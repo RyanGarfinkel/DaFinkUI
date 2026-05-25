@@ -39,6 +39,40 @@ Mouse users clicking a button don't need a focus ring — they can see where the
 3. Hover and focus-visible must be visually distinct from each other and from the default state
 4. Disabled elements must not show hover or focus states
 
+## focus: vs focus-visible: in Tailwind
+
+These two utilities target different CSS pseudo-classes with very different semantics. Using the wrong one is one of the most common accessibility mistakes in this codebase.
+
+| Utility | CSS pseudo-class | When it fires | Use for |
+|---|---|---|---|
+| `focus:` | `:focus` | Any focus: click, tap, keyboard, script | Suppressing browser defaults (`focus:outline-none`) |
+| `focus-visible:` | `:focus-visible` | Keyboard navigation only (browser decides) | All visible focus indicators |
+
+**The pattern — always write both:**
+
+```tsx
+// ✅ Correct
+className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring"
+
+// ❌ Wrong — ring shows on mouse click too (annoying for mouse users)
+className="focus:ring-2 focus:ring-offset-2 focus:ring-brand-ring"
+
+// ❌ Wrong — no suppression; browser default outline flashes on click
+className="focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring"
+```
+
+**Ring color by intent:**
+
+| Variant | Ring token |
+|---|---|
+| Default / primary | `ring-brand-ring` |
+| Destructive | `ring-danger` |
+| Success | `ring-success` |
+
+**offset-2 is required for legibility.** The ring sits inside the element border by default — `ring-offset-2` pushes it outside so it's never obscured by the element's own background.
+
+**Never use `focus:outline-none` alone.** It removes the browser default without replacing it. A keyboard user reaching that element sees nothing. Always follow it with `focus-visible:ring-*` on the same element.
+
 ## Token Usage
 
 | State         | Token                        |
@@ -46,3 +80,75 @@ Mouse users clicking a button don't need a focus ring — they can see where the
 | Hover         | Component-level bg/border shift |
 | Focus         | `outline-none` (suppressed)  |
 | Focus Visible | `--ring-color` per variant   |
+
+---
+
+## Focus Management in Overlays
+
+For popup-type components (modals, drawers, menus, dropdowns, popovers), interactive states extend beyond the three above. When an overlay opens, focus must move into it and be managed until it closes.
+
+### On Open
+Move focus to the first focusable element inside the overlay as soon as it renders. Use a `useEffect` with a `ref` to the overlay container:
+
+```tsx
+useEffect(() => {
+  if (isOpen) {
+    const firstFocusable = containerRef.current?.querySelector<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    firstFocusable?.focus();
+  }
+}, [isOpen]);
+```
+
+If the overlay has no focusable children (e.g. an informational tooltip container), focus the overlay container itself — give it `tabIndex={-1}` and call `.focus()`.
+
+### Focus Trap (blocking overlays)
+Modals, dialogs, and drawers block the page behind them and must trap focus. Tab and Shift+Tab must cycle only through focusable elements within the overlay. See `src/patterns/accessibility.md` for the full trap implementation.
+
+### On Close
+When the overlay closes, always return focus to the element that opened it. Store a ref to the trigger before opening:
+
+```tsx
+const triggerRef = useRef<HTMLElement | null>(null);
+
+function open(e: React.MouseEvent) {
+  triggerRef.current = e.currentTarget as HTMLElement;
+  setIsOpen(true);
+}
+
+function close() {
+  setIsOpen(false);
+  triggerRef.current?.focus();
+}
+```
+
+### Escape Key
+All overlays must close on Escape. Attach the listener to the overlay container (not `document`) to avoid conflicts when multiple overlays are nested:
+
+```tsx
+<div
+  onKeyDown={(e) => {
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      close();
+    }
+  }}
+>
+```
+
+### Tab in Non-Blocking Overlays (menus, dropdowns)
+In menus and non-modal popovers, Tab does **not** trap. It closes the overlay and moves focus to the next element in the page. This matches the expected browser and screen reader behavior for non-blocking overlays.
+
+```tsx
+onKeyDown={(e) => {
+  if (e.key === 'Tab') {
+    close(); // let Tab propagate naturally afterward
+  }
+  if (e.key === 'Escape') {
+    e.stopPropagation();
+    close();
+    triggerRef.current?.focus();
+  }
+}}
+```
