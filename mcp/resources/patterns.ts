@@ -1,17 +1,15 @@
-import fs from 'fs';
 import path from 'path';
+import fs from 'fs';
 
 const PATTERNS_DIR = path.resolve(__dirname, '../../src/patterns');
 
-export function listPatterns(): string[]
-{
+export const listPatterns = () => {
 	return fs.readdirSync(PATTERNS_DIR)
 		.filter(f => f.endsWith('.mdx') || f.endsWith('.md'))
 		.map(f => f.replace(/\.mdx?$/, ''));
-}
+};
 
-export function getPattern(name: string): string
-{
+export const getPattern = (name: string) => {
 	const candidates = [
 		path.join(PATTERNS_DIR, `${name}.mdx`),
 		path.join(PATTERNS_DIR, `${name}.md`),
@@ -24,4 +22,4 @@ export function getPattern(name: string): string
 	}
 
 	throw new Error(`No pattern found: ${name}`);
-}
+};

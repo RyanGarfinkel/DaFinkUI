@@ -1,6 +1,5 @@
 import { colors, spacing, typography } from '../../src/tokens';
 
-export function getTokens()
-{
+export const getTokens = () => {
 	return { colors, spacing, typography };
-}
+};

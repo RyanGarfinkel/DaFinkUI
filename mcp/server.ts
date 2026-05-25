@@ -1,9 +1,9 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { z } from 'zod';
 import { listComponents, getComponentSpec } from './resources/components';
-import { getTokens } from './resources/tokens';
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { listPatterns, getPattern } from './resources/patterns';
+import { getTokens } from './resources/tokens';
+import { z } from 'zod';
 
 const server = new McpServer({
 	name: 'obi-ui',
