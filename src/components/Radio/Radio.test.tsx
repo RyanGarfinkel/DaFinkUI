@@ -2,16 +2,15 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { RadioGroup, RadioItem } from './Radio';
 
-function renderGroup(value = 'a', onValueChange = vi.fn())
-{
+const renderGroup = (value = 'a', onValueChange = vi.fn()) => {
 	return render(
-		<RadioGroup name="test-group" value={value} onValueChange={onValueChange}>
-			<RadioItem value="a" label="Option A" />
-			<RadioItem value="b" label="Option B" hint="A helpful hint" />
-			<RadioItem value="c" label="Option C" disabled />
+		<RadioGroup name='test-group' value={value} onValueChange={onValueChange}>
+			<RadioItem value='a' label='Option A' />
+			<RadioItem value='b' label='Option B' hint='A helpful hint' />
+			<RadioItem value='c' label='Option C' disabled />
 		</RadioGroup>
 	);
-}
+};
 
 describe('RadioGroup / RadioItem', () =>
 {

@@ -30,6 +30,26 @@ export const colors = {
 			active:  '#fca5a5',
 		},
 	},
+	success: {
+		default: '#16a34a',
+		bg:      '#f0fdf4',
+		border:  '#bbf7d0',
+		dark: {
+			default: '#4ade80',
+			bg:      '#052e16',
+			border:  '#166534',
+		},
+	},
+	warning: {
+		default: '#d97706',
+		bg:      '#fffbeb',
+		border:  '#fde68a',
+		dark: {
+			default: '#fbbf24',
+			bg:      '#1c1200',
+			border:  '#92400e',
+		},
+	},
 	surface: {
 		default:      '#ffffff',
 		hover:        '#f9fafb',

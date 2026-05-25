@@ -1,10 +1,9 @@
+import { Table, TableHead, TableBody, TableRow, TableHeader, TableCell } from './Table';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { Table, TableHead, TableBody, TableRow, TableHeader, TableCell } from './Table';
 
-function BasicTable({ striped = false }: { striped?: boolean })
-{
+const BasicTable = ({ striped = false }: { striped?: boolean }) => {
 	return (
 		<Table striped={striped}>
 			<TableHead>
@@ -25,7 +24,7 @@ function BasicTable({ striped = false }: { striped?: boolean })
 			</TableBody>
 		</Table>
 	);
-}
+};
 
 describe('Table', () =>
 {
@@ -62,13 +61,13 @@ describe('Table', () =>
 
 	it('forwards className to the table element', () =>
 	{
-		render(<Table className="custom-table"><tbody /></Table>);
+		render(<Table className='custom-table'><tbody /></Table>);
 		expect(screen.getByRole('table').className).toContain('custom-table');
 	});
 
 	it('forwards native table attributes', () =>
 	{
-		render(<Table aria-label="users table"><tbody /></Table>);
+		render(<Table aria-label='users table'><tbody /></Table>);
 		expect(screen.getByRole('table').getAttribute('aria-label')).toBe('users table');
 	});
 });
@@ -155,7 +154,7 @@ describe('TableRow', () =>
 	{
 		render(
 			<table><tbody>
-				<TableRow className="my-row"><td>cell</td></TableRow>
+				<TableRow className='my-row'><td>cell</td></TableRow>
 			</tbody></table>
 		);
 		expect(screen.getByRole('row').className).toContain('my-row');
@@ -222,7 +221,7 @@ describe('TableHeader', () =>
 	{
 		render(
 			<table><thead><tr>
-				<TableHeader sortDirection="asc" onSort={() => {}}>Name</TableHeader>
+				<TableHeader sortDirection='asc' onSort={() => {}}>Name</TableHeader>
 			</tr></thead></table>
 		);
 		expect(screen.getByRole('columnheader').getAttribute('aria-sort')).toBe('ascending');
@@ -232,7 +231,7 @@ describe('TableHeader', () =>
 	{
 		render(
 			<table><thead><tr>
-				<TableHeader sortDirection="desc" onSort={() => {}}>Name</TableHeader>
+				<TableHeader sortDirection='desc' onSort={() => {}}>Name</TableHeader>
 			</tr></thead></table>
 		);
 		expect(screen.getByRole('columnheader').getAttribute('aria-sort')).toBe('descending');
@@ -265,7 +264,7 @@ describe('TableHeader', () =>
 	{
 		render(
 			<table><thead><tr>
-				<TableHeader className="custom-th">Name</TableHeader>
+				<TableHeader className='custom-th'>Name</TableHeader>
 			</tr></thead></table>
 		);
 		expect(screen.getByRole('columnheader').className).toContain('custom-th');
@@ -275,7 +274,7 @@ describe('TableHeader', () =>
 	{
 		render(
 			<table><thead><tr>
-				<TableHeader scope="col">Name</TableHeader>
+				<TableHeader scope='col'>Name</TableHeader>
 			</tr></thead></table>
 		);
 		expect(screen.getByRole('columnheader').getAttribute('scope')).toBe('col');
@@ -321,7 +320,7 @@ describe('TableCell', () =>
 	{
 		render(
 			<table><tbody><tr>
-				<TableCell className="custom-td">Alice</TableCell>
+				<TableCell className='custom-td'>Alice</TableCell>
 			</tr></tbody></table>
 		);
 		expect(screen.getByRole('cell').className).toContain('custom-td');

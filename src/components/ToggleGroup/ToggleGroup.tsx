@@ -1,6 +1,5 @@
-'use client';
-
-import { createContext, useContext, ButtonHTMLAttributes } from 'react';
+'use client';;
+import { createContext, useContext, useRef, useEffect, ButtonHTMLAttributes } from 'react';
 
 export type ToggleGroupType = 'single' | 'multiple';
 export type ToggleGroupSize = 'sm' | 'md' | 'lg';
@@ -16,12 +15,11 @@ interface ToggleGroupContextValue
 
 const ToggleGroupContext = createContext<ToggleGroupContextValue | null>(null);
 
-function useToggleGroupContext()
-{
+const useToggleGroupContext = () => {
 	const ctx = useContext(ToggleGroupContext);
 	if(!ctx) throw new Error('ToggleGroupItem must be used inside a ToggleGroup');
 	return ctx;
-}
+};
 
 export interface ToggleGroupProps
 {
@@ -48,16 +46,17 @@ const sizeClasses: Record<ToggleGroupSize, string> = {
 	lg: 'h-11 px-5 text-base',
 };
 
-const ITEM_BASE = 'inline-flex items-center justify-center font-medium tracking-tight transition-colors duration-150 border-r border-surface-border last:border-r-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40';
+const ITEM_BASE = 'relative z-10 inline-flex items-center justify-center font-medium tracking-tight transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40';
 
-export function ToggleGroupItem({
-	value,
-	disabled = false,
-	children,
-	className = '',
-	...props
-}: ToggleGroupItemProps)
-{
+export const ToggleGroupItem = (
+    {
+        value,
+        disabled = false,
+        children,
+        className = '',
+        ...props
+    }: ToggleGroupItemProps
+) => {
 	const ctx = useToggleGroupContext();
 
 	const isActive = ctx.type === 'single'
@@ -84,13 +83,17 @@ export function ToggleGroupItem({
 		}
 	};
 
-	const stateClasses = isActive
-		? 'bg-brand text-brand-fg'
-		: 'bg-surface text-text hover:bg-surface-hover';
+	const stateClasses = ctx.type === 'single'
+		? isActive
+			? 'text-brand-fg'
+			: 'text-text hover:bg-surface-active'
+		: isActive
+			? 'bg-brand text-brand-fg'
+			: 'bg-surface text-text hover:bg-surface-hover border-r border-surface-border last:border-r-0';
 
 	return (
 		<button
-			type="button"
+			type='button'
 			aria-pressed={isActive}
 			disabled={isDisabled}
 			onClick={handleClick}
@@ -100,28 +103,67 @@ export function ToggleGroupItem({
 			{children}
 		</button>
 	);
-}
+};
 
-export function ToggleGroup({
-	type,
-	value,
-	onValueChange,
-	size = 'md',
-	disabled = false,
-	className = '',
-	children,
-}: ToggleGroupProps)
-{
+export const ToggleGroup = (
+    {
+        type,
+        value,
+        onValueChange,
+        size = 'md',
+        disabled = false,
+        className = '',
+        children,
+    }: ToggleGroupProps
+) => {
+	const groupRef     = useRef<HTMLDivElement>(null);
+	const indicatorRef = useRef<HTMLDivElement>(null);
+	const initialized  = useRef(false);
+
+	useEffect(() =>
+	{
+		if(type !== 'single') return;
+		const group     = groupRef.current;
+		const indicator = indicatorRef.current;
+		if(!group || !indicator) return;
+
+		const active = group.querySelector<HTMLElement>('[aria-pressed="true"]');
+		if(!active) return;
+
+		if(!initialized.current)
+		{
+			indicator.style.transition = 'none';
+			indicator.style.left       = `${active.offsetLeft}px`;
+			indicator.style.width      = `${active.offsetWidth}px`;
+			indicator.getBoundingClientRect();
+			indicator.style.transition = '';
+			initialized.current = true;
+		}
+		else
+		{
+			indicator.style.left  = `${active.offsetLeft}px`;
+			indicator.style.width = `${active.offsetWidth}px`;
+		}
+	}, [value, type]);
+
 	return (
 		<ToggleGroupContext.Provider value={{ type, value, onValueChange, size, disabled }}>
 			<div
-				role="group"
-				className={`inline-flex items-center rounded-md border border-surface-border bg-surface overflow-hidden ${className}`}
+				role='group'
+				ref={groupRef}
+				className={`relative inline-flex items-center rounded-md border border-surface-border bg-surface overflow-hidden ${className}`}
 			>
+				{type === 'single' && (
+					<div
+						ref={indicatorRef}
+						aria-hidden='true'
+						className='absolute top-0 h-full bg-brand motion-safe:transition-[left,width] motion-safe:duration-200'
+					/>
+				)}
 				{children}
 			</div>
 		</ToggleGroupContext.Provider>
 	);
-}
+};
 
 export default ToggleGroup;

@@ -14,38 +14,39 @@ export interface BreadcrumbProps
 	className?: string;
 }
 
-export default function Breadcrumb({
-	items,
-	separator = '/',
-	className = '',
-}: BreadcrumbProps)
-{
+const Breadcrumb = (
+    {
+        items,
+        separator = '/',
+        className = '',
+    }: BreadcrumbProps
+) => {
 	return (
-		<nav aria-label="breadcrumb" className={className}>
-			<ol className="flex flex-wrap items-center">
+		<nav aria-label='breadcrumb' className={className}>
+			<ol className='flex flex-wrap items-center'>
 				{items.map((item, index) =>
 				{
 					const isLast = index === items.length - 1;
 
 					return (
-						<li key={index} className="flex items-center">
+						<li key={index} className='flex items-center'>
 							{index > 0 && (
-								<span className="text-sm text-text-subtle mx-2" aria-hidden="true">
+								<span className='text-sm text-text-subtle mx-2' aria-hidden='true'>
 									{separator}
 								</span>
 							)}
 
 							{isLast ? (
 								<span
-									aria-current="page"
-									className="text-sm text-text font-medium"
+									aria-current='page'
+									className='text-sm text-text font-medium'
 								>
 									{item.label}
 								</span>
 							) : (
 								<Link
 									href={item.href ?? '#'}
-									className="text-sm text-text-muted transition-colors hover:text-text focus:outline-none focus-visible:underline"
+									className='text-sm text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:text-text hover:underline focus:outline-none focus-visible:underline'
 								>
 									{item.label}
 								</Link>
@@ -56,4 +57,6 @@ export default function Breadcrumb({
 			</ol>
 		</nav>
 	);
-}
+};
+
+export default Breadcrumb;

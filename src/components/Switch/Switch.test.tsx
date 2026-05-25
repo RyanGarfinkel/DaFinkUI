@@ -93,13 +93,13 @@ describe('Switch', () =>
 
 	it('renders label when provided', () =>
 	{
-		render(<Switch checked={false} onCheckedChange={() => {}} label="Dark mode" />);
+		render(<Switch checked={false} onCheckedChange={() => {}} label='Dark mode' />);
 		expect(screen.getByText('Dark mode')).toBeDefined();
 	});
 
 	it('renders hint when provided', () =>
 	{
-		render(<Switch checked={false} onCheckedChange={() => {}} label="Feature" hint="Some hint text." />);
+		render(<Switch checked={false} onCheckedChange={() => {}} label='Feature' hint='Some hint text.' />);
 		expect(screen.getByText('Some hint text.')).toBeDefined();
 	});
 

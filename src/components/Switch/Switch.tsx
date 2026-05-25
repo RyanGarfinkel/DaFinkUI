@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 const TRACK_BASE = [
 	'relative inline-flex h-6 w-10 shrink-0 cursor-pointer items-center rounded-full',
 	'transition-colors duration-200 ease-out',
@@ -24,16 +23,17 @@ export interface SwitchProps
 	className?: string;
 }
 
-export default function Switch({
-	checked,
-	onCheckedChange,
-	label,
-	hint,
-	disabled,
-	id,
-	className = '',
-}: SwitchProps)
-{
+const Switch = (
+    {
+        checked,
+        onCheckedChange,
+        label,
+        hint,
+        disabled,
+        id,
+        className = '',
+    }: SwitchProps
+) => {
 	const switchId = id ?? (label ? `switch-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
 	const hintId   = switchId ? `${switchId}-hint` : undefined;
 
@@ -43,7 +43,7 @@ export default function Switch({
 	return (
 		<div className={`flex items-start gap-3 ${className}`}>
 			<button
-				role="switch"
+				role='switch'
 				id={switchId}
 				aria-checked={checked}
 				aria-describedby={hint && hintId ? hintId : undefined}
@@ -55,17 +55,17 @@ export default function Switch({
 			</button>
 
 			{(label || hint) && (
-				<div className="flex flex-col gap-0.5">
+				<div className='flex flex-col gap-0.5'>
 					{label && (
 						<label
 							htmlFor={switchId}
-							className="cursor-pointer select-none text-sm font-medium text-text leading-6"
+							className='cursor-pointer select-none text-sm font-medium text-text leading-6'
 						>
 							{label}
 						</label>
 					)}
 					{hint && (
-						<p id={hintId} className="text-sm text-text-muted">
+						<p id={hintId} className='text-sm text-text-muted'>
 							{hint}
 						</p>
 					)}
@@ -73,4 +73,6 @@ export default function Switch({
 			)}
 		</div>
 	);
-}
+};
+
+export default Switch;

@@ -26,6 +26,16 @@
 	--color-danger-active:  #991b1b;
 	--color-danger-ring:    #dc2626;
 
+	/* Success */
+	--color-success:        #16a34a;
+	--color-success-bg:     #f0fdf4;
+	--color-success-border: #bbf7d0;
+
+	/* Warning */
+	--color-warning:        #d97706;
+	--color-warning-bg:     #fffbeb;
+	--color-warning-border: #fde68a;
+
 	/* Surface (secondary/ghost backgrounds + borders) */
 	--color-surface:              #ffffff;
 	--color-surface-hover:        #f9fafb;
@@ -63,6 +73,14 @@
 	--color-danger-hover:   #f87171;
 	--color-danger-active:  #fca5a5;
 
+	--color-success:        #4ade80;
+	--color-success-bg:     #052e16;
+	--color-success-border: #166534;
+
+	--color-warning:        #fbbf24;
+	--color-warning-bg:     #1c1200;
+	--color-warning-border: #92400e;
+
 	--color-surface:              #27272a;
 	--color-surface-hover:        #3f3f46;
 	--color-surface-active:       #52525b;
@@ -77,6 +95,30 @@
 	--color-input-border-hover:  #52525b;
 	--color-input-ring:          #fafafa;
 	--color-input-disabled-bg:   #27272a;
+}
+
+/* ─── Scrollbar ──────────────────────────────────────── */
+
+.scrollbar-thin {
+	scrollbar-width: thin;
+	scrollbar-color: var(--color-surface-border) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+	width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+	background-color: var(--color-surface-border);
+	border-radius: 2px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+	background-color: var(--color-surface-border-hover);
 }
 
 /* ─── Base styles ────────────────────────────────────── */

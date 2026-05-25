@@ -109,7 +109,7 @@ describe('Button', () =>
 
 	it('forwards native button props', () =>
 	{
-		render(<Button type="submit" aria-label="submit form">Submit</Button>);
+		render(<Button type='submit' aria-label='submit form'>Submit</Button>);
 		const btn = screen.getByRole('button');
 		expect(btn.getAttribute('type')).toBe('submit');
 		expect(btn.getAttribute('aria-label')).toBe('submit form');
@@ -117,7 +117,7 @@ describe('Button', () =>
 
 	it('merges custom className', () =>
 	{
-		render(<Button className="custom-class">Click me</Button>);
+		render(<Button className='custom-class'>Click me</Button>);
 		expect(screen.getByRole('button').className).toContain('custom-class');
 	});
 });

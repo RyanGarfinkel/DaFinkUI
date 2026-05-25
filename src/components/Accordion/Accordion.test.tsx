@@ -1,27 +1,26 @@
+import Accordion, { AccordionItem, AccordionTrigger, AccordionContent } from './Accordion';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect } from 'vitest';
-import Accordion, { AccordionItem, AccordionTrigger, AccordionContent } from './Accordion';
 
-function renderAccordion(props: Partial<React.ComponentProps<typeof Accordion>> = {})
-{
+const renderAccordion = (props: Partial<React.ComponentProps<typeof Accordion>> = {}) => {
 	return render(
-		<Accordion type="single" collapsible {...props}>
-			<AccordionItem value="one">
+		<Accordion type='single' collapsible {...props}>
+			<AccordionItem value='one'>
 				<AccordionTrigger>Item One</AccordionTrigger>
 				<AccordionContent>Content One</AccordionContent>
 			</AccordionItem>
-			<AccordionItem value="two">
+			<AccordionItem value='two'>
 				<AccordionTrigger>Item Two</AccordionTrigger>
 				<AccordionContent>Content Two</AccordionContent>
 			</AccordionItem>
-			<AccordionItem value="three">
+			<AccordionItem value='three'>
 				<AccordionTrigger disabled>Item Three</AccordionTrigger>
 				<AccordionContent>Content Three</AccordionContent>
 			</AccordionItem>
 		</Accordion>
 	);
-}
+};
 
 describe('Accordion', () =>
 {
@@ -36,7 +35,7 @@ describe('Accordion', () =>
 	{
 		renderAccordion();
 		const regions = screen.getAllByRole('region', { hidden: true });
-		expect(regions.every(r => r.hidden)).toBe(true);
+		expect(regions.every(r => r.getAttribute('aria-hidden') === 'true')).toBe(true);
 	});
 
 	it('opens an item when its trigger is clicked', async () =>
@@ -44,7 +43,7 @@ describe('Accordion', () =>
 		renderAccordion();
 		await userEvent.click(screen.getByRole('button', { name: /Item One/i }));
 		const region = screen.getAllByRole('region', { hidden: false })[0];
-		expect(region.hidden).toBe(false);
+		expect(region.getAttribute('aria-hidden')).toBe('false');
 	});
 
 	it('closes an open item when clicked again (collapsible)', async () =>
@@ -54,7 +53,7 @@ describe('Accordion', () =>
 		await userEvent.click(trigger);
 		await userEvent.click(trigger);
 		const regions = screen.getAllByRole('region', { hidden: true });
-		expect(regions.length).toBeGreaterThan(0);
+		expect(regions.some(r => r.getAttribute('aria-hidden') === 'true')).toBe(true);
 	});
 
 	it('closes the previous item when a new one opens (type=single)', async () =>
@@ -72,12 +71,12 @@ describe('Accordion', () =>
 	it('allows multiple items open when type=multiple', async () =>
 	{
 		render(
-			<Accordion type="multiple">
-				<AccordionItem value="a">
+			<Accordion type='multiple'>
+				<AccordionItem value='a'>
 					<AccordionTrigger>A</AccordionTrigger>
 					<AccordionContent>Content A</AccordionContent>
 				</AccordionItem>
-				<AccordionItem value="b">
+				<AccordionItem value='b'>
 					<AccordionTrigger>B</AccordionTrigger>
 					<AccordionContent>Content B</AccordionContent>
 				</AccordionItem>

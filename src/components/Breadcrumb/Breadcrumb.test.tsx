@@ -50,14 +50,14 @@ describe('Breadcrumb', () =>
 
 	it('renders a custom separator', () =>
 	{
-		render(<Breadcrumb items={threeItems} separator=">" />);
+		render(<Breadcrumb items={threeItems} separator='>' />);
 		const separators = screen.getAllByText('>');
 		expect(separators.length).toBe(2);
 	});
 
 	it('applies custom className to the nav element', () =>
 	{
-		render(<Breadcrumb items={threeItems} className="custom-class" />);
+		render(<Breadcrumb items={threeItems} className='custom-class' />);
 		const nav = screen.getByRole('navigation');
 		expect(nav.className).toContain('custom-class');
 	});

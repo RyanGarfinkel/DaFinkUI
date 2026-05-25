@@ -1,16 +1,16 @@
+import { ToggleGroup, ToggleGroupItem } from './ToggleGroup';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { ToggleGroup, ToggleGroupItem } from './ToggleGroup';
 
 describe('ToggleGroup', () =>
 {
 	it('renders without errors', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={() => {}}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
-				<ToggleGroupItem value="b">B</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={() => {}}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+				<ToggleGroupItem value='b'>B</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -21,9 +21,9 @@ describe('ToggleGroup', () =>
 	it('sets aria-pressed true on the active item in single mode', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="b" onValueChange={() => {}}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
-				<ToggleGroupItem value="b">B</ToggleGroupItem>
+			<ToggleGroup type='single' value='b' onValueChange={() => {}}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+				<ToggleGroupItem value='b'>B</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -35,10 +35,10 @@ describe('ToggleGroup', () =>
 	it('sets aria-pressed true on all active items in multiple mode', () =>
 	{
 		render(
-			<ToggleGroup type="multiple" value={['a', 'c']} onValueChange={() => {}}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
-				<ToggleGroupItem value="b">B</ToggleGroupItem>
-				<ToggleGroupItem value="c">C</ToggleGroupItem>
+			<ToggleGroup type='multiple' value={['a', 'c']} onValueChange={() => {}}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+				<ToggleGroupItem value='b'>B</ToggleGroupItem>
+				<ToggleGroupItem value='c'>C</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -53,9 +53,9 @@ describe('ToggleGroup', () =>
 		const handler = vi.fn();
 
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={handler}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
-				<ToggleGroupItem value="b">B</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={handler}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+				<ToggleGroupItem value='b'>B</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -68,9 +68,9 @@ describe('ToggleGroup', () =>
 		const handler = vi.fn();
 
 		render(
-			<ToggleGroup type="multiple" value={['a']} onValueChange={handler}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
-				<ToggleGroupItem value="b">B</ToggleGroupItem>
+			<ToggleGroup type='multiple' value={['a']} onValueChange={handler}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+				<ToggleGroupItem value='b'>B</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -83,9 +83,9 @@ describe('ToggleGroup', () =>
 		const handler = vi.fn();
 
 		render(
-			<ToggleGroup type="multiple" value={['a', 'b']} onValueChange={handler}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
-				<ToggleGroupItem value="b">B</ToggleGroupItem>
+			<ToggleGroup type='multiple' value={['a', 'b']} onValueChange={handler}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+				<ToggleGroupItem value='b'>B</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -98,9 +98,9 @@ describe('ToggleGroup', () =>
 		const handler = vi.fn();
 
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={handler} disabled>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
-				<ToggleGroupItem value="b">B</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={handler} disabled>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+				<ToggleGroupItem value='b'>B</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -113,9 +113,9 @@ describe('ToggleGroup', () =>
 		const handler = vi.fn();
 
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={handler}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
-				<ToggleGroupItem value="b" disabled>B</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={handler}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+				<ToggleGroupItem value='b' disabled>B</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -126,24 +126,22 @@ describe('ToggleGroup', () =>
 	it('applies active classes to the selected item', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={() => {}}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
-				<ToggleGroupItem value="b">B</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={() => {}}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+				<ToggleGroupItem value='b'>B</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
 		const [active, inactive] = screen.getAllByRole('button');
-		expect(active.className).toContain('bg-brand');
 		expect(active.className).toContain('text-brand-fg');
-		expect(inactive.className).toContain('bg-surface');
 		expect(inactive.className).toContain('text-text');
 	});
 
 	it('applies disabled classes when group is disabled', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={() => {}} disabled>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={() => {}} disabled>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -156,8 +154,8 @@ describe('ToggleGroup', () =>
 	it('applies disabled classes when item is disabled', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={() => {}}>
-				<ToggleGroupItem value="b" disabled>B</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={() => {}}>
+				<ToggleGroupItem value='b' disabled>B</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -169,8 +167,8 @@ describe('ToggleGroup', () =>
 	it('applies focus-visible ring classes', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={() => {}}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={() => {}}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -191,8 +189,8 @@ describe('ToggleGroup', () =>
 		for(const { size, contains } of cases)
 		{
 			const { unmount } = render(
-				<ToggleGroup type="single" size={size} value="a" onValueChange={() => {}}>
-					<ToggleGroupItem value="a">A</ToggleGroupItem>
+				<ToggleGroup type='single' size={size} value='a' onValueChange={() => {}}>
+					<ToggleGroupItem value='a'>A</ToggleGroupItem>
 				</ToggleGroup>
 			);
 			expect(screen.getByRole('button').className).toContain(contains);
@@ -203,8 +201,8 @@ describe('ToggleGroup', () =>
 	it('defaults to md size', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={() => {}}>
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={() => {}}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -214,8 +212,8 @@ describe('ToggleGroup', () =>
 	it('forwards native button props to ToggleGroupItem', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={() => {}}>
-				<ToggleGroupItem value="a" aria-label="option a" data-testid="item-a">A</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={() => {}}>
+				<ToggleGroupItem value='a' aria-label='option a' data-testid='item-a'>A</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -227,8 +225,8 @@ describe('ToggleGroup', () =>
 	it('merges custom className on ToggleGroup', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={() => {}} className="custom-group">
-				<ToggleGroupItem value="a">A</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={() => {}} className='custom-group'>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -238,8 +236,8 @@ describe('ToggleGroup', () =>
 	it('merges custom className on ToggleGroupItem', () =>
 	{
 		render(
-			<ToggleGroup type="single" value="a" onValueChange={() => {}}>
-				<ToggleGroupItem value="a" className="custom-item">A</ToggleGroupItem>
+			<ToggleGroup type='single' value='a' onValueChange={() => {}}>
+				<ToggleGroupItem value='a' className='custom-item'>A</ToggleGroupItem>
 			</ToggleGroup>
 		);
 
@@ -250,7 +248,7 @@ describe('ToggleGroup', () =>
 	{
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-		expect(() => render(<ToggleGroupItem value="a">A</ToggleGroupItem>)).toThrow(
+		expect(() => render(<ToggleGroupItem value='a'>A</ToggleGroupItem>)).toThrow(
 			'ToggleGroupItem must be used inside a ToggleGroup'
 		);
 

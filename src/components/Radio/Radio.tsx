@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { createContext, useContext } from 'react';
 
 interface RadioContextValue
@@ -11,12 +10,11 @@ interface RadioContextValue
 
 const RadioContext = createContext<RadioContextValue | null>(null);
 
-function useRadioContext()
-{
+const useRadioContext = () => {
 	const ctx = useContext(RadioContext);
 	if(!ctx) throw new Error('RadioItem must be used inside a RadioGroup');
 	return ctx;
-}
+};
 
 export interface RadioGroupProps
 {
@@ -27,16 +25,15 @@ export interface RadioGroupProps
 	children: React.ReactNode;
 }
 
-export function RadioGroup({ value, onValueChange, name, className = '', children }: RadioGroupProps)
-{
+export const RadioGroup = ({ value, onValueChange, name, className = '', children }: RadioGroupProps) => {
 	return (
 		<RadioContext.Provider value={{ name, value, onValueChange }}>
-			<div role="radiogroup" className={`flex flex-col gap-3 ${className}`}>
+			<div role='radiogroup' className={`flex flex-col gap-3 ${className}`}>
 				{children}
 			</div>
 		</RadioContext.Provider>
 	);
-}
+};
 
 export interface RadioItemProps
 {
@@ -47,8 +44,7 @@ export interface RadioItemProps
 	className?: string;
 }
 
-export function RadioItem({ value, label, hint, disabled = false, className = '' }: RadioItemProps)
-{
+export const RadioItem = ({ value, label, hint, disabled = false, className = '' }: RadioItemProps) => {
 	const ctx = useRadioContext();
 	const checked = ctx.value === value;
 	const id = `${ctx.name}-${value}`;
@@ -67,9 +63,9 @@ export function RadioItem({ value, label, hint, disabled = false, className = ''
 				className,
 			].join(' ').trim()}
 		>
-			<div className="relative flex items-center justify-center mt-0.5 shrink-0">
+			<div className='relative flex items-center justify-center mt-0.5 shrink-0'>
 				<input
-					type="radio"
+					type='radio'
 					id={id}
 					name={ctx.name}
 					value={value}
@@ -77,30 +73,34 @@ export function RadioItem({ value, label, hint, disabled = false, className = ''
 					disabled={disabled}
 					onChange={handleChange}
 					aria-checked={checked}
-					className="peer sr-only"
+					className='peer sr-only'
 				/>
 				<div
 					className={[
 						'w-4 h-4 rounded-full border-2 bg-surface flex items-center justify-center',
-						'transition-colors duration-150',
+						'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 						'peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2 peer-focus-visible:ring-brand-ring',
 						checked
 							? 'border-brand'
 							: 'border-surface-border group-hover:border-brand',
 					].join(' ')}
 				>
-					{checked && (
-						<div className="w-2 h-2 rounded-full bg-brand" />
-					)}
+					<div
+						className={[
+							'w-2 h-2 rounded-full bg-brand',
+							'motion-safe:transition-transform motion-safe:duration-[var(--duration-fast)]',
+							checked ? 'scale-100' : 'scale-0',
+						].join(' ')}
+					/>
 				</div>
 			</div>
 
-			<div className="flex flex-col gap-0.5">
-				<span className="text-sm text-text leading-none">{label}</span>
+			<div className='flex flex-col gap-0.5'>
+				<span className='text-sm text-text leading-none'>{label}</span>
 				{hint && (
-					<span className="text-xs text-text-muted">{hint}</span>
+					<span className='text-xs text-text-muted'>{hint}</span>
 				)}
 			</div>
 		</label>
 	);
-}
+};

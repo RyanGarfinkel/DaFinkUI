@@ -1,6 +1,6 @@
+import { Card, CardHeader, CardContent, CardFooter } from './Card';
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
-import { Card, CardHeader, CardContent, CardFooter } from './Card';
 
 describe('Card', () =>
 {
@@ -22,7 +22,7 @@ describe('Card', () =>
 
 	it('applies elevated variant classes', () =>
 	{
-		const { container } = render(<Card variant="elevated">content</Card>);
+		const { container } = render(<Card variant='elevated'>content</Card>);
 		const card = container.firstChild as HTMLElement;
 		expect(card.className).toContain('bg-surface');
 		expect(card.className).toContain('shadow-md');
@@ -32,7 +32,7 @@ describe('Card', () =>
 
 	it('applies outline variant classes', () =>
 	{
-		const { container } = render(<Card variant="outline">content</Card>);
+		const { container } = render(<Card variant='outline'>content</Card>);
 		const card = container.firstChild as HTMLElement;
 		expect(card.className).toContain('bg-transparent');
 		expect(card.className).toContain('border-2');
@@ -42,13 +42,13 @@ describe('Card', () =>
 
 	it('merges custom className on Card', () =>
 	{
-		const { container } = render(<Card className="custom-card">content</Card>);
+		const { container } = render(<Card className='custom-card'>content</Card>);
 		expect((container.firstChild as HTMLElement).className).toContain('custom-card');
 	});
 
 	it('forwards native div props', () =>
 	{
-		const { container } = render(<Card aria-label="my card" data-testid="card-root">content</Card>);
+		const { container } = render(<Card aria-label='my card' data-testid='card-root'>content</Card>);
 		const card = container.firstChild as HTMLElement;
 		expect(card.getAttribute('aria-label')).toBe('my card');
 		expect(card.getAttribute('data-testid')).toBe('card-root');
@@ -65,7 +65,7 @@ describe('CardHeader', () =>
 
 	it('merges custom className', () =>
 	{
-		const { container } = render(<CardHeader className="custom-header">H</CardHeader>);
+		const { container } = render(<CardHeader className='custom-header'>H</CardHeader>);
 		expect((container.firstChild as HTMLElement).className).toContain('custom-header');
 	});
 });
@@ -80,7 +80,7 @@ describe('CardContent', () =>
 
 	it('merges custom className', () =>
 	{
-		const { container } = render(<CardContent className="custom-content">C</CardContent>);
+		const { container } = render(<CardContent className='custom-content'>C</CardContent>);
 		expect((container.firstChild as HTMLElement).className).toContain('custom-content');
 	});
 });
@@ -103,7 +103,7 @@ describe('CardFooter', () =>
 
 	it('merges custom className', () =>
 	{
-		const { container } = render(<CardFooter className="custom-footer">F</CardFooter>);
+		const { container } = render(<CardFooter className='custom-footer'>F</CardFooter>);
 		expect((container.firstChild as HTMLElement).className).toContain('custom-footer');
 	});
 });

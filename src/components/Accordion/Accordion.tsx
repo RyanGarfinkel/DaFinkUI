@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { createContext, useContext, useState, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 
 export type AccordionType = 'single' | 'multiple';
@@ -44,15 +43,16 @@ export interface AccordionProps extends HTMLAttributes<HTMLDivElement>
 	className?: string;
 }
 
-export default function Accordion({
-	type = 'single',
-	defaultValue,
-	collapsible = false,
-	className = '',
-	children,
-	...props
-}: AccordionProps)
-{
+const Accordion = (
+    {
+        type = 'single',
+        defaultValue,
+        collapsible = false,
+        className = '',
+        children,
+        ...props
+    }: AccordionProps
+) => {
 	const initial = defaultValue
 		? new Set(Array.isArray(defaultValue) ? defaultValue : [defaultValue])
 		: new Set<string>();
@@ -85,7 +85,9 @@ export default function Accordion({
 			</div>
 		</AccordionContext.Provider>
 	);
-}
+};
+
+export default Accordion;
 
 export interface AccordionItemProps extends HTMLAttributes<HTMLDivElement>
 {
@@ -93,8 +95,7 @@ export interface AccordionItemProps extends HTMLAttributes<HTMLDivElement>
 	className?: string;
 }
 
-export function AccordionItem({ value, className = '', children, ...props }: AccordionItemProps)
-{
+export const AccordionItem = ({ value, className = '', children, ...props }: AccordionItemProps) => {
 	const { openItems } = useAccordionContext();
 	const isOpen = openItems.has(value);
 
@@ -105,21 +106,20 @@ export function AccordionItem({ value, className = '', children, ...props }: Acc
 			</div>
 		</AccordionItemContext.Provider>
 	);
-}
+};
 
 export interface AccordionTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement>
 {
 	className?: string;
 }
 
-export function AccordionTrigger({ className = '', children, disabled, ...props }: AccordionTriggerProps)
-{
+export const AccordionTrigger = ({ className = '', children, disabled, ...props }: AccordionTriggerProps) => {
 	const { toggle } = useAccordionContext();
 	const { value, isOpen } = useAccordionItemContext();
 
 	return (
 		<button
-			type="button"
+			type='button'
 			aria-expanded={isOpen}
 			disabled={disabled}
 			onClick={() => toggle(value)}
@@ -128,42 +128,44 @@ export function AccordionTrigger({ className = '', children, disabled, ...props 
 		>
 			{children}
 			<svg
-				width="16"
-				height="16"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				strokeWidth="2"
-				strokeLinecap="round"
-				strokeLinejoin="round"
-				aria-hidden="true"
-				className={`shrink-0 text-text-muted transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
+				width='16'
+				height='16'
+				viewBox='0 0 24 24'
+				fill='none'
+				stroke='currentColor'
+				strokeWidth='2'
+				strokeLinecap='round'
+				strokeLinejoin='round'
+				aria-hidden='true'
+				className={`shrink-0 text-text-muted motion-safe:transition-transform motion-safe:duration-200 ${isOpen ? 'rotate-180' : ''}`}
 			>
-				<path d="m6 9 6 6 6-6" />
+				<path d='m6 9 6 6 6-6' />
 			</svg>
 		</button>
 	);
-}
+};
 
 export interface AccordionContentProps extends HTMLAttributes<HTMLDivElement>
 {
 	className?: string;
 }
 
-export function AccordionContent({ className = '', children, ...props }: AccordionContentProps)
-{
+export const AccordionContent = ({ className = '', children, ...props }: AccordionContentProps) => {
 	const { isOpen } = useAccordionItemContext();
 
 	return (
 		<div
-			role="region"
-			hidden={!isOpen}
-			className={`overflow-hidden ${isOpen ? 'pb-4' : ''} ${className}`}
+			role='region'
+			aria-hidden={!isOpen}
+			className='motion-safe:grid motion-safe:transition-[grid-template-rows] motion-safe:duration-200'
+			style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
 			{...props}
 		>
-			<div className="text-sm text-text-muted">
-				{children}
+			<div className={`overflow-hidden ${isOpen ? 'pb-4' : ''} ${className}`}>
+				<div className='text-sm text-text-muted'>
+					{children}
+				</div>
 			</div>
 		</div>
 	);
-}
+};

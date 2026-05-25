@@ -36,13 +36,14 @@ const variantClasses: Record<TypographyVariant, string> = {
 	blockquote: 'border-l-2 border-surface-border pl-4 italic text-text-muted',
 };
 
-export default function Typography({
-	variant,
-	as,
-	className = '',
-	children,
-}: TypographyProps)
-{
+const Typography = (
+    {
+        variant,
+        as,
+        className = '',
+        children,
+    }: TypographyProps
+) => {
 	const Tag = as ?? defaultElements[variant];
 
 	return (
@@ -50,4 +51,6 @@ export default function Typography({
 			{children}
 		</Tag>
 	);
-}
+};
+
+export default Typography;

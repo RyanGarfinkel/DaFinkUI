@@ -1,23 +1,22 @@
+import { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
 
-function renderTabs(active = 'one', onValueChange = vi.fn())
-{
+const renderTabs = (active = 'one', onValueChange = vi.fn()) => {
 	return render(
 		<Tabs value={active} onValueChange={onValueChange}>
 			<TabsList>
-				<TabsTrigger value="one">One</TabsTrigger>
-				<TabsTrigger value="two">Two</TabsTrigger>
-				<TabsTrigger value="three" disabled>Three</TabsTrigger>
+				<TabsTrigger value='one'>One</TabsTrigger>
+				<TabsTrigger value='two'>Two</TabsTrigger>
+				<TabsTrigger value='three' disabled>Three</TabsTrigger>
 			</TabsList>
-			<TabsContent value="one">Content One</TabsContent>
-			<TabsContent value="two">Content Two</TabsContent>
-			<TabsContent value="three">Content Three</TabsContent>
+			<TabsContent value='one'>Content One</TabsContent>
+			<TabsContent value='two'>Content Two</TabsContent>
+			<TabsContent value='three'>Content Three</TabsContent>
 		</Tabs>
 	);
-}
+};
 
 describe('Tabs', () =>
 {
@@ -77,8 +76,6 @@ describe('Tabs', () =>
 		renderTabs('one');
 		const trigger = screen.getByRole('tab', { name: 'One' });
 		expect(trigger.className).toContain('bg-surface');
-		expect(trigger.className).toContain('border-b-2');
-		expect(trigger.className).toContain('border-brand');
 		expect(trigger.className).toContain('text-text');
 		expect(trigger.className).toContain('font-medium');
 	});

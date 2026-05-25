@@ -66,6 +66,10 @@ Accepts all native `<div>` HTML attributes.
 - **active (pressed)**: inherited from base button behavior
 - **disabled**: `disabled:pointer-events-none disabled:opacity-40` — trigger is visible but non-interactive
 
+## Sliding Indicator
+
+The active tab is marked by an absolutely-positioned `h-0.5 bg-brand` bar rendered inside `TabsList`. Its `left` and `width` are measured from the active trigger via `useLayoutEffect` and updated on every value change. The bar transitions with `motion-safe:transition-[left,width] motion-safe:duration-200` — users who prefer reduced motion see an instant jump.
+
 ## Keyboard Navigation
 
 Arrow key navigation between tabs is a progressive enhancement — not currently implemented. Tab key moves focus to the next focusable element in the document order. Each `TabsTrigger` is independently focusable and activatable with `Enter` or `Space`.

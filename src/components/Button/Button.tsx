@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { ButtonHTMLAttributes } from 'react';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'outlined' | 'ghost' | 'link' | 'destructive';
@@ -28,14 +27,15 @@ const sizeClasses: Record<ButtonSize, string> = {
 
 const BASE = 'inline-flex items-center justify-center gap-2 rounded-md font-medium tracking-tight transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40';
 
-export default function Button({
-	variant = 'primary',
-	size = 'md',
-	className = '',
-	children,
-	...props
-}: ButtonProps)
-{
+const Button = (
+    {
+        variant = 'primary',
+        size = 'md',
+        className = '',
+        children,
+        ...props
+    }: ButtonProps
+) => {
 	return (
 		<button
 			className={`${BASE} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
@@ -44,4 +44,6 @@ export default function Button({
 			{children}
 		</button>
 	);
-}
+};
+
+export default Button;

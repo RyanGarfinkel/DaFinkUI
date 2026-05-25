@@ -1,5 +1,4 @@
-'use client';
-
+'use client';;
 import { TableHTMLAttributes, ThHTMLAttributes, TdHTMLAttributes, HTMLAttributes } from 'react';
 
 export type SortDirection = 'asc' | 'desc' | null;
@@ -40,10 +39,9 @@ export interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement>
 
 const CELL_BASE = 'px-4 py-3 text-sm text-text';
 
-export function Table({ striped = false, className = '', children, ...props }: TableProps)
-{
+export const Table = ({ striped = false, className = '', children, ...props }: TableProps) => {
 	return (
-		<div className="w-full overflow-x-auto rounded-md border border-surface-border">
+		<div className='w-full overflow-x-auto rounded-md border border-surface-border'>
 			<table
 				className={`w-full border-collapse ${striped ? '[&_tbody_tr:nth-child(odd)]:bg-surface [&_tbody_tr:nth-child(even)]:bg-surface-hover' : ''} ${className}`}
 				{...props}
@@ -52,28 +50,25 @@ export function Table({ striped = false, className = '', children, ...props }: T
 			</table>
 		</div>
 	);
-}
+};
 
-export function TableHead({ className = '', children, ...props }: TableHeadProps)
-{
+export const TableHead = ({ className = '', children, ...props }: TableHeadProps) => {
 	return (
 		<thead className={`border-b border-surface-border bg-surface-active ${className}`} {...props}>
 			{children}
 		</thead>
 	);
-}
+};
 
-export function TableBody({ className = '', children, ...props }: TableBodyProps)
-{
+export const TableBody = ({ className = '', children, ...props }: TableBodyProps) => {
 	return (
 		<tbody className={`divide-y divide-surface-border ${className}`} {...props}>
 			{children}
 		</tbody>
 	);
-}
+};
 
-export function TableRow({ header = false, className = '', children, ...props }: TableRowProps)
-{
+export const TableRow = ({ header = false, className = '', children, ...props }: TableRowProps) => {
 	const hoverClass = header ? '' : 'hover:bg-surface-hover transition-colors duration-150 motion-reduce:transition-none';
 
 	return (
@@ -81,31 +76,31 @@ export function TableRow({ header = false, className = '', children, ...props }:
 			{children}
 		</tr>
 	);
-}
+};
 
-function SortIcon({ direction }: { direction: SortDirection })
-{
+const SortIcon = ({ direction }: { direction: SortDirection }) => {
 	if(direction === 'asc')
 	{
-		return <span aria-hidden="true" className="ml-1.5 inline-block text-text-muted">▲</span>;
+		return <span aria-hidden='true' className='ml-1.5 inline-block text-text-muted'>▲</span>;
 	}
 
 	if(direction === 'desc')
 	{
-		return <span aria-hidden="true" className="ml-1.5 inline-block text-text-muted">▼</span>;
+		return <span aria-hidden='true' className='ml-1.5 inline-block text-text-muted'>▼</span>;
 	}
 
-	return <span aria-hidden="true" className="ml-1.5 inline-block text-text-subtle">⇅</span>;
-}
+	return <span aria-hidden='true' className='ml-1.5 inline-block text-text-subtle'>⇅</span>;
+};
 
-export function TableHeader({
-	sortDirection,
-	onSort,
-	className = '',
-	children,
-	...props
-}: TableHeaderProps)
-{
+export const TableHeader = (
+    {
+        sortDirection,
+        onSort,
+        className = '',
+        children,
+        ...props
+    }: TableHeaderProps
+) => {
 	const isSortable = onSort !== undefined;
 	const labelBase = 'text-xs font-semibold uppercase tracking-wide text-text-muted';
 
@@ -118,9 +113,9 @@ export function TableHeader({
 				{...props}
 			>
 				<button
-					type="button"
+					type='button'
 					onClick={onSort}
-					className="inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring rounded-sm hover:text-text transition-colors duration-150 motion-reduce:transition-none"
+					className='inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring rounded-sm hover:text-text transition-colors duration-150 motion-reduce:transition-none'
 				>
 					{children}
 					<SortIcon direction={sortDirection ?? null} />
@@ -137,15 +132,14 @@ export function TableHeader({
 			{children}
 		</th>
 	);
-}
+};
 
-export function TableCell({ className = '', children, ...props }: TableCellProps)
-{
+export const TableCell = ({ className = '', children, ...props }: TableCellProps) => {
 	return (
 		<td className={`${CELL_BASE} ${className}`} {...props}>
 			{children}
 		</td>
 	);
-}
+};
 
 export default Table;

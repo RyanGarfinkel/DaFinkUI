@@ -11,7 +11,7 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
 }
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-	function Textarea({ label, error, hint, className = '', id, ...props }, ref)
+	({ label, error, hint, className = '', id, ...props }, ref) =>
 	{
 		const textareaId = id ?? label?.toLowerCase().replace(/\s+/g, '-');
 
@@ -19,7 +19,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 			'w-full rounded-md border bg-surface text-text px-3 py-2 text-sm',
 			'min-h-[80px] resize-y',
 			'placeholder:text-text-subtle',
-			'transition-colors outline-none',
+			'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] outline-none',
 			'hover:border-input-border-hover',
 			'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-0',
 			error
@@ -30,9 +30,9 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 		].join(' ');
 
 		return (
-			<div className="flex flex-col gap-1.5">
+			<div className='flex flex-col gap-1.5'>
 				{label && (
-					<label htmlFor={textareaId} className="text-sm font-medium text-text">
+					<label htmlFor={textareaId} className='text-sm font-medium text-text'>
 						{label}
 					</label>
 				)}
@@ -47,12 +47,12 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 					{...props}
 				/>
 				{error && (
-					<p id={`${textareaId}-error`} className="text-sm text-input-error">
+					<p id={`${textareaId}-error`} className='text-sm text-input-error'>
 						{error}
 					</p>
 				)}
 				{!error && hint && (
-					<p id={`${textareaId}-hint`} className="text-sm text-text-muted">
+					<p id={`${textareaId}-hint`} className='text-sm text-text-muted'>
 						{hint}
 					</p>
 				)}
@@ -60,5 +60,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 		);
 	}
 );
+
+Textarea.displayName = 'Textarea';
 
 export default Textarea;
