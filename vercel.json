@@ -1,5 +1,3 @@
 {
-  "buildCommand": "npm run build-storybook",
-  "outputDirectory": "storybook-static",
-  "framework": null
+  "framework": "nextjs"
 }

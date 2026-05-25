@@ -164,6 +164,16 @@ These live in `src/docs/components/`:
 - Sidebar width: `w-56` on desktop
 - Main content max-width: `max-w-3xl`
 
+## Usage Code and Preview Must Align
+
+The registry `usage` field is the string shown in the code block on the detail page. The live preview renders the component with representative props directly. These two must be consistent:
+
+- The component and props shown in the live preview must match what the `usage` code string imports and renders
+- If the preview shows `<Input label="Email" />`, the usage string must also show `<Input label="Email" />` — not a different label, different variant, or different component altogether
+- If a new prop is added, update both the preview render and the usage string
+
+This rule exists because users copy from the usage code block and expect it to reproduce what they saw in the preview.
+
 ## What Not to Build
 
 - No search

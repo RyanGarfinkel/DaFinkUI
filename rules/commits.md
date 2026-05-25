@@ -51,3 +51,4 @@ Fix all lint errors and failing tests before committing. Do not bypass the hook 
 - No period at the end
 - Use imperative mood: "add", not "added" or "adds"
 - If a commit touches multiple concerns, split it into multiple commits
+- Do not add yourself as a co-author — no `Co-Authored-By` trailer in any commit
