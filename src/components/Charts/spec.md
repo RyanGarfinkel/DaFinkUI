@@ -1,0 +1,94 @@
+# Charts
+
+Recharts-based chart primitives: `LineChart`, `BarChart`, `AreaChart`, and `DonutChart`. Shipped as a separate entry point (`@obi/ui/charts`) so the Recharts dependency is not pulled into projects that only use primitives.
+
+## Installation
+
+```bash
+npx @obi/ui add charts
+```
+
+npm dependency: `recharts`
+
+## Components
+
+### LineChart
+
+Renders one or more lines over a shared x-axis.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| data | ChartDataPoint[] | required | Array of data objects |
+| xKey | string | required | Key to use for the x-axis |
+| series | ChartSeries[] | required | Lines to render |
+| height | number | 240 | Chart height in px |
+| showLegend | boolean | true | Whether to show the legend |
+| showGrid | boolean | true | Whether to show the background grid |
+| className | string | "" | Extra classes |
+
+### BarChart
+
+Vertical bars with optional stacking.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| data | ChartDataPoint[] | required | Array of data objects |
+| xKey | string | required | Key to use for the x-axis |
+| series | ChartSeries[] | required | Bar groups to render |
+| stacked | boolean | false | Stack series on top of each other |
+| height | number | 240 | Chart height in px |
+| showLegend | boolean | true | Whether to show the legend |
+| showGrid | boolean | true | Whether to show the background grid |
+| className | string | "" | Extra classes |
+
+### AreaChart
+
+Filled area chart with optional stacking.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| data | ChartDataPoint[] | required | Array of data objects |
+| xKey | string | required | Key to use for the x-axis |
+| series | ChartSeries[] | required | Areas to render |
+| stacked | boolean | false | Stack areas on top of each other |
+| height | number | 240 | Chart height in px |
+| showLegend | boolean | true | Whether to show the legend |
+| showGrid | boolean | true | Whether to show the background grid |
+| className | string | "" | Extra classes |
+
+### DonutChart
+
+Donut (or pie) chart from named slices.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| data | DonutSlice[] | required | Array of `{ label, value, color? }` |
+| innerRadius | number | 0.65 | Inner radius as a fraction of outer (0 = pie) |
+| height | number | 240 | Chart height in px |
+| showLegend | boolean | true | Whether to show the legend |
+| className | string | "" | Extra classes |
+
+## Shared types
+
+```ts
+interface ChartDataPoint { [key: string]: string | number }
+interface ChartSeries { key: string; label: string; color?: string }
+interface DonutSlice   { label: string; value: number; color?: string }
+```
+
+## When to use
+
+- **LineChart** — trends over time; multiple metrics on the same axis
+- **BarChart** — comparisons across categories; use `stacked` for part-to-whole
+- **AreaChart** — cumulative values or emphasising volume beneath a trend line
+- **DonutChart** — part-to-whole proportions (5 slices or fewer for readability)
+
+## Theming
+
+All chart elements use CSS custom properties (`var(--color-brand)`, `var(--color-surface)`, etc.) so they respect the active design system theme automatically.
+
+## Accessibility notes
+
+- Charts are decorative by nature. Always pair a chart with a data table or text summary for screen-reader users.
+- Tooltips are keyboard-accessible via Recharts' built-in implementation.
+- Color is not the only differentiator — series also differ by label and position.
