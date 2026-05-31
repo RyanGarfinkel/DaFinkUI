@@ -54,5 +54,8 @@ jobs:
       - name: Test
         run: npm test
 
-      - name: Build Storybook
-        run: npm run build-storybook
+      - name: Build
+        run: npm run build
+
+      - name: Validate components
+        run: node scripts/validate-components.mjs
