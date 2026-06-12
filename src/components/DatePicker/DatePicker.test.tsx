@@ -54,7 +54,11 @@ describe('DatePicker', () =>
 		const trigger = screen.getByRole('button', { name: /may 15, 2025/i });
 
 		await userEvent.click(trigger);
-		expect(screen.queryByRole('dialog')).toBeDefined();
+
+		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
+
+		const dayBtn = screen.getByRole('button', { name: /15 May 2025/i });
+		dayBtn.focus();
 
 		await userEvent.keyboard('{Escape}');
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

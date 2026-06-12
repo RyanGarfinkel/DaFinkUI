@@ -97,9 +97,9 @@ describe('OTPInput', () =>
 	it('each cell has an accessible aria-label', () =>
 	{
 		render(<OTPInput length={3} value='' />);
-		expect(screen.getByLabelText('Digit 1 of 3')).toBeDefined();
-		expect(screen.getByLabelText('Digit 2 of 3')).toBeDefined();
-		expect(screen.getByLabelText('Digit 3 of 3')).toBeDefined();
+		expect(screen.getByLabelText('Character 1 of 3')).toBeDefined();
+		expect(screen.getByLabelText('Character 2 of 3')).toBeDefined();
+		expect(screen.getByLabelText('Character 3 of 3')).toBeDefined();
 	});
 
 	it('cells have caret-transparent class', () =>

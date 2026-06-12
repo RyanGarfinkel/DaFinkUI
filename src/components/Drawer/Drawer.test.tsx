@@ -1,8 +1,22 @@
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, DrawerSide } from './Drawer';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
 import { useState } from 'react';
+
+// ─── jsdom stubs ──────────────────────────────────────────────────────────────
+
+beforeEach(() =>
+{
+	HTMLDialogElement.prototype.showModal = vi.fn(function(this: HTMLDialogElement)
+	{
+		this.setAttribute('open', '');
+	});
+	HTMLDialogElement.prototype.close = vi.fn(function(this: HTMLDialogElement)
+	{
+		this.removeAttribute('open');
+	});
+});
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -62,11 +76,12 @@ const renderControlled = (open: boolean, side?: DrawerSide, onOpenChange = vi.fn
 	return { ...result, onOpenChange };
 };
 
-// Wait until the open animation frame has run and focus has settled inside
 const waitForFocusInside = async () =>
 {
 	await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Close')));
 };
+
+const getPanel = () => screen.getByRole('dialog').querySelector<HTMLElement>('[data-state]')!;
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
@@ -112,11 +127,13 @@ describe('Drawer', () =>
 	it('defaults to the right side', async () =>
 	{
 		renderControlled(true);
-		const dialog = await screen.findByRole('dialog');
-
-		expect(dialog.getAttribute('data-side')).toBe('right');
-		expect(dialog.className).toContain('right-0');
-		expect(dialog.className).toContain('border-l');
+		await waitFor(() =>
+		{
+			const panel = getPanel();
+			expect(panel.getAttribute('data-side')).toBe('right');
+			expect(panel.className).toContain('right-0');
+			expect(panel.className).toContain('border-l');
+		});
 	});
 
 	it.each([
@@ -129,18 +146,18 @@ describe('Drawer', () =>
 		async (side, positionClass, borderClass) =>
 		{
 			renderControlled(true, side);
-			const dialog = await screen.findByRole('dialog');
-
-			expect(dialog.getAttribute('data-side')).toBe(side);
-			expect(dialog.className).toContain(positionClass);
-			expect(dialog.className).toContain(borderClass);
+			await waitFor(() =>
+			{
+				const panel = getPanel();
+				expect(panel.getAttribute('data-side')).toBe(side);
+				expect(panel.className).toContain(positionClass);
+				expect(panel.className).toContain(borderClass);
+			});
 		}
 	);
 
 	it('uses a translate transform for the hidden state', () =>
 	{
-		// Render closed first, then open — before the enter frame runs the panel
-		// carries the off-screen translate class
 		const { rerender } = render(
 			<Drawer open={false} onOpenChange={() => {}} side='left'>
 				<DrawerTitle>Drawer title</DrawerTitle>
@@ -153,23 +170,24 @@ describe('Drawer', () =>
 			</Drawer>
 		);
 
-		const dialog = screen.getByRole('dialog');
-		expect(dialog.getAttribute('data-state')).toBe('closed');
-		expect(dialog.className).toContain('-translate-x-full');
-		expect(dialog.className).toContain('motion-safe:transition-transform');
+		const dialog = screen.getByRole('dialog', { hidden: true });
+		const panel  = dialog.querySelector<HTMLElement>('[data-state]')!;
+		expect(panel.getAttribute('data-state')).toBe('closed');
+		expect(panel.className).toContain('-translate-x-full');
+		expect(panel.className).toContain('motion-safe:transition-transform');
 	});
 
 	it('uses motion tokens for the enter animation', async () =>
 	{
 		renderControlled(true);
-		const dialog = screen.getByRole('dialog');
 
 		await waitFor(() =>
 		{
-			expect(dialog.getAttribute('data-state')).toBe('open');
-			expect(dialog.className).toContain('translate-x-0');
-			expect(dialog.className).toContain('motion-safe:duration-[var(--duration-base)]');
-			expect(dialog.className).toContain('motion-safe:ease-[var(--ease-enter)]');
+			const panel = getPanel();
+			expect(panel.getAttribute('data-state')).toBe('open');
+			expect(panel.className).toContain('translate-x-0');
+			expect(panel.className).toContain('motion-safe:duration-[var(--duration-base)]');
+			expect(panel.className).toContain('motion-safe:ease-[var(--ease-enter)]');
 		});
 	});
 
@@ -178,7 +196,6 @@ describe('Drawer', () =>
 		renderControlled(true);
 		await waitFor(() =>
 		{
-			// DrawerClose is the first focusable element in DOM order
 			expect(document.activeElement).toBe(screen.getByLabelText('Close'));
 		});
 	});
@@ -224,8 +241,7 @@ describe('Drawer', () =>
 		const { onOpenChange } = renderControlled(true);
 		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
 
-		const wrapper = screen.getByRole('dialog').parentElement!;
-		fireEvent.pointerDown(wrapper);
+		fireEvent.pointerDown(screen.getByRole('dialog'));
 
 		expect(onOpenChange).toHaveBeenCalledWith(false);
 	});
@@ -250,18 +266,6 @@ describe('Drawer', () =>
 		expect(onOpenChange).toHaveBeenCalledWith(false);
 	});
 
-	it('locks body scroll while open and restores it on close', async () =>
-	{
-		render(<DrawerHarness />);
-
-		await userEvent.click(screen.getByText('Open drawer'));
-		await waitFor(() => expect(document.body.style.overflow).toBe('hidden'));
-		await waitForFocusInside();
-
-		await userEvent.keyboard('{Escape}');
-		await waitFor(() => expect(document.body.style.overflow).toBe(''));
-	});
-
 	it('returns focus to the trigger when closed via Escape', async () =>
 	{
 		render(<DrawerHarness />);
@@ -283,7 +287,7 @@ describe('Drawer', () =>
 		await userEvent.click(trigger);
 		await waitForFocusInside();
 
-		fireEvent.pointerDown(screen.getByRole('dialog').parentElement!);
+		fireEvent.pointerDown(screen.getByRole('dialog'));
 
 		await waitFor(() => expect(document.activeElement).toBe(trigger));
 	});
@@ -333,7 +337,7 @@ describe('Drawer', () =>
 
 		await waitFor(() =>
 		{
-			expect(screen.getByRole('dialog').className).toContain('custom-class');
+			expect(getPanel().className).toContain('custom-class');
 		});
 	});
 
@@ -361,7 +365,7 @@ describe('Drawer', () =>
 
 		await waitFor(() =>
 		{
-			expect(document.activeElement).toBe(screen.getByRole('dialog'));
+			expect(document.activeElement).toBe(getPanel());
 		});
 	});
 

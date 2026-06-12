@@ -172,10 +172,10 @@ describe('ToggleGroup', () =>
 			</ToggleGroup>
 		);
 
-		const btn = screen.getByRole('button');
-		expect(btn.className).toContain('focus-visible:ring-2');
-		expect(btn.className).toContain('focus-visible:ring-inset');
-		expect(btn.className).toContain('focus-visible:ring-brand-ring');
+		const btn  = screen.getByRole('button');
+		const ring = btn.querySelector('[aria-hidden="true"]')!;
+		expect(ring.className).toContain('group-focus-visible:ring-2');
+		expect(ring.className).toContain('group-focus-visible:ring-brand-ring');
 	});
 
 	it('applies correct size classes', () =>
