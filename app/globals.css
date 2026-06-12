@@ -36,9 +36,13 @@
 	--color-warning-bg:     #fffbeb;
 	--color-warning-border: #fde68a;
 
+	/* Danger */
+	--color-danger-bg:     #fef2f2;
+	--color-danger-border: #fecaca;
+
 	/* Surface (secondary/ghost backgrounds + borders) */
 	--color-surface:              #ffffff;
-	--color-surface-hover:        #f9fafb;
+	--color-surface-hover:        #ebebed;
 	--color-surface-active:       #f4f4f5;
 	--color-surface-border:       #e4e4e7;
 	--color-surface-border-hover: #d4d4d8;
@@ -78,8 +82,10 @@
 	--color-warning:              #fbbf24;
 	--color-warning-bg:           #1c1200;
 	--color-warning-border:       #92400e;
+	--color-danger-bg:            #2d0a0a;
+	--color-danger-border:        #7f1d1d;
 	--color-surface:              #111113;
-	--color-surface-hover:        #1c1c1f;
+	--color-surface-hover:        #252529;
 	--color-surface-active:       #26262a;
 	--color-surface-border:       #2e2e32;
 	--color-surface-border-hover: #3e3e43;
@@ -126,6 +132,33 @@
 body {
 	background-color: var(--color-surface);
 	color:            var(--color-text);
+	scrollbar-gutter: stable;
+}
+
+/* ─── Native dialog ─────────────────────────────────── */
+
+dialog {
+	padding:     0;
+	border:      0;
+	background:  transparent;
+	max-width:   unset;
+	max-height:  unset;
+	overflow:    visible;
+	color:       inherit;
+}
+
+dialog::backdrop {
+	background: color-mix(in srgb, var(--color-text) 40%, transparent);
+}
+
+/* ─── Typography polish ─────────────────────────────── */
+
+h1, h2, h3, h4, h5, h6 {
+	text-wrap: balance;
+}
+
+p {
+	text-wrap: pretty;
 }
 
 /* ─── View transitions ───────────────────────────────── */
@@ -156,5 +189,20 @@ body {
 	::view-transition-old(root),
 	::view-transition-new(root) {
 		animation: none;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*, ::before, ::after {
+		animation-duration:        0.01ms !important;
+		animation-iteration-count: 1      !important;
+		transition-duration:       0.01ms !important;
+	}
+}
+
+@media (forced-colors: active) {
+	*:focus-visible {
+		outline:        2px solid transparent;
+		outline-offset: 2px;
 	}
 }
