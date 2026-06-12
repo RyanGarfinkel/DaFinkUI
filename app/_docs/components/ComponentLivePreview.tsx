@@ -1,6 +1,8 @@
 'use client';
 
+import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, type DrawerSide } from '@/src/components/Drawer/Drawer';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots } from '@/src/components/Carousel/Carousel';
+import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
 import Accordion, { AccordionContent, AccordionItem, AccordionTrigger } from '@/src/components/Accordion/Accordion';
 import Collapsible, { CollapsibleTrigger, CollapsibleContent } from '@/src/components/Collapsible/Collapsible';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/src/components/Table/Table';
@@ -17,8 +19,12 @@ import { Skeleton, SkeletonCard } from '@/src/components/Skeleton/Skeleton';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
 import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
 import { ToastProvider, useToast } from '@/src/components/Toast/Toast';
+import DropdownMenu from '@/src/components/DropdownMenu/DropdownMenu';
+import Avatar, { AvatarGroup } from '@/src/components/Avatar/Avatar';
+import Reveal, { RevealGroup } from '@/src/components/Reveal/Reveal';
 import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
 import { DatePicker } from '@/src/components/DatePicker/DatePicker';
+import TextShimmer from '@/src/components/TextShimmer/TextShimmer';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
 import Breadcrumb from '@/src/components/Breadcrumb/Breadcrumb';
 import { Combobox } from '@/src/components/Combobox/Combobox';
@@ -31,6 +37,9 @@ import Textarea from '@/src/components/Textarea/Textarea';
 import OTPInput from '@/src/components/OTPInput/OTPInput';
 import { Select } from '@/src/components/Select/Select';
 import { Canvas } from '@/src/components/Canvas/Canvas';
+import Popover from '@/src/components/Popover/Popover';
+import Tooltip from '@/src/components/Tooltip/Tooltip';
+import CountUp from '@/src/components/CountUp/CountUp';
 import { Alert } from '@/src/components/Alert/Alert';
 import { Badge } from '@/src/components/Badge/Badge';
 import Switch from '@/src/components/Switch/Switch';
@@ -673,6 +682,54 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
 
+    case 'tooltip':
+      return (
+        <div className='flex flex-wrap items-center gap-4'>
+          <Tooltip content='Appears above' side='top'>
+            <Button variant='secondary'>Top</Button>
+          </Tooltip>
+          <Tooltip content='Appears below' side='bottom'>
+            <Button variant='secondary'>Bottom</Button>
+          </Tooltip>
+          <Tooltip content='Appears left' side='left'>
+            <Button variant='secondary'>Left</Button>
+          </Tooltip>
+          <Tooltip content='Appears right' side='right'>
+            <Button variant='secondary'>Right</Button>
+          </Tooltip>
+          <Tooltip content='Opens instantly' delay={0}>
+            <Button variant='secondary'>No delay</Button>
+          </Tooltip>
+        </div>
+      );
+
+    case 'popover':
+      return (
+        <Popover trigger='Open popover' label='Share settings' side='bottom' align='center'>
+          <div className='flex flex-col gap-2'>
+            <p className='text-sm font-medium text-text'>Share this page</p>
+            <p className='text-xs text-text-muted'>Anyone with the link can view.</p>
+            <button className='self-start rounded-md bg-brand px-3 py-1.5 text-xs text-brand-fg hover:bg-brand-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'>
+              Copy link
+            </button>
+          </div>
+        </Popover>
+      );
+
+    case 'dropdown-menu':
+      return (
+        <DropdownMenu
+          trigger='Actions'
+          items={[
+            { label: 'Edit',      onSelect: () => console.log('edit')      },
+            { label: 'Duplicate', onSelect: () => console.log('duplicate') },
+            { separator: true },
+            { label: 'Archive', disabled: true },
+            { label: 'Delete',    onSelect: () => console.log('delete')    },
+          ]}
+        />
+      );
+
     case 'combobox': {
       const LANG_OPTIONS = [
         { value: 'ts',      label: 'TypeScript' },
@@ -845,6 +902,131 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       }
 
       return <DataTablePreview />;
+    }
+
+    case 'avatar':
+      return (
+        <div className='flex flex-col items-center gap-6'>
+          <div className='flex items-end gap-4'>
+            <Avatar name='Ada Lovelace' size='sm' />
+            <Avatar name='Grace Hopper' size='md' />
+            <Avatar name='Alan Turing' size='lg' />
+            <Avatar name='Katherine Johnson' shape='square' size='lg' />
+          </div>
+          <AvatarGroup max={3}>
+            <Avatar name='Ada Lovelace' />
+            <Avatar name='Grace Hopper' />
+            <Avatar name='Alan Turing' />
+            <Avatar name='Katherine Johnson' />
+            <Avatar name='Margaret Hamilton' />
+          </AvatarGroup>
+        </div>
+      );
+
+    case 'reveal':
+      return (
+        <RevealGroup stagger={120} effect='slide-up' className='flex flex-col gap-3 w-full max-w-sm'>
+          <Reveal>
+            <div className='rounded-lg border border-surface-border bg-surface px-4 py-3 text-sm text-text'>Scroll-triggered entrance</div>
+          </Reveal>
+          <Reveal>
+            <div className='rounded-lg border border-surface-border bg-surface px-4 py-3 text-sm text-text'>Staggered by 120ms</div>
+          </Reveal>
+          <Reveal effect='scale'>
+            <div className='rounded-lg border border-surface-border bg-surface px-4 py-3 text-sm text-text'>With its own effect</div>
+          </Reveal>
+        </RevealGroup>
+      );
+
+    case 'count-up':
+      return (
+        <div className='flex flex-wrap items-center justify-center gap-10'>
+          <div className='flex flex-col items-center gap-1'>
+            <CountUp value={12480} separator=',' className='text-3xl font-semibold tracking-tight text-text' />
+            <span className='text-xs text-text-muted'>Daily downloads</span>
+          </div>
+          <div className='flex flex-col items-center gap-1'>
+            <CountUp value={99.98} decimals={2} suffix='%' className='text-3xl font-semibold tracking-tight text-text' />
+            <span className='text-xs text-text-muted'>Uptime</span>
+          </div>
+          <div className='flex flex-col items-center gap-1'>
+            <CountUp value={1200000} prefix='$' separator=',' duration={1500} className='text-3xl font-semibold tracking-tight text-text' />
+            <span className='text-xs text-text-muted'>ARR</span>
+          </div>
+        </div>
+      );
+
+    case 'text-shimmer':
+      return (
+        <div className='flex flex-col items-center gap-4'>
+          <TextShimmer className='text-2xl font-semibold tracking-tight'>Generating your report…</TextShimmer>
+          <TextShimmer duration={1600} className='text-sm font-medium'>Thinking…</TextShimmer>
+        </div>
+      );
+
+    case 'modal': {
+      const ModalPreview = () =>
+      {
+        const [open, setOpen] = useState(false);
+        return (
+          <>
+            <Button onClick={() => setOpen(true)}>Open modal</Button>
+
+            <Modal open={open} onOpenChange={setOpen}>
+              <ModalClose />
+              <ModalHeader>
+                <ModalTitle>Delete project</ModalTitle>
+              </ModalHeader>
+              <ModalContent>
+                This action cannot be undone. The project and all of its data will be
+                permanently removed.
+              </ModalContent>
+              <ModalFooter>
+                <Button variant='secondary' onClick={() => setOpen(false)}>Cancel</Button>
+                <Button variant='destructive' onClick={() => setOpen(false)}>Delete</Button>
+              </ModalFooter>
+            </Modal>
+          </>
+        );
+      };
+      return <ModalPreview />;
+    }
+
+    case 'drawer': {
+      const DrawerPreview = () =>
+      {
+        const [open, setOpen] = useState(false);
+        const [side, setSide] = useState<DrawerSide>('right');
+
+        const openFrom = (s: DrawerSide) =>
+        {
+          setSide(s);
+          setOpen(true);
+        };
+
+        return (
+          <div className='flex flex-wrap gap-2 justify-center'>
+            <Button variant='secondary' onClick={() => openFrom('left')}>Left</Button>
+            <Button variant='secondary' onClick={() => openFrom('right')}>Right</Button>
+            <Button variant='secondary' onClick={() => openFrom('top')}>Top</Button>
+            <Button variant='secondary' onClick={() => openFrom('bottom')}>Bottom</Button>
+
+            <Drawer open={open} onOpenChange={setOpen} side={side}>
+              <DrawerClose />
+              <DrawerHeader>
+                <DrawerTitle>Notifications</DrawerTitle>
+              </DrawerHeader>
+              <DrawerContent>
+                You have no unread notifications.
+              </DrawerContent>
+              <DrawerFooter>
+                <Button variant='secondary' onClick={() => setOpen(false)}>Close</Button>
+              </DrawerFooter>
+            </Drawer>
+          </div>
+        );
+      };
+      return <DrawerPreview />;
     }
 
     default:

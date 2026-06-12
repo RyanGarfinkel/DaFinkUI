@@ -1670,6 +1670,116 @@ export default function Example() {
     files: ['CommandPalette/CommandPalette.tsx'],
   },
   {
+    slug: 'tooltip',
+    name: 'Tooltip',
+    category: 'Overlay',
+    description: 'A small floating text label that appears next to its trigger on hover or keyboard focus. Never contains interactive content.',
+    usage: `import Tooltip from '@/src/components/Tooltip/Tooltip';
+import Button from '@/src/components/Button/Button';
+
+export default function Example() {
+  return (
+    <div className="flex flex-wrap items-center gap-4">
+      <Tooltip content="Appears above" side="top">
+        <Button variant="secondary">Top</Button>
+      </Tooltip>
+      <Tooltip content="Appears below" side="bottom">
+        <Button variant="secondary">Bottom</Button>
+      </Tooltip>
+      <Tooltip content="Appears left" side="left">
+        <Button variant="secondary">Left</Button>
+      </Tooltip>
+      <Tooltip content="Appears right" side="right">
+        <Button variant="secondary">Right</Button>
+      </Tooltip>
+      <Tooltip content="Opens instantly" delay={0}>
+        <Button variant="secondary">No delay</Button>
+      </Tooltip>
+    </div>
+  );
+}`,
+    props: [
+      { name: 'content',   type: 'ReactNode',                          default: '—',      description: 'The tooltip text. Must be non-interactive content only.' },
+      { name: 'children',  type: 'ReactElement',                       default: '—',      description: 'A single trigger element; receives hover/focus handlers and aria-describedby automatically.' },
+      { name: 'side',      type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'", description: 'Which side of the trigger the tooltip appears on.' },
+      { name: 'delay',     type: 'number',                             default: '300',    description: 'Open delay in milliseconds for hover. Keyboard focus shows the tooltip immediately.' },
+      { name: 'className', type: 'string',                             default: "''",     description: 'Additional classes on the wrapper span.' },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Tooltip/Tooltip.tsx'],
+  },
+  {
+    slug: 'popover',
+    name: 'Popover',
+    category: 'Overlay',
+    description: 'A click-triggered, non-modal floating panel anchored to its trigger. Focus moves in on open but is never trapped; Escape and outside clicks close it.',
+    usage: `import Popover from '@/src/components/Popover/Popover';
+
+export default function Example() {
+  return (
+    <Popover trigger="Open popover" label="Share settings" side="bottom" align="center">
+      <div className="flex flex-col gap-2">
+        <p className="text-sm font-medium text-text">Share this page</p>
+        <p className="text-xs text-text-muted">Anyone with the link can view.</p>
+        <button className="self-start rounded-md bg-brand px-3 py-1.5 text-xs text-brand-fg hover:bg-brand-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring">
+          Copy link
+        </button>
+      </div>
+    </Popover>
+  );
+}`,
+    props: [
+      { name: 'trigger',          type: 'ReactNode',                           default: '—',          description: 'Content of the built-in trigger button.' },
+      { name: 'children',         type: 'ReactNode',                           default: '—',          description: 'Panel content. May contain interactive elements.' },
+      { name: 'side',             type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'",   description: 'Which side of the trigger the panel appears on.' },
+      { name: 'align',            type: "'start' | 'center' | 'end'",          default: "'center'",   description: 'Alignment along the chosen side.' },
+      { name: 'label',            type: 'string',                              default: 'undefined',  description: 'Accessible name for the panel (aria-label).' },
+      { name: 'onOpenChange',     type: '(open: boolean) => void',             default: 'undefined',  description: 'Called whenever the popover opens or closes.' },
+      { name: 'disabled',         type: 'boolean',                             default: 'false',      description: 'Disables the trigger.' },
+      { name: 'className',        type: 'string',                              default: "''",         description: 'Additional classes on the panel.' },
+      { name: 'triggerClassName', type: 'string',                              default: "''",         description: 'Additional classes on the trigger button.' },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Popover/Popover.tsx'],
+  },
+  {
+    slug: 'dropdown-menu',
+    name: 'DropdownMenu',
+    category: 'Overlay',
+    description: 'A trigger button that opens a floating menu of actions with arrow-key navigation, typeahead, separators, and disabled items.',
+    usage: `import DropdownMenu from '@/src/components/DropdownMenu/DropdownMenu';
+
+export default function Example() {
+  return (
+    <DropdownMenu
+      trigger="Actions"
+      items={[
+        { label: 'Edit',      onSelect: () => console.log('edit')      },
+        { label: 'Duplicate', onSelect: () => console.log('duplicate') },
+        { separator: true },
+        { label: 'Archive', disabled: true },
+        { label: 'Delete',    onSelect: () => console.log('delete')    },
+      ]}
+    />
+  );
+}`,
+    props: [
+      { name: 'items',            type: 'DropdownMenuEntry[]',                 default: '—',          description: 'Array of items ({ label, onSelect?, disabled? }) and separators ({ separator: true }).' },
+      { name: 'trigger',          type: 'ReactNode',                           default: '—',          description: 'Content of the built-in trigger button.' },
+      { name: 'side',             type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'",   description: 'Which side of the trigger the menu appears on.' },
+      { name: 'align',            type: "'start' | 'center' | 'end'",          default: "'start'",    description: 'Alignment along the chosen side.' },
+      { name: 'onSelect',         type: '(item: DropdownMenuItem) => void',    default: 'undefined',  description: "Called with the activated item, in addition to the item's own onSelect." },
+      { name: 'disabled',         type: 'boolean',                             default: 'false',      description: 'Disables the trigger.' },
+      { name: 'className',        type: 'string',                              default: "''",         description: 'Additional classes on the menu list.' },
+      { name: 'triggerClassName', type: 'string',                              default: "''",         description: 'Additional classes on the trigger button.' },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['DropdownMenu/DropdownMenu.tsx'],
+  },
+  {
     slug: 'combobox',
     name: 'Combobox',
     category: 'Inputs',
@@ -2067,6 +2177,424 @@ export default function Example() {
     dependencies: [],
     registryDependencies: ['toggle-group'],
     files: ['CodeBlock/CodeBlock.tsx'],
+  },
+  {
+    slug: 'avatar',
+    name: 'Avatar',
+    category: 'Display',
+    description: 'User or entity image with graceful fallback to initials, plus an overlapping AvatarGroup with a +N overflow indicator.',
+    usage: `import Avatar, { AvatarGroup } from '@/src/components/Avatar/Avatar';
+
+export default function Example() {
+  return (
+    <div className="flex flex-col items-center gap-6">
+      <div className="flex items-end gap-4">
+        <Avatar name="Ada Lovelace" size="sm" />
+        <Avatar name="Grace Hopper" size="md" />
+        <Avatar name="Alan Turing" size="lg" />
+        <Avatar name="Katherine Johnson" shape="square" size="lg" />
+      </div>
+      <AvatarGroup max={3}>
+        <Avatar name="Ada Lovelace" />
+        <Avatar name="Grace Hopper" />
+        <Avatar name="Alan Turing" />
+        <Avatar name="Katherine Johnson" />
+        <Avatar name="Margaret Hamilton" />
+      </AvatarGroup>
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'src',
+        type: 'string',
+        default: '—',
+        description: 'Image URL. When set, alt is required (enforced by the prop types).',
+      },
+      {
+        name: 'alt',
+        type: 'string',
+        default: '—',
+        description: 'Accessible description of the person — required with src, optional otherwise.',
+      },
+      {
+        name: 'name',
+        type: 'string',
+        default: '—',
+        description: 'Full name used to derive fallback initials ("Ada Lovelace" → "AL") and the fallback accessible label.',
+      },
+      {
+        name: 'fallback',
+        type: 'string',
+        default: '—',
+        description: 'Explicit fallback text; overrides initials derived from name.',
+      },
+      {
+        name: 'size',
+        type: '"sm" | "md" | "lg"',
+        default: '"md"',
+        description: 'Avatar dimensions: 28px / 36px / 48px.',
+      },
+      {
+        name: 'shape',
+        type: '"circle" | "square"',
+        default: '"circle"',
+        description: 'circle is rounded-full; square is rounded-md.',
+      },
+      {
+        name: 'max (AvatarGroup)',
+        type: 'number',
+        default: '—',
+        description: 'Maximum avatars shown before collapsing the rest into a "+N" indicator.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional Tailwind classes merged onto the root element.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Avatar/Avatar.tsx'],
+  },
+  {
+    slug: 'reveal',
+    name: 'Reveal',
+    category: 'Effects',
+    description: 'Scroll-triggered entrance animation driven by IntersectionObserver, with a RevealGroup for staggered cascades. Content stays visible without JS and under reduced motion.',
+    usage: `import Reveal, { RevealGroup } from '@/src/components/Reveal/Reveal';
+
+export default function Example() {
+  return (
+    <RevealGroup stagger={120} effect="slide-up" className="flex flex-col gap-3 w-full max-w-sm">
+      <Reveal>
+        <div className="rounded-lg border border-surface-border bg-surface px-4 py-3 text-sm text-text">Scroll-triggered entrance</div>
+      </Reveal>
+      <Reveal>
+        <div className="rounded-lg border border-surface-border bg-surface px-4 py-3 text-sm text-text">Staggered by 120ms</div>
+      </Reveal>
+      <Reveal effect="scale">
+        <div className="rounded-lg border border-surface-border bg-surface px-4 py-3 text-sm text-text">With its own effect</div>
+      </Reveal>
+    </RevealGroup>
+  );
+}`,
+    props: [
+      {
+        name: 'effect',
+        type: '"fade" | "slide-up" | "slide-left" | "slide-right" | "scale"',
+        default: '"fade"',
+        description: 'Entrance effect applied when the element scrolls into view.',
+      },
+      {
+        name: 'delay',
+        type: 'number',
+        default: '0',
+        description: 'Delay in milliseconds before the entrance transition starts.',
+      },
+      {
+        name: 'once',
+        type: 'boolean',
+        default: 'true',
+        description: 'Reveal only on first entry. When false, content re-hides on exit and re-reveals on re-entry.',
+      },
+      {
+        name: 'stagger (RevealGroup)',
+        type: 'number',
+        default: '100',
+        description: 'Milliseconds added to each successive child Reveal’s delay.',
+      },
+      {
+        name: 'delay (RevealGroup)',
+        type: 'number',
+        default: '0',
+        description: 'Base delay applied to the first child of the group.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional Tailwind classes merged onto the wrapper element.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Reveal/Reveal.tsx'],
+  },
+  {
+    slug: 'count-up',
+    name: 'CountUp',
+    category: 'Effects',
+    description: 'Animates a number from a start value to its final value when scrolled into view. Screen readers always get the real value; reduced motion renders it immediately.',
+    usage: `import CountUp from '@/src/components/CountUp/CountUp';
+
+export default function Example() {
+  return (
+    <div className="flex flex-wrap items-center justify-center gap-10">
+      <div className="flex flex-col items-center gap-1">
+        <CountUp value={12480} separator="," className="text-3xl font-semibold tracking-tight text-text" />
+        <span className="text-xs text-text-muted">Daily downloads</span>
+      </div>
+      <div className="flex flex-col items-center gap-1">
+        <CountUp value={99.98} decimals={2} suffix="%" className="text-3xl font-semibold tracking-tight text-text" />
+        <span className="text-xs text-text-muted">Uptime</span>
+      </div>
+      <div className="flex flex-col items-center gap-1">
+        <CountUp value={1200000} prefix="$" separator="," duration={1500} className="text-3xl font-semibold tracking-tight text-text" />
+        <span className="text-xs text-text-muted">ARR</span>
+      </div>
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'value',
+        type: 'number',
+        default: '—',
+        description: 'Required. Final value to count up to.',
+      },
+      {
+        name: 'start',
+        type: 'number',
+        default: '0',
+        description: 'Value the animation starts from.',
+      },
+      {
+        name: 'duration',
+        type: 'number',
+        default: '1000',
+        description: 'Animation duration in milliseconds, eased with the --ease-standard token curve.',
+      },
+      {
+        name: 'decimals',
+        type: 'number',
+        default: '0',
+        description: 'Number of decimal places rendered.',
+      },
+      {
+        name: 'prefix',
+        type: 'string',
+        default: '""',
+        description: 'String prepended to the number (e.g. "$").',
+      },
+      {
+        name: 'suffix',
+        type: 'string',
+        default: '""',
+        description: 'String appended to the number (e.g. "%").',
+      },
+      {
+        name: 'separator',
+        type: 'string',
+        default: '""',
+        description: 'Thousands separator (e.g. ",").',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional Tailwind classes merged onto the root span.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['CountUp/CountUp.tsx'],
+  },
+  {
+    slug: 'text-shimmer',
+    name: 'TextShimmer',
+    category: 'Effects',
+    description: 'Text with a looping gradient shimmer sweeping across it via background-clip: text. Token-driven colors keep AA contrast; reduced motion renders static text.',
+    usage: `import TextShimmer from '@/src/components/TextShimmer/TextShimmer';
+
+export default function Example() {
+  return (
+    <div className="flex flex-col items-center gap-4">
+      <TextShimmer className="text-2xl font-semibold tracking-tight">Generating your report…</TextShimmer>
+      <TextShimmer duration={1600} className="text-sm font-medium">Thinking…</TextShimmer>
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'duration',
+        type: 'number',
+        default: 'calc(var(--duration-slow) * 8)',
+        description: 'Duration of one shimmer sweep in milliseconds. Defaults to a token-derived 2400ms.',
+      },
+      {
+        name: 'children',
+        type: 'ReactNode',
+        default: '—',
+        description: 'Required. The text to shimmer.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional Tailwind classes merged onto the text element.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['TextShimmer/TextShimmer.tsx'],
+  },
+  {
+    slug: 'modal',
+    name: 'Modal',
+    category: 'Overlay',
+    description: 'A blocking overlay dialog with focus trap, scroll lock, Escape-to-close, backdrop dismissal, and focus return — composed from Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter, and ModalClose.',
+    usage: `'use client';
+
+import { useState } from 'react';
+import Modal, {
+  ModalHeader,
+  ModalTitle,
+  ModalContent,
+  ModalFooter,
+  ModalClose,
+} from '@/src/components/Modal/Modal';
+import Button from '@/src/components/Button/Button';
+
+export default function Example() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Open modal</Button>
+
+      <Modal open={open} onOpenChange={setOpen}>
+        <ModalClose />
+        <ModalHeader>
+          <ModalTitle>Delete project</ModalTitle>
+        </ModalHeader>
+        <ModalContent>
+          This action cannot be undone. The project and all of its data will be
+          permanently removed.
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="secondary" onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant="destructive" onClick={() => setOpen(false)}>Delete</Button>
+        </ModalFooter>
+      </Modal>
+    </>
+  );
+}`,
+    props: [
+      {
+        name: 'open',
+        type: 'boolean',
+        default: '—',
+        description: 'Controls whether the modal is rendered and visible (controlled).',
+      },
+      {
+        name: 'onOpenChange',
+        type: '(open: boolean) => void',
+        default: '—',
+        description: 'Called with false when the user dismisses via Escape, backdrop click, or ModalClose.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional classes merged onto the dialog panel element.',
+      },
+      {
+        name: 'children',
+        type: 'ReactNode',
+        default: '—',
+        description: 'Modal subcomponents (ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose) and arbitrary content.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Modal/Modal.tsx'],
+  },
+  {
+    slug: 'drawer',
+    name: 'Drawer',
+    category: 'Overlay',
+    description: 'A blocking side-panel overlay that slides in from an edge of the screen, with the full modal accessibility contract — focus trap, scroll lock, Escape-to-close, backdrop dismissal, and focus return.',
+    usage: `'use client';
+
+import { useState } from 'react';
+import Drawer, {
+  DrawerHeader,
+  DrawerTitle,
+  DrawerContent,
+  DrawerFooter,
+  DrawerClose,
+  type DrawerSide,
+} from '@/src/components/Drawer/Drawer';
+import Button from '@/src/components/Button/Button';
+
+export default function Example() {
+  const [open, setOpen] = useState(false);
+  const [side, setSide] = useState<DrawerSide>('right');
+
+  const openFrom = (s: DrawerSide) => {
+    setSide(s);
+    setOpen(true);
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2 justify-center">
+      <Button variant="secondary" onClick={() => openFrom('left')}>Left</Button>
+      <Button variant="secondary" onClick={() => openFrom('right')}>Right</Button>
+      <Button variant="secondary" onClick={() => openFrom('top')}>Top</Button>
+      <Button variant="secondary" onClick={() => openFrom('bottom')}>Bottom</Button>
+
+      <Drawer open={open} onOpenChange={setOpen} side={side}>
+        <DrawerClose />
+        <DrawerHeader>
+          <DrawerTitle>Notifications</DrawerTitle>
+        </DrawerHeader>
+        <DrawerContent>
+          You have no unread notifications.
+        </DrawerContent>
+        <DrawerFooter>
+          <Button variant="secondary" onClick={() => setOpen(false)}>Close</Button>
+        </DrawerFooter>
+      </Drawer>
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'open',
+        type: 'boolean',
+        default: '—',
+        description: 'Controls whether the drawer is rendered and visible (controlled).',
+      },
+      {
+        name: 'onOpenChange',
+        type: '(open: boolean) => void',
+        default: '—',
+        description: 'Called with false when the user dismisses via Escape, backdrop click, or DrawerClose.',
+      },
+      {
+        name: 'side',
+        type: '"left" | "right" | "top" | "bottom"',
+        default: '"right"',
+        description: 'Which edge of the screen the drawer slides in from.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional classes merged onto the drawer panel element.',
+      },
+      {
+        name: 'children',
+        type: 'ReactNode',
+        default: '—',
+        description: 'Drawer subcomponents (DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose) and arbitrary content.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Drawer/Drawer.tsx'],
   },
 ];
 

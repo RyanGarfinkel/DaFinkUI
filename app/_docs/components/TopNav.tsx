@@ -3,7 +3,7 @@ import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/Comm
 import { themes, getThemeByName, type Theme } from '@/src/themes';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { Select } from '@/src/components/Select/Select';
-import { registry } from '@/src/docs/registry';
+import { registry } from '@/app/_docs/registry';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 

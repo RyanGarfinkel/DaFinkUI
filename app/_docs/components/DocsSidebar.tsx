@@ -1,6 +1,6 @@
 import { Sidebar, SidebarSection } from '@/src/components/Sidebar/Sidebar';
-import { DocsSidebarLink } from '@/src/docs/components/DocsSidebarLink';
-import { registry } from '@/src/docs/registry';
+import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
+import { registry } from '@/app/_docs/registry';
 
 const CATEGORIES = [
 	'Actions',
@@ -10,6 +10,7 @@ const CATEGORIES = [
 	'Navigation',
 	'Disclosure',
 	'Forms',
+	'Effects',
 	'Charts',
 	'Drag & Drop',
 	'Canvas',
