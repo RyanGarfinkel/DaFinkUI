@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent, DialogHTMLAttributes } from 'react';
 
 // ─── Focus trap selector ──────────────────────────────────────────────────────
 
@@ -54,7 +54,7 @@ const useDrawerContext = () =>
 
 // ─── Drawer ───────────────────────────────────────────────────────────────────
 
-export interface DrawerProps extends HTMLAttributes<HTMLDivElement>
+export interface DrawerProps extends DialogHTMLAttributes<HTMLDialogElement>
 {
 	open:         boolean;
 	onOpenChange: (open: boolean) => void;
@@ -75,6 +75,7 @@ const Drawer = (
 	const [mounted, setMounted] = useState(false);
 	const [visible, setVisible] = useState(false);
 
+	const dialogRef  = useRef<HTMLDialogElement>(null);
 	const panelRef   = useRef<HTMLDivElement>(null);
 	const triggerRef = useRef<HTMLElement | null>(null);
 	const openRef    = useRef(open);
@@ -106,7 +107,11 @@ const Drawer = (
 			triggerRef.current?.focus();
 			triggerRef.current = null;
 
-			const timer = setTimeout(() => setMounted(false), EXIT_DURATION_MS);
+			const timer = setTimeout(() =>
+			{
+				dialogRef.current?.close();
+				setMounted(false);
+			}, EXIT_DURATION_MS);
 			return () => clearTimeout(timer);
 		}
 	}, [open]);
@@ -126,6 +131,7 @@ const Drawer = (
 			// The drawer may have been closed again before this frame ran
 			if(!openRef.current) return;
 
+			dialogRef.current?.showModal();
 			setVisible(true);
 			const focusable = panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
 			if(focusable && focusable.length > 0)
@@ -136,16 +142,20 @@ const Drawer = (
 		return () => cancelAnimationFrame(frame);
 	}, [mounted]);
 
-	// Scroll lock on <body> while open
 	useEffect(() =>
 	{
-		if(!open) return;
-		const prev = document.body.style.overflow;
-		document.body.style.overflow = 'hidden';
-		return () => { document.body.style.overflow = prev; };
-	}, [open]);
+		const dialog = dialogRef.current;
+		if(!dialog) return;
+		const onCancel = (e: Event) =>
+		{
+			e.preventDefault();
+			requestClose();
+		};
+		dialog.addEventListener('cancel', onCancel);
+		return () => dialog.removeEventListener('cancel', onCancel);
+	});
 
-	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) =>
+	const handleKeyDown = (e: KeyboardEvent<HTMLDialogElement>) =>
 	{
 		if(e.key === 'Escape')
 		{
@@ -184,7 +194,7 @@ const Drawer = (
 		}
 	};
 
-	const handleBackdropPointerDown = (e: PointerEvent<HTMLDivElement>) =>
+	const handleBackdropPointerDown = (e: PointerEvent<HTMLDialogElement>) =>
 	{
 		if(e.target === e.currentTarget) requestClose();
 	};
@@ -193,10 +203,16 @@ const Drawer = (
 
 	return (
 		<DrawerContext.Provider value={{ titleId, requestClose }}>
-			<div
-				className='fixed inset-0 z-50'
+			<dialog
+				ref={dialogRef}
+				role='dialog'
+				aria-modal='true'
+				aria-labelledby={titleId}
+				style={{ width: '100vw', height: '100dvh', maxWidth: '100%', maxHeight: '100%', margin: 0 }}
+				className='fixed inset-0 p-0 border-0 bg-transparent overflow-visible'
 				onPointerDown={handleBackdropPointerDown}
 				onKeyDown={handleKeyDown}
+				{...props}
 			>
 				<div
 					aria-hidden='true'
@@ -211,8 +227,6 @@ const Drawer = (
 
 				<div
 					ref={panelRef}
-					role='dialog'
-					aria-modal='true'
 					aria-labelledby={titleId}
 					tabIndex={-1}
 					data-state={visible ? 'open' : 'closed'}
@@ -228,11 +242,10 @@ const Drawer = (
 							: `${SIDE_HIDDEN_CLASSES[side]} motion-safe:duration-[var(--duration-fast)] motion-safe:ease-[var(--ease-exit)]`,
 						className,
 					].join(' ')}
-					{...props}
 				>
 					{children}
 				</div>
-			</div>
+			</dialog>
 		</DrawerContext.Provider>
 	);
 };

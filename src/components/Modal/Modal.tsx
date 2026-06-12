@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent, DialogHTMLAttributes } from 'react';
 
 // ─── Focus trap selector ──────────────────────────────────────────────────────
 
@@ -36,7 +36,7 @@ const useModalContext = () =>
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
 
-export interface ModalProps extends HTMLAttributes<HTMLDivElement>
+export interface ModalProps extends DialogHTMLAttributes<HTMLDialogElement>
 {
 	open:         boolean;
 	onOpenChange: (open: boolean) => void;
@@ -55,6 +55,7 @@ const Modal = (
 	const [mounted, setMounted] = useState(false);
 	const [visible, setVisible] = useState(false);
 
+	const dialogRef  = useRef<HTMLDialogElement>(null);
 	const panelRef   = useRef<HTMLDivElement>(null);
 	const triggerRef = useRef<HTMLElement | null>(null);
 	const openRef    = useRef(open);
@@ -86,7 +87,11 @@ const Modal = (
 			triggerRef.current?.focus();
 			triggerRef.current = null;
 
-			const timer = setTimeout(() => setMounted(false), EXIT_DURATION_MS);
+			const timer = setTimeout(() =>
+			{
+				dialogRef.current?.close();
+				setMounted(false);
+			}, EXIT_DURATION_MS);
 			return () => clearTimeout(timer);
 		}
 	}, [open]);
@@ -106,6 +111,7 @@ const Modal = (
 			// The modal may have been closed again before this frame ran
 			if(!openRef.current) return;
 
+			dialogRef.current?.showModal();
 			setVisible(true);
 			const focusable = panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
 			if(focusable && focusable.length > 0)
@@ -116,16 +122,20 @@ const Modal = (
 		return () => cancelAnimationFrame(frame);
 	}, [mounted]);
 
-	// Scroll lock on <body> while open
 	useEffect(() =>
 	{
-		if(!open) return;
-		const prev = document.body.style.overflow;
-		document.body.style.overflow = 'hidden';
-		return () => { document.body.style.overflow = prev; };
-	}, [open]);
+		const dialog = dialogRef.current;
+		if(!dialog) return;
+		const onCancel = (e: Event) =>
+		{
+			e.preventDefault();
+			requestClose();
+		};
+		dialog.addEventListener('cancel', onCancel);
+		return () => dialog.removeEventListener('cancel', onCancel);
+	});
 
-	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) =>
+	const handleKeyDown = (e: KeyboardEvent<HTMLDialogElement>) =>
 	{
 		if(e.key === 'Escape')
 		{
@@ -164,7 +174,7 @@ const Modal = (
 		}
 	};
 
-	const handleBackdropPointerDown = (e: PointerEvent<HTMLDivElement>) =>
+	const handleBackdropPointerDown = (e: PointerEvent<HTMLDialogElement>) =>
 	{
 		if(e.target === e.currentTarget) requestClose();
 	};
@@ -173,10 +183,16 @@ const Modal = (
 
 	return (
 		<ModalContext.Provider value={{ titleId, requestClose }}>
-			<div
-				className='fixed inset-0 z-50 flex items-center justify-center px-4'
+			<dialog
+				ref={dialogRef}
+				role='dialog'
+				aria-modal='true'
+				aria-labelledby={titleId}
+				style={{ width: '100vw', height: '100dvh', maxWidth: '100%', maxHeight: '100%', margin: 0 }}
+				className='fixed inset-0 flex items-center justify-center px-4 p-0 border-0 bg-transparent overflow-visible'
 				onPointerDown={handleBackdropPointerDown}
 				onKeyDown={handleKeyDown}
+				{...props}
 			>
 				<div
 					aria-hidden='true'
@@ -191,8 +207,6 @@ const Modal = (
 
 				<div
 					ref={panelRef}
-					role='dialog'
-					aria-modal='true'
 					aria-labelledby={titleId}
 					tabIndex={-1}
 					data-state={visible ? 'open' : 'closed'}
@@ -206,11 +220,10 @@ const Modal = (
 							: 'opacity-0 scale-95 motion-safe:duration-[var(--duration-fast)] motion-safe:ease-[var(--ease-exit)]',
 						className,
 					].join(' ')}
-					{...props}
 				>
 					{children}
 				</div>
-			</div>
+			</dialog>
 		</ModalContext.Provider>
 	);
 };

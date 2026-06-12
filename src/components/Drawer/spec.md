@@ -1,6 +1,6 @@
 # Drawer
 
-A blocking side-panel overlay that slides in from an edge of the screen. Shares the full modal accessibility contract — focus trap, scroll lock, Escape-to-close, backdrop dismissal, focus return — but uses a translate animation instead of fade + scale. Composed of `Drawer`, `DrawerHeader`, `DrawerTitle`, `DrawerContent`, `DrawerFooter`, and `DrawerClose`.
+A blocking side-panel overlay that slides in from an edge of the screen. Uses the native `<dialog>` element with `showModal()` for top-layer rendering — no z-index required, not clippable by ancestor overflow or transform. Shares the full modal accessibility contract — focus trap, Escape-to-close, backdrop dismissal, focus return — but uses a translate animation instead of fade + scale. Composed of `Drawer`, `DrawerHeader`, `DrawerTitle`, `DrawerContent`, `DrawerFooter`, and `DrawerClose`.
 
 ---
 
@@ -40,7 +40,7 @@ No additional npm packages required. No registry dependencies.
 | `className`    | `string`                                 | `''`      | Additional classes merged onto the panel element.        |
 | `children`     | `ReactNode`                              | —         | Drawer subcomponents and arbitrary content.              |
 
-`Drawer` extends `HTMLAttributes<HTMLDivElement>` — all native div props are spread onto the panel.
+`Drawer` extends `DialogHTMLAttributes<HTMLDialogElement>` — all native dialog props are spread onto the `<dialog>` element.
 
 ### DrawerHeader / DrawerContent / DrawerFooter
 
@@ -104,11 +104,12 @@ The panel exposes `data-side` and `data-state="open" | "closed"` for style exten
 
 ### ARIA Roles
 
-| Element  | Role / Attribute                                                            |
-|----------|------------------------------------------------------------------------------|
-| Panel    | `role="dialog"`, `aria-modal="true"`, `aria-labelledby` → `DrawerTitle` id  |
-| Backdrop | `aria-hidden="true"`                                                        |
-| Close    | `<button>` with `aria-label="Close"`, decorative icon `aria-hidden`         |
+| Element          | Role / Attribute                                                            |
+|------------------|-----------------------------------------------------------------------------|
+| `<dialog>`       | `role="dialog"`, `aria-modal="true"`, `aria-labelledby` → `DrawerTitle` id |
+| Inner panel div  | `aria-labelledby` → `DrawerTitle` id (legacy AT support)                    |
+| Backdrop         | `aria-hidden="true"`                                                        |
+| Close            | `<button>` with `aria-label="Close"`, decorative icon `aria-hidden`         |
 
 ### Focus Management
 
@@ -120,7 +121,7 @@ The panel exposes `data-side` and `data-state="open" | "closed"` for style exten
 
 ### Scroll Lock
 
-While open, `document.body.style.overflow` is set to `'hidden'`. The previous value is restored on close or unmount.
+Handled natively by `showModal()` — no manual `document.body.style.overflow` manipulation required.
 
 ### Reduced Motion
 
