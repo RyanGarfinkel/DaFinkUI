@@ -3,7 +3,7 @@
 > A free, open-source copy-paste React component library for Next.js and React applications.
 
 GitHub: https://github.com/RyanGarfinkel/ObiUI
-Docs: https://obi-ui.vercel.app
+Docs: https://ui.ryangarfinkel.dev
 
 Obi UI is a design system where components are installed by copying source code into your project — not installed as an npm dependency. Each component is self-contained, accessible, and built with Tailwind v4 CSS custom properties for theming.
 
@@ -109,4 +109,4 @@ Theme tokens are applied as CSS custom properties on :root (or a wrapper element
 
 An MCP (Model Context Protocol) server is available for AI-native development. Connect it to Claude or any MCP-compatible AI assistant to give it live access to every component specification, token definition, and design pattern. The AI will use the actual docs rather than hallucinated APIs when helping you build with Obi UI.
 
-See the /mcp page in the docs site for setup instructions.
+MCP server endpoint: https://ui.ryangarfinkel.dev/api/mcp (Streamable HTTP transport). See the /mcp page in the docs site for setup instructions.

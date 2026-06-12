@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://obi-ui.vercel.app/sitemap.xml
+Sitemap: https://ui.ryangarfinkel.dev/sitemap.xml
