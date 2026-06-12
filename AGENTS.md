@@ -37,9 +37,18 @@ These five rules apply to every component, no exceptions:
 
 1. **Every interactive element is keyboard-navigable.** Tab reaches it. Enter/Space activates it. If it cannot be reached and activated by keyboard alone, it is not done.
 2. **Every interactive element has a visible focus indicator.** `focus-visible:ring-2 focus-visible:ring-offset-2` is the baseline. Never suppress focus-visible without a direct replacement.
-3. **Color contrast.** Body text: 4.5:1 minimum. Large text and UI components: 3:1 minimum. Design tokens are pre-validated — use them. Never substitute a hardcoded color without a contrast check.
+3. **Color contrast.** Body text: 4.5:1 minimum. Large text and UI components: 3:1 minimum. Design tokens are contrast-checked by the CI gate at `scripts/check-contrast.ts`. Run it after any token change. Never substitute a hardcoded color without a contrast check.
 4. **Color is not the only signal.** Any state communicated by color (error, success, disabled) must also be communicated by a label, icon, or border change.
-5. **All animation respects `prefers-reduced-motion`.** The global CSS rule in `globals.css` handles this — do not bypass it.
+5. **All animation respects `prefers-reduced-motion`.** `globals.css` now contains the following rule — do not bypass it:
+   ```css
+   @media (prefers-reduced-motion: reduce) {
+     *, ::before, ::after {
+       animation-duration: 0.01ms !important;
+       animation-iteration-count: 1 !important;
+       transition-duration: 0.01ms !important;
+     }
+   }
+   ```
 
 ---
 

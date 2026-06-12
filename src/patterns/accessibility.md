@@ -26,7 +26,7 @@ All text and UI elements must meet WCAG 2.1 AA contrast ratios. Design tokens ar
 
 ### Checking Contrast
 
-Before shipping a new token or hardcoded color, verify with a tool like the WebAIM Contrast Checker. For tokens already defined in `globals.css`, they have been verified — trust them.
+Before shipping a new token or hardcoded color, verify with a tool like the WebAIM Contrast Checker. Run `scripts/check-contrast.ts` to verify token contrast ratios before shipping any token changes.
 
 ---
 
@@ -65,10 +65,10 @@ Focus must follow the visual and DOM order. Never use `tabindex` values greater 
 
 ### Composite Widgets (Roving tabindex)
 
-For components that contain multiple focusable children — menus, listboxes, radio groups, tab lists — use the **roving tabindex** pattern:
+For components that contain multiple focusable children — menus, listboxes, radio groups, tab lists, segmented controls — use the **roving tabindex** pattern:
 
 1. Only one child has `tabIndex={0}` at a time; all others have `tabIndex={-1}`
-2. Arrow keys move the "active" child and update which element has `tabIndex={0}`
+2. Arrow keys move focus and update which element has `tabIndex={0}`
 3. Tab moves focus out of the widget entirely — it does not cycle through children
 
 This keeps the tab stop count manageable for keyboard users navigating long pages.
@@ -90,6 +90,12 @@ items.map((item, i) => (
   />
 ))
 ```
+
+**Arrow navigation vs. selection.** Arrow keys move focus only — they do not change the selected/active value. The user confirms a choice with Enter or Space. This separates navigation intent from activation intent and avoids accidental state changes when exploring options.
+
+**Focus-visible on selected items.** When the focused item is also the selected one, use a double-outline to distinguish "focused" from merely "selected": `ring-2 ring-offset-2 ring-brand-ring` with the offset color set to the container's background. This matches the primary button's focus convention. When the focused item is *not* selected (e.g., arrow-navigating to an unactivated option), use a single ring without offset: `ring-2 ring-brand-ring`.
+
+**ToggleGroup implementation note.** `ToggleGroup` (single type) uses a sliding pill indicator as the selected state. The focus ring targets an absolutely-positioned inner `<span>` sized to match the pill (`inset-y-[5px] inset-x-1 rounded`), not the full button height. This gives the focus ring the same shape as the pill rather than a taller rectangle.
 
 ---
 
@@ -277,6 +283,38 @@ All animations must be suppressed or replaced with an instant transition when th
 ```
 
 This is configured globally in `globals.css`. Do not add per-component reduced-motion overrides — the global rule handles it.
+
+---
+
+## WCAG 2.2 Additions
+
+WCAG 2.2 is the current conformance target (enforceable under the European Accessibility Act since June 2025). These criteria are not covered by the WCAG 2.1 patterns above.
+
+### 2.5.8 — Target Size Minimum (AA)
+
+Every interactive target must be at least 24×24 CSS pixels, OR have spacing around it such that a 24px circle centered on the target doesn't intersect another target or the edge of the viewport.
+
+Components to audit: Checkbox/Radio (default 20px — passes if the label extends the clickable area), icon-only buttons, DataTable sort headers, Carousel dots.
+
+### 2.4.11 — Focus Not Obscured (AA)
+
+A focused element must not be completely hidden by a sticky or fixed-position element. Applies to: Toast (floating overlay), sticky Sidebar headers, sticky TopNav. Verify that none of these can fully cover a focused element on the page beneath them.
+
+### 2.5.7 — Dragging Movements (AA)
+
+Any UI action that requires dragging must also be achievable with a single-pointer action (click/tap) or keyboard. Applies to: Kanban (already has KeyboardSensor — good), Slider, Carousel, any sortable list.
+
+### 3.3.7 — Redundant Entry (AA)
+
+Never block paste on any input field. OTPInput: verify `onPaste` is not suppressed. Auto-populated fields (autofill, clipboard) must not require re-entry.
+
+### 3.3.8 — Accessible Authentication (AA)
+
+Do not prevent autofill or autocomplete on authentication forms. Since Input spreads all props, consumers can set `autocomplete` — document that they must.
+
+### 1.3.5 — Identify Input Purpose (2.1 AA, feeds 2.2 criteria)
+
+Identity inputs — name, email, phone, address — must have the appropriate `autocomplete` attribute. Input's prop spread means consumers can set this; the component spec should require it for identity fields. Without it, password managers and autofill cannot assist users, which also violates 3.3.7.
 
 ---
 

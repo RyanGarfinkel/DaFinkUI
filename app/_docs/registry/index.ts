@@ -2596,6 +2596,155 @@ export default function Example() {
     registryDependencies: [],
     files: ['Drawer/Drawer.tsx'],
   },
+  {
+    slug: 'typewriter',
+    name: 'Typewriter',
+    category: 'Effects',
+    description: 'Reveals text character by character, like a terminal being typed in real time. Screen readers receive the full string immediately; reduced motion renders it statically.',
+    usage: `import Typewriter from '@/src/components/Typewriter/Typewriter';
+
+export default function Example() {
+  return (
+    <div className="flex flex-col items-start gap-6">
+      <h1 className="text-4xl font-bold tracking-tight text-text">
+        <Typewriter text="Hello, world." />
+      </h1>
+      <p className="text-base font-mono text-text-muted">
+        <Typewriter
+          text="System ready. Awaiting input…"
+          speed={60}
+          delay={400}
+          cursorPersist
+        />
+      </p>
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'text',
+        type: 'string',
+        default: '—',
+        description: 'Required. The full text to type out.',
+      },
+      {
+        name: 'speed',
+        type: 'number',
+        default: '50',
+        description: 'Milliseconds between each character.',
+      },
+      {
+        name: 'delay',
+        type: 'number',
+        default: '0',
+        description: 'Milliseconds to wait before typing begins.',
+      },
+      {
+        name: 'cursor',
+        type: 'boolean',
+        default: 'true',
+        description: 'Show a blinking | cursor while typing.',
+      },
+      {
+        name: 'cursorPersist',
+        type: 'boolean',
+        default: 'false',
+        description: 'Keep the cursor visible after typing completes.',
+      },
+      {
+        name: 'onComplete',
+        type: '() => void',
+        default: '—',
+        description: 'Called when all characters have been revealed.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional Tailwind classes merged onto the root span.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Typewriter/Typewriter.tsx'],
+  },
+  {
+    slug: 'graph',
+    name: 'Graph',
+    category: 'Display',
+    description: 'Force-directed node/edge graph with draggable nodes, pan/zoom, hover-highlighting, and keyboard navigation.',
+    usage: `'use client';
+
+import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
+
+const NODES: GraphNode[] = [
+  { id: 'react',      label: 'React'      },
+  { id: 'nextjs',     label: 'Next.js'    },
+  { id: 'typescript', label: 'TypeScript' },
+  { id: 'tailwind',   label: 'Tailwind'   },
+  { id: 'obi',        label: 'Obi UI'     },
+];
+
+const EDGES: GraphEdge[] = [
+  { source: 'react',    target: 'nextjs'     },
+  { source: 'react',    target: 'typescript' },
+  { source: 'nextjs',   target: 'obi'        },
+  { source: 'tailwind', target: 'obi'        },
+];
+
+export default function Example() {
+  return (
+    <Graph
+      nodes={NODES}
+      edges={EDGES}
+      width={600}
+      height={400}
+      onNodeSelect={node => console.log('selected', node.label)}
+    />
+  );
+}`,
+    props: [
+      {
+        name: 'nodes',
+        type: 'GraphNode[]',
+        default: '—',
+        description: 'Required. Array of { id, label, group? } objects.',
+      },
+      {
+        name: 'edges',
+        type: 'GraphEdge[]',
+        default: '—',
+        description: 'Required. Array of { source, target } objects referencing node ids.',
+      },
+      {
+        name: 'width',
+        type: 'number',
+        default: '600',
+        description: 'SVG width in pixels.',
+      },
+      {
+        name: 'height',
+        type: 'number',
+        default: '400',
+        description: 'SVG height in pixels.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional classes on the root wrapper div.',
+      },
+      {
+        name: 'onNodeSelect',
+        type: '(node: GraphNode) => void',
+        default: '—',
+        description: 'Called when a node is selected via click or keyboard Enter/Space.',
+      },
+    ],
+    dependencies: ['d3-force'],
+    registryDependencies: [],
+    files: ['Graph/Graph.tsx'],
+  },
 ];
 
 export const getComponent = (slug: string) => {

@@ -93,13 +93,29 @@ This means a component author must correctly declare all dependencies at registr
 
 ## Component Detail Page
 
-Each page (`app/(docs)/components/[slug]/page.tsx`) renders:
+Each page (`app/(docs)/components/[slug]/page.tsx`) renders these sections, in this order:
 
-1. Component name + description
-2. Install command — `npx @obi/ui add {slug}` in a `CodeBlock`; if the component has `registryDependencies`, list them as "Also installs: Button, Icon" below the command
-3. Live preview — render the component with representative props
-4. Usage code block (from registry `usage` field)
-5. Props table (from registry `props` field)
+1. **Header** — component name (`text-3xl font-semibold tracking-tight text-text`) + description (`text-base text-text-muted leading-relaxed`)
+2. **Installation** — `npx @obi/ui add {slug}` in a `CodeBlock`; if the component has `registryDependencies`, list them as "Also installs: Button, Icon" below the command; if it has npm `dependencies`, list them as "Requires: …" in inline `font-mono text-xs` code
+3. **Preview** — live render with representative props, wrapped in `ComponentPreview` → `ComponentLivePreview`
+4. **Extra sections (optional, per component)** — variant demos and interactive examples (e.g. Timeline "Horizontal variant" / "Interactive example", Skeleton "Examples")
+5. **Usage** — `CodeBlock` with the registry `usage` field
+6. **Props** — `PropsTable` from the registry `props` field
+
+### Section Format
+
+Every section after the header follows the same structure — match it exactly when adding sections:
+
+- Wrapper: `<section className='flex flex-col gap-3'>`; sections are spaced by the page-level `flex flex-col gap-10`
+- Heading: `<h2 className='text-sm font-semibold text-text uppercase tracking-wide'>` — sentence case in source ("Horizontal variant"); the uppercase rendering comes from CSS, never type headings in caps
+- Optional one-paragraph intro: `text-sm text-text-muted`; inline prop/code references use `<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>`
+- Demos always go inside `ComponentPreview`; standalone demo components live in `app/_docs/components/examples/`
+
+### Extra Section Guidelines
+
+- A variant section = heading + one-line prose explaining the prop that enables it + a `ComponentPreview` demo
+- An interactive example section = heading + one-line prose stating what to do and what to expect + a `ComponentPreview` demo
+- Demos must follow the "Usage Code and Preview Must Align" rule below if their code is shown anywhere
 
 **Next.js 16 note**: `params` is a `Promise` — always destructure with `await`:
 

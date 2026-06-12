@@ -1,260 +1,462 @@
 'use client';
 
 import { FormDescription, FormField, FormLabel } from '@/src/components/Form/Form';
+import DataTable, { ColumnDef } from '@/src/components/DataTable/DataTable';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
 import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
+import { DropdownMenu } from '@/src/components/DropdownMenu/DropdownMenu';
+import { ToastProvider, useToast } from '@/src/components/Toast/Toast';
+import { Typewriter } from '@/src/components/Typewriter/Typewriter';
+import Badge, { BadgeVariant } from '@/src/components/Badge/Badge';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
+import Graph, { GraphNode } from '@/src/components/Graph/Graph';
 import { AreaChart } from '@/src/components/Charts/Charts';
+import OTPInput from '@/src/components/OTPInput/OTPInput';
+import Progress from '@/src/components/Progress/Progress';
+import CountUp from '@/src/components/CountUp/CountUp';
+import Avatar from '@/src/components/Avatar/Avatar';
 import Button from '@/src/components/Button/Button';
+import { useState, useEffect, useRef } from 'react';
 import Input from '@/src/components/Input/Input';
-import { useState, useEffect } from 'react';
 
-// ─── Example 1: Login form ─────────────────────────────────────────────────────
+// ─── Example 1: Two-step auth ─────────────────────────────────────────────────
 
-const LOGIN_CODE = `'use client';
+const AUTH_CODE = `'use client';
 
 import { useState } from 'react';
-import Button from '@/src/components/Button/Button';
+import { FormField, FormLabel } from '@/src/components/Form/Form';
 import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
-import { FormField, FormLabel, FormDescription } from '@/src/components/Form/Form';
+import OTPInput from '@/src/components/OTPInput/OTPInput';
+import Progress from '@/src/components/Progress/Progress';
+import Button from '@/src/components/Button/Button';
+import Badge from '@/src/components/Badge/Badge';
 import Input from '@/src/components/Input/Input';
 
-export default function LoginForm() {
+export default function TwoFactorAuth() {
+  const [step,     setStep]     = useState(0);
   const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
+  const [otp,      setOtp]      = useState('');
+
+  const reset = () => { setStep(0); setEmail(''); setPassword(''); setOtp(''); };
 
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <h3 className="text-2xl font-semibold tracking-tight text-text">Sign in</h3>
-        <p className="text-sm text-text-muted">
-          Enter your email and password to continue.
-        </p>
+        <Progress value={[33, 66, 100][step]} className="mb-4" />
+        {step === 0 && (
+          <>
+            <h3 className="text-xl font-semibold text-text">Sign in</h3>
+            <p className="text-sm text-text-muted">Enter your credentials to continue.</p>
+          </>
+        )}
+        {step === 1 && (
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-semibold text-text">Verify identity</h3>
+              <Badge variant="warning">2FA</Badge>
+            </div>
+            <p className="text-sm text-text-muted">
+              We sent a 6-digit code to <strong>{email}</strong>.
+            </p>
+          </div>
+        )}
+        {step === 2 && (
+          <>
+            <div className="flex items-center gap-2">
+              <h3 className="text-xl font-semibold text-text">You're in</h3>
+              <Badge variant="success">Verified</Badge>
+            </div>
+            <p className="text-sm text-text-muted">Welcome back, {email}.</p>
+          </>
+        )}
       </CardHeader>
       <CardContent>
-        <form onSubmit={(e) => e.preventDefault()} className="flex flex-col gap-4">
-          <FormField>
-            <FormLabel required>Email</FormLabel>
-            <Input
-              type="email"
-              placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </FormField>
-          <FormField>
-            <FormLabel required>Password</FormLabel>
-            <Input
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <FormDescription>
-              <a href="/reset" className="text-brand hover:underline">
-                Forgot password?
-              </a>
-            </FormDescription>
-          </FormField>
-          <Button type="submit" className="w-full mt-1">Sign in</Button>
-          <p className="text-center text-xs text-text-muted">
-            No account?{' '}
-            <a href="/signup" className="text-brand hover:underline">Create one</a>
-          </p>
-        </form>
+        {step === 0 && (
+          <div className="flex flex-col gap-4">
+            <FormField>
+              <FormLabel required>Email</FormLabel>
+              <Input type="email" placeholder="you@example.com" value={email}
+                onChange={(e) => setEmail(e.target.value)} />
+            </FormField>
+            <FormField>
+              <FormLabel required>Password</FormLabel>
+              <Input type="password" placeholder="••••••••" value={password}
+                onChange={(e) => setPassword(e.target.value)} />
+            </FormField>
+            <Button className="w-full" onClick={() => setStep(1)}
+              disabled={!email || !password}>
+              Continue
+            </Button>
+          </div>
+        )}
+        {step === 1 && (
+          <div className="flex flex-col gap-5">
+            <OTPInput length={6} value={otp} onChange={setOtp} />
+            <div className="flex gap-2">
+              <Button variant="ghost" size="sm" onClick={() => { setStep(0); setOtp(''); }}>
+                Back
+              </Button>
+              <Button className="flex-1" onClick={() => setStep(2)}
+                disabled={otp.length < 6}>
+                Verify
+              </Button>
+            </div>
+          </div>
+        )}
+        {step === 2 && (
+          <div className="flex flex-col items-center gap-4 py-2">
+            <div className="w-14 h-14 rounded-full bg-success/15 flex items-center justify-center">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"
+                strokeLinejoin="round" className="text-success">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <p className="text-sm text-text-muted text-center">
+              Authentication complete. Redirecting…
+            </p>
+            <Button variant="outlined" size="sm" onClick={reset}>Start over</Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }`;
 
-const LoginPreview = () => {
-  const [email,    setEmail]    = useState('');
-  const [password, setPassword] = useState('');
+const CheckIcon = () => (
+	<svg width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' className='text-success' aria-hidden='true'>
+		<polyline points='20 6 9 17 4 12' />
+	</svg>
+);
 
-  return (
-    <Card className='w-full max-w-sm'>
-      <CardHeader>
-        <h3 className='text-2xl font-semibold tracking-tight text-text'>Sign in</h3>
-        <p className='text-sm text-text-muted'>Enter your email and password to continue.</p>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={(e) => e.preventDefault()} className='flex flex-col gap-4'>
-          <FormField>
-            <FormLabel required>Email</FormLabel>
-            <Input
-              type='email'
-              placeholder='you@example.com'
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </FormField>
-          <FormField>
-            <FormLabel required>Password</FormLabel>
-            <Input
-              type='password'
-              placeholder='••••••••'
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <FormDescription>
-              <a href='#' className='text-brand hover:underline'>Forgot password?</a>
-            </FormDescription>
-          </FormField>
-          <Button type='submit' className='w-full mt-1'>Sign in</Button>
-          <p className='text-center text-xs text-text-muted'>
-            No account?{' '}
-            <a href='#' className='text-brand hover:underline'>Create one</a>
-          </p>
-        </form>
-      </CardContent>
-    </Card>
-  );
+const AuthPreview = () =>
+{
+	const [step,     setStep]     = useState(0);
+	const [email,    setEmail]    = useState('');
+	const [password, setPassword] = useState('');
+	const [otp,      setOtp]      = useState('');
+
+	const reset = () => { setStep(0); setEmail(''); setPassword(''); setOtp(''); };
+
+	return (
+		<Card className='w-full max-w-sm'>
+			<CardHeader>
+				<Progress value={[33, 66, 100][step]} className='mb-4' />
+				{step === 0 && (
+					<>
+						<h3 className='text-xl font-semibold text-text'>Sign in</h3>
+						<p className='text-sm text-text-muted'>Enter your credentials to continue.</p>
+					</>
+				)}
+				{step === 1 && (
+					<div className='flex flex-col gap-1'>
+						<div className='flex items-center gap-2'>
+							<h3 className='text-xl font-semibold text-text'>Verify identity</h3>
+							<Badge variant='warning'>2FA</Badge>
+						</div>
+						<p className='text-sm text-text-muted'>
+							We sent a 6-digit code to <strong>{email || 'your email'}</strong>.
+						</p>
+					</div>
+				)}
+				{step === 2 && (
+					<>
+						<div className='flex items-center gap-2'>
+							<h3 className='text-xl font-semibold text-text'>You&apos;re in</h3>
+							<Badge variant='success'>Verified</Badge>
+						</div>
+						<p className='text-sm text-text-muted'>Welcome back, {email || 'user'}.</p>
+					</>
+				)}
+			</CardHeader>
+			<CardContent>
+				{step === 0 && (
+					<div className='flex flex-col gap-4'>
+						<FormField>
+							<FormLabel required>Email</FormLabel>
+							<Input type='email' placeholder='you@example.com' value={email} onChange={(e) => setEmail(e.target.value)} />
+						</FormField>
+						<FormField>
+							<FormLabel required>Password</FormLabel>
+							<Input type='password' placeholder='••••••••' value={password} onChange={(e) => setPassword(e.target.value)} />
+						</FormField>
+						<Button className='w-full' onClick={() => setStep(1)} disabled={!email || !password}>
+							Continue
+						</Button>
+					</div>
+				)}
+				{step === 1 && (
+					<div className='flex flex-col gap-5'>
+						<OTPInput length={6} value={otp} onChange={setOtp} />
+						<div className='flex gap-2'>
+							<Button variant='ghost' size='sm' onClick={() => { setStep(0); setOtp(''); }}>
+								Back
+							</Button>
+							<Button className='flex-1' onClick={() => setStep(2)} disabled={otp.length < 6}>
+								Verify
+							</Button>
+						</div>
+					</div>
+				)}
+				{step === 2 && (
+					<div className='flex flex-col items-center gap-4 py-2'>
+						<div className='w-14 h-14 rounded-full bg-success/15 flex items-center justify-center'>
+							<CheckIcon />
+						</div>
+						<p className='text-sm text-text-muted text-center'>Authentication complete. Redirecting…</p>
+						<Button variant='outlined' size='sm' onClick={reset}>Start over</Button>
+					</div>
+				)}
+			</CardContent>
+		</Card>
+	);
 };
 
-// ─── Example 2: Dashboard ──────────────────────────────────────────────────────
+// ─── Example 2: Team dashboard ─────────────────────────────────────────────────
 
-const DASHBOARD_CODE = `import { AreaChart } from '@/src/components/Charts/Charts';
-import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
+interface ActivityRow
+{
+	id:     number;
+	user:   string;
+	action: string;
+	status: string;
+	time:   string;
+}
 
-const data  = [
-  { month: 'Jan', revenue: 12400, users: 3200 },
-  { month: 'Feb', revenue: 18200, users: 4100 },
-  { month: 'Mar', revenue: 15800, users: 3800 },
-  { month: 'Apr', revenue: 22100, users: 5200 },
-  { month: 'May', revenue: 19600, users: 4700 },
-  { month: 'Jun', revenue: 26800, users: 6100 },
+const ACTIVITY_DATA: ActivityRow[] = [
+	{ id: 1, user: 'Alex Kim',    action: 'Deployed to production', status: 'success', time: '2m ago'  },
+	{ id: 2, user: 'Sam Chen',    action: 'Merged pull request',    status: 'success', time: '18m ago' },
+	{ id: 3, user: 'Jordan Park', action: 'Build failed',           status: 'danger',  time: '42m ago' },
+	{ id: 4, user: 'Riley Yu',    action: 'Tests passed',           status: 'success', time: '1h ago'  },
+	{ id: 5, user: 'Morgan Lee',  action: 'Deploy queued',          status: 'warning', time: '2h ago'  },
 ];
-
-const stats = [
-  { label: 'Total revenue', value: '$114.9k', delta: '+18%',  positive: true  },
-  { label: 'Active users',  value: '27.1k',   delta: '+12%',  positive: true  },
-  { label: 'Conversion',    value: '3.4%',    delta: '+0.6%', positive: true  },
-  { label: 'Avg. session',  value: '4m 12s',  delta: '-3%',   positive: false },
-];
-
-export default function Dashboard() {
-  return (
-    <div className="flex flex-col gap-6 w-full">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((s) => (
-          <Card key={s.label}>
-            <CardContent className="pt-4">
-              <p className="text-xs text-text-muted">{s.label}</p>
-              <p className="text-2xl font-semibold text-text mt-1">{s.value}</p>
-              <p className={s.positive ? 'text-xs text-success mt-0.5' : 'text-xs text-danger mt-0.5'}>
-                {s.delta} vs last period
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <Card>
-        <CardHeader>
-          <h3 className="text-2xl font-semibold tracking-tight text-text">Revenue &amp; users</h3>
-          <p className="text-sm text-text-muted">6-month trend</p>
-        </CardHeader>
-        <CardContent>
-          <AreaChart
-            data={data}
-            xKey="month"
-            series={[
-              { key: 'revenue', label: 'Revenue' },
-              { key: 'users',   label: 'Users'   },
-            ]}
-            height={220}
-          />
-        </CardContent>
-      </Card>
-    </div>
-  );
-}`;
 
 const AREA_DATA = [
-  { month: 'Jan', revenue: 12400, users: 3200 },
-  { month: 'Feb', revenue: 18200, users: 4100 },
-  { month: 'Mar', revenue: 15800, users: 3800 },
-  { month: 'Apr', revenue: 22100, users: 5200 },
-  { month: 'May', revenue: 19600, users: 4700 },
-  { month: 'Jun', revenue: 26800, users: 6100 },
+	{ month: 'Jan', revenue: 12400, users: 3200 },
+	{ month: 'Feb', revenue: 18200, users: 4100 },
+	{ month: 'Mar', revenue: 15800, users: 3800 },
+	{ month: 'Apr', revenue: 22100, users: 5200 },
+	{ month: 'May', revenue: 19600, users: 4700 },
+	{ month: 'Jun', revenue: 26800, users: 6100 },
 ];
+
+const PERIOD_ITEMS = (setPeriod: (p: string) => void) =>
+	['Last 7 days', 'Last 30 days', 'Last 90 days'].map((label) => ({
+		label,
+		onSelect: () => setPeriod(label),
+	}));
 
 const STATS = [
-  { label: 'Total revenue', value: '$114.9k', delta: '+18%',  positive: true  },
-  { label: 'Active users',  value: '27.1k',   delta: '+12%',  positive: true  },
-  { label: 'Conversion',    value: '3.4%',    delta: '+0.6%', positive: true  },
-  { label: 'Avg. session',  value: '4m 12s',  delta: '-3%',   positive: false },
+	{ label: 'Revenue',     num: 114.9, prefix: '$', suffix: 'k', decimals: 1, delta: '+18%',  variant: 'success' as BadgeVariant },
+	{ label: 'Active users',num: 27.1,  prefix: '',  suffix: 'k', decimals: 1, delta: '+12%',  variant: 'success' as BadgeVariant },
+	{ label: 'Conversion',  num: 3.4,   prefix: '',  suffix: '%', decimals: 1, delta: '+0.6%', variant: 'success' as BadgeVariant },
+	{ label: 'Avg session', num: 4.2,   prefix: '',  suffix: 'm', decimals: 1, delta: '−3%',   variant: 'danger'  as BadgeVariant },
 ];
 
-const DashboardPreview = () => {
+const ACTIVITY_COLUMNS: ColumnDef<ActivityRow>[] = [
+	{
+		key:    'user',
+		header: 'Team member',
+		render: (v) => (
+			<div className='flex items-center gap-2'>
+				<Avatar name={v as string} size='sm' />
+				<span className='text-sm text-text'>{v as string}</span>
+			</div>
+		),
+	},
+	{ key: 'action', header: 'Action' },
+	{
+		key:    'status',
+		header: 'Status',
+		render: (v) => <Badge variant={v as BadgeVariant}>{v as string}</Badge>,
+	},
+	{ key: 'time', header: 'Time' },
+];
+
+const DASHBOARD_CODE = `'use client';
+
+import { useState } from 'react';
+import DataTable, { ColumnDef } from '@/src/components/DataTable/DataTable';
+import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
+import { DropdownMenu } from '@/src/components/DropdownMenu/DropdownMenu';
+import { AreaChart } from '@/src/components/Charts/Charts';
+import Badge, { BadgeVariant } from '@/src/components/Badge/Badge';
+import Avatar from '@/src/components/Avatar/Avatar';
+
+// ... data definitions omitted for brevity
+
+export default function TeamDashboard() {
+  const [period, setPeriod] = useState('Last 30 days');
+
   return (
-    <div className='flex flex-col gap-5 w-full'>
-      <div className='grid grid-cols-2 gap-3'>
+    <div className="flex flex-col gap-5 w-full">
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-text">Team activity</h2>
+        <DropdownMenu
+          items={['Last 7 days', 'Last 30 days', 'Last 90 days'].map(label => ({
+            label,
+            onSelect: () => setPeriod(label),
+          }))}
+          trigger={period}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {STATS.map((s) => (
           <Card key={s.label}>
-            <CardContent className='pt-4 pb-4'>
-              <p className='text-xs text-text-muted'>{s.label}</p>
-              <p className='text-xl font-semibold text-text mt-1'>{s.value}</p>
-              <p className={s.positive ? 'text-xs text-success mt-0.5' : 'text-xs text-danger mt-0.5'}>
-                {s.delta} vs last period
-              </p>
+            <CardContent className="pt-4 pb-3">
+              <p className="text-xs text-text-muted">{s.label}</p>
+              <p className="text-xl font-semibold text-text mt-1">{s.value}</p>
+              <Badge variant={s.variant} className="mt-1">{s.delta}</Badge>
             </CardContent>
           </Card>
         ))}
       </div>
+
       <Card>
         <CardHeader>
-          <h3 className='text-2xl font-semibold tracking-tight text-text'>Revenue &amp; users</h3>
-          <p className='text-sm text-text-muted'>6-month trend</p>
+          <h3 className="text-base font-semibold text-text">Revenue vs users</h3>
         </CardHeader>
         <CardContent>
-          <AreaChart
-            data={AREA_DATA}
-            xKey='month'
-            series={[
-              { key: 'revenue', label: 'Revenue' },
-              { key: 'users',   label: 'Users'   },
-            ]}
-            height={200}
-          />
+          <AreaChart data={AREA_DATA} xKey="month"
+            series={[{ key: 'revenue', label: 'Revenue' }, { key: 'users', label: 'Users' }]}
+            height={180} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h3 className="text-base font-semibold text-text">Recent activity</h3>
+        </CardHeader>
+        <CardContent className="px-0 pb-0">
+          <DataTable data={ACTIVITY} columns={COLUMNS} keyField="id" pageSize={5} />
         </CardContent>
       </Card>
     </div>
   );
+}`;
+
+const DashboardPreview = () =>
+{
+	const [period, setPeriod] = useState('Last 30 days');
+
+	return (
+		<div className='flex flex-col gap-5 w-full'>
+			<div className='flex items-center justify-between'>
+				<h2 className='text-lg font-semibold text-text'>Team activity</h2>
+				<DropdownMenu items={PERIOD_ITEMS(setPeriod)} trigger={period} />
+			</div>
+
+			<div className='grid grid-cols-2 gap-3'>
+				{STATS.map((s) => (
+					<Card key={s.label}>
+						<CardContent className='pt-4 pb-3'>
+							<p className='text-xs text-text-muted'>{s.label}</p>
+							<p className='text-xl font-semibold text-text mt-1'>
+								<CountUp value={s.num} prefix={s.prefix} suffix={s.suffix} decimals={s.decimals} duration={1400} separator=',' />
+							</p>
+							<Badge variant={s.variant} className='mt-1.5'>{s.delta}</Badge>
+						</CardContent>
+					</Card>
+				))}
+			</div>
+
+			<Card>
+				<CardHeader>
+					<h3 className='text-base font-semibold text-text'>Revenue vs users</h3>
+					<p className='text-xs text-text-muted'>{period}</p>
+				</CardHeader>
+				<CardContent>
+					<AreaChart
+						data={AREA_DATA}
+						xKey='month'
+						series={[
+							{ key: 'revenue', label: 'Revenue' },
+							{ key: 'users',   label: 'Users'   },
+						]}
+						height={160}
+					/>
+				</CardContent>
+			</Card>
+
+			<Card>
+				<CardHeader>
+					<h3 className='text-base font-semibold text-text'>Recent activity</h3>
+				</CardHeader>
+				<CardContent className='px-0 pb-0'>
+					<DataTable data={ACTIVITY_DATA} columns={ACTIVITY_COLUMNS} keyField='id' pageSize={5} />
+				</CardContent>
+			</Card>
+		</div>
+	);
 };
 
-// ─── Example 3: Deploy log ─────────────────────────────────────────────────────
+// ─── Example 3: Deploy pipeline ────────────────────────────────────────────────
 
-const DEPLOY_STEPS = [
-  { title: 'Clone repository',       body: 'main @ a1b2c3d · 0.4s'          },
-  { title: 'Install dependencies',   body: '847 packages installed · 4.2s'  },
-  { title: 'Run test suite',         body: '47 tests passed · 1.1s'          },
-  { title: 'Build for production',   body: 'Bundle 142 kb gzipped · 8.3s'   },
-  { title: 'Deploy to edge network', body: 'Live at myapp.vercel.app · 2.0s' },
+const PIPELINE_STEPS = [
+	{ title: 'Clone repository',       log: 'main @ a1b2c3d · 0.4s',          failLog: 'fatal: repository not found'            },
+	{ title: 'Install dependencies',   log: '847 packages installed · 4.2s',  failLog: 'npm ERR! 404 package not found'         },
+	{ title: 'Run test suite',         log: '47 tests passed · 1.1s',          failLog: '3 tests failed — see output above'      },
+	{ title: 'Build for production',   log: 'Bundle 142 kb gzipped · 8.3s',   failLog: 'error TS2322: Type mismatch'            },
+	{ title: 'Deploy to edge network', log: 'Live at myapp.vercel.app · 2.0s', failLog: 'error: deployment quota exceeded'      },
 ];
+
+type DeployStatus = 'idle' | 'running' | 'success' | 'failed';
+
+const STATUS_BADGE: Record<DeployStatus, BadgeVariant> = {
+	idle:    'outline',
+	running: 'warning',
+	success: 'success',
+	failed:  'danger',
+};
 
 const DEPLOY_CODE = `'use client';
 
 import { useState, useEffect } from 'react';
+import { ToastProvider, useToast } from '@/src/components/Toast/Toast';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
+import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
+import Badge, { BadgeVariant } from '@/src/components/Badge/Badge';
 import Button from '@/src/components/Button/Button';
 
+type Status = 'idle' | 'running' | 'success' | 'failed';
+
 const STEPS = [
-  { title: 'Clone repository',       body: 'main @ a1b2c3d · 0.4s'          },
-  { title: 'Install dependencies',   body: '847 packages installed · 4.2s'  },
-  { title: 'Run test suite',         body: '47 tests passed · 1.1s'          },
-  { title: 'Build for production',   body: 'Bundle 142 kb gzipped · 8.3s'   },
-  { title: 'Deploy to edge network', body: 'Live at myapp.vercel.app · 2.0s' },
+  { title: 'Clone repository',       log: 'main @ a1b2c3d · 0.4s'          },
+  { title: 'Install dependencies',   log: '847 packages installed · 4.2s'  },
+  { title: 'Run test suite',         log: '47 tests passed · 1.1s'          },
+  { title: 'Build for production',   log: 'Bundle 142 kb gzipped · 8.3s'   },
+  { title: 'Deploy to edge network', log: 'Live at myapp.vercel.app · 2.0s' },
 ];
 
-export default function DeployLog() {
-  const [count,    setCount]    = useState(1);
+const STATUS_BADGE: Record<Status, BadgeVariant> = {
+  idle: 'outline', running: 'warning', success: 'success', failed: 'danger',
+};
+
+function Pipeline() {
+  const { toast }  = useToast();
+  const [count,    setCount]    = useState(0);
+  const [status,   setStatus]   = useState<Status>('idle');
   const [newIndex, setNewIndex] = useState<number | null>(null);
 
-  function runNextStep() {
+  const start = () => { setCount(1); setStatus('running'); setNewIndex(0); };
+  const reset = () => { setCount(0); setStatus('idle'); setNewIndex(null); };
+
+  useEffect(() => {
+    if (status !== 'running') return;
     if (count >= STEPS.length) return;
-    setNewIndex(count);
-    setCount(c => c + 1);
-  }
+    const id = setTimeout(() => {
+      const next = count + 1;
+      setNewIndex(count);
+      setCount(next);
+      if (next >= STEPS.length) {
+        setStatus('success');
+        toast({ title: 'Deployed', description: 'Live at myapp.vercel.app', variant: 'success' });
+      }
+    }, 1000);
+    return () => clearTimeout(id);
+  }, [status, count, toast]);
 
   useEffect(() => {
     if (newIndex === null) return;
@@ -262,158 +464,484 @@ export default function DeployLog() {
     return () => clearTimeout(id);
   }, [newIndex]);
 
-  const done = count >= STEPS.length;
+  return (
+    <Card className="w-full max-w-sm">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-text">Production deploy</p>
+            <p className="text-xs text-text-muted font-mono">git push origin main</p>
+          </div>
+          <Badge variant={STATUS_BADGE[status]}>{status}</Badge>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="flex gap-2 mb-5">
+          {status === 'idle'    && <Button size="sm" onClick={start}>Deploy</Button>}
+          {status === 'running' && <Button size="sm" variant="outlined" disabled>Running…</Button>}
+          {status === 'success' && <Button size="sm" variant="outlined" onClick={reset}>Replay</Button>}
+        </div>
+        {count > 0 && (
+          <Timeline animate="none">
+            {STEPS.slice(0, count).map((step, i) => (
+              <TimelineItem key={step.title} title={step.title}
+                className={i === newIndex ? 'step-enter dot-pop' : ''}>
+                <span className="text-text-muted text-xs">{step.log}</span>
+              </TimelineItem>
+            ))}
+          </Timeline>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function DeployPipeline() {
+  return <ToastProvider><Pipeline /></ToastProvider>;
+}`;
+
+const PipelineInner = () =>
+{
+	const { toast }    = useToast();
+	const delaysRef    = useRef<number[]>([]);
+	const failAtRef    = useRef<number | null>(null);
+
+	const [count,      setCount]      = useState(0);
+	const [status,     setStatus]     = useState<DeployStatus>('idle');
+	const [newIndex,   setNewIndex]   = useState<number | null>(null);
+	const [failedStep, setFailedStep] = useState<number | null>(null);
+
+	const start = () =>
+	{
+		delaysRef.current = PIPELINE_STEPS.map(() => 400 + Math.floor(Math.random() * 1100));
+		failAtRef.current = Math.random() < 0.35
+			? 1 + Math.floor(Math.random() * (PIPELINE_STEPS.length - 1))
+			: null;
+		setCount(1);
+		setStatus('running');
+		setNewIndex(0);
+		setFailedStep(null);
+	};
+
+	const reset = () => { setCount(0); setStatus('idle'); setNewIndex(null); setFailedStep(null); };
+
+	useEffect(() =>
+	{
+		if(status !== 'running') return;
+		if(count >= PIPELINE_STEPS.length) return;
+
+		const delay = delaysRef.current[count - 1] ?? 800;
+
+		const id = setTimeout(() =>
+		{
+			if(failAtRef.current === count)
+			{
+				setFailedStep(count);
+				setNewIndex(count);
+				setCount((c) => c + 1);
+				setStatus('failed');
+				toast({ title: 'Deploy failed', description: PIPELINE_STEPS[count].failLog, variant: 'danger' });
+				return;
+			}
+
+			const next = count + 1;
+			setNewIndex(count);
+			setCount(next);
+			if(next >= PIPELINE_STEPS.length)
+			{
+				setStatus('success');
+				toast({ title: 'Deployed', description: 'Live at myapp.vercel.app', variant: 'success' });
+			}
+		}, delay);
+
+		return () => clearTimeout(id);
+	}, [status, count, toast]);
+
+	useEffect(() =>
+	{
+		if(newIndex === null) return;
+		const id = setTimeout(() => setNewIndex(null), 500);
+		return () => clearTimeout(id);
+	}, [newIndex]);
+
+	return (
+		<>
+			<style>{`
+				@keyframes stepIn {
+					from { opacity: 0; transform: translateY(8px); }
+					to   { opacity: 1; transform: translateY(0);   }
+				}
+				.step-enter { animation: stepIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+				@keyframes dotPop {
+					0%   { transform: scale(1);    }
+					40%  { transform: scale(1.35); }
+					100% { transform: scale(1);    }
+				}
+				.dot-pop > div:first-child > div:first-child { animation: dotPop 0.4s ease-out; }
+			`}</style>
+
+			<Card className='w-full max-w-sm'>
+				<CardHeader>
+					<div className='flex items-center justify-between'>
+						<div>
+							<p className='text-sm font-semibold text-text'>Production deploy</p>
+							<p className='text-xs text-text-muted font-mono'>git push origin main</p>
+						</div>
+						<Badge variant={STATUS_BADGE[status]}>{status}</Badge>
+					</div>
+				</CardHeader>
+				<CardContent>
+					<div className='flex gap-2 mb-5'>
+						{status === 'idle'                           && <Button size='sm' onClick={start}>Deploy</Button>}
+						{status === 'running'                        && <Button size='sm' variant='outlined' disabled>Running…</Button>}
+						{(status === 'success' || status === 'failed') && <Button size='sm' variant='outlined' onClick={reset}>Replay</Button>}
+					</div>
+					{count > 0 && (
+						<Timeline animate='none'>
+							{PIPELINE_STEPS.slice(0, count).map((step, i) =>
+							{
+								const isFailed = failedStep === i;
+								return (
+									<TimelineItem
+										key={step.title}
+										title={step.title}
+										className={i === newIndex ? 'step-enter dot-pop' : ''}
+									>
+										<span className={isFailed ? 'text-danger text-xs font-mono' : 'text-text-muted text-xs'}>
+											{isFailed ? step.failLog : step.log}
+										</span>
+									</TimelineItem>
+								);
+							})}
+						</Timeline>
+					)}
+				</CardContent>
+			</Card>
+		</>
+	);
+};
+
+const DeployPreview = () => (
+	<ToastProvider>
+		<PipelineInner />
+	</ToastProvider>
+);
+
+// ─── Example 4: Terminal typewriter ───────────────────────────────────────────
+
+const TERMINAL_LINES = [
+	{ prompt: '$', text: 'git clone https://github.com/org/project' },
+	{ prompt: '$', text: 'cd project && npm install'                 },
+	{ prompt: '$', text: 'npm run build'                             },
+	{ prompt: '✓', text: 'Build complete — ready to deploy'         },
+];
+
+const TYPEWRITER_CODE = `'use client';
+
+import { useState } from 'react';
+import { Typewriter } from '@/src/components/Typewriter/Typewriter';
+import Button from '@/src/components/Button/Button';
+
+const LINES = [
+  { prompt: '$', text: 'git clone https://github.com/org/project' },
+  { prompt: '$', text: 'cd project && npm install'                 },
+  { prompt: '$', text: 'npm run build'                             },
+  { prompt: '✓', text: 'Build complete — ready to deploy'         },
+];
+
+export default function Terminal() {
+  const [active, setActive] = useState(0);
+  const [epoch,  setEpoch]  = useState(0);
+  const done = active >= LINES.length;
+
+  const replay = () => { setActive(0); setEpoch(e => e + 1); };
 
   return (
-    <>
-      <style>{\`
-        @keyframes stepIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0);   }
-        }
-        .step-enter { animation: stepIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
-        @keyframes dotPop {
-          0%   { transform: scale(1);    }
-          40%  { transform: scale(1.35); }
-          100% { transform: scale(1);    }
-        }
-        .dot-pop > div:first-child > div:first-child { animation: dotPop 0.4s ease-out; }
-      \`}</style>
-
-      <div className="flex flex-col gap-6 w-full max-w-sm">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-text">
-            {done ? 'Deployment complete' : \`Step \${count} of \${STEPS.length}\`}
-          </p>
-          {done ? (
-            <Button size="sm" variant="outlined" onClick={() => { setCount(1); setNewIndex(null); }}>
-              Reset
-            </Button>
-          ) : (
-            <Button size="sm" onClick={runNextStep}>Run next step</Button>
-          )}
+    <div className="flex flex-col gap-3 w-full max-w-md">
+      <div key={epoch} className="rounded-lg overflow-hidden border border-white/10"
+        style={{ backgroundColor: '#0d1117' }}>
+        <div className="flex gap-1.5 px-4 py-3 border-b border-white/5">
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ff5f56' }} />
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ffbd2e' }} />
+          <span className="w-3 h-3 rounded-full" style={{ backgroundColor: '#27c93f' }} />
         </div>
-        <Timeline animate="none">
-          {STEPS.slice(0, count).map((step, i) => (
-            <TimelineItem
-              key={step.title}
-              title={step.title}
-              className={i === newIndex ? 'step-enter dot-pop' : ''}
-            >
-              {step.body}
-            </TimelineItem>
+        <div className="p-4 font-mono text-sm flex flex-col gap-1.5">
+          {LINES.slice(0, Math.min(active + 1, LINES.length)).map((line, i) => (
+            <div key={i} className="flex items-start gap-2">
+              <span className="select-none"
+                style={{ color: i === LINES.length - 1 ? '#3fb950' : '#8b949e' }}>
+                {line.prompt}
+              </span>
+              {i < active ? (
+                <span style={{ color: '#e6edf3' }}>{line.text}</span>
+              ) : (
+                <Typewriter text={line.text} speed={35}
+                  cursor={!done} cursorPersist={i === LINES.length - 1}
+                  style={{ color: '#e6edf3' }}
+                  onComplete={() => setActive(a => a + 1)} />
+              )}
+            </div>
           ))}
-        </Timeline>
+        </div>
       </div>
-    </>
+      {done && (
+        <div className="flex justify-end">
+          <Button size="sm" variant="outlined" onClick={replay}>Replay</Button>
+        </div>
+      )}
+    </div>
   );
 }`;
 
-const DeployPreview = () => {
-  const [count,    setCount]    = useState(1);
-  const [newIndex, setNewIndex] = useState<number | null>(null);
+const TerminalPreview = () =>
+{
+	const [active, setActive] = useState(0);
+	const [epoch,  setEpoch]  = useState(0);
+	const done = active >= TERMINAL_LINES.length;
 
-  const runNextStep = () => {
-    if (count >= DEPLOY_STEPS.length) return;
-    setNewIndex(count);
-    setCount((c) => c + 1);
-  };
+	const replay = () => { setActive(0); setEpoch((e) => e + 1); };
 
-  useEffect(() => {
-    if (newIndex === null) return;
-    const id = setTimeout(() => setNewIndex(null), 500);
-    return () => clearTimeout(id);
-  }, [newIndex]);
-
-  const done = count >= DEPLOY_STEPS.length;
-
-  return (
-    <>
-      <style>{`
-        @keyframes stepIn {
-          from { opacity: 0; transform: translateY(8px); }
-          to   { opacity: 1; transform: translateY(0);   }
-        }
-        .step-enter { animation: stepIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
-        @keyframes dotPop {
-          0%   { transform: scale(1);    }
-          40%  { transform: scale(1.35); }
-          100% { transform: scale(1);    }
-        }
-        .dot-pop > div:first-child > div:first-child { animation: dotPop 0.4s ease-out; }
-      `}</style>
-
-      <div className='flex flex-col gap-6 w-full max-w-sm'>
-        <div className='flex items-center justify-between'>
-          <p className='text-sm font-medium text-text'>
-            {done ? 'Deployment complete' : `Step ${count} of ${DEPLOY_STEPS.length}`}
-          </p>
-          {done ? (
-            <Button size='sm' variant='outlined' onClick={() => { setCount(1); setNewIndex(null); }}>
-              Reset
-            </Button>
-          ) : (
-            <Button size='sm' onClick={runNextStep}>Run next step</Button>
-          )}
-        </div>
-        <Timeline animate='none'>
-          {DEPLOY_STEPS.slice(0, count).map((step, i) => (
-            <TimelineItem
-              key={step.title}
-              title={step.title}
-              className={i === newIndex ? 'step-enter dot-pop' : ''}
-            >
-              <span className='text-text-muted text-xs'>{step.body}</span>
-            </TimelineItem>
-          ))}
-        </Timeline>
-      </div>
-    </>
-  );
+	return (
+		<div className='flex flex-col gap-3 w-full max-w-md'>
+			<div
+				key={epoch}
+				className='rounded-lg overflow-hidden border border-white/10'
+				style={{ backgroundColor: '#0d1117' }}
+			>
+				<div className='flex gap-1.5 px-4 py-3 border-b border-white/5'>
+					<span className='w-3 h-3 rounded-full' style={{ backgroundColor: '#ff5f56' }} />
+					<span className='w-3 h-3 rounded-full' style={{ backgroundColor: '#ffbd2e' }} />
+					<span className='w-3 h-3 rounded-full' style={{ backgroundColor: '#27c93f' }} />
+				</div>
+				<div className='p-4 font-mono text-sm flex flex-col gap-1.5'>
+					{TERMINAL_LINES.slice(0, Math.min(active + 1, TERMINAL_LINES.length)).map((line, i) => (
+						<div key={i} className='flex items-start gap-2'>
+							<span
+								className='select-none'
+								style={{ color: i === TERMINAL_LINES.length - 1 ? '#3fb950' : '#8b949e' }}
+							>
+								{line.prompt}
+							</span>
+							{i < active ? (
+								<span style={{ color: '#e6edf3' }}>{line.text}</span>
+							) : (
+								<Typewriter
+									text={line.text}
+									speed={35}
+									cursor={!done}
+									cursorPersist={i === TERMINAL_LINES.length - 1}
+									style={{ color: '#e6edf3' }}
+									onComplete={() => setActive((a) => a + 1)}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+			</div>
+			{done && (
+				<div className='flex justify-end'>
+					<Button size='sm' variant='outlined' onClick={replay}>Replay</Button>
+				</div>
+			)}
+		</div>
+	);
 };
 
-const ExamplesPage = () => {
+// ─── Example 5: Service mesh graph ────────────────────────────────────────────
+
+const GRAPH_NODES = [
+	{ id: 'browser', label: 'Browser'  },
+	{ id: 'gateway', label: 'Gateway'  },
+	{ id: 'auth',    label: 'Auth'     },
+	{ id: 'api',     label: 'API'      },
+	{ id: 'db',      label: 'Database' },
+	{ id: 'cache',   label: 'Cache'    },
+	{ id: 'queue',   label: 'Queue'    },
+];
+
+const GRAPH_EDGES = [
+	{ source: 'browser', target: 'gateway' },
+	{ source: 'gateway', target: 'auth'    },
+	{ source: 'gateway', target: 'api'     },
+	{ source: 'auth',    target: 'db'      },
+	{ source: 'api',     target: 'db'      },
+	{ source: 'api',     target: 'cache'   },
+	{ source: 'api',     target: 'queue'   },
+	{ source: 'queue',   target: 'db'      },
+];
+
+const GRAPH_CODE = `'use client';
+
+import { useState } from 'react';
+import Graph, { GraphNode } from '@/src/components/Graph/Graph';
+
+const nodes = [
+  { id: 'browser', label: 'Browser'  },
+  { id: 'gateway', label: 'Gateway'  },
+  { id: 'auth',    label: 'Auth'     },
+  { id: 'api',     label: 'API'      },
+  { id: 'db',      label: 'Database' },
+  { id: 'cache',   label: 'Cache'    },
+  { id: 'queue',   label: 'Queue'    },
+];
+
+const edges = [
+  { source: 'browser', target: 'gateway' },
+  { source: 'gateway', target: 'auth'    },
+  { source: 'gateway', target: 'api'     },
+  { source: 'auth',    target: 'db'      },
+  { source: 'api',     target: 'db'      },
+  { source: 'api',     target: 'cache'   },
+  { source: 'api',     target: 'queue'   },
+  { source: 'queue',   target: 'db'      },
+];
+
+export default function ServiceMesh() {
+  const [selected, setSelected] = useState<GraphNode | null>(null);
+
   return (
-    <div className='flex flex-col gap-12'>
-      <div className='flex flex-col gap-2'>
-        <h1 className='text-3xl font-semibold tracking-tight text-text'>Examples</h1>
-        <p className='text-base text-text-muted leading-relaxed'>
-          Real patterns assembled from Obi UI components. Copy the code and
-          drop it straight into your project.
-        </p>
-      </div>
-
-      <section className='flex flex-col gap-2'>
-        <h2 className='text-lg font-semibold text-text'>Login form</h2>
-        <p className='text-sm text-text-muted'>
-          A card-wrapped sign-in form using Input, Button, and Form primitives.
-        </p>
-        <CodeBlock variant='example'label='login' code={LOGIN_CODE} minHeight='320px'>
-          <LoginPreview />
-        </CodeBlock>
-      </section>
-
-      <section className='flex flex-col gap-2'>
-        <h2 className='text-lg font-semibold text-text'>Dashboard</h2>
-        <p className='text-sm text-text-muted'>
-          Stat cards and an area chart for a typical analytics overview.
-        </p>
-        <CodeBlock variant='example'label='dashboard' code={DASHBOARD_CODE} minHeight='320px'>
-          <DashboardPreview />
-        </CodeBlock>
-      </section>
-
-      <section className='flex flex-col gap-2'>
-        <h2 className='text-lg font-semibold text-text'>Deploy log</h2>
-        <p className='text-sm text-text-muted'>
-          An interactive Timeline that grows one step at a time, with a slide-in and dot-pop animation on each new entry.
-        </p>
-        <CodeBlock variant='example'label='deploy' code={DEPLOY_CODE} minHeight='320px'>
-          <DeployPreview />
-        </CodeBlock>
-      </section>
+    <div className="flex flex-col gap-3 w-full">
+      <Graph nodes={nodes} edges={edges} width={600} height={320}
+        onNodeSelect={setSelected} />
+      <p className="text-sm text-center text-text-muted min-h-5">
+        {selected
+          ? <>Selected: <span className="text-text font-medium">{selected.label}</span></>
+          : 'Click or arrow-key a node to select it'}
+      </p>
     </div>
   );
+}`;
+
+const GRAPH_ADJACENCY = GRAPH_EDGES.reduce<Record<string, string[]>>((acc, e) =>
+{
+	(acc[e.source] ??= []).push(e.target);
+	(acc[e.target] ??= []).push(e.source);
+	return acc;
+}, {});
+
+const GraphPreview = () =>
+{
+	const [selected, setSelected] = useState<GraphNode | null>(null);
+
+	const connectedNodes = selected
+		? (GRAPH_ADJACENCY[selected.id] ?? []).map((id) => GRAPH_NODES.find((n) => n.id === id)!).filter(Boolean)
+		: [];
+
+	return (
+		<div className='flex flex-col gap-3 w-full'>
+			<div className='flex items-center justify-between'>
+				<div>
+					<p className='text-sm font-semibold text-text'>Request flow</p>
+					<p className='text-xs text-text-muted'>{GRAPH_NODES.length} services · {GRAPH_EDGES.length} connections</p>
+				</div>
+				<p className='text-xs text-text-muted hidden sm:block'>Pan · scroll to zoom · click to select</p>
+			</div>
+
+			<Graph
+				nodes={GRAPH_NODES}
+				edges={GRAPH_EDGES}
+				width={600}
+				height={300}
+				onNodeSelect={setSelected}
+			/>
+
+			<div className={[
+				'rounded-lg border p-3 transition-colors duration-150 min-h-[3.5rem] flex items-center',
+				selected ? 'border-brand/30 bg-brand/5' : 'border-dashed border-surface-border',
+			].join(' ')}>
+				{selected ? (
+					<div className='flex items-start gap-8 w-full'>
+						<div>
+							<p className='text-[11px] font-medium text-text-muted uppercase tracking-wider'>Node</p>
+							<p className='text-sm font-semibold text-text mt-0.5'>{selected.label}</p>
+						</div>
+						<div>
+							<p className='text-[11px] font-medium text-text-muted uppercase tracking-wider'>Edges</p>
+							<p className='text-sm font-semibold text-text mt-0.5'>{connectedNodes.length}</p>
+						</div>
+						<div>
+							<p className='text-[11px] font-medium text-text-muted uppercase tracking-wider'>Connected to</p>
+							<div className='flex flex-wrap gap-1 mt-0.5'>
+								{connectedNodes.map((n) => (
+									<Badge key={n.id} variant='outline'>{n.label}</Badge>
+								))}
+							</div>
+						</div>
+					</div>
+				) : (
+					<p className='text-xs text-text-muted w-full text-center'>
+						Click or arrow-key a node to inspect its connections
+					</p>
+				)}
+			</div>
+		</div>
+	);
+};
+
+// ─── Page ──────────────────────────────────────────────────────────────────────
+
+const ExamplesPage = () =>
+{
+	return (
+		<div className='flex flex-col gap-12'>
+			<div className='flex flex-col gap-2'>
+				<h1 className='text-3xl font-semibold tracking-tight text-text'>Examples</h1>
+				<p className='text-base text-text-muted leading-relaxed'>
+					Real patterns assembled from Obi UI components. Copy the code and drop it straight into your project.
+				</p>
+			</div>
+
+			<section className='flex flex-col gap-2'>
+				<h2 className='text-lg font-semibold text-text'>Two-factor authentication</h2>
+				<p className='text-sm text-text-muted'>
+					A three-step auth flow: credentials → OTP verification → success. Combines Card, Input, OTPInput, Progress, and Badge into a single cohesive experience.
+				</p>
+				<CodeBlock variant='example' label='auth' code={AUTH_CODE} minHeight='360px'>
+					<AuthPreview />
+				</CodeBlock>
+			</section>
+
+			<section className='flex flex-col gap-2'>
+				<h2 className='text-lg font-semibold text-text'>Team dashboard</h2>
+				<p className='text-sm text-text-muted'>
+					Filterable analytics overview with stat cards, a trend chart, and a live activity feed. Combines DropdownMenu, Badge, Avatar, AreaChart, and DataTable.
+				</p>
+				<CodeBlock variant='example' label='dashboard' code={DASHBOARD_CODE} minHeight='560px'>
+					<DashboardPreview />
+				</CodeBlock>
+			</section>
+
+			<section className='flex flex-col gap-2'>
+				<h2 className='text-lg font-semibold text-text'>Deploy pipeline</h2>
+				<p className='text-sm text-text-muted'>
+					A CI/CD pipeline that auto-advances one step per second, with a live status Badge and a success Toast on completion. Hit Deploy and watch it run.
+				</p>
+				<CodeBlock variant='example' label='deploy' code={DEPLOY_CODE} minHeight='360px'>
+					<DeployPreview />
+				</CodeBlock>
+			</section>
+
+			<section className='flex flex-col gap-2'>
+				<h2 className='text-lg font-semibold text-text'>Terminal</h2>
+				<p className='text-sm text-text-muted'>
+					Chained Typewriter lines that each start when the previous finishes, creating a realistic terminal playback effect.
+				</p>
+				<CodeBlock variant='example' label='terminal' code={TYPEWRITER_CODE} minHeight='260px'>
+					<TerminalPreview />
+				</CodeBlock>
+			</section>
+
+			<section className='flex flex-col gap-2'>
+				<h2 className='text-lg font-semibold text-text'>Service mesh</h2>
+				<p className='text-sm text-text-muted'>
+					Force-directed graph visualising request flow through a web service architecture. Pan, zoom, and select nodes by click or keyboard.
+				</p>
+				<CodeBlock variant='example' label='graph' code={GRAPH_CODE} minHeight='400px'>
+					<GraphPreview />
+				</CodeBlock>
+			</section>
+		</div>
+	);
 };
 
 export default ExamplesPage;

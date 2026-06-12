@@ -14,6 +14,7 @@ import { AreaChart, BarChart, DonutChart, LineChart } from '@/src/components/Cha
 import Mosaic, { MosaicTile, type MosaicTileLayout } from '@/src/components/Mosaic/Mosaic';
 import ToggleGroup, { ToggleGroupItem } from '@/src/components/ToggleGroup/ToggleGroup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/Tabs/Tabs';
+import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
 import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
 import { Skeleton, SkeletonCard } from '@/src/components/Skeleton/Skeleton';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
@@ -26,6 +27,7 @@ import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
 import { DatePicker } from '@/src/components/DatePicker/DatePicker';
 import TextShimmer from '@/src/components/TextShimmer/TextShimmer';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
+import Typewriter from '@/src/components/Typewriter/Typewriter';
 import Breadcrumb from '@/src/components/Breadcrumb/Breadcrumb';
 import { Combobox } from '@/src/components/Combobox/Combobox';
 import { Progress } from '@/src/components/Progress/Progress';
@@ -964,6 +966,18 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
 
+    case 'typewriter':
+      return (
+        <div className='flex flex-col items-start gap-6'>
+          <h2 className='text-3xl font-bold tracking-tight text-text'>
+            <Typewriter text='Hello, world.' />
+          </h2>
+          <p className='text-base font-mono text-text-muted'>
+            <Typewriter text='System ready. Awaiting input…' speed={60} delay={400} cursorPersist />
+          </p>
+        </div>
+      );
+
     case 'modal': {
       const ModalPreview = () =>
       {
@@ -1027,6 +1041,45 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         );
       };
       return <DrawerPreview />;
+    }
+
+    case 'graph': {
+      const GRAPH_NODES: GraphNode[] = [
+        { id: 'auth',      label: 'Auth',         group: 'core'    },
+        { id: 'users',     label: 'Users',         group: 'core'    },
+        { id: 'posts',     label: 'Posts',         group: 'content' },
+        { id: 'comments',  label: 'Comments',      group: 'content' },
+        { id: 'tags',      label: 'Tags',          group: 'content' },
+        { id: 'media',     label: 'Media',         group: 'content' },
+        { id: 'notifs',    label: 'Notifications', group: 'core'    },
+        { id: 'search',    label: 'Search',        group: 'infra'   },
+        { id: 'cache',     label: 'Cache',         group: 'infra'   },
+        { id: 'email',     label: 'Email',         group: 'infra'   },
+      ];
+      const GRAPH_EDGES: GraphEdge[] = [
+        { source: 'auth',     target: 'users'    },
+        { source: 'auth',     target: 'notifs'   },
+        { source: 'users',    target: 'posts'    },
+        { source: 'users',    target: 'comments' },
+        { source: 'users',    target: 'notifs'   },
+        { source: 'posts',    target: 'comments' },
+        { source: 'posts',    target: 'tags'     },
+        { source: 'posts',    target: 'media'    },
+        { source: 'posts',    target: 'search'   },
+        { source: 'comments', target: 'notifs'   },
+        { source: 'search',   target: 'cache'    },
+        { source: 'notifs',   target: 'email'    },
+      ];
+      return (
+        <div className='w-full flex items-center justify-center'>
+          <Graph
+            nodes={GRAPH_NODES}
+            edges={GRAPH_EDGES}
+            width={580}
+            height={380}
+          />
+        </div>
+      );
     }
 
     default:

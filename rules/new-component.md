@@ -31,6 +31,8 @@ Rules:
 - Hover, default, and focus-visible must each be visually distinct from one another
 - Disabled elements must not show hover or focus-visible styles
 - Ring color must match the component's semantic intent (primary → blue, destructive → red, neutral → zinc)
+- **Composite widgets** (ToggleGroup, tab lists, segmented controls, radio groups) use the roving tabindex pattern — one `tabIndex={0}`, rest `tabIndex={-1}`, arrow keys navigate without changing selection, Tab exits the widget. See `src/patterns/accessibility.md` → Composite Widgets.
+- When a composite item is both focused and selected, use `ring-2 ring-offset-2` (double outline). When focused but not selected, use `ring-2` only (no offset).
 
 ## ComponentName.tsx
 
@@ -145,6 +147,9 @@ Any component that opens a floating layer — Modal, Dialog, Drawer, Dropdown, M
 - [ ] **Backdrop click** (modals/dialogs) — clicking the backdrop closes the overlay, same as Escape
 - [ ] **ARIA roles** — correct `role`, `aria-modal`, `aria-expanded`, `aria-haspopup`, `aria-labelledby`, `aria-describedby` as applicable
 - [ ] **Animation** — enters with `opacity-0 scale-95` → `opacity-100 scale-100`; exits in reverse; respects `prefers-reduced-motion`
+- [ ] **Target size** — all interactive targets are ≥ 24×24 CSS px, or have adequate spacing so a 24px circle centered on the target doesn't overlap another target (WCAG 2.5.8 AA)
+- [ ] **No paste blocking** — never call `e.preventDefault()` on paste events in any text input within the component
+- [ ] **Autocomplete** — identity inputs (`type="email"`, `type="tel"`, name/address fields) have the correct `autocomplete` attribute set (WCAG 1.3.5 AA)
 
 ### Animation Pattern
 
