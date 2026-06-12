@@ -177,7 +177,7 @@ const DataTable = <T extends Record<string, any>>(
 	const showPaginator = pageSize > 0 && totalRowCount > 0 && totalPages > 1;
 
 	return (
-		<div className={`w-full overflow-x-auto rounded-lg border border-surface-border ${className}`}>
+		<div className={`@container w-full overflow-x-auto rounded-lg border border-surface-border ${className}`}>
 			<table className='w-full border-collapse'>
 				<thead className='border-b border-surface-border bg-surface-active'>
 					<tr>
@@ -300,7 +300,7 @@ const DataTable = <T extends Record<string, any>>(
 			</table>
 
 			{showPaginator && (
-				<div className='border-t border-surface-border px-4 py-2 flex items-center justify-between'>
+				<div className='border-t border-surface-border px-4 py-2 flex flex-col gap-2 @sm:flex-row @sm:items-center @sm:justify-between'>
 					<span className='text-sm text-text-muted select-none'>
 						Showing {rangeStart}{'–'}{rangeEnd} of {totalRowCount}
 					</span>

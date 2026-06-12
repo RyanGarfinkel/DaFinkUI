@@ -134,6 +134,19 @@ focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visibl
 
 ---
 
+## Container Queries
+
+The DataTable root wrapper carries `@container`, establishing a container context. Layout within the component adapts to the table's own rendered width rather than the viewport.
+
+| Breakpoint | Container width | Behavior |
+|---|---|---|
+| Below `@sm` | < 24rem (384px) | The pagination footer stacks vertically: the "Showing X–Y of Z" range label appears above the Prev/Next controls. |
+| `@sm` and above | ≥ 24rem (384px) | The pagination footer is a single horizontal row with the range label on the left and pagination controls on the right. |
+
+The `overflow-x-auto` on the root wrapper handles column overflow at any container width — horizontal scrolling kicks in before columns collapse.
+
+---
+
 ## Tokens used
 
 | Token | Used for |

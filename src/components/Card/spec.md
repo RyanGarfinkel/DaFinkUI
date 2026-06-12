@@ -77,6 +77,19 @@ All styling uses semantic design tokens only — never raw palette values.
 
 ---
 
+## Container Queries
+
+The `Card` root element carries `@container`, establishing a container context. The subcomponents adapt their padding and layout based on the card's own rendered width — not the viewport.
+
+| Breakpoint | Container width | Behavior |
+|---|---|---|
+| Below `@sm` | < 24rem (384px) | `CardHeader`, `CardContent`, `CardFooter` use reduced padding (`px-4`, `py-3`). `CardFooter` stacks children vertically (`flex-col`) and left-aligns them. |
+| `@sm` and above | ≥ 24rem (384px) | Full padding (`px-6`). `CardFooter` switches to a right-aligned horizontal row (`flex-row justify-end`). |
+
+This means the same `Card` component placed in a narrow sidebar column and in a wide content area will use the correct internal spacing and button layout for its context — no consumer overrides needed.
+
+---
+
 ## When to Use
 
 - Use `Card` to group related content into a self-contained unit — a user profile, a pricing tier, a form section, a data summary.

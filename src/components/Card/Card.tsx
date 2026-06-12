@@ -33,7 +33,7 @@ export const Card = (
 ) => {
 	return (
 		<div
-			className={`${variantClasses[variant]} ${interactive ? interactiveClasses : ''} ${className}`}
+			className={`@container ${variantClasses[variant]} ${interactive ? interactiveClasses : ''} ${className}`}
 			{...props}
 		>
 			{children}
@@ -50,7 +50,7 @@ export const CardHeader = (
 ) => {
 	return (
 		<div
-			className={`px-6 pt-6 pb-4 ${className}`}
+			className={`px-4 pt-4 pb-3 @sm:px-6 @sm:pt-6 @sm:pb-4 ${className}`}
 			{...props}
 		>
 			{children}
@@ -67,7 +67,7 @@ export const CardContent = (
 ) => {
 	return (
 		<div
-			className={`px-6 py-4 ${className}`}
+			className={`px-4 py-3 @sm:px-6 @sm:py-4 ${className}`}
 			{...props}
 		>
 			{children}
@@ -84,7 +84,7 @@ export const CardFooter = (
 ) => {
 	return (
 		<div
-			className={`px-6 pt-4 pb-6 flex justify-end gap-3 ${className}`}
+			className={`px-4 pt-3 pb-4 flex flex-col gap-2 @sm:px-6 @sm:pt-4 @sm:pb-6 @sm:flex-row @sm:justify-end @sm:gap-3 ${className}`}
 			{...props}
 		>
 			{children}
