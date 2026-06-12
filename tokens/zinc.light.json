@@ -2,50 +2,52 @@
 	"$meta": { "label": "Zinc", "accent": "#18181b" },
 	"color": {
 		"brand": {
-			"default":     { "value": "#18181b", "type": "color" },
-			"hover":       { "value": "#27272a", "type": "color" },
-			"active":      { "value": "#3f3f46", "type": "color" },
-			"ring":        { "value": "#18181b", "type": "color" },
-			"fg":          { "value": "#ffffff", "type": "color" }
+			"default":     { "$value": "#18181b", "$type": "color" },
+			"hover":       { "$value": "#27272a", "$type": "color" },
+			"active":      { "$value": "#3f3f46", "$type": "color" },
+			"ring":        { "$value": "#18181b", "$type": "color" },
+			"fg":          { "$value": "#ffffff", "$type": "color" }
 		},
 		"danger": {
-			"default":     { "value": "#dc2626", "type": "color" },
-			"hover":       { "value": "#b91c1c", "type": "color" },
-			"active":      { "value": "#991b1b", "type": "color" },
-			"ring":        { "value": "#dc2626", "type": "color" }
+			"default":     { "$value": "#dc2626", "$type": "color" },
+			"hover":       { "$value": "#b91c1c", "$type": "color" },
+			"active":      { "$value": "#991b1b", "$type": "color" },
+			"ring":        { "$value": "#dc2626", "$type": "color" },
+			"bg":          { "$value": "#fef2f2", "$type": "color" },
+			"border":      { "$value": "#fecaca", "$type": "color" }
 		},
 		"success": {
-			"default":     { "value": "#16a34a", "type": "color" },
-			"bg":          { "value": "#f0fdf4", "type": "color" },
-			"border":      { "value": "#bbf7d0", "type": "color" }
+			"default":     { "$value": "#16a34a", "$type": "color" },
+			"bg":          { "$value": "#f0fdf4", "$type": "color" },
+			"border":      { "$value": "#bbf7d0", "$type": "color" }
 		},
 		"warning": {
-			"default":     { "value": "#d97706", "type": "color" },
-			"bg":          { "value": "#fffbeb", "type": "color" },
-			"border":      { "value": "#fde68a", "type": "color" }
+			"default":     { "$value": "#d97706", "$type": "color" },
+			"bg":          { "$value": "#fffbeb", "$type": "color" },
+			"border":      { "$value": "#fde68a", "$type": "color" }
 		},
 		"surface": {
-			"default":     { "value": "#ffffff", "type": "color" },
-			"hover":       { "value": "#f9fafb", "type": "color" },
-			"active":      { "value": "#f4f4f5", "type": "color" },
-			"border":      { "value": "#e4e4e7", "type": "color" },
-			"borderHover": { "value": "#d4d4d8", "type": "color" }
+			"default":     { "$value": "#ffffff", "$type": "color" },
+			"hover":       { "$value": "#ebebed", "$type": "color" },
+			"active":      { "$value": "#90909b", "$type": "color" },
+			"border":      { "$value": "#90909d", "$type": "color" },
+			"borderHover": { "$value": "#d4d4d8", "$type": "color" }
 		},
 		"text": {
-			"default":     { "value": "#18181b", "type": "color" },
-			"muted":       { "value": "#52525b", "type": "color" },
-			"subtle":      { "value": "#a1a1aa", "type": "color" },
-			"inverted":    { "value": "#ffffff", "type": "color" }
+			"default":     { "$value": "#18181b", "$type": "color" },
+			"muted":       { "$value": "#52525b", "$type": "color" },
+			"subtle":      { "$value": "#737380", "$type": "color" },
+			"inverted":    { "$value": "#ffffff", "$type": "color" }
 		},
 		"input": {
-			"border":       { "value": "#d4d4d8", "type": "color" },
-			"borderHover":  { "value": "#a1a1aa", "type": "color" },
-			"ring":         { "value": "#18181b", "type": "color" },
-			"placeholder":  { "value": "#a1a1aa", "type": "color" },
-			"disabledBg":   { "value": "#f4f4f5", "type": "color" },
-			"disabledText": { "value": "#a1a1aa", "type": "color" },
-			"error":        { "value": "#dc2626", "type": "color" },
-			"errorRing":    { "value": "#dc2626", "type": "color" }
+			"border":       { "$value": "#90909b", "$type": "color" },
+			"borderHover":  { "$value": "#a1a1aa", "$type": "color" },
+			"ring":         { "$value": "#18181b", "$type": "color" },
+			"placeholder":  { "$value": "#737380", "$type": "color" },
+			"disabledBg":   { "$value": "#f4f4f5", "$type": "color" },
+			"disabledText": { "$value": "#a1a1aa", "$type": "color" },
+			"error":        { "$value": "#dc2626", "$type": "color" },
+			"errorRing":    { "$value": "#dc2626", "$type": "color" }
 		}
 	}
 }
