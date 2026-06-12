@@ -52,9 +52,13 @@ No npm dependencies. No registry dependencies.
 | Focus-visible | `focus-visible:ring-2 ring-brand-ring ring-offset-2` | —                         |
 | Disabled      | `opacity-50 cursor-not-allowed pointer-events-none` | —                          |
 
+## Rendering
+
+The panel is portalled to `document.body` via `createPortal` and positioned with `position: fixed` and coordinates computed from `getBoundingClientRect()`. This prevents clipping by any ancestor with `overflow: hidden` or `transform`. Position is recalculated on open, and on `resize` and `scroll` events while the panel is mounted.
+
 ## Animation
 
-Panel enters with `opacity-0 scale-95` → `opacity-100 scale-100` over `var(--duration-base)` with `var(--ease-enter)`, exits in reverse over `var(--duration-fast)` with `var(--ease-exit)`. Transform origin faces the trigger. Respects `prefers-reduced-motion` via the global rule in `globals.css`.
+Panel enters with `opacity-0 scale-95` → `opacity-100 scale-100` over `var(--duration-base)` with `var(--ease-enter)`, exits in reverse over `var(--duration-fast)` with `var(--ease-exit)`. Respects `prefers-reduced-motion` via the global rule in `globals.css`.
 
 ## Tokens Used
 

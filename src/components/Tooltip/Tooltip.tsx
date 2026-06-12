@@ -1,7 +1,8 @@
 'use client';
 
-import { cloneElement, isValidElement, useEffect, useId, useRef, useState } from 'react';
+import { cloneElement, isValidElement, useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -16,15 +17,6 @@ export interface TooltipProps
 	className?: string;
 }
 
-// ─── Placement map ────────────────────────────────────────────────────────────
-
-const SIDE: Record<TooltipSide, string> = {
-	top:    'bottom-full left-1/2 -translate-x-1/2 mb-1.5 origin-bottom',
-	bottom: 'top-full left-1/2 -translate-x-1/2 mt-1.5 origin-top',
-	left:   'right-full top-1/2 -translate-y-1/2 mr-1.5 origin-right',
-	right:  'left-full top-1/2 -translate-y-1/2 ml-1.5 origin-left',
-};
-
 // ─── Tooltip ──────────────────────────────────────────────────────────────────
 
 export const Tooltip = (
@@ -36,14 +28,37 @@ export const Tooltip = (
         className = '',
     }: TooltipProps
 ) => {
-    const [mounted, setMounted] = useState(false);
-    const [visible, setVisible] = useState(false);
+    const [mounted,  setMounted]  = useState(false);
+    const [visible,  setVisible]  = useState(false);
+    const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
-    const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-    const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const triggerRef  = useRef<HTMLElement>(null);
+    const panelRef    = useRef<HTMLSpanElement>(null);
+    const openTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const hideTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const id        = useId();
     const tooltipId = `${id}-tooltip`;
+
+    const calcPosition = useCallback(() =>
+    {
+        if(!triggerRef.current) return;
+        const t = triggerRef.current.getBoundingClientRect();
+        const p = panelRef.current?.getBoundingClientRect() ?? { width: 0, height: 0 };
+        const GAP = 6;
+        let top = 0, left = t.left + (t.width - p.width) / 2;
+
+        if(side === 'top')         top = t.top - p.height - GAP;
+        else if(side === 'bottom') top = t.bottom + GAP;
+        else if(side === 'left')   { left = t.left - p.width - GAP; top = t.top + (t.height - p.height) / 2; }
+        else                       { left = t.right + GAP;          top = t.top + (t.height - p.height) / 2; }
+
+        const vw = window.innerWidth, vh = window.innerHeight;
+        top  = Math.max(8, Math.min(top,  vh - (p.height || 0) - 8));
+        left = Math.max(8, Math.min(left, vw - (p.width  || 0) - 8));
+
+        setPosition({ top, left });
+    }, [side]);
 
     const show = (withDelay: boolean) => {
 		if(hideTimer.current) clearTimeout(hideTimer.current);
@@ -65,8 +80,24 @@ export const Tooltip = (
     useEffect(() =>
 	{
 		if(!mounted) return;
-		requestAnimationFrame(() => setVisible(true));
-	}, [mounted]);
+		requestAnimationFrame(() =>
+		{
+			calcPosition();
+			setVisible(true);
+		});
+	}, [mounted, calcPosition]);
+
+    useEffect(() =>
+	{
+		if(!mounted) return;
+		window.addEventListener('resize', calcPosition);
+		window.addEventListener('scroll', calcPosition, true);
+		return () =>
+		{
+			window.removeEventListener('resize', calcPosition);
+			window.removeEventListener('scroll', calcPosition, true);
+		};
+	}, [mounted, calcPosition]);
 
     useEffect(() =>
 	{
@@ -90,38 +121,40 @@ export const Tooltip = (
 	}, []);
 
     const trigger = isValidElement(children)
-		// Merging the child's own handlers/aria props is required for the
-		// cloneElement wrapper pattern — no refs are read here.
-		// eslint-disable-next-line react-hooks/refs
-		? cloneElement(children, {
-			'aria-describedby': mounted ? tooltipId : children.props['aria-describedby'],
-			onMouseEnter: (e) => { children.props.onMouseEnter?.(e); show(true);  },
-			onMouseLeave: (e) => { children.props.onMouseLeave?.(e); hide();      },
-			onFocus:      (e) => { children.props.onFocus?.(e);      show(false); },
-			onBlur:       (e) => { children.props.onBlur?.(e);       hide();      },
-		} satisfies HTMLAttributes<HTMLElement>)
+		? cloneElement(children as ReactElement<HTMLAttributes<HTMLElement>>, {
+			'aria-describedby': mounted ? tooltipId : undefined,
+		})
 		: children;
 
     return (
-		<span className={['relative inline-flex', className].join(' ')}>
+		<span
+			ref={triggerRef}
+			className={['inline-flex', className].join(' ')}
+			onMouseEnter={() => show(true)}
+			onMouseLeave={() => hide()}
+			onFocus={() => show(false)}
+			onBlur={() => hide()}
+		>
 			{trigger}
 
-			{mounted && (
+			{mounted && createPortal(
 				<span
+					ref={panelRef}
 					id={tooltipId}
 					role='tooltip'
+					style={{ position: 'fixed', top: position.top, left: position.left, zIndex: 50 }}
 					className={[
-						'absolute z-50 pointer-events-none select-none whitespace-nowrap',
+						'pointer-events-none select-none whitespace-nowrap',
 						'rounded-md border border-surface-border bg-surface px-2.5 py-1 text-xs text-text shadow-md',
 						'transition-all',
-						SIDE[side],
 						visible
 							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'
 							: 'opacity-0 scale-95 duration-[var(--duration-fast)] ease-[var(--ease-exit)]',
 					].join(' ')}
 				>
 					{content}
-				</span>
+				</span>,
+				document.body
 			)}
 		</span>
 	);

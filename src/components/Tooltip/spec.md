@@ -49,9 +49,13 @@ No npm dependencies. No registry dependencies.
 
 The trigger element keeps its own hover/focus-visible styles — the Tooltip does not alter them.
 
+## Rendering
+
+The tooltip element is portalled to `document.body` via `createPortal` and positioned with `position: fixed` and coordinates computed from `getBoundingClientRect()`. This prevents clipping by any ancestor with `overflow: hidden` or `transform`. Position is recalculated on open, and on `resize` and `scroll` events while the tooltip is mounted.
+
 ## Animation
 
-Fade + scale from `opacity-0 scale-95` to `opacity-100 scale-100`, transform origin facing the trigger (e.g. `origin-bottom` for `side="top"`). Respects `prefers-reduced-motion` via the global rule in `globals.css`.
+Fade + scale from `opacity-0 scale-95` to `opacity-100 scale-100`. Respects `prefers-reduced-motion` via the global rule in `globals.css`.
 
 ## Tokens Used
 

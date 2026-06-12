@@ -1,6 +1,7 @@
 'use client';
 
-import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
+import { KeyboardEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -34,22 +35,6 @@ export interface DropdownMenuProps
 	triggerClassName?: string;
 }
 
-// ─── Placement maps ───────────────────────────────────────────────────────────
-
-const SIDE: Record<DropdownMenuSide, string> = {
-	top:    'bottom-full mb-1 origin-bottom',
-	bottom: 'top-full mt-1 origin-top',
-	left:   'right-full mr-1 origin-right',
-	right:  'left-full ml-1 origin-left',
-};
-
-const ALIGN: Record<DropdownMenuSide, Record<DropdownMenuAlign, string>> = {
-	top:    { start: 'left-0', center: 'left-1/2 -translate-x-1/2', end: 'right-0'  },
-	bottom: { start: 'left-0', center: 'left-1/2 -translate-x-1/2', end: 'right-0'  },
-	left:   { start: 'top-0',  center: 'top-1/2 -translate-y-1/2',  end: 'bottom-0' },
-	right:  { start: 'top-0',  center: 'top-1/2 -translate-y-1/2',  end: 'bottom-0' },
-};
-
 const isSeparator = (entry: DropdownMenuEntry): entry is DropdownMenuSeparator =>
 	'separator' in entry;
 
@@ -71,6 +56,7 @@ export const DropdownMenu = (
     const [visible,     setVisible]     = useState(false);
     const [activeIndex, setActiveIndex] = useState(0);
     const [typeahead,   setTypeahead]   = useState('');
+    const [position,    setPosition]    = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
     const triggerRef     = useRef<HTMLButtonElement>(null);
     const menuRef        = useRef<HTMLUListElement>(null);
@@ -84,37 +70,85 @@ export const DropdownMenu = (
 		.filter(({ entry }) => !isSeparator(entry) && !entry.disabled)
 		.map(({ i }) => i);
 
+    const calcPosition = useCallback(() =>
+    {
+        if(!triggerRef.current) return;
+        const t = triggerRef.current.getBoundingClientRect();
+        const p = menuRef.current?.getBoundingClientRect() ?? { width: 0, height: 0 };
+        const GAP = 8;
+        let top = 0, left = 0;
+
+        if(side === 'bottom')      top = t.bottom + GAP;
+        else if(side === 'top')    top = t.top - p.height - GAP;
+        else if(side === 'left')   top = t.top;
+        else                       top = t.top;
+
+        if(side === 'bottom' || side === 'top')
+        {
+            if(align === 'start')        left = t.left;
+            else if(align === 'center')  left = t.left + (t.width - p.width) / 2;
+            else                         left = t.right - p.width;
+        }
+        else if(side === 'left')  left = t.left - p.width - GAP;
+        else                      left = t.right + GAP;
+
+        if(side === 'left' || side === 'right')
+        {
+            if(align === 'center')   top = t.top + (t.height - p.height) / 2;
+            else if(align === 'end') top = t.bottom - p.height;
+        }
+
+        const vw = window.innerWidth, vh = window.innerHeight;
+        top  = Math.max(8, Math.min(top,  vh - (p.height || 0) - 8));
+        left = Math.max(8, Math.min(left, vw - (p.width  || 0) - 8));
+
+        setPosition({ top, left });
+    }, [side, align]);
+
     const openMenu = (initial: 'first' | 'last') => {
 		if(disabled || navigable.length === 0) return;
 		setActiveIndex(initial === 'first' ? navigable[0] : navigable[navigable.length - 1]);
 		setMounted(true);
 	};
 
-    const closeMenu = (returnFocus = true) => {
+    const closeMenu = useCallback((returnFocus = true) => {
 		setVisible(false);
 		if(typeaheadTimer.current) clearTimeout(typeaheadTimer.current);
 		setTypeahead('');
 		setTimeout(() => setMounted(false), 150);
 		if(returnFocus) triggerRef.current?.focus();
-	};
+	}, []);
 
-    const activateItem = (index: number) => {
+    const activateItem = useCallback((index: number) => {
 		const entry = items[index];
 		if(!entry || isSeparator(entry) || entry.disabled) return;
 		entry.onSelect?.();
 		onSelect?.(entry);
 		closeMenu();
-	};
+	}, [items, onSelect, closeMenu]);
 
     useEffect(() =>
 	{
 		if(!mounted) return;
 		requestAnimationFrame(() =>
 		{
+			calcPosition();
 			setVisible(true);
 			menuRef.current?.focus();
 		});
-	}, [mounted]);
+	}, [mounted, calcPosition]);
+
+    useEffect(() =>
+	{
+		if(!mounted) return;
+		window.addEventListener('resize', calcPosition);
+		window.addEventListener('scroll', calcPosition, true);
+		return () =>
+		{
+			window.removeEventListener('resize', calcPosition);
+			window.removeEventListener('scroll', calcPosition, true);
+		};
+	}, [mounted, calcPosition]);
 
     useEffect(() =>
 	{
@@ -137,7 +171,7 @@ export const DropdownMenu = (
 
         document.addEventListener('pointerdown', onPointerDown);
         return () => document.removeEventListener('pointerdown', onPointerDown);
-    }, [mounted]);
+    }, [mounted, closeMenu]);
 
     const moveActive = (offset: 1 | -1) => {
 		const pos  = navigable.indexOf(activeIndex);
@@ -222,7 +256,7 @@ export const DropdownMenu = (
 	};
 
     return (
-		<span className='relative inline-flex'>
+		<span className='inline-flex'>
 			<button
 				ref={triggerRef}
 				id={`${id}-trigger`}
@@ -244,7 +278,7 @@ export const DropdownMenu = (
 				{trigger}
 			</button>
 
-			{mounted && (
+			{mounted && createPortal(
 				<ul
 					ref={menuRef}
 					id={menuId}
@@ -253,11 +287,10 @@ export const DropdownMenu = (
 					aria-labelledby={`${id}-trigger`}
 					aria-activedescendant={`${id}-item-${activeIndex}`}
 					onKeyDown={handleMenuKeyDown}
+					style={{ position: 'fixed', top: position.top, left: position.left, zIndex: 50 }}
 					className={[
-						'absolute z-50 min-w-48 max-h-72 overflow-y-auto rounded-lg border border-surface-border bg-surface py-1 shadow-lg outline-none',
+						'min-w-48 max-h-72 overflow-y-auto rounded-lg border border-surface-border bg-surface py-1 shadow-lg outline-none',
 						'transition-all',
-						SIDE[side],
-						ALIGN[side][align],
 						visible
 							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'
 							: 'opacity-0 scale-95 duration-[var(--duration-fast)] ease-[var(--ease-exit)]',
@@ -294,7 +327,8 @@ export const DropdownMenu = (
 							</li>
 						);
 					})}
-				</ul>
+				</ul>,
+				document.body
 			)}
 		</span>
 	);
