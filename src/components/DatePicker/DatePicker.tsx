@@ -42,6 +42,7 @@ export const DatePicker = (
     const triggerRef  = useRef<HTMLButtonElement>(null);
     const popupRef    = useRef<HTMLDivElement>(null);
     const gridRef     = useRef<HTMLDivElement>(null);
+    const buttonRefs  = useRef<Map<string, HTMLButtonElement>>(new Map());
 
     const id       = useId();
     const popupId  = `${id}-popup`;
@@ -64,8 +65,18 @@ export const DatePicker = (
 	{
 		if(!mounted) return;
 		requestAnimationFrame(() => setVisible(true));
-		gridRef.current?.focus();
 	}, [mounted]);
+
+    useEffect(() =>
+	{
+		if(focusedDay === null || !mounted) return;
+		const frame = requestAnimationFrame(() =>
+		{
+			const key = `${viewYear}-${viewMonth}-${focusedDay}`;
+			buttonRefs.current.get(key)?.focus();
+		});
+		return () => cancelAnimationFrame(frame);
+	}, [focusedDay, viewYear, viewMonth, mounted]);
 
     const closePopup = (returnFocus = true) => {
 		setVisible(false);
@@ -326,7 +337,7 @@ export const DatePicker = (
 							id={gridId}
 							aria-label={monthLabel}
 							ref={gridRef}
-							tabIndex={0}
+							tabIndex={-1}
 							onKeyDown={handleGridKeyDown}
 							className='outline-none'
 						>
@@ -367,12 +378,17 @@ export const DatePicker = (
 											>
 												<button
 													type='button'
+													ref={(el) =>
+													{
+														const key = `${year}-${month}-${day}`;
+														if(el) buttonRefs.current.set(key, el);
+														else   buttonRefs.current.delete(key);
+													}}
 													tabIndex={isFocused ? 0 : -1}
 													disabled={isDisabled}
 													aria-label={dateLabel}
 													aria-current={isToday ? 'date' : undefined}
 													onClick={() => !isDisabled && selectDate(day)}
-													onMouseEnter={() => setFocusedDay(day)}
 													className={[
 														'flex items-center justify-center w-full h-8 rounded-md text-sm',
 														'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',

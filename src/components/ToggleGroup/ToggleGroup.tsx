@@ -1,21 +1,25 @@
-'use client';;
-import { createContext, useContext, useRef, useEffect, ButtonHTMLAttributes } from 'react';
+'use client';
+
+import { createContext, useContext, useRef, useEffect, useState, ButtonHTMLAttributes } from 'react';
 
 export type ToggleGroupType = 'single' | 'multiple';
 export type ToggleGroupSize = 'sm' | 'md' | 'lg';
 
 interface ToggleGroupContextValue
 {
-	type: ToggleGroupType;
-	value: string | string[];
-	onValueChange: (value: string | string[]) => void;
-	size: ToggleGroupSize;
-	disabled: boolean;
+	type:           ToggleGroupType;
+	value:          string | string[];
+	onValueChange:  (value: string | string[]) => void;
+	size:           ToggleGroupSize;
+	disabled:       boolean;
+	rovingValue:    string | null;
+	setRovingValue: (v: string) => void;
 }
 
 const ToggleGroupContext = createContext<ToggleGroupContextValue | null>(null);
 
-const useToggleGroupContext = () => {
+const useToggleGroupContext = () =>
+{
 	const ctx = useContext(ToggleGroupContext);
 	if(!ctx) throw new Error('ToggleGroupItem must be used inside a ToggleGroup');
 	return ctx;
@@ -23,22 +27,22 @@ const useToggleGroupContext = () => {
 
 export interface ToggleGroupProps
 {
-	type: ToggleGroupType;
-	value: string | string[];
-	onValueChange: (value: string | string[]) => void;
-	size?: ToggleGroupSize;
-	disabled?: boolean;
-	className?: string;
-	children: React.ReactNode;
-	'aria-label'?: string;
+	type:               ToggleGroupType;
+	value:              string | string[];
+	onValueChange:      (value: string | string[]) => void;
+	size?:              ToggleGroupSize;
+	disabled?:          boolean;
+	className?:         string;
+	children:           React.ReactNode;
+	'aria-label'?:      string;
 	'aria-labelledby'?: string;
 }
 
 export interface ToggleGroupItemProps extends ButtonHTMLAttributes<HTMLButtonElement>
 {
-	value: string;
-	disabled?: boolean;
-	children: React.ReactNode;
+	value:      string;
+	disabled?:  boolean;
+	children:   React.ReactNode;
 	className?: string;
 }
 
@@ -48,17 +52,18 @@ const sizeClasses: Record<ToggleGroupSize, string> = {
 	lg: 'h-11 px-5 text-base',
 };
 
-const ITEM_BASE = 'relative z-10 inline-flex items-center justify-center font-medium tracking-tight transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40';
+const ITEM_BASE = 'group relative z-10 inline-flex items-center justify-center font-medium tracking-tight transition-colors duration-150 focus:outline-none disabled:pointer-events-none disabled:opacity-40';
 
 export const ToggleGroupItem = (
-    {
-        value,
-        disabled = false,
-        children,
-        className = '',
-        ...props
-    }: ToggleGroupItemProps
-) => {
+	{
+		value,
+		disabled  = false,
+		children,
+		className = '',
+		...props
+	}: ToggleGroupItemProps
+) =>
+{
 	const ctx = useToggleGroupContext();
 
 	const isActive = ctx.type === 'single'
@@ -71,6 +76,8 @@ export const ToggleGroupItem = (
 	{
 		if(isDisabled) return;
 
+		ctx.setRovingValue(value);
+
 		if(ctx.type === 'single')
 		{
 			ctx.onValueChange(value);
@@ -78,7 +85,7 @@ export const ToggleGroupItem = (
 		else
 		{
 			const current = Array.isArray(ctx.value) ? ctx.value : [];
-			const next = current.includes(value)
+			const next    = current.includes(value)
 				? current.filter(v => v !== value)
 				: [...current, value];
 			ctx.onValueChange(next);
@@ -96,33 +103,70 @@ export const ToggleGroupItem = (
 	return (
 		<button
 			type='button'
+			data-value={value}
 			aria-pressed={isActive}
 			disabled={isDisabled}
+			tabIndex={ctx.rovingValue === value ? 0 : -1}
 			onClick={handleClick}
 			className={`${ITEM_BASE} ${sizeClasses[ctx.size]} ${stateClasses} ${className}`}
 			{...props}
 		>
+			<span
+				aria-hidden='true'
+				className={[
+					'absolute inset-y-[5px] inset-x-1 rounded transition-[box-shadow]',
+					isActive
+						? 'group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-brand-ring group-focus-visible:[--tw-ring-offset-color:var(--color-surface)]'
+						: 'group-focus-visible:ring-2 group-focus-visible:ring-brand-ring',
+				].join(' ')}
+			/>
 			{children}
 		</button>
 	);
 };
 
 export const ToggleGroup = (
-    {
-        type,
-        value,
-        onValueChange,
-        size = 'md',
-        disabled = false,
-        className = '',
-        children,
-        'aria-label': ariaLabel,
-        'aria-labelledby': ariaLabelledBy,
-    }: ToggleGroupProps
-) => {
+	{
+		type,
+		value,
+		onValueChange,
+		size      = 'md',
+		disabled  = false,
+		className = '',
+		children,
+		'aria-label':      ariaLabel,
+		'aria-labelledby': ariaLabelledBy,
+	}: ToggleGroupProps
+) =>
+{
 	const groupRef     = useRef<HTMLDivElement>(null);
 	const indicatorRef = useRef<HTMLDivElement>(null);
 	const initialized  = useRef(false);
+
+	const [rovingValue, setRovingValue] = useState<string | null>(
+		type === 'single' && typeof value === 'string' ? value || null : null
+	);
+
+	useEffect(() =>
+	{
+		if(type === 'single' && typeof value === 'string' && value)
+		{
+			const id = setTimeout(() => setRovingValue(value), 0);
+			return () => clearTimeout(id);
+		}
+	}, [value, type]);
+
+	useEffect(() =>
+	{
+		if(rovingValue !== null) return;
+		const first = groupRef.current?.querySelector<HTMLButtonElement>('button:not(:disabled)');
+		if(first?.dataset.value)
+		{
+			const val = first.dataset.value;
+			const id = setTimeout(() => setRovingValue(val), 0);
+			return () => clearTimeout(id);
+		}
+	}, []); // eslint-disable-line react-hooks/exhaustive-deps
 
 	useEffect(() =>
 	{
@@ -134,36 +178,81 @@ export const ToggleGroup = (
 		const active = group.querySelector<HTMLElement>('[aria-pressed="true"]');
 		if(!active) return;
 
+		const X = 4;
+
 		if(!initialized.current)
 		{
 			indicator.style.transition = 'none';
-			indicator.style.left       = `${active.offsetLeft}px`;
-			indicator.style.width      = `${active.offsetWidth}px`;
+			indicator.style.left       = `${active.offsetLeft + X}px`;
+			indicator.style.width      = `${active.offsetWidth - X * 2}px`;
 			indicator.getBoundingClientRect();
 			indicator.style.transition = '';
-			initialized.current = true;
+			initialized.current        = true;
 		}
 		else
 		{
-			indicator.style.left  = `${active.offsetLeft}px`;
-			indicator.style.width = `${active.offsetWidth}px`;
+			indicator.style.left  = `${active.offsetLeft + X}px`;
+			indicator.style.width = `${active.offsetWidth - X * 2}px`;
 		}
 	}, [value, type]);
 
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) =>
+	{
+		const buttons = Array.from(
+			groupRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? []
+		);
+		if(buttons.length < 2) return;
+
+		const idx = buttons.indexOf(document.activeElement as HTMLButtonElement);
+		if(idx === -1) return;
+
+		let next: HTMLButtonElement | undefined;
+
+		if(e.key === 'ArrowRight' || e.key === 'ArrowDown')
+		{
+			e.preventDefault();
+			next = buttons[(idx + 1) % buttons.length];
+		}
+		else if(e.key === 'ArrowLeft' || e.key === 'ArrowUp')
+		{
+			e.preventDefault();
+			next = buttons[(idx - 1 + buttons.length) % buttons.length];
+		}
+		else if(e.key === 'Home')
+		{
+			e.preventDefault();
+			next = buttons[0];
+		}
+		else if(e.key === 'End')
+		{
+			e.preventDefault();
+			next = buttons[buttons.length - 1];
+		}
+
+		if(!next) return;
+
+		const nextValue = next.dataset.value;
+		if(!nextValue) return;
+
+		setRovingValue(nextValue);
+		next.focus();
+	};
+
 	return (
-		<ToggleGroupContext.Provider value={{ type, value, onValueChange, size, disabled }}>
+		<ToggleGroupContext.Provider value={{ type, value, onValueChange, size, disabled, rovingValue, setRovingValue: (v) => setRovingValue(v) }}>
 			<div
 				role='group'
 				ref={groupRef}
 				aria-label={ariaLabel}
 				aria-labelledby={ariaLabelledBy}
+				onKeyDown={handleKeyDown}
 				className={`relative inline-flex items-center rounded-md border border-surface-border bg-surface overflow-hidden ${className}`}
 			>
 				{type === 'single' && (
 					<div
 						ref={indicatorRef}
 						aria-hidden='true'
-						className='absolute top-0 h-full bg-brand motion-safe:transition-[left,width] motion-safe:duration-200'
+						className='absolute inset-y-[5px] rounded bg-brand motion-safe:transition-[left,width] motion-safe:duration-200'
 					/>
 				)}
 				{children}
