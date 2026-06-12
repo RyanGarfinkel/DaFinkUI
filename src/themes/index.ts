@@ -1,16 +1,20 @@
 export type { Theme } from './types';
 export { defaultTheme } from './default';
-export { terminalTheme } from './terminal';
-export { violetTheme } from './violet';
-export { roseTheme } from './rose';
+export { oceanTheme } from './ocean';
+export { emberTheme } from './ember';
+export { forestTheme } from './forest';
+export { noirTheme } from './noir';
+export { plumTheme } from './plum';
 
-import { terminalTheme } from './terminal';
 import { defaultTheme } from './default';
-import { violetTheme } from './violet';
+import { forestTheme } from './forest';
+import { oceanTheme } from './ocean';
+import { emberTheme } from './ember';
 import type { Theme } from './types';
-import { roseTheme } from './rose';
+import { noirTheme } from './noir';
+import { plumTheme } from './plum';
 
-export const themes: Theme[] = [defaultTheme, violetTheme, roseTheme, terminalTheme];
+export const themes: Theme[] = [defaultTheme, oceanTheme, emberTheme, forestTheme, noirTheme, plumTheme];
 
 export const getThemeByName = (name: string) =>
 {
