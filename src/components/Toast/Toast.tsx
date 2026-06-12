@@ -69,7 +69,7 @@ const VARIANT_STYLES: Record<ToastVariant, { wrapper: string; icon: string; path
 		path:    'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0zM12 9v4m0 4h.01',
 	},
 	danger: {
-		wrapper: 'bg-danger/10 border-danger/20',
+		wrapper: 'bg-danger-bg border-danger-border',
 		icon:    'text-danger',
 		path:    'M12 9v4m0 4h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z',
 	},
@@ -105,8 +105,8 @@ const ToastCard = (
 
     return (
 		<div
-			role='status'
-			aria-live='polite'
+			role={item.variant === 'danger' ? 'alert' : 'status'}
+			aria-live={item.variant === 'danger' ? 'assertive' : 'polite'}
 			aria-atomic='true'
 			style={{
 				transition: 'opacity 200ms ease, transform 200ms ease',

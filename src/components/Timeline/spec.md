@@ -48,7 +48,7 @@ No npm dependencies. No registry dependencies.
 
 | Variant  | Indicator style                                     |
 |----------|-----------------------------------------------------|
-| `brand`  | Filled brand-color circle, white text               |
+| `brand`  | Filled brand-color circle, `text-brand-fg` text (light-theme: white; dark-theme: near-black) |
 | `muted`  | Surface-active background, neutral text, light border |
 
 ---
@@ -91,7 +91,7 @@ No npm dependencies. No registry dependencies.
 | Token               | Where                                |
 |---------------------|--------------------------------------|
 | `bg-brand`          | Indicator dot (brand variant)        |
-| `text-white`        | Indicator number (brand variant)     |
+| `text-brand-fg`     | Indicator number (brand variant) — resolves to a contrasting foreground color on the brand surface in both light and dark themes |
 | `bg-surface-active` | Indicator dot (muted variant)        |
 | `text-text-muted`   | Indicator number + body text         |
 | `border-surface-border` | Indicator border (muted) + connector line |
