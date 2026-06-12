@@ -1,6 +1,6 @@
 # Rule: Docs Site
 
-Apply this rule when working on any file under `app/` or `src/docs/`.
+Apply this rule when working on any file under `app/`, including `app/_docs/`.
 
 ## Overview
 
@@ -13,6 +13,10 @@ app/
 ├── layout.tsx                        # Root layout: font, dark mode flash-prevention script
 ├── page.tsx                          # Home page
 ├── globals.css                       # Design tokens — already exists, do not modify
+├── _docs/                            # Private folder (not routable): registry + shared docs components
+│   ├── registry/
+│   │   └── index.ts                  # Component registry (ComponentEntry[])
+│   └── components/                   # Shared docs components (sidebar, code block, live preview, …)
 └── (docs)/                           # Route group — no URL prefix
     ├── layout.tsx                    # Docs shell: sidebar + main content area
     ├── installation/
@@ -51,7 +55,7 @@ The `ThemeToggle` button reads `document.documentElement.classList` to determine
 
 ## Component Registry
 
-All component metadata lives in `src/docs/registry/index.ts`. Each entry is typed as `ComponentEntry`:
+All component metadata lives in `app/_docs/registry/index.ts`. Each entry is typed as `ComponentEntry`:
 
 ```ts
 export interface ComponentEntry {
@@ -144,7 +148,7 @@ Start with three sample themes: `default`, `ocean` (cool blues and teals), and `
 
 ## Shared Docs Components
 
-These live in `src/docs/components/`:
+These live in `app/_docs/components/`:
 
 | Component             | Type   | Purpose                                                             |
 |-----------------------|--------|---------------------------------------------------------------------|

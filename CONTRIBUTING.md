@@ -53,8 +53,8 @@ Every new component requires all of the following — no exceptions:
 1. `src/components/ComponentName/ComponentName.tsx` — the component
 2. `src/components/ComponentName/ComponentName.test.tsx` — Vitest tests
 3. `src/components/ComponentName/spec.md` — machine-readable spec
-4. An entry in `src/docs/registry/index.ts`
-5. A `case` in `src/docs/components/ComponentLivePreview.tsx`
+4. An entry in `app/_docs/registry/index.ts`
+5. A `case` in `app/_docs/components/ComponentLivePreview.tsx`
 
 Read `rules/new-component.md` before writing any code. It covers required file structure, interactive states, accessibility requirements, and the overlay component checklist.
 

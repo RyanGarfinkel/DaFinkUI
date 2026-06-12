@@ -13,7 +13,7 @@ src/components/ComponentName/
 └── spec.md                  # Machine-readable spec for MCP
 ```
 
-No exceptions. All three files are required. After creating the files, add an entry for the component to `src/docs/registry/index.ts` — this is what populates the docs site. A component that exists in code but is not in the registry is invisible to users of the docs site.
+No exceptions. All three files are required. After creating the files, add an entry for the component to `app/_docs/registry/index.ts` — this is what populates the docs site. A component that exists in code but is not in the registry is invisible to users of the docs site.
 
 **Note:** Storybook stories (`.stories.tsx`) are no longer part of the required structure. The docs site registry replaces them as the primary showcase.
 
@@ -41,7 +41,7 @@ Rules:
 - Extend the relevant native HTML element's attributes (`ButtonHTMLAttributes`, `InputHTMLAttributes`, etc.) so consumers can pass through native props
 - Accept and spread a `className` prop to allow style extension
 
-## Registry Entry (src/docs/registry/index.ts)
+## Registry Entry (app/_docs/registry/index.ts)
 
 Every new component must have an entry in the registry. Categories follow the sidebar groupings:
 
@@ -87,11 +87,11 @@ If a component has zero npm dependencies and zero registry dependencies, still i
 
 ## Live Preview (Required)
 
-Every component must have a live preview case in `src/docs/components/ComponentLivePreview.tsx`. Add a `case` for the component's slug in the switch statement. Without it, the component detail page shows "No preview available for this component" — this is not acceptable.
+Every component must have a live preview case in `app/_docs/components/ComponentLivePreview.tsx`. Add a `case` for the component's slug in the switch statement. Without it, the component detail page shows "No preview available for this component" — this is not acceptable.
 
 The preview must match the `usage` field in the registry entry exactly. If the preview shows `<Input label="Email" />`, the `usage` string must also show `<Input label="Email" />`. They are always kept in sync.
 
-**Whenever you change the live preview, update the `usage` string in the registry to match — and vice versa.** Divergence between the two is a bug. The easiest way to check: search for the component's slug in `src/docs/registry/index.ts` and compare the `usage` field against the `case` block in `ComponentLivePreview.tsx` side by side.
+**Whenever you change the live preview, update the `usage` string in the registry to match — and vice versa.** Divergence between the two is a bug. The easiest way to check: search for the component's slug in `app/_docs/registry/index.ts` and compare the `usage` field against the `case` block in `ComponentLivePreview.tsx` side by side.
 
 A component is not done until its preview case exists and renders correctly on the docs site.
 

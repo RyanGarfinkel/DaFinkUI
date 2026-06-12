@@ -17,8 +17,8 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT       = resolve(__dirname, '..');
 const COMP_DIR   = join(ROOT, 'src/components');
-const REGISTRY   = join(ROOT, 'src/docs/registry/index.ts');
-const PREVIEW    = join(ROOT, 'src/docs/components/ComponentLivePreview.tsx');
+const REGISTRY   = join(ROOT, 'app/_docs/registry/index.ts');
+const PREVIEW    = join(ROOT, 'app/_docs/components/ComponentLivePreview.tsx');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
