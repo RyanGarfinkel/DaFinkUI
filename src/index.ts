@@ -66,6 +66,9 @@ export { FormSection, FormField, FormLabel, FormControl, FormDescription, FormMe
 
 export { default as FunctionPlotter } from './components/FunctionPlotter/FunctionPlotter';
 
+export { default as Graph } from './components/Graph/Graph';
+export type { GraphNode, GraphEdge, GraphProps } from './components/Graph/Graph';
+
 export { default as Input } from './components/Input/Input';
 export type { InputProps } from './components/Input/Input';
 
@@ -117,6 +120,9 @@ export type { TextareaProps } from './components/Textarea/Textarea';
 
 export { default as TextShimmer } from './components/TextShimmer/TextShimmer';
 export type { TextShimmerProps } from './components/TextShimmer/TextShimmer';
+
+export { default as Typewriter } from './components/Typewriter/Typewriter';
+export type { TypewriterProps } from './components/Typewriter/Typewriter';
 
 export { Timeline, TimelineItem } from './components/Timeline/Timeline';
 export type { TimelineVariant, TimelineDirection, TimelineAnimate } from './components/Timeline/Timeline';
