@@ -1,7 +1,7 @@
 'use client';
 
 import { ToggleGroup, ToggleGroupItem } from '../ToggleGroup/ToggleGroup';
-import { useState, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export type CodeBlockVariant = 'code' | 'example';
 
@@ -43,7 +43,23 @@ const CheckIcon = () => (
 const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: boolean; onCodeChange?: (code: string) => void }) =>
 {
 	const [copied, setCopied] = useState(false);
+	const [isOverflowing, setIsOverflowing] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const preRef = useRef<HTMLPreElement>(null);
+
+	useEffect(() =>
+	{
+		const el = preRef.current;
+		if(!el) return;
+
+		const observer = new ResizeObserver(() =>
+		{
+			setIsOverflowing(el.scrollWidth > el.clientWidth);
+		});
+
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, []);
 
 	const currentCode = () => editable && textareaRef.current ? textareaRef.current.value : code;
 
@@ -96,7 +112,16 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 					className='bg-surface-active text-text font-mono text-sm p-4 rounded-lg w-full resize-none outline-none'
 				/>
 			) : (
-				<pre className='bg-surface-active text-text font-mono text-sm p-4 rounded-lg overflow-x-auto w-full'>
+				<pre
+					ref={preRef}
+					tabIndex={isOverflowing ? 0 : -1}
+					role={isOverflowing ? 'region' : undefined}
+					aria-label={isOverflowing ? 'Code sample' : undefined}
+					className={[
+						'bg-surface-active text-text font-mono text-sm p-4 rounded-lg overflow-x-auto w-full',
+						isOverflowing ? 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring' : '',
+					].join(' ').trim()}
+				>
 					<code>{code}</code>
 				</pre>
 			)}

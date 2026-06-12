@@ -2,11 +2,14 @@
 
 import { ClipboardEvent, KeyboardEvent, useRef } from 'react';
 
+export type OTPCharset = 'numeric' | 'alphanumeric' | 'alphabetic' | 'any';
+
 export interface OTPInputProps
 {
 	length?:    number;
 	value?:     string;
 	onChange?:  (value: string) => void;
+	charset?:   OTPCharset;
 	label?:     string;
 	error?:     string;
 	hint?:      string;
@@ -14,10 +17,18 @@ export interface OTPInputProps
 	className?: string;
 }
 
+const CHARSET_CONFIG: Record<OTPCharset, { filter: (s: string) => string; inputMode: React.HTMLAttributes<HTMLInputElement>['inputMode']; pattern: string }> = {
+	numeric:     { filter: s => s.replace(/\D/g, ''),            inputMode: 'numeric', pattern: '[0-9]*'       },
+	alphanumeric:{ filter: s => s.replace(/[^a-zA-Z0-9]/g, ''), inputMode: 'text',    pattern: '[a-zA-Z0-9]*' },
+	alphabetic:  { filter: s => s.replace(/[^a-zA-Z]/g, ''),    inputMode: 'text',    pattern: '[a-zA-Z]*'    },
+	any:         { filter: s => s,                               inputMode: 'text',    pattern: '.*'           },
+};
+
 const OTPInput = ({
 	length = 6,
 	value = '',
 	onChange,
+	charset = 'numeric',
 	label,
 	error,
 	hint,
@@ -29,18 +40,19 @@ const OTPInput = ({
 	const refs = useRef<(HTMLInputElement | null)[]>([]);
 
 	const chars = Array.from({ length }, (_, i) => value[i] ?? '');
+	const { filter, inputMode, pattern } = CHARSET_CONFIG[charset];
 
 	const feedbackId = error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined;
 	const feedbackText = error ?? hint;
 
 	const handleChange = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) =>
 	{
-		const digit = e.target.value.replace(/\D/g, '').slice(-1);
+		const char = filter(e.target.value).slice(-1);
 		const newChars = [...chars];
-		newChars[index] = digit;
+		newChars[index] = char;
 		onChange?.(newChars.join(''));
 
-		if(digit && index < length - 1)
+		if(char && index < length - 1)
 			refs.current[index + 1]?.focus();
 	};
 
@@ -77,7 +89,7 @@ const OTPInput = ({
 	const handlePaste = (e: ClipboardEvent<HTMLInputElement>) =>
 	{
 		e.preventDefault();
-		const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, length);
+		const pasted = filter(e.clipboardData.getData('text')).slice(0, length);
 		if(!pasted) return;
 		onChange?.(pasted);
 		refs.current[Math.min(pasted.length, length - 1)]?.focus();
@@ -93,10 +105,9 @@ const OTPInput = ({
 		'caret-transparent outline-none',
 		'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 		'hover:border-input-border-hover',
-		'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-0',
 		error
-			? 'border-input-error focus-visible:outline-input-error-ring'
-			: 'border-input-border focus-visible:outline-input-ring',
+			? 'border-input-error focus:border-input-error-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-input-error-ring'
+			: 'border-input-border focus:border-input-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-input-ring',
 		'disabled:cursor-not-allowed disabled:bg-input-disabled-bg disabled:text-input-disabled-text disabled:border-input-border',
 	].join(' ');
 
@@ -123,8 +134,8 @@ const OTPInput = ({
 						ref={el => { refs.current[index] = el; }}
 						id={index === 0 ? `${inputId}-0` : undefined}
 						type='text'
-						inputMode='numeric'
-						pattern='[0-9]*'
+						inputMode={inputMode}
+						pattern={pattern}
 						maxLength={1}
 						value={chars[index]}
 						onChange={handleChange(index)}
@@ -132,7 +143,8 @@ const OTPInput = ({
 						onPaste={handlePaste}
 						onFocus={handleFocus(index)}
 						disabled={disabled}
-						aria-label={`Digit ${index + 1} of ${length}`}
+						autoComplete={index === 0 ? 'one-time-code' : 'off'}
+						aria-label={`Character ${index + 1} of ${length}`}
 						className={cellClass}
 					/>
 				))}

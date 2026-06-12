@@ -317,7 +317,7 @@ export const Canvas = (
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
         style={{ touchAction: 'none', cursor: tool === 'eraser' ? 'cell' : 'crosshair' }}
-        className='w-full rounded-lg border border-surface-border bg-white'
+        className='w-full rounded-lg border border-surface-border bg-surface'
         aria-label='Drawing canvas'
         role='img'
       />

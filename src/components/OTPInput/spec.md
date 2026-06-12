@@ -41,6 +41,7 @@ Pasting into any cell fills the entire input from the beginning using the first 
 - Cells are grouped in a `role="group"` with `aria-labelledby` linked to the label
 - Error and hint messages are associated to the group via `aria-describedby`
 - `caret-transparent` hides the blinking text cursor — the cell border focus ring provides the visual focus indicator
+- The first cell carries `autoComplete='one-time-code'`; remaining cells use `autoComplete='off'`. This enables SMS and browser autofill of OTP codes (WCAG 1.3.5)
 
 ## When to Use
 

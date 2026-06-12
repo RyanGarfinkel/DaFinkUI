@@ -58,6 +58,7 @@ Interaction states are owned by the `ToggleGroup` / `ToggleGroupItem` component 
 - In `variant="example"`, the two panels carry `role="tabpanel"` and `aria-label` matching the tab name.
 - The ToggleGroup strip receives an `aria-label` from the `label` prop.
 - No focus trap is needed — neither variant opens a floating overlay.
+- The `<pre>` block (read-only variant) is conditionally focusable based on overflow state. When code overflows horizontally (`scrollWidth > clientWidth`), the element receives `tabIndex={0}`, `role="region"`, `aria-label="Code sample"`, and `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring` so keyboard users can scroll to read clipped content. When content fits without overflow, `tabIndex={-1}` keeps it out of the tab order and the copy button remains the primary tab stop. A `ResizeObserver` tracks this state and updates dynamically.
 
 ---
 
@@ -78,5 +79,5 @@ Interaction states are owned by the `ToggleGroup` / `ToggleGroupItem` component 
 | `bg-surface`           | Copy button background             |
 | `bg-surface-hover`     | Copy button hover background; preview pane tint |
 | `border-surface-border`| Copy button border; preview pane border |
-| `ring-brand-ring`      | Focus ring on copy button          |
+| `ring-brand-ring`      | Focus ring on copy button and overflowing `<pre>` |
 | `duration-[var(--duration-fast)]` | Copy button transition  |
