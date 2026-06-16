@@ -109,7 +109,7 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 					autoCorrect='off'
 					onChange={(e) => onCodeChange?.(e.target.value)}
 					onKeyDown={handleKeyDown}
-					className='bg-surface-active text-text font-mono text-sm p-4 rounded-lg w-full resize-none outline-none'
+					className='bg-surface-active text-text font-mono text-sm p-4 rounded-[var(--radius-lg)] w-full resize-none outline-none'
 				/>
 			) : (
 				<pre
@@ -118,7 +118,7 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 					role={isOverflowing ? 'region' : undefined}
 					aria-label={isOverflowing ? 'Code sample' : undefined}
 					className={[
-						'bg-surface-active text-text font-mono text-sm p-4 rounded-lg overflow-x-auto w-full',
+						'bg-surface-active text-text font-mono text-sm p-4 rounded-[var(--radius-lg)] overflow-x-auto w-full',
 						isOverflowing ? 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring' : '',
 					].join(' ').trim()}
 				>
@@ -131,9 +131,9 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 				aria-label={copied ? 'Copied' : 'Copy to clipboard'}
 				className='
 					absolute right-3 top-3
-					inline-flex items-center gap-1.5 rounded-md px-2 py-1.5
+					inline-flex items-center gap-1.5 rounded-[var(--radius)] px-2 py-1.5
 					text-xs text-text-muted
-					bg-surface border border-surface-border
+					bg-surface border-[length:var(--border-width)] border-surface-border
 					transition-colors duration-[var(--duration-fast)]
 					hover:bg-surface-hover hover:text-text
 					focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring
@@ -161,6 +161,23 @@ export const CodeBlock = (
 {
 	const [tab, setTab] = useState<string>('preview');
 	const [liveCode, setLiveCode] = useState(code);
+	const [previewOverflowing, setPreviewOverflowing] = useState(false);
+
+	const previewRef = useRef<HTMLDivElement>(null);
+
+	useEffect(() =>
+	{
+		const el = previewRef.current;
+		if(!el) return;
+
+		const observer = new ResizeObserver(() =>
+		{
+			setPreviewOverflowing(el.scrollWidth > el.clientWidth);
+		});
+
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, [tab]);
 
 	const handleCodeChange = (value: string) =>
 	{
@@ -194,14 +211,17 @@ export const CodeBlock = (
 
 			{tab === 'preview' ? (
 				<div
+					ref={previewRef}
 					role='tabpanel'
 					aria-label='Preview'
+					tabIndex={previewOverflowing ? 0 : undefined}
 					style={{ minHeight }}
 					className={[
-						'rounded-lg border border-surface-border bg-surface-hover/30 p-8 w-full',
-						'flex flex-wrap',
+						'rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-hover/30 p-4 sm:p-8 w-full',
+						'flex flex-wrap overflow-x-auto',
 						align === 'center' ? 'items-center justify-center' : 'items-start justify-start',
-					].join(' ')}
+						previewOverflowing ? 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring' : '',
+					].join(' ').trim()}
 				>
 					{children}
 				</div>

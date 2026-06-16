@@ -78,7 +78,7 @@ Use **floating** for compact layouts (login forms, inline search fields) where y
 ## Installation
 
 ```
-npx @obi/ui add input
+npx @dafink/ui add input
 ```
 
 No npm dependencies. No registry dependencies.

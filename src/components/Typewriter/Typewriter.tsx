@@ -82,21 +82,21 @@ export const Typewriter = (
 	return (
 		<>
 			<style>{`
-				@keyframes obi-cursor-blink {
+				@keyframes dafink-cursor-blink {
 					0%, 100% { opacity: 1; }
 					50%       { opacity: 0; }
 				}
-				.obi-cursor {
+				.dafink-cursor {
 					display: inline-block;
 					width: 2px;
 					height: 1em;
 					background: currentColor;
 					margin-left: 1px;
 					vertical-align: text-bottom;
-					animation: obi-cursor-blink 1s step-start infinite;
+					animation: dafink-cursor-blink 1s step-start infinite;
 				}
 				@media (prefers-reduced-motion: reduce) {
-					.obi-cursor { animation: none; }
+					.dafink-cursor { animation: none; }
 				}
 			`}</style>
 			<span
@@ -107,7 +107,7 @@ export const Typewriter = (
 			>
 				<span aria-hidden='true'>
 					{text.slice(0, displayedChars)}
-					{showCursor && <span className='obi-cursor' />}
+					{showCursor && <span className='dafink-cursor' />}
 				</span>
 			</span>
 		</>

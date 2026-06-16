@@ -379,7 +379,7 @@ const FunctionPlotter = ({
 
 	return (
 		<div className={['flex flex-col gap-3 w-full', className].join(' ')}>
-			<div ref={wrapperRef} className='relative w-full rounded-lg overflow-hidden border border-surface-border'>
+			<div ref={wrapperRef} className='relative w-full rounded-[var(--radius-lg)] overflow-hidden border-[length:var(--border-width)] border-surface-border'>
 				<canvas
 					ref={canvasRef}
 					onPointerDown={onPointerDown}
@@ -395,7 +395,7 @@ const FunctionPlotter = ({
 
 				{/* Zoom controls */}
 				<div
-					className='absolute top-2 right-2 flex flex-col gap-1 rounded-lg overflow-hidden border border-surface-border bg-surface/80 backdrop-blur-sm'
+					className='absolute top-2 right-2 flex flex-col gap-1 rounded-[var(--radius-lg)] overflow-hidden border-[length:var(--border-width)] border-surface-border bg-surface/80 backdrop-blur-[var(--backdrop-blur)]'
 					aria-label='Zoom controls'
 				>
 					<ZoomButton onClick={zoomIn}    aria-label='Zoom in'>
@@ -439,7 +439,7 @@ const FunctionPlotter = ({
 							aria-invalid={eq.error ? 'true' : 'false'}
 							placeholder='e.g. x^2 + 1'
 							className={[
-								'flex-1 rounded-md border px-3 py-1.5 text-sm bg-surface text-text',
+								'flex-1 rounded-[var(--radius)] border-[length:var(--border-width)] px-3 py-1.5 text-sm bg-surface text-text',
 								'placeholder:text-text-subtle',
 								'transition-colors duration-[var(--duration-fast)]',
 								'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
@@ -454,7 +454,7 @@ const FunctionPlotter = ({
 							aria-label={`Remove equation ${i + 1}`}
 							disabled={equations.length <= 1}
 							className={[
-								'flex items-center justify-center w-7 h-7 rounded-md text-text-muted',
+								'flex items-center justify-center w-7 h-7 rounded-[var(--radius)] text-text-muted',
 								'transition-colors duration-[var(--duration-fast)]',
 								'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 								'disabled:pointer-events-none disabled:opacity-40',
@@ -475,8 +475,8 @@ const FunctionPlotter = ({
 					disabled={equations.length >= MAX_EQ}
 					aria-label='Add equation'
 					className={[
-						'self-start flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm text-text-muted',
-						'border border-dashed border-surface-border',
+						'self-start flex items-center gap-1.5 rounded-[var(--radius)] px-3 py-1.5 text-sm text-text-muted',
+						'border-[length:var(--border-width)] border-dashed border-surface-border',
 						'transition-colors duration-[var(--duration-fast)]',
 						'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 						'disabled:pointer-events-none disabled:opacity-40',

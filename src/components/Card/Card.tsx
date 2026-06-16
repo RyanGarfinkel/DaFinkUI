@@ -14,13 +14,15 @@ export interface CardSectionProps extends HTMLAttributes<HTMLDivElement>
 	className?: string;
 }
 
+// Shape, depth, and translucency come from surface (style) tokens so the Card
+// re-skins automatically when the active Style changes. Color stays on palette tokens.
 const variantClasses: Record<CardVariant, string> = {
-	default:  'bg-surface border border-surface-border rounded-lg',
-	elevated: 'bg-surface shadow-md rounded-lg',
-	outline:  'bg-transparent border-2 border-surface-border rounded-lg',
+	default:  'bg-surface-panel border-[length:var(--border-width)] border-surface-border rounded-[var(--radius)] shadow-[var(--shadow-sm)] backdrop-blur-[var(--backdrop-blur)]',
+	elevated: 'bg-surface-panel rounded-[var(--radius)] shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
+	outline:  'bg-transparent border-[length:var(--border-width)] border-surface-border rounded-[var(--radius)]',
 };
 
-const interactiveClasses = 'motion-safe:transition-[box-shadow,transform] motion-safe:duration-[var(--duration-fast)] cursor-pointer hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring';
+const interactiveClasses = 'motion-safe:transition-[box-shadow,transform] motion-safe:duration-[var(--duration-fast)] cursor-pointer hover:-translate-y-0.5 hover:shadow-[var(--shadow-lg)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring';
 
 export const Card = (
     {

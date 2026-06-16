@@ -242,7 +242,7 @@ const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelec
 				tabIndex={0}
 				role='application'
 				aria-label='Graph'
-				className='block rounded-md border border-surface-border bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
+				className='block rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
 				onPointerDown={handleSvgPointerDown}
 				onPointerMove={handlePointerMove}
 				onPointerUp={handlePointerUp}

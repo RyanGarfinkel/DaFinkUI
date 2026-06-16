@@ -268,7 +268,7 @@ export const DatePicker = (
 					aria-controls={popupId}
 					onClick={openPopup}
 					className={[
-						'w-full flex items-center justify-between rounded-md border px-3 py-2 text-sm',
+						'w-full flex items-center justify-between rounded-[var(--radius)] border-[length:var(--border-width)] px-3 py-2 text-sm',
 						'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 						'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 						error
@@ -290,7 +290,7 @@ export const DatePicker = (
 						role='dialog'
 						aria-label='Date picker'
 						className={[
-							'absolute z-50 top-full mt-1 left-0 rounded-xl border border-surface-border bg-surface shadow-lg',
+							'absolute z-50 top-full mt-1 left-0 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
 							'p-3 w-72 outline-none',
 							'motion-safe:transition-[opacity,transform] motion-safe:duration-[var(--duration-fast)] origin-top',
 							visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
@@ -303,7 +303,7 @@ export const DatePicker = (
 								onClick={prevMonth}
 								aria-label='Previous month'
 								className={[
-									'flex items-center justify-center w-7 h-7 rounded-md text-text-muted',
+									'flex items-center justify-center w-7 h-7 rounded-[var(--radius)] text-text-muted',
 									'hover:bg-surface-hover hover:text-text',
 									'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring',
 									'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
@@ -321,7 +321,7 @@ export const DatePicker = (
 								onClick={nextMonth}
 								aria-label='Next month'
 								className={[
-									'flex items-center justify-center w-7 h-7 rounded-md text-text-muted',
+									'flex items-center justify-center w-7 h-7 rounded-[var(--radius)] text-text-muted',
 									'hover:bg-surface-hover hover:text-text',
 									'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring',
 									'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
@@ -390,7 +390,7 @@ export const DatePicker = (
 													aria-current={isToday ? 'date' : undefined}
 													onClick={() => !isDisabled && selectDate(day)}
 													className={[
-														'flex items-center justify-center w-full h-8 rounded-md text-sm',
+														'flex items-center justify-center w-full h-8 rounded-[var(--radius)] text-sm',
 														'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 														'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring',
 														isDisabled

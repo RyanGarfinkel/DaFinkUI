@@ -88,7 +88,7 @@ For breadcrumb-style hierarchical location indicators, use `Breadcrumb` instead.
 ## Installation
 
 ```bash
-npx @obi/ui add sidebar
+npx @dafink/ui add sidebar
 ```
 
 No additional npm dependencies. No registry dependencies.

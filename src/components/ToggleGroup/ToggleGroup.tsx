@@ -95,10 +95,10 @@ export const ToggleGroupItem = (
 	const stateClasses = ctx.type === 'single'
 		? isActive
 			? 'text-brand-fg'
-			: 'text-text hover:bg-surface-active'
+			: 'text-text'
 		: isActive
 			? 'bg-brand text-brand-fg'
-			: 'bg-surface text-text hover:bg-surface-hover border-r border-surface-border last:border-r-0';
+			: 'bg-surface text-text border-r-[length:var(--border-width)] border-surface-border last:border-r-0';
 
 	return (
 		<button
@@ -114,13 +114,13 @@ export const ToggleGroupItem = (
 			<span
 				aria-hidden='true'
 				className={[
-					'absolute inset-y-[5px] inset-x-1 rounded transition-[box-shadow]',
+					'absolute inset-y-[5px] inset-x-1 rounded-[max(0px,calc(var(--radius)_-_0.25rem))] transition-[box-shadow,background-color] duration-150',
 					isActive
-						? 'group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-brand-ring group-focus-visible:[--tw-ring-offset-color:var(--color-surface)]'
-						: 'group-focus-visible:ring-2 group-focus-visible:ring-brand-ring',
+						? 'group-hover:backdrop-brightness-[0.82] group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-brand-ring group-focus-visible:[--tw-ring-offset-color:var(--color-surface)]'
+						: 'group-hover:bg-input-border group-focus-visible:ring-2 group-focus-visible:ring-brand-ring',
 				].join(' ')}
 			/>
-			{children}
+			<span className='relative'>{children}</span>
 		</button>
 	);
 };
@@ -246,13 +246,13 @@ export const ToggleGroup = (
 				aria-label={ariaLabel}
 				aria-labelledby={ariaLabelledBy}
 				onKeyDown={handleKeyDown}
-				className={`relative inline-flex items-center rounded-md border border-surface-border bg-surface overflow-hidden ${className}`}
+				className={`relative inline-flex items-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--inner-shadow)] backdrop-blur-[var(--backdrop-blur)] overflow-hidden ${className}`}
 			>
 				{type === 'single' && (
 					<div
 						ref={indicatorRef}
 						aria-hidden='true'
-						className='absolute inset-y-[5px] rounded bg-brand motion-safe:transition-[left,width] motion-safe:duration-200'
+						className='absolute inset-y-[5px] rounded-[max(0px,calc(var(--radius)_-_0.25rem))] bg-brand shadow-[var(--shadow-sm)] motion-safe:transition-[left,width,box-shadow] motion-safe:duration-200'
 					/>
 				)}
 				{children}

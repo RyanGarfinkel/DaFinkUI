@@ -31,7 +31,7 @@ Extends all native `<span>` HTML attributes.
 
 ## Cursor
 
-The cursor is a 2px-wide block element with `background: currentColor`, so it inherits the text color of its context without any extra styling. It blinks via `obi-cursor-blink` — a step-start CSS keyframe. The CSS is injected inline via a `<style>` block, matching the pattern used by `TextShimmer`.
+The cursor is a 2px-wide block element with `background: currentColor`, so it inherits the text color of its context without any extra styling. It blinks via `dafink-cursor-blink` — a step-start CSS keyframe. The CSS is injected inline via a `<style>` block, matching the pattern used by `TextShimmer`.
 
 Show cursor when: `cursor` is `true` AND (still typing OR `cursorPersist` is `true`).
 
@@ -45,7 +45,7 @@ Screen readers receive the complete text immediately via `aria-label` on the roo
 <span aria-label="The full text string">
   <span aria-hidden="true">
     {text.slice(0, displayedChars)}
-    {showCursor && <span className="obi-cursor" />}
+    {showCursor && <span className="dafink-cursor" />}
   </span>
 </span>
 ```
@@ -106,7 +106,7 @@ None — the cursor inherits `currentColor`.
 ## Installation
 
 ```bash
-npx @obi/ui add typewriter
+npx @dafink/ui add typewriter
 ```
 
 npm dependencies: none  

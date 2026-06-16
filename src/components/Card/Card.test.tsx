@@ -14,19 +14,19 @@ describe('Card', () =>
 	{
 		const { container } = render(<Card>content</Card>);
 		const card = container.firstChild as HTMLElement;
-		expect(card.className).toContain('bg-surface');
-		expect(card.className).toContain('border');
+		expect(card.className).toContain('bg-surface-panel');
+		expect(card.className).toContain('border-[length:var(--border-width)]');
 		expect(card.className).toContain('border-surface-border');
-		expect(card.className).toContain('rounded-lg');
+		expect(card.className).toContain('rounded-[var(--radius)]');
 	});
 
 	it('applies elevated variant classes', () =>
 	{
 		const { container } = render(<Card variant='elevated'>content</Card>);
 		const card = container.firstChild as HTMLElement;
-		expect(card.className).toContain('bg-surface');
-		expect(card.className).toContain('shadow-md');
-		expect(card.className).toContain('rounded-lg');
+		expect(card.className).toContain('bg-surface-panel');
+		expect(card.className).toContain('shadow-[var(--shadow-lg)]');
+		expect(card.className).toContain('rounded-[var(--radius)]');
 		expect(card.className).not.toContain('border-surface-border');
 	});
 
@@ -35,9 +35,9 @@ describe('Card', () =>
 		const { container } = render(<Card variant='outline'>content</Card>);
 		const card = container.firstChild as HTMLElement;
 		expect(card.className).toContain('bg-transparent');
-		expect(card.className).toContain('border-2');
+		expect(card.className).toContain('border-[length:var(--border-width)]');
 		expect(card.className).toContain('border-surface-border');
-		expect(card.className).toContain('rounded-lg');
+		expect(card.className).toContain('rounded-[var(--radius)]');
 	});
 
 	it('merges custom className on Card', () =>

@@ -1,4 +1,4 @@
-import { Skeleton, SkeletonInput, SkeletonCard, SkeletonTableRow, SkeletonForm } from './Skeleton';
+import { Skeleton, SkeletonInput, SkeletonCard, SkeletonTableRow, SkeletonForm, SkeletonImage } from './Skeleton';
 import { render } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 
@@ -129,5 +129,52 @@ describe('SkeletonForm', () =>
 		const { container } = render(<SkeletonForm fields={2} />);
 		const inputs = container.querySelectorAll('.animate-pulse');
 		expect(inputs.length).toBeGreaterThanOrEqual(2);
+	});
+});
+
+describe('SkeletonImage', () =>
+{
+	it('renders without errors', () =>
+	{
+		const { container } = render(<SkeletonImage />);
+		expect(container.firstElementChild).toBeDefined();
+	});
+
+	it('sets aria-hidden="true"', () =>
+	{
+		const { container } = render(<SkeletonImage />);
+		expect(container.firstElementChild?.getAttribute('aria-hidden')).toBe('true');
+	});
+
+	it('applies animate-pulse class', () =>
+	{
+		const { container } = render(<SkeletonImage />);
+		expect(container.firstElementChild?.className).toContain('animate-pulse');
+	});
+
+	it('applies default aspect ratio via inline style', () =>
+	{
+		const { container } = render(<SkeletonImage />);
+		const el = container.firstElementChild as HTMLElement;
+		expect(el.style.aspectRatio).toBe('16/9');
+	});
+
+	it('applies custom aspect ratio via inline style', () =>
+	{
+		const { container } = render(<SkeletonImage aspectRatio='4/3' />);
+		const el = container.firstElementChild as HTMLElement;
+		expect(el.style.aspectRatio).toBe('4/3');
+	});
+
+	it('forwards className prop', () =>
+	{
+		const { container } = render(<SkeletonImage className='w-64' />);
+		expect(container.firstElementChild?.className).toContain('w-64');
+	});
+
+	it('renders the image placeholder icon', () =>
+	{
+		const { container } = render(<SkeletonImage />);
+		expect(container.querySelector('svg')).not.toBeNull();
 	});
 });

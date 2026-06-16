@@ -85,13 +85,13 @@ export const Sidebar = (
             {...props}
             ref={sidebarRef}
             onKeyDown={handleKeyDown}
-            className={['overflow-y-auto scrollbar-thin border-r border-surface-border bg-surface', height, width, className].join(' ')}
+            className={['overflow-y-auto scrollbar-hover border-r-[length:var(--border-width)] border-surface-border bg-surface', height, width, className].join(' ')}
         >
             <div className='relative px-3 py-6 flex flex-col gap-6'>
                 <div
                     ref={indicatorRef}
                     aria-hidden='true'
-                    className='absolute inset-x-3 rounded-md bg-surface-active pointer-events-none motion-safe:transition-[top,height] motion-safe:duration-200 motion-safe:ease-[var(--ease-standard)]'
+                    className='absolute inset-x-3 rounded-[var(--radius)] bg-surface-active pointer-events-none motion-safe:transition-[top,height] motion-safe:duration-200 motion-safe:ease-[var(--ease-standard)]'
                 >
                     <span className='absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-brand' />
                 </div>
@@ -136,7 +136,7 @@ export const SidebarLink = ({ isActive = false, className = '', children, ...pro
 			{...props}
 			aria-current={isActive ? 'page' : undefined}
 			className={[
-				'relative z-10 flex items-center rounded-md px-3 py-1.5 text-sm',
+				'relative z-10 flex items-center rounded-[var(--radius)] px-3 py-1.5 text-sm',
 				'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 				'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 				isActive
@@ -156,7 +156,7 @@ export const SidebarDivider = ({ className = '', ...props }: HTMLAttributes<HTML
 	return (
 		<hr
 			{...props}
-			className={['border-surface-border my-1', className].join(' ')}
+			className={['border-t-[length:var(--border-width)] border-surface-border my-1', className].join(' ')}
 		/>
 	);
 };

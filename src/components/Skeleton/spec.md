@@ -13,6 +13,7 @@ A set of loading placeholder components that mimic content shapes while data is 
 | `SkeletonInput` | Input field placeholder with optional label line |
 | `SkeletonTableRow` | Row of equal-width column blocks |
 | `SkeletonForm` | Stack of labelled input placeholders |
+| `SkeletonImage` | Rectangular image placeholder with a centred photo icon |
 
 ## Props
 
@@ -54,12 +55,20 @@ Extends all native `<div>` HTML attributes.
 | fields | `number` | `3` | Number of labelled input fields (each is a `SkeletonInput` with `label`). |
 | className | `string` | `''` | Additional classes on the wrapper. |
 
+### SkeletonImage
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| aspectRatio | `string` | `'16/9'` | CSS `aspect-ratio` value. Controls height relative to width (e.g. `'4/3'`, `'1'`). |
+| className | `string` | `''` | Additional classes — use for width constraints (e.g. `'w-64'`). |
+
 ## Visual Design
 
 - All blocks use `animate-pulse bg-surface-active rounded` — the pulse animation fades the block in and out
 - `SkeletonCard` staggers line widths from the `lineWidths` array to mimic realistic text wrapping
 - `SkeletonInput` renders the input block at `h-[2.25rem]` to match the real Input component height
 - `SkeletonTableRow` uses `flex gap-4` with `flex-1` columns — columns stretch to fill available width
+- `SkeletonImage` is a block-level div; height is derived from `aspectRatio` and the element's width. A centred photo icon (`text-text-muted opacity-40`) provides visual affordance.
 
 ## Accessibility
 
@@ -72,13 +81,14 @@ Extends all native `<div>` HTML attributes.
 - Use `SkeletonCard` to replace card components while their data loads.
 - Use `SkeletonInput` / `SkeletonForm` to hold form layout during async initialization.
 - Use `SkeletonTableRow` in table bodies while paginated data is fetching.
-- Use the base `Skeleton` for anything custom — avatars, image placeholders, stat tiles.
+- Use `SkeletonImage` to hold the layout of an image or media card while the source loads.
+- Use the base `Skeleton` for anything custom — avatars, stat tiles, or shapes not covered by the named variants.
 - Do not use Skeleton for actions triggered by the user (button presses, form submits) — use Spinner for those.
 
 ## Installation
 
 ```bash
-npx @obi/ui add skeleton
+npx @dafink/ui add skeleton
 ```
 
 npm dependencies: none

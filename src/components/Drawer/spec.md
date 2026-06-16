@@ -7,7 +7,7 @@ A blocking side-panel overlay that slides in from an edge of the screen. Uses th
 ## Installation
 
 ```bash
-npx @obi/ui add drawer
+npx @dafink/ui add drawer
 ```
 
 No additional npm packages required. No registry dependencies.

@@ -15,7 +15,7 @@ describe('TextShimmer', () =>
 	it('applies the shimmer class to the text element', () =>
 	{
 		render(<TextShimmer>Shiny</TextShimmer>);
-		expect(screen.getByText('Shiny').className).toContain('obi-text-shimmer');
+		expect(screen.getByText('Shiny').className).toContain('dafink-text-shimmer');
 	});
 
 	it('defaults the sweep duration to a token-derived value', () =>

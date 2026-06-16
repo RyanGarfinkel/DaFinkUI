@@ -145,7 +145,7 @@ export const Tooltip = (
 					style={{ position: 'fixed', top: position.top, left: position.left, zIndex: 50 }}
 					className={[
 						'pointer-events-none select-none whitespace-nowrap',
-						'rounded-md border border-surface-border bg-surface px-2.5 py-1 text-xs text-text shadow-md',
+						'rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel px-2.5 py-1 text-xs text-text shadow-[var(--shadow)] backdrop-blur-[var(--backdrop-blur)]',
 						'transition-all',
 						visible
 							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'

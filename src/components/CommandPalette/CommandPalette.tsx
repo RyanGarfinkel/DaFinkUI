@@ -351,14 +351,14 @@ export const CommandPalette = (
 				<div
 					ref={dialogRef}
 					className={[
-						'relative z-10 w-full max-w-lg rounded-xl border border-surface-border bg-surface shadow-xl',
+						'relative z-10 w-full max-w-lg rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
 						'flex flex-col overflow-hidden',
 						'motion-safe:transition-[opacity,transform] motion-safe:duration-[var(--duration-base)]',
 						visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
 					].join(' ')}
 					onPointerDown={(e) => e.stopPropagation()}
 				>
-					<div className='flex items-center gap-3 border-b border-surface-border px-4 py-3'>
+					<div className='flex items-center gap-3 border-b-[length:var(--border-width)] border-surface-border px-4 py-3'>
 						<svg
 							width='16'
 							height='16'
@@ -392,7 +392,7 @@ export const CommandPalette = (
 							].join(' ')}
 						/>
 
-						<kbd className='hidden sm:flex items-center rounded border border-surface-border px-1.5 py-0.5 text-[11px] font-medium text-text-muted select-none'>
+						<kbd className='hidden sm:flex items-center rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-surface-border px-1.5 py-0.5 text-[11px] font-medium text-text-muted select-none'>
 							Esc
 						</kbd>
 					</div>
@@ -493,7 +493,7 @@ export const CommandItem = (
 			onPointerDown={handlePointerDown}
 			onPointerEnter={handlePointerEnter}
 			className={[
-				'flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-lg text-sm select-none',
+				'flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-[var(--radius-lg)] text-sm select-none',
 				'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 				disabled
 					? 'opacity-40 cursor-not-allowed text-text-muted'
@@ -517,7 +517,7 @@ export const CommandItem = (
 			</span>
 
 			{shortcut && (
-				<kbd className='ml-auto shrink-0 flex items-center rounded border border-surface-border px-1.5 py-0.5 text-[11px] font-medium text-text-muted select-none'>
+				<kbd className='ml-auto shrink-0 flex items-center rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-surface-border px-1.5 py-0.5 text-[11px] font-medium text-text-muted select-none'>
 					{shortcut}
 				</kbd>
 			)}

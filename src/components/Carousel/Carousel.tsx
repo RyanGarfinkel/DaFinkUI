@@ -165,7 +165,7 @@ export const CarouselItem = ({ children, className = '', ...props }: CarouselIte
 	</div>
 );
 
-const NAV_BASE = 'absolute top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-surface border border-surface-border shadow-sm text-text hover:bg-surface-hover active:bg-surface-active transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40';
+const NAV_BASE = 'absolute top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-surface border-[length:var(--border-width)] border-surface-border shadow-[var(--shadow-sm)] text-text hover:bg-surface-hover active:bg-surface-active transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40';
 
 export type CarouselPreviousProps = ButtonHTMLAttributes<HTMLButtonElement>;
 

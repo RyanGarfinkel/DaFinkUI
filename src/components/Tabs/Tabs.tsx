@@ -76,7 +76,7 @@ export const TabsList = ({ children, className = '', ...props }: TabsListProps) 
 		<div
 			role='tablist'
 			ref={listRef}
-			className={`relative border-b border-surface-border flex gap-1 ${className}`}
+			className={`relative border-b-[length:var(--border-width)] border-surface-border flex gap-1 ${className}`}
 			{...props}
 		>
 			{children}
@@ -100,7 +100,7 @@ export const TabsTrigger = ({ value, children, className = '', disabled, ...prop
 	const { value: activeValue, onValueChange } = useTabsContext();
 	const isActive = activeValue === value;
 
-	const baseClasses   = 'relative px-4 py-2 text-sm rounded-t-md transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40';
+	const baseClasses   = 'relative px-4 py-2 text-sm rounded-t-[var(--radius)] transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40';
 	const stateClasses  = isActive
 		? 'bg-surface text-text font-medium'
 		: 'text-text-muted hover:text-text hover:bg-surface-hover';

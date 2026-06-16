@@ -7,7 +7,7 @@ A trigger button that opens a calendar popup for selecting a single date. No ext
 ## Installation
 
 ```bash
-npx @obi/ui add date-picker
+npx @dafink/ui add date-picker
 ```
 
 No npm dependencies. No registry dependencies.

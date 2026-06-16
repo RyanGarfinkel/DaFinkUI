@@ -91,7 +91,7 @@ describe('Avatar', () =>
 		expect(screen.getByTestId('avatar').className).toContain('rounded-full');
 
 		rerender(<Avatar name='Ada Lovelace' data-testid='avatar' shape='square' />);
-		expect(screen.getByTestId('avatar').className).toContain('rounded-md');
+		expect(screen.getByTestId('avatar').className).toContain('rounded-[var(--radius)]');
 	});
 
 	it('uses token-derived classes for the fallback surface', () =>
@@ -166,7 +166,7 @@ describe('AvatarGroup', () =>
 		);
 		const child = screen.getByTestId('child');
 		expect(child.className).toContain('h-12');
-		expect(child.className).toContain('rounded-md');
+		expect(child.className).toContain('rounded-[var(--radius)]');
 	});
 
 	it('overlaps avatars with negative spacing and a surface ring', () =>

@@ -51,7 +51,7 @@ Each variant applies a matching background, border, text color, and icon. The ic
 ## Installation
 
 ```bash
-npx @obi/ui add alert
+npx @dafink/ui add alert
 ```
 
 npm dependencies: none

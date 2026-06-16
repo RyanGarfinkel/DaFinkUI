@@ -41,7 +41,7 @@ const CELL_BASE = 'px-4 py-3 text-sm text-text';
 
 export const Table = ({ striped = false, className = '', children, ...props }: TableProps) => {
 	return (
-		<div className='w-full overflow-x-auto rounded-md border border-surface-border'>
+		<div className='w-full overflow-x-auto rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border'>
 			<table
 				className={`w-full border-collapse ${striped ? '[&_tbody_tr:nth-child(odd)]:bg-surface [&_tbody_tr:nth-child(even)]:bg-surface-hover' : ''} ${className}`}
 				{...props}
@@ -54,7 +54,7 @@ export const Table = ({ striped = false, className = '', children, ...props }: T
 
 export const TableHead = ({ className = '', children, ...props }: TableHeadProps) => {
 	return (
-		<thead className={`border-b border-surface-border bg-surface-active ${className}`} {...props}>
+		<thead className={`border-b-[length:var(--border-width)] border-surface-border bg-surface-active ${className}`} {...props}>
 			{children}
 		</thead>
 	);
@@ -115,7 +115,7 @@ export const TableHeader = (
 				<button
 					type='button'
 					onClick={onSort}
-					className='inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring rounded-sm hover:text-text transition-colors duration-150 motion-reduce:transition-none'
+					className='inline-flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring rounded-[var(--radius-sm)] hover:text-text transition-colors duration-150 motion-reduce:transition-none'
 				>
 					{children}
 					<SortIcon direction={sortDirection ?? null} />

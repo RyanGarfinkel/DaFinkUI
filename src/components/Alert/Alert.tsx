@@ -40,7 +40,7 @@ export const Alert = (
 			role='alert'
 			{...props}
 			className={[
-				'flex gap-3 rounded-lg border p-4',
+				'flex gap-3 rounded-[var(--radius-lg)] border-[length:var(--border-width)] p-4',
 				s.wrapper,
 				className,
 			].join(' ')}

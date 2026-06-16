@@ -7,7 +7,7 @@ A global command palette overlay for quick navigation and action execution. Open
 ## Installation
 
 ```bash
-npx @obi/ui add command-palette
+npx @dafink/ui add command-palette
 ```
 
 No additional npm packages required. No registry dependencies.

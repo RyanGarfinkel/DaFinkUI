@@ -59,7 +59,7 @@ Set the `error` prop to a non-empty string to enter the error state:
 ## Installation
 
 ```bash
-npx @obi/ui add textarea
+npx @dafink/ui add textarea
 ```
 
 npm dependencies: none

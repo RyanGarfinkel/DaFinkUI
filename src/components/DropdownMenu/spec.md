@@ -5,7 +5,7 @@ A trigger button that opens a floating menu of actions with full keyboard naviga
 ## Installation
 
 ```bash
-npx @obi/ui add dropdown-menu
+npx @dafink/ui add dropdown-menu
 ```
 
 No npm dependencies. No registry dependencies.

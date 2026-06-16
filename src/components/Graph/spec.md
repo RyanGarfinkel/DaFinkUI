@@ -5,7 +5,7 @@ A force-directed node/edge graph rendered in SVG with draggable nodes, pan/zoom,
 ## Installation
 
 ```bash
-npx @obi/ui add graph
+npx @dafink/ui add graph
 ```
 
 npm dependency: `d3-force`. No registry dependencies.
@@ -129,14 +129,14 @@ const NODES: GraphNode[] = [
   { id: 'nextjs',     label: 'Next.js'    },
   { id: 'typescript', label: 'TypeScript' },
   { id: 'tailwind',   label: 'Tailwind'   },
-  { id: 'obi',        label: 'Obi UI'     },
+  { id: 'dafink',        label: 'DaFink UI'     },
 ];
 
 const EDGES: GraphEdge[] = [
   { source: 'react',      target: 'nextjs'     },
   { source: 'react',      target: 'typescript' },
-  { source: 'nextjs',     target: 'obi'        },
-  { source: 'tailwind',   target: 'obi'        },
+  { source: 'nextjs',     target: 'dafink'        },
+  { source: 'tailwind',   target: 'dafink'        },
 ];
 
 export default function Example() {

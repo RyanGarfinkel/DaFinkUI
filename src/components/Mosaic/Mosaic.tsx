@@ -237,7 +237,7 @@ const SizePicker = (
 							aria-label={`${c}×${r}`}
 							aria-pressed={isCurrent}
 							className={[
-								'w-5 h-5 rounded-sm border motion-safe:transition-colors motion-safe:duration-75',
+								'w-5 h-5 rounded-[var(--radius-sm)] border-[length:var(--border-width)] motion-safe:transition-colors motion-safe:duration-75',
 								isLit
 									? 'bg-brand border-brand'
 									: isCurrent
@@ -480,7 +480,7 @@ export const Mosaic = (
 					{activeTile && ghostW > 0 && (
 						<div
 							style={{ width: ghostW, height: ghostH, cursor: 'grabbing' }}
-							className='relative rounded-lg border border-brand/20 bg-surface shadow-2xl ring-1 ring-brand/10'
+							className='relative rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-brand/20 bg-surface shadow-2xl ring-1 ring-brand/10'
 						>
 							{activeSnapCell && (
 								<span className='absolute bottom-2 left-3 text-[11px] font-medium text-text-muted tabular-nums select-none'>
@@ -766,16 +766,16 @@ export const MosaicTile = (
 		<div
 			ref={setNodeRef}
 			style={style}
-			className={`relative group/tile bg-surface border border-surface-border rounded-lg ${className}`}
+			className={`relative group/tile bg-surface border-[length:var(--border-width)] border-surface-border rounded-[var(--radius-lg)] ${className}`}
 		>
 			{isDragging ? (
-				<div className='absolute inset-0 rounded-lg border-2 border-dashed border-surface-border bg-surface' />
+				<div className='absolute inset-0 rounded-[var(--radius-lg)] border-2 border-dashed border-surface-border bg-surface' />
 			) : (
 				<>
 					<div
 						{...listeners}
 						{...attributes}
-						className='absolute top-2 right-2 z-20 p-1.5 rounded opacity-0 group-hover/tile:opacity-100 cursor-grab active:cursor-grabbing touch-none motion-safe:transition-opacity motion-safe:duration-150 text-text-subtle hover:text-text-muted hover:bg-surface-hover'
+						className='absolute top-2 right-2 z-20 p-1.5 rounded-[var(--radius-sm)] opacity-0 group-hover/tile:opacity-100 cursor-grab active:cursor-grabbing touch-none motion-safe:transition-opacity motion-safe:duration-150 text-text-subtle hover:text-text-muted hover:bg-surface-hover'
 						aria-label={`Drag to reposition ${id}`}
 					>
 						<svg width='10' height='14' viewBox='0 0 10 14' fill='currentColor' aria-hidden='true'>
@@ -795,7 +795,7 @@ export const MosaicTile = (
 								onClick={() => setShowPicker(v => !v)}
 								aria-label={`Resize ${id}`}
 								aria-expanded={showPicker}
-								className='p-1.5 rounded opacity-0 group-hover/tile:opacity-100 motion-safe:transition-opacity motion-safe:duration-150 text-text-subtle hover:text-text-muted hover:bg-surface-hover'
+								className='p-1.5 rounded-[var(--radius-sm)] opacity-0 group-hover/tile:opacity-100 motion-safe:transition-opacity motion-safe:duration-150 text-text-subtle hover:text-text-muted hover:bg-surface-hover'
 							>
 								<svg width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' aria-hidden='true'>
 									<path d='M1 8v3h3M11 4V1H8M8 11h3v-3M1 4V1h3' />
@@ -803,7 +803,7 @@ export const MosaicTile = (
 							</button>
 
 							{showPicker && (
-								<div className='absolute bottom-full right-0 mb-1.5 rounded-lg border border-surface-border bg-surface shadow-lg'>
+								<div className='absolute bottom-full right-0 mb-1.5 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]'>
 									<SizePicker
 										pickerCols={pickerCols}
 										pickerRows={pickerRows}

@@ -200,7 +200,7 @@ export const Canvas = (
       {...props}
     >
       {showToolbar && (
-        <div className='flex flex-wrap items-center gap-3 rounded-lg border border-surface-border bg-surface px-3 py-2'>
+        <div className='flex flex-wrap items-center gap-3 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface px-3 py-2'>
           {/* Tool selector */}
           <div className='flex items-center gap-1' role='group' aria-label='Drawing tool'>
             <ToolButton
@@ -264,7 +264,7 @@ export const Canvas = (
                 aria-label={`Stroke width ${w}`}
                 onClick={() => setStrokeWidth(w)}
                 className={[
-                  'flex items-center justify-center w-7 h-7 rounded-md transition-colors duration-[var(--duration-fast)]',
+                  'flex items-center justify-center w-7 h-7 rounded-[var(--radius)] transition-colors duration-[var(--duration-fast)]',
                   'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
                   strokeWidth === w
                     ? 'bg-surface-active text-text'
@@ -317,7 +317,7 @@ export const Canvas = (
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerUp}
         style={{ touchAction: 'none', cursor: tool === 'eraser' ? 'cell' : 'crosshair' }}
-        className='w-full rounded-lg border border-surface-border bg-surface'
+        className='w-full rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface'
         aria-label='Drawing canvas'
         role='img'
       />
@@ -337,7 +337,7 @@ const ToolButton = ({ active = false, className = '', children, ...props }: Tool
       type='button'
       {...props}
       className={[
-        'flex items-center justify-center w-7 h-7 rounded-md text-sm transition-colors duration-[var(--duration-fast)]',
+        'flex items-center justify-center w-7 h-7 rounded-[var(--radius)] text-sm transition-colors duration-[var(--duration-fast)]',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
         'disabled:pointer-events-none disabled:opacity-40',
         active

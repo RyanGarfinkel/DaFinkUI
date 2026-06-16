@@ -196,13 +196,13 @@ export const Select = (
 					aria-controls={listboxId}
 					onClick={openList}
 					className={[
-						'w-full flex items-center justify-between rounded-md border',
-						'transition-colors duration-[var(--duration-fast)]',
-						'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
+						'w-full flex items-center justify-between rounded-[var(--radius)] border-[length:var(--border-width)]',
+						'motion-safe:transition-shadow motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
+						'focus:outline-none shadow-[var(--inner-shadow)] focus-visible:shadow-[var(--input-focus-shadow)]',
 						SIZE[size],
 						error
-							? 'border-danger bg-input text-text'
-							: 'border-input-border bg-input text-text hover:border-brand',
+							? 'border-danger bg-surface text-text'
+							: 'border-input-border bg-surface text-text hover:border-input-border-hover',
 						disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer',
 					].join(' ')}
 				>
@@ -238,8 +238,8 @@ export const Select = (
 						aria-activedescendant={`${id}-opt-${activeIndex}`}
 						onKeyDown={handleListKeyDown}
 						className={[
-							'absolute z-50 top-full mt-1 left-0 right-0 rounded-lg border border-surface-border bg-surface shadow-lg',
-							'overflow-y-auto max-h-60 py-1 outline-none',
+							'absolute z-50 top-full mt-1 left-0 min-w-full rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
+							'overflow-x-hidden overflow-y-auto max-h-60 py-2 outline-none',
 							'transition-all duration-[var(--duration-fast)] origin-top',
 							visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
 						].join(' ')}
@@ -258,7 +258,7 @@ export const Select = (
 									onPointerDown={(e) => { e.preventDefault(); selectOption(i); }}
 									onPointerEnter={() => setActiveIndex(i)}
 									className={[
-										'flex items-center justify-between px-3 py-2 text-sm cursor-pointer select-none',
+										'flex items-center justify-between mx-1 rounded-[var(--radius-sm)] px-3 py-2 text-sm cursor-pointer select-none',
 										'transition-colors duration-[var(--duration-fast)]',
 										isActive
 											? 'bg-surface-active text-text'

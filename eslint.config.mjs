@@ -16,6 +16,8 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
     // Build artifacts
     'storybook-static/**',
+    // Sub-packages manage their own lint conventions
+    'packages/**',
   ]),
   {
     plugins: {

@@ -45,7 +45,7 @@ Extends all native `<span>` HTML attributes.
 ## Installation
 
 ```bash
-npx @obi/ui add spinner
+npx @dafink/ui add spinner
 ```
 
 npm dependencies: none

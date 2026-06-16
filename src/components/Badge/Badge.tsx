@@ -21,7 +21,7 @@ export const Badge = ({ variant = 'default', className = '', children, ...props 
 		<span
 			{...props}
 			className={[
-				'inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium leading-none',
+				'inline-flex items-center rounded-full border-[length:var(--border-width)] px-2 py-0.5 text-xs font-medium leading-none',
 				VARIANT_CLASSES[variant],
 				className,
 			].join(' ')}

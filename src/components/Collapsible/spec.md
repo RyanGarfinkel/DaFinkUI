@@ -87,7 +87,7 @@ Use **Accordion** when you have multiple related sections that share a visual gr
 ## Installation
 
 ```bash
-npx @obi/ui add collapsible
+npx @dafink/ui add collapsible
 ```
 
 No npm dependencies. No registry dependencies.

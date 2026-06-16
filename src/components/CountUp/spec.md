@@ -46,7 +46,7 @@ Extends all native `<span>` HTML attributes.
 ## Installation
 
 ```bash
-npx @obi/ui add count-up
+npx @dafink/ui add count-up
 ```
 
 npm dependencies: none

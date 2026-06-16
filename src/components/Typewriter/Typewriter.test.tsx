@@ -97,8 +97,8 @@ describe('Typewriter', () =>
 	{
 		const { container } = render(<Typewriter text='Hello' />);
 		const css = container.querySelector('style')?.textContent ?? '';
-		expect(css).toContain('obi-cursor-blink');
-		expect(css).toContain('obi-cursor');
+		expect(css).toContain('dafink-cursor-blink');
+		expect(css).toContain('dafink-cursor');
 	});
 
 	it('forwards className and native HTML attributes', () =>

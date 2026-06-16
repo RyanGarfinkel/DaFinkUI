@@ -68,10 +68,10 @@ export const KanbanCard = ({ card, isDragging = false, className = '' }: KanbanC
       {...listeners}
       aria-label={`Card: ${card.title}. Press space to start dragging.`}
       className={[
-        'group rounded-lg border bg-surface p-3 shadow-sm cursor-grab active:cursor-grabbing',
+        'group rounded-[var(--radius-lg)] border-[length:var(--border-width)] bg-surface-panel p-3 shadow-[var(--shadow-sm)] cursor-grab active:cursor-grabbing',
         'transition-all duration-[var(--duration-fast)]',
         'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
-        'hover:border-surface-border-hover hover:shadow-md',
+        'hover:border-surface-border-hover hover:shadow-[var(--shadow)]',
         isSortableDragging || isDragging
           ? 'opacity-40 border-surface-border-hover'
           : 'border-surface-border',
@@ -102,7 +102,7 @@ export const KanbanColumn = ({ column, className = '', ...props }: KanbanColumnP
   return (
     <div
       className={[
-        'flex flex-col gap-3 rounded-xl border border-surface-border bg-surface-hover p-3 min-w-[240px] w-[240px]',
+        'flex flex-col gap-3 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-hover p-3 min-w-[240px] w-[240px]',
         className,
       ].join(' ')}
       {...props}
@@ -228,7 +228,7 @@ export const KanbanBoard = ({ initialColumns, className = '' }: KanbanBoardProps
 
       <DragOverlay>
         {activeCard && (
-          <KanbanCard card={activeCard} isDragging className='rotate-1 shadow-xl opacity-95' />
+          <KanbanCard card={activeCard} isDragging className='rotate-1 shadow-[var(--shadow-lg)] opacity-95' />
         )}
       </DragOverlay>
     </DndContext>

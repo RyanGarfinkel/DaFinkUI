@@ -5,7 +5,7 @@ A dual-purpose display component that renders a styled `<pre><code>` block with 
 ## Installation
 
 ```bash
-npx @obi/ui add code-block
+npx @dafink/ui add code-block
 ```
 
 **Registry dependencies:** `toggle-group` (installed automatically)  

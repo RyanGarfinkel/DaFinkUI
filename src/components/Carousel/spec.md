@@ -7,7 +7,7 @@ A compound component for cycling through a series of slides with keyboard naviga
 ## Installation
 
 ```bash
-npx @obi/ui add carousel
+npx @dafink/ui add carousel
 ```
 
 No npm dependencies. No registry dependencies.

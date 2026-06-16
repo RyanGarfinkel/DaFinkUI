@@ -16,15 +16,15 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 		const textareaId = id ?? label?.toLowerCase().replace(/\s+/g, '-');
 
 		const textareaClasses = [
-			'w-full rounded-md border bg-surface text-text px-3 py-2 text-sm',
+			'w-full rounded-[var(--radius)] border-[length:var(--border-width)] bg-surface text-text px-3 py-2 text-sm',
 			'min-h-[80px] resize-y',
 			'placeholder:text-text-subtle',
-			'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] outline-none',
+			'motion-safe:transition-shadow motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] outline-none',
 			'hover:border-input-border-hover',
-			'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-0',
 			error
-				? 'border-input-error focus-visible:outline-input-error-ring'
-				: 'border-input-border focus-visible:outline-input-ring',
+				? 'border-input-error focus:border-input-error-ring'
+				: 'border-input-border focus:border-input-ring',
+			'focus:outline-none shadow-[var(--inner-shadow)] focus-visible:shadow-[var(--input-focus-shadow)]',
 			'disabled:cursor-not-allowed disabled:bg-input-disabled-bg disabled:text-input-disabled-text disabled:border-input-border',
 			className,
 		].join(' ');

@@ -1,6 +1,6 @@
 'use client';
 
-import { ClipboardEvent, KeyboardEvent, useRef } from 'react';
+import { ClipboardEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 
 export type OTPCharset = 'numeric' | 'alphanumeric' | 'alphabetic' | 'any';
 
@@ -28,7 +28,7 @@ const OTPInput = ({
 	length = 6,
 	value = '',
 	onChange,
-	charset = 'numeric',
+	charset = 'any',
 	label,
 	error,
 	hint,
@@ -39,8 +39,26 @@ const OTPInput = ({
 	const inputId = label?.toLowerCase().replace(/\s+/g, '-') ?? 'otp';
 	const refs = useRef<(HTMLInputElement | null)[]>([]);
 
-	const chars = Array.from({ length }, (_, i) => value[i] ?? '');
+	const [slots, setSlots] = useState<string[]>(() =>
+		Array.from({ length }, (_, i) => value[i] ?? '')
+	);
+	const lastEmitted = useRef(value);
+
+	useEffect(() =>
+	{
+		if(value !== lastEmitted.current)
+			// eslint-disable-next-line react-hooks/set-state-in-effect
+			setSlots(Array.from({ length }, (_, i) => value[i] ?? ''));
+	}, [value, length]);
+
 	const { filter, inputMode, pattern } = CHARSET_CONFIG[charset];
+
+	const emit = (newSlots: string[]) =>
+	{
+		const joined = newSlots.join('');
+		lastEmitted.current = joined;
+		onChange?.(joined);
+	};
 
 	const feedbackId = error ? `${inputId}-error` : hint ? `${inputId}-hint` : undefined;
 	const feedbackText = error ?? hint;
@@ -48,9 +66,10 @@ const OTPInput = ({
 	const handleChange = (index: number) => (e: React.ChangeEvent<HTMLInputElement>) =>
 	{
 		const char = filter(e.target.value).slice(-1);
-		const newChars = [...chars];
-		newChars[index] = char;
-		onChange?.(newChars.join(''));
+		const newSlots = [...slots];
+		newSlots[index] = char;
+		setSlots(newSlots);
+		emit(newSlots);
 
 		if(char && index < length - 1)
 			refs.current[index + 1]?.focus();
@@ -58,19 +77,36 @@ const OTPInput = ({
 
 	const handleKeyDown = (index: number) => (e: KeyboardEvent<HTMLInputElement>) =>
 	{
+		if(e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && slots[index])
+		{
+			const char = filter(e.key);
+			if(char)
+			{
+				e.preventDefault();
+				const newSlots = [...slots];
+				newSlots[index] = char;
+				setSlots(newSlots);
+				emit(newSlots);
+				if(index < length - 1) refs.current[index + 1]?.focus();
+			}
+			return;
+		}
+
 		if(e.key === 'Backspace')
 		{
-			if(chars[index])
+			if(slots[index])
 			{
-				const newChars = [...chars];
-				newChars[index] = '';
-				onChange?.(newChars.join(''));
+				const newSlots = [...slots];
+				newSlots[index] = '';
+				setSlots(newSlots);
+				emit(newSlots);
 			}
 			else if(index > 0)
 			{
-				const newChars = [...chars];
-				newChars[index - 1] = '';
-				onChange?.(newChars.join(''));
+				const newSlots = [...slots];
+				newSlots[index - 1] = '';
+				setSlots(newSlots);
+				emit(newSlots);
 				refs.current[index - 1]?.focus();
 			}
 		}
@@ -91,23 +127,25 @@ const OTPInput = ({
 		e.preventDefault();
 		const pasted = filter(e.clipboardData.getData('text')).slice(0, length);
 		if(!pasted) return;
-		onChange?.(pasted);
+		const newSlots = Array.from({ length }, (_, i) => pasted[i] ?? '');
+		setSlots(newSlots);
+		emit(newSlots);
 		refs.current[Math.min(pasted.length, length - 1)]?.focus();
 	};
 
-	const handleFocus = (index: number) => () =>
+	const handleFocus = (e: React.FocusEvent<HTMLInputElement>) =>
 	{
-		refs.current[index]?.select();
+		const el = e.currentTarget;
+		requestAnimationFrame(() => el.setSelectionRange(el.value.length, el.value.length));
 	};
 
 	const cellClass = [
-		'w-10 h-12 text-center text-lg font-semibold rounded-md border bg-surface text-text',
+		'w-10 h-12 text-center text-lg font-semibold rounded-[var(--radius)] border-[length:var(--border-width)] bg-surface text-text',
 		'caret-transparent outline-none',
-		'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
+		'motion-safe:transition-shadow motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 		'hover:border-input-border-hover',
-		error
-			? 'border-input-error focus:border-input-error-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-input-error-ring'
-			: 'border-input-border focus:border-input-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-input-ring',
+		error ? 'border-input-error' : 'border-input-border',
+		'shadow-[var(--inner-shadow)] focus-visible:shadow-[var(--input-focus-shadow)]',
 		'disabled:cursor-not-allowed disabled:bg-input-disabled-bg disabled:text-input-disabled-text disabled:border-input-border',
 	].join(' ');
 
@@ -129,24 +167,34 @@ const OTPInput = ({
 				className='flex gap-2'
 			>
 				{Array.from({ length }).map((_, index) => (
-					<input
-						key={index}
-						ref={el => { refs.current[index] = el; }}
-						id={index === 0 ? `${inputId}-0` : undefined}
-						type='text'
-						inputMode={inputMode}
-						pattern={pattern}
-						maxLength={1}
-						value={chars[index]}
-						onChange={handleChange(index)}
-						onKeyDown={handleKeyDown(index)}
-						onPaste={handlePaste}
-						onFocus={handleFocus(index)}
-						disabled={disabled}
-						autoComplete={index === 0 ? 'one-time-code' : 'off'}
-						aria-label={`Character ${index + 1} of ${length}`}
-						className={cellClass}
-					/>
+					<div key={index} className='relative group'>
+						<input
+							ref={el => { refs.current[index] = el; }}
+							id={index === 0 ? `${inputId}-0` : undefined}
+							type='text'
+							inputMode={inputMode}
+							pattern={pattern}
+							maxLength={1}
+							value={slots[index]}
+							onChange={handleChange(index)}
+							onKeyDown={handleKeyDown(index)}
+							onPaste={handlePaste}
+							onFocus={handleFocus}
+							disabled={disabled}
+							autoComplete={index === 0 ? 'one-time-code' : 'off'}
+							aria-label={`Character ${index + 1} of ${length}`}
+							className={cellClass}
+						/>
+						<span
+							aria-hidden='true'
+							className={[
+								'absolute bottom-2.5 left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full',
+								'opacity-0 group-focus-within:opacity-100',
+								'motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)]',
+								error ? 'bg-input-error-ring' : 'bg-input-ring',
+							].join(' ')}
+						/>
+					</div>
 				))}
 			</div>
 			<div

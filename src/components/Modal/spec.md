@@ -7,7 +7,7 @@ A blocking overlay dialog with focus trap, Escape-to-close, and backdrop dismiss
 ## Installation
 
 ```bash
-npx @obi/ui add modal
+npx @dafink/ui add modal
 ```
 
 No additional npm packages required. No registry dependencies.

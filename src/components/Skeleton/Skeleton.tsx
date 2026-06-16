@@ -34,7 +34,7 @@ export interface SkeletonFormProps
 export const Skeleton = ({ width, height, className = '', style, ...props }: SkeletonProps) => {
 	return (
 		<div
-			className={`animate-pulse bg-surface-active rounded ${className}`}
+			className={`animate-pulse bg-surface-active rounded-[var(--radius-sm)] ${className}`}
 			style={{ width, height, ...style }}
 			aria-hidden='true'
 			{...props}
@@ -90,6 +90,40 @@ export const SkeletonForm = ({ fields = 3, className = '' }: SkeletonFormProps) 
 			{Array.from({ length: fields }, (_, i) => (
 				<SkeletonInput key={i} label />
 			))}
+		</div>
+	);
+};
+
+export interface SkeletonImageProps
+{
+	aspectRatio?: string;
+	className?:   string;
+}
+
+export const SkeletonImage = ({ aspectRatio = '16/9', className = '' }: SkeletonImageProps) =>
+{
+	return (
+		<div
+			className={`animate-pulse bg-surface-active rounded-[var(--radius-sm)] flex items-center justify-center ${className}`}
+			style={{ aspectRatio }}
+			aria-hidden='true'
+		>
+			<svg
+				xmlns='http://www.w3.org/2000/svg'
+				width='32'
+				height='32'
+				viewBox='0 0 24 24'
+				fill='none'
+				stroke='currentColor'
+				strokeWidth='1.5'
+				strokeLinecap='round'
+				strokeLinejoin='round'
+				className='text-text-muted opacity-40'
+			>
+				<rect x='3' y='3' width='18' height='18' rx='2' ry='2' />
+				<circle cx='8.5' cy='8.5' r='1.5' />
+				<polyline points='21 15 16 10 5 21' />
+			</svg>
 		</div>
 	);
 };

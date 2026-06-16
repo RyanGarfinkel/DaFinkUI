@@ -212,7 +212,7 @@ const Modal = (
 					data-state={visible ? 'open' : 'closed'}
 					onPointerDown={(e) => e.stopPropagation()}
 					className={[
-						'relative z-10 w-full max-w-md rounded-xl border border-surface-border bg-surface shadow-xl',
+						'relative z-10 w-full max-w-md rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
 						'focus:outline-none',
 						'motion-safe:transition-[opacity,transform]',
 						visible
@@ -318,7 +318,7 @@ export const ModalClose = (
 				onClick?.(e);
 				requestClose();
 			}}
-			className={`absolute top-4 right-4 rounded-md p-1 text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring ${className}`}
+			className={`absolute top-4 right-4 rounded-[var(--radius)] p-1 text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring ${className}`}
 			{...props}
 		>
 			<svg

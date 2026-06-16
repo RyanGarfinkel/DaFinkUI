@@ -5,7 +5,7 @@ A single-value dropdown selector with full keyboard navigation, typeahead, and a
 ## Installation
 
 ```bash
-npx @obi/ui add select
+npx @dafink/ui add select
 ```
 
 No npm dependencies. No registry dependencies.

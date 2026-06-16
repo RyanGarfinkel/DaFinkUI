@@ -22,10 +22,10 @@ const EXIT_DURATION_MS = 150;
 export type DrawerSide = 'left' | 'right' | 'top' | 'bottom';
 
 const SIDE_PANEL_CLASSES: Record<DrawerSide, string> = {
-	right:  'inset-y-0 right-0 h-full w-80 max-w-[85vw] border-l',
-	left:   'inset-y-0 left-0 h-full w-80 max-w-[85vw] border-r',
-	top:    'inset-x-0 top-0 w-full max-h-[85vh] border-b',
-	bottom: 'inset-x-0 bottom-0 w-full max-h-[85vh] border-t',
+	right:  'inset-y-0 right-0 h-full w-80 max-w-[85vw] border-l-[length:var(--border-width)]',
+	left:   'inset-y-0 left-0 h-full w-80 max-w-[85vw] border-r-[length:var(--border-width)]',
+	top:    'inset-x-0 top-0 w-full max-h-[85vh] border-b-[length:var(--border-width)]',
+	bottom: 'inset-x-0 bottom-0 w-full max-h-[85vh] border-t-[length:var(--border-width)]',
 };
 
 const SIDE_HIDDEN_CLASSES: Record<DrawerSide, string> = {
@@ -233,7 +233,7 @@ const Drawer = (
 					data-side={side}
 					onPointerDown={(e) => e.stopPropagation()}
 					className={[
-						'absolute z-10 flex flex-col bg-surface border-surface-border shadow-xl',
+						'absolute z-10 flex flex-col bg-surface-panel border-surface-border shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
 						SIDE_PANEL_CLASSES[side],
 						'focus:outline-none',
 						'motion-safe:transition-transform',
@@ -340,7 +340,7 @@ export const DrawerClose = (
 				onClick?.(e);
 				requestClose();
 			}}
-			className={`absolute top-4 right-4 rounded-md p-1 text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring ${className}`}
+			className={`absolute top-4 right-4 rounded-[var(--radius)] p-1 text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring ${className}`}
 			{...props}
 		>
 			<svg

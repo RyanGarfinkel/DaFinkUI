@@ -216,7 +216,7 @@ export const TreeItem = (
 					onKeyDown={handleKeyDown}
 					onFocus={() => !disabled && tree.setFocusedId(itemId)}
 					className={[
-						'flex items-center gap-1.5 rounded-md py-1 pr-2 cursor-pointer',
+						'flex items-center gap-1.5 rounded-[var(--radius)] py-1 pr-2 cursor-pointer',
 						'text-text transition-colors duration-[var(--duration-fast)]',
 						disabled
 							? 'opacity-40 cursor-not-allowed pointer-events-none'

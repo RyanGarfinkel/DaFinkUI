@@ -170,7 +170,7 @@ export const Popover = (
 				aria-controls={mounted ? panelId : undefined}
 				onClick={() => (mounted ? closePopover() : openPopover())}
 				className={[
-					'inline-flex items-center gap-2 rounded-md border border-input-border bg-input px-3 py-2 text-sm text-text',
+					'inline-flex items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-input-border bg-input px-3 py-2 text-sm text-text',
 					'transition-colors duration-[var(--duration-fast)]',
 					'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 					disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:border-brand',
@@ -191,7 +191,7 @@ export const Popover = (
 					onBlur={handlePanelBlur}
 					style={{ position: 'fixed', top: position.top, left: position.left, zIndex: 50 }}
 					className={[
-						'min-w-56 rounded-lg border border-surface-border bg-surface p-4 shadow-lg outline-none',
+						'min-w-56 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel p-4 shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)] outline-none',
 						'transition-all',
 						visible
 							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'

@@ -13,11 +13,12 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement>
 }
 
 const SHARED_INPUT = [
-	'w-full rounded-md border bg-surface text-text text-sm',
+	'w-full rounded-[var(--radius)] border-[length:var(--border-width)] bg-surface text-text text-sm',
 	'placeholder:text-text-subtle',
-	'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] outline-none',
+	'motion-safe:transition-shadow motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] outline-none',
 	'hover:border-input-border-hover',
-	'focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-0',
+	'focus:outline-none',
+	'shadow-[var(--inner-shadow)] focus-visible:shadow-[var(--input-focus-shadow)]',
 	'disabled:cursor-not-allowed disabled:bg-input-disabled-bg disabled:text-input-disabled-text disabled:border-input-border',
 ];
 
@@ -82,8 +83,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 		const labelFloated = isFocused || hasValue || !!error;
 
 		const borderClass = error
-			? 'border-input-error focus-visible:outline-input-error-ring'
-			: 'border-input-border focus-visible:outline-input-ring';
+			? 'border-input-error focus:border-input-error-ring'
+			: 'border-input-border focus:border-input-ring';
 
 		const handleFocus = (e: React.FocusEvent<HTMLInputElement>) =>
 		{
@@ -138,7 +139,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 					'text-text-muted hover:text-text',
 					'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-input-ring',
-					'rounded disabled:pointer-events-none',
+					'rounded-[var(--radius-sm)] disabled:pointer-events-none',
 				].join(' ')}
 			>
 				{showPassword ? <EyeOffIcon /> : <EyeIcon />}

@@ -69,7 +69,7 @@ All effects transition to `opacity-100 translate-x-0 translate-y-0 scale-100` at
 ## Installation
 
 ```bash
-npx @obi/ui add reveal
+npx @dafink/ui add reveal
 ```
 
 npm dependencies: none

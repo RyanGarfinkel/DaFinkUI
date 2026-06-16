@@ -54,7 +54,7 @@ const POSITION_CLASSES: Record<ToastPosition, string> = {
 
 const VARIANT_STYLES: Record<ToastVariant, { wrapper: string; icon: string; path: string }> = {
 	default: {
-		wrapper: 'bg-surface border-surface-border',
+		wrapper: 'bg-surface-panel border-surface-border backdrop-blur-[var(--backdrop-blur)]',
 		icon:    'text-text-muted',
 		path:    'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z',
 	},
@@ -114,7 +114,7 @@ const ToastCard = (
 				transform:  visible ? 'translateY(0)' : `translateY(${isTop ? '-8px' : '8px'})`,
 			}}
 			className={[
-				'flex items-start gap-3 rounded-xl border shadow-lg px-4 py-3 w-full max-w-sm',
+				'flex items-start gap-3 rounded-[var(--radius-lg)] border-[length:var(--border-width)] shadow-[var(--shadow-lg)] px-4 py-3 w-full max-w-sm',
 				s.wrapper,
 			].join(' ')}
 		>
@@ -144,7 +144,7 @@ const ToastCard = (
 					<button
 						type='button'
 						onClick={() => { item.action!.onClick(); dismiss(); }}
-						className='mt-2 text-xs font-medium text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring rounded'
+						className='mt-2 text-xs font-medium text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring rounded-[var(--radius-sm)]'
 					>
 						{item.action.label}
 					</button>
@@ -155,7 +155,7 @@ const ToastCard = (
 				type='button'
 				onClick={dismiss}
 				aria-label='Dismiss'
-				className='shrink-0 rounded-md p-0.5 text-text-muted hover:text-text hover:bg-surface-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring'
+				className='shrink-0 rounded-[var(--radius)] p-0.5 text-text-muted hover:text-text hover:bg-surface-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring'
 			>
 				<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
 					<path d='M18 6 6 18M6 6l12 12' />

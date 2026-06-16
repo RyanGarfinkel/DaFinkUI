@@ -47,7 +47,7 @@ Extends all native `<span>` HTML attributes.
 ## Installation
 
 ```bash
-npx @obi/ui add badge
+npx @dafink/ui add badge
 ```
 
 npm dependencies: none

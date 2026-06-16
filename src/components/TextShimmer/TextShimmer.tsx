@@ -35,11 +35,11 @@ export const TextShimmer = (
 	return (
 		<>
 			<style>{`
-				@keyframes obi-text-shimmer {
+				@keyframes dafink-text-shimmer {
 					from { background-position: 200% center; }
 					to   { background-position: -200% center; }
 				}
-				.obi-text-shimmer {
+				.dafink-text-shimmer {
 					background-image: linear-gradient(
 						110deg,
 						var(--color-text) 35%,
@@ -51,10 +51,10 @@ export const TextShimmer = (
 					-webkit-background-clip: text;
 					-webkit-text-fill-color: transparent;
 					color: var(--color-text);
-					animation: obi-text-shimmer var(--shimmer-duration) var(--ease-standard) infinite;
+					animation: dafink-text-shimmer var(--shimmer-duration) var(--ease-standard) infinite;
 				}
 				@media (prefers-reduced-motion: reduce) {
-					.obi-text-shimmer {
+					.dafink-text-shimmer {
 						animation: none;
 						background-image: none;
 						-webkit-text-fill-color: currentColor;
@@ -63,7 +63,7 @@ export const TextShimmer = (
 			`}</style>
 			<span
 				{...props}
-				className={['obi-text-shimmer inline-block', className].join(' ')}
+				className={['dafink-text-shimmer inline-block', className].join(' ')}
 				style={{ ['--shimmer-duration' as string]: durationValue, ...style } as React.CSSProperties}
 			>
 				{children}

@@ -98,6 +98,52 @@ Spacing follows Tailwind's default 4px base unit. Prefer spacing values from the
 
 ---
 
+## Responsive Design
+
+Every surface in this system — components, docs pages, examples — must be usable on a phone. Responsiveness is not a desktop layout that shrinks; it is a mobile layout that grows.
+
+### Mobile-First
+
+Write base styles for the smallest screen, then layer enhancements upward with `min-width` breakpoints (`sm:`, `md:`, `lg:`). Never write desktop styles first and patch them down with `max-*` variants — that inverts the cascade and rots quickly.
+
+- The unprefixed style is the mobile style. `flex-col md:flex-row`, not `flex-row max-md:flex-col`.
+- Test at 360px before testing at 1440px. If it works small, growing is easy; the reverse is not.
+- Content is never clipped or requires horizontal page scroll at any width ≥ 320px. Wide content (tables, code blocks) scrolls within its own container, not the page.
+
+### Breakpoints
+
+Use Tailwind's default scale. Do not invent custom breakpoints — pick the nearest standard one.
+
+| Breakpoint | Width    | Typical role                                  |
+|------------|----------|-----------------------------------------------|
+| (none)     | 0+       | Phones — the default target                   |
+| `sm:`      | 640px+   | Large phones, small tablets                   |
+| `md:`      | 768px+   | Tablets — sidebars and multi-column layouts appear here |
+| `lg:`      | 1024px+  | Laptops — full desktop chrome                 |
+| `xl:`      | 1280px+  | Wide screens — max-width containers cap here  |
+
+Breakpoints describe the viewport, not the component. A component dropped into a narrow sidebar on desktop still needs to work — **prefer container queries (`@container`) over viewport breakpoints for component-internal layout** (Card and DataTable already do this; follow that pattern). Reserve viewport breakpoints for page-level layout: navigation, sidebars, grids.
+
+### Touch Targets
+
+Pointer accuracy on touch is coarse. Small targets are an accessibility failure, not a style choice.
+
+- **Minimum interactive target: 44×44px on touch devices.** WCAG 2.2 requires 24×24px (AA) as the absolute floor; 44px is the standard this system builds to.
+- A visual element may be smaller than its target — extend the hit area with padding or a pseudo-element, never by inflating the visual.
+- Adjacent touch targets need at least 8px of separation, or enough combined offset that a 44px circle centered on one does not overlap its neighbor.
+- Hover is not available on touch. Anything revealed on hover (tooltips, hover cards, secondary actions) must also be reachable by tap or focus. Use `@media (hover: hover)` for hover-only affordances rather than letting them dangle on touch devices.
+
+### Layout Rules
+
+- **Navigation collapses, never crowds.** Horizontal nav that doesn't fit becomes a drawer or menu behind a visible, labeled toggle — it does not wrap or shrink into illegibility. Off-canvas navigation follows the overlay rules in `src/patterns/accessibility.md` (focus trap, Escape, focus return).
+- **Multi-column becomes single-column.** Sidebars, split panes, and grids stack below `md:`. Order the stacked content by importance, which may differ from the desktop left-to-right order.
+- **Spacing compresses, type mostly doesn't.** Reduce container padding on small screens (`px-4 md:px-8`), but keep body text at its standard size — small screens are not an excuse for small text. Only display-scale headings step down (`text-3xl md:text-5xl`).
+- **Inputs use a 16px font size minimum on mobile.** Smaller values trigger iOS auto-zoom on focus, which disorients the user.
+- **Respect safe areas.** Fixed or sticky chrome accounts for `env(safe-area-inset-*)` on notched devices.
+- **Overlays adapt.** Modals that center as a card on desktop may take the full width (with margin) on phones; drawers may become bottom sheets. The accessibility contract is identical at every size.
+
+---
+
 ## Accessibility
 
 Accessibility is the baseline, not the bonus. Every component must be fully operable without a mouse. See `src/patterns/accessibility.md` for the complete reference.

@@ -302,7 +302,7 @@ export const Combobox = (props: ComboboxProps) => {
 						{pills.map((pill) => (
 							<span
 								key={pill.value}
-								className='inline-flex items-center gap-1 rounded-md bg-surface-active text-text px-2 py-0.5 text-xs font-medium'
+								className='inline-flex items-center gap-1 rounded-[var(--radius)] bg-surface-active text-text px-2 py-0.5 text-xs font-medium'
 							>
 								{pill.label}
 								<button
@@ -340,7 +340,7 @@ export const Combobox = (props: ComboboxProps) => {
 						onFocus={handleInputFocus}
 						onKeyDown={handleInputKeyDown}
 						className={[
-							'w-full rounded-md border bg-surface text-text outline-none',
+							'w-full rounded-[var(--radius)] border-[length:var(--border-width)] bg-surface text-text outline-none',
 							'placeholder:text-text-subtle',
 							'motion-safe:transition-[border-color,box-shadow] motion-safe:duration-[var(--duration-fast)]',
 							'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
@@ -383,8 +383,8 @@ export const Combobox = (props: ComboboxProps) => {
 						aria-multiselectable={isMulti || undefined}
 						tabIndex={-1}
 						className={[
-							'absolute z-50 top-full mt-1 left-0 right-0 rounded-lg border border-surface-border bg-surface shadow-lg',
-							'overflow-y-auto max-h-60 py-1 outline-none',
+							'absolute z-50 top-full mt-1 left-0 right-0 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
+							'overflow-y-auto max-h-60 py-2 outline-none',
 							'motion-safe:transition-all motion-safe:duration-[var(--duration-fast)] origin-top',
 							visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
 						].join(' ')}
@@ -414,7 +414,7 @@ export const Combobox = (props: ComboboxProps) => {
 										onPointerDown={(e) => { e.preventDefault(); selectOption(opt); }}
 										onPointerEnter={() => { if(!opt.disabled) setActiveIndex(i); }}
 										className={[
-											'flex items-center justify-between select-none',
+											'flex items-center justify-between mx-1 rounded-[var(--radius-sm)] select-none',
 											'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 											optionSizeClasses,
 											opt.disabled

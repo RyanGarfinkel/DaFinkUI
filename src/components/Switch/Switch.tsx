@@ -37,11 +37,11 @@ const Switch = (
 	const switchId = id ?? (label ? `switch-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
 	const hintId   = switchId ? `${switchId}-hint` : undefined;
 
-	const trackColor  = checked ? 'bg-brand' : 'bg-surface-active';
+	const trackColor  = checked ? 'bg-brand' : 'bg-input-border';
 	const thumbOffset = checked ? 'translate-x-5' : 'translate-x-1';
 
 	return (
-		<div className={`flex items-start gap-3 ${className}`}>
+		<div className={`flex items-center gap-3 ${className}`}>
 			<button
 				role='switch'
 				id={switchId}
@@ -59,7 +59,7 @@ const Switch = (
 					{label && (
 						<label
 							htmlFor={switchId}
-							className='cursor-pointer select-none text-sm font-medium text-text leading-6'
+							className='cursor-pointer select-none text-sm font-medium text-text'
 						>
 							{label}
 						</label>

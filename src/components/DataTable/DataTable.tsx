@@ -177,9 +177,9 @@ const DataTable = <T extends Record<string, any>>(
 	const showPaginator = pageSize > 0 && totalRowCount > 0 && totalPages > 1;
 
 	return (
-		<div className={`@container w-full overflow-x-auto rounded-lg border border-surface-border ${className}`}>
+		<div className={`@container w-full overflow-x-auto rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border ${className}`}>
 			<table className='w-full border-collapse'>
-				<thead className='border-b border-surface-border bg-surface-active'>
+				<thead className='border-b-[length:var(--border-width)] border-surface-border bg-surface-active'>
 					<tr>
 						{selectable && (
 							<th className='px-4 py-3 text-left w-10' aria-label='Select all rows'>
@@ -191,7 +191,7 @@ const DataTable = <T extends Record<string, any>>(
 									onChange={handleHeaderCheckbox}
 									aria-label='Select all rows'
 									className={[
-										'w-4 h-4 rounded border border-input-border bg-surface cursor-pointer',
+										'w-4 h-4 rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-input-border bg-surface cursor-pointer',
 										'accent-[var(--color-brand)]',
 										'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 									].join(' ')}
@@ -223,7 +223,7 @@ const DataTable = <T extends Record<string, any>>(
 												className={[
 													'inline-flex items-center gap-1.5',
 													'transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none',
-													'hover:text-text rounded-sm',
+													'hover:text-text rounded-[var(--radius-sm)]',
 													'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 												].join(' ')}
 											>
@@ -275,7 +275,7 @@ const DataTable = <T extends Record<string, any>>(
 												onChange={() => handleRowCheckbox(row)}
 												aria-label={`Select row ${rowKey}`}
 												className={[
-													'w-4 h-4 rounded border border-input-border bg-surface cursor-pointer',
+													'w-4 h-4 rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-input-border bg-surface cursor-pointer',
 													'accent-[var(--color-brand)]',
 													'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 												].join(' ')}

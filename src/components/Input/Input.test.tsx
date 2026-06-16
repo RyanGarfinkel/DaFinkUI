@@ -68,17 +68,14 @@ describe('Input', () =>
 		render(<Input error='Something went wrong.' />);
 		const input = screen.getByRole('textbox');
 		expect(input.className).toContain('border-input-error');
-		expect(input.className).toContain('focus-visible:outline-input-error-ring');
+		expect(input.className).toContain('focus:border-input-error-ring');
 	});
 
 	it('applies focus-visible outline classes', () =>
 	{
 		render(<Input />);
 		const input = screen.getByRole('textbox');
-		expect(input.className).toContain('focus-visible:outline');
-		expect(input.className).toContain('focus-visible:outline-[3px]');
-		expect(input.className).toContain('focus-visible:outline-input-ring');
-		expect(input.className).toContain('focus-visible:outline-offset-0');
+		expect(input.className).toContain('focus-visible:shadow-[var(--input-focus-shadow)]');
 	});
 
 	it('suppresses default outline', () =>

@@ -65,7 +65,7 @@ export const TimelineItem = (
 
 	const dotColor = _variant === 'brand'
 		? 'bg-brand text-brand-fg'
-		: 'bg-surface-active text-text-muted border border-surface-border';
+		: 'bg-surface-active text-text-muted border-[length:var(--border-width)] border-surface-border';
 
 	const staggerStyle: React.CSSProperties = _animate === 'stagger'
 		? { animation: `tl-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${_index * 90}ms both` }

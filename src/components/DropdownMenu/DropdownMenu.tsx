@@ -268,7 +268,7 @@ export const DropdownMenu = (
 				onClick={() => (mounted ? closeMenu() : openMenu('first'))}
 				onKeyDown={handleTriggerKeyDown}
 				className={[
-					'inline-flex items-center gap-2 rounded-md border border-input-border bg-input px-3 py-2 text-sm text-text',
+					'inline-flex items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-input-border bg-input px-3 py-2 text-sm text-text',
 					'transition-colors duration-[var(--duration-fast)]',
 					'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 					disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:border-brand',
@@ -289,7 +289,7 @@ export const DropdownMenu = (
 					onKeyDown={handleMenuKeyDown}
 					style={{ position: 'fixed', top: position.top, left: position.left, zIndex: 50 }}
 					className={[
-						'min-w-48 max-h-72 overflow-y-auto rounded-lg border border-surface-border bg-surface py-1 shadow-lg outline-none',
+						'min-w-48 max-h-72 overflow-y-auto rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel py-2 shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)] outline-none',
 						'transition-all',
 						visible
 							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'
@@ -314,7 +314,7 @@ export const DropdownMenu = (
 								onPointerDown={(e) => { e.preventDefault(); if(!isDisabled) activateItem(i); }}
 								onPointerEnter={() => { if(!isDisabled) setActiveIndex(i); }}
 								className={[
-									'flex items-center px-3 py-2 text-sm select-none whitespace-nowrap',
+									'flex items-center mx-1 rounded-[var(--radius-sm)] px-3 py-2 text-sm select-none whitespace-nowrap',
 									'transition-colors duration-[var(--duration-fast)]',
 									isDisabled
 										? 'opacity-50 cursor-not-allowed text-text-muted'

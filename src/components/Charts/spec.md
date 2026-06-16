@@ -1,11 +1,11 @@
 # Charts
 
-Recharts-based chart primitives: `LineChart`, `BarChart`, `AreaChart`, and `DonutChart`. Shipped as a separate entry point (`@obi/ui/charts`) so the Recharts dependency is not pulled into projects that only use primitives.
+Recharts-based chart primitives: `LineChart`, `BarChart`, `AreaChart`, and `DonutChart`. Shipped as a separate entry point (`@dafink/ui/charts`) so the Recharts dependency is not pulled into projects that only use primitives.
 
 ## Installation
 
 ```bash
-npx @obi/ui add charts
+npx @dafink/ui add charts
 ```
 
 npm dependency: `recharts`

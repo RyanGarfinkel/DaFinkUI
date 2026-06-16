@@ -1,6 +1,6 @@
 # Accessibility Patterns
 
-This is the canonical accessibility reference for Obi UI. Read this before building any interactive component, and especially before building anything that involves overlays, focus management, or keyboard interaction.
+This is the canonical accessibility reference for DaFink UI. Read this before building any interactive component, and especially before building anything that involves overlays, focus management, or keyboard interaction.
 
 ---
 

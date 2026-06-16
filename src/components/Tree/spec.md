@@ -5,7 +5,7 @@ A collapsible, keyboard-navigable tree view for hierarchical data — file trees
 ## Installation
 
 ```bash
-npx @obi/ui add tree
+npx @dafink/ui add tree
 ```
 
 No additional npm dependencies. No registry dependencies.

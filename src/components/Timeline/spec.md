@@ -5,7 +5,7 @@ A vertical step list with numbered indicators and connector lines. Use it to rep
 ## Installation
 
 ```bash
-npx @obi/ui add timeline
+npx @dafink/ui add timeline
 ```
 
 No npm dependencies. No registry dependencies.
@@ -108,10 +108,10 @@ export default function SetupGuide() {
   return (
     <Timeline>
       <TimelineItem title="Install the CLI">
-        <p>Run <code>npx @obi/ui init</code> in your project root.</p>
+        <p>Run <code>npx @dafink/ui init</code> in your project root.</p>
       </TimelineItem>
       <TimelineItem title="Add components">
-        <p>Use <code>npx @obi/ui add button input</code> to copy components.</p>
+        <p>Use <code>npx @dafink/ui add button input</code> to copy components.</p>
       </TimelineItem>
       <TimelineItem title="Import and use">
         <p>Import from <code>@/components/ui</code> and start building.</p>

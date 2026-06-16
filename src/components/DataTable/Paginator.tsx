@@ -17,7 +17,7 @@ export interface PaginatorProps
 // ─── Shared styles ────────────────────────────────────────────────────────────
 
 const BTN_BASE = [
-	'inline-flex items-center justify-center rounded-md border border-surface-border',
+	'inline-flex items-center justify-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border',
 	'text-sm text-text-muted',
 	'transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none',
 	'hover:bg-surface-hover hover:border-surface-border-hover hover:text-text',

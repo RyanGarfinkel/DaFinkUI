@@ -54,7 +54,7 @@ describe('Switch', () =>
 	it('track has bg-surface-active when unchecked', () =>
 	{
 		render(<Switch checked={false} onCheckedChange={() => {}} />);
-		expect(screen.getByRole('switch').className).toContain('bg-surface-active');
+		expect(screen.getByRole('switch').className).toContain('bg-input-border');
 		expect(screen.getByRole('switch').className).not.toContain('bg-brand');
 	});
 
@@ -62,7 +62,7 @@ describe('Switch', () =>
 	{
 		render(<Switch checked={true} onCheckedChange={() => {}} />);
 		expect(screen.getByRole('switch').className).toContain('bg-brand');
-		expect(screen.getByRole('switch').className).not.toContain('bg-surface-active');
+		expect(screen.getByRole('switch').className).not.toContain('bg-input-border');
 	});
 
 	it('does not call onCheckedChange when disabled', () =>

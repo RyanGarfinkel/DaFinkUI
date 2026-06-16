@@ -49,7 +49,7 @@ const SIZE_CLASSES: Record<AvatarSize, string> = {
 
 const SHAPE_CLASSES: Record<AvatarShape, string> = {
 	circle: 'rounded-full',
-	square: 'rounded-md',
+	square: 'rounded-[var(--radius)]',
 };
 
 export const getInitials = (name: string): string => {
@@ -100,7 +100,7 @@ export const Avatar = (
 
 	const rootClasses = [
 		'relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden',
-		'border border-surface-border bg-surface-active text-text-muted font-medium',
+		'border-[length:var(--border-width)] border-surface-border bg-surface-active text-text-muted font-medium',
 		SIZE_CLASSES[size],
 		SHAPE_CLASSES[shape],
 		className,
@@ -178,7 +178,7 @@ export const AvatarGroup = (
 					aria-label={`${overflow} more`}
 					className={[
 						'relative inline-flex shrink-0 select-none items-center justify-center overflow-hidden',
-						'border border-surface-border bg-surface-active text-text-muted font-medium',
+						'border-[length:var(--border-width)] border-surface-border bg-surface-active text-text-muted font-medium',
 						SIZE_CLASSES[size],
 						SHAPE_CLASSES[shape],
 						ringClasses,

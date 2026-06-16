@@ -5,12 +5,12 @@ A drag-and-drop Kanban board built on `@dnd-kit/core`. Cards can be dragged betw
 ## Installation
 
 ```bash
-npx @obi/ui add kanban
+npx @dafink/ui add kanban
 ```
 
 npm dependency: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`
 
-Ships as a separate entry point (`@obi/ui/dnd`) so the dnd-kit dependency is not pulled in unless needed.
+Ships as a separate entry point (`@dafink/ui/dnd`) so the dnd-kit dependency is not pulled in unless needed.
 
 ## Components
 
