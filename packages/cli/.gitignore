@@ -1,3 +1,4 @@
 dist/
 registry/
 assets/
+package-lock.json
