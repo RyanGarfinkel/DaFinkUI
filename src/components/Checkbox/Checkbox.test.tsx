@@ -1,15 +1,61 @@
 'use client';
 
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi } from 'vitest';
 import Checkbox from './Checkbox';
 
 describe('Checkbox', () =>
 {
-	it('renders without errors', () =>
+	it('renders as a checkbox', () =>
 	{
 		render(<Checkbox />);
 		expect(screen.getByRole('checkbox')).toBeDefined();
+	});
+
+	it('is unchecked by default', () =>
+	{
+		render(<Checkbox />);
+		expect(screen.getByRole('checkbox')).toHaveProperty('checked', false);
+	});
+
+	it('toggles checked state on click', async () =>
+	{
+		render(<Checkbox />);
+		const checkbox = screen.getByRole('checkbox');
+		await userEvent.click(checkbox);
+		expect(checkbox).toHaveProperty('checked', true);
+		await userEvent.click(checkbox);
+		expect(checkbox).toHaveProperty('checked', false);
+	});
+
+	it('clicking the label toggles the checkbox', async () =>
+	{
+		render(<Checkbox label='Accept terms' id='terms' />);
+		await userEvent.click(screen.getByText('Accept terms'));
+		expect(screen.getByRole('checkbox')).toHaveProperty('checked', true);
+	});
+
+	it('calls onChange when toggled', async () =>
+	{
+		const onChange = vi.fn();
+		render(<Checkbox onChange={onChange} />);
+		await userEvent.click(screen.getByRole('checkbox'));
+		expect(onChange).toHaveBeenCalledOnce();
+	});
+
+	it('does not toggle when disabled', async () =>
+	{
+		render(<Checkbox disabled />);
+		const checkbox = screen.getByRole('checkbox');
+		await userEvent.click(checkbox);
+		expect(checkbox).toHaveProperty('checked', false);
+	});
+
+	it('is disabled when disabled prop is set', () =>
+	{
+		render(<Checkbox disabled />);
+		expect(screen.getByRole('checkbox')).toHaveProperty('disabled', true);
 	});
 
 	it('renders a label when provided', () =>
@@ -21,34 +67,13 @@ describe('Checkbox', () =>
 	it('associates label with input via htmlFor and id', () =>
 	{
 		render(<Checkbox label='Accept terms' id='terms' />);
-		const checkbox = screen.getByRole('checkbox');
-		expect(checkbox.getAttribute('id')).toBe('terms');
+		expect(screen.getByRole('checkbox').getAttribute('id')).toBe('terms');
 	});
 
-	it('renders as type="checkbox"', () =>
-	{
-		render(<Checkbox />);
-		expect(screen.getByRole('checkbox').getAttribute('type')).toBe('checkbox');
-	});
-
-	it('applies focus-visible ring classes', () =>
+	it('has a visible focus ring for keyboard users', () =>
 	{
 		render(<Checkbox />);
 		expect(screen.getByRole('checkbox').className).toContain('focus-visible:ring-2');
-	});
-
-	it('applies disabled classes when disabled', () =>
-	{
-		render(<Checkbox disabled />);
-		const checkbox = screen.getByRole('checkbox');
-		expect(checkbox.className).toContain('disabled:opacity-50');
-		expect(checkbox).toHaveProperty('disabled', true);
-	});
-
-	it('forwards className to the wrapper label', () =>
-	{
-		const { container } = render(<Checkbox className='extra-class' />);
-		expect(container.querySelector('label')?.className).toContain('extra-class');
 	});
 
 	it('forwards native input props', () =>

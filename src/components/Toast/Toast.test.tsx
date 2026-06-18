@@ -1,8 +1,9 @@
 'use client';
 
-import { render, screen, act } from '@testing-library/react';
+import { render, screen, act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ToastProvider, useToast } from './Toast';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { useEffect } from 'react';
 
 const Trigger = ({ opts }: { opts: Parameters<ReturnType<typeof useToast>['toast']>[0] }) =>
@@ -23,11 +24,6 @@ const renderWithProvider = (opts: Parameters<ReturnType<typeof useToast>['toast'
 
 describe('ToastProvider', () =>
 {
-	it('renders without errors', () =>
-	{
-		render(<ToastProvider><div /></ToastProvider>);
-	});
-
 	it('renders children', () =>
 	{
 		render(
@@ -72,21 +68,21 @@ describe('Toast rendering', () =>
 		expect(screen.getByText('Your file was saved.')).toBeDefined();
 	});
 
-	it('sets role="status" and aria-live="polite" on the toast card', async () =>
+	it('sets role="status" and aria-live="polite" on the toast', async () =>
 	{
 		await act(async () => { renderWithProvider({ title: 'Hi' }); });
 		const toastEl = screen.getAllByRole('status')[0];
 		expect(toastEl.getAttribute('aria-live')).toBe('polite');
 	});
 
-	it('sets aria-atomic="true" on the toast card', async () =>
+	it('sets aria-atomic="true" on the toast', async () =>
 	{
 		await act(async () => { renderWithProvider({ title: 'Hi' }); });
 		const toastEl = screen.getAllByRole('status')[0];
 		expect(toastEl.getAttribute('aria-atomic')).toBe('true');
 	});
 
-	it('renders dismiss button with aria-label="Dismiss"', async () =>
+	it('renders dismiss button', async () =>
 	{
 		await act(async () => { renderWithProvider({ title: 'Check' }); });
 		expect(screen.getByRole('button', { name: 'Dismiss' })).toBeDefined();
@@ -99,5 +95,43 @@ describe('Toast rendering', () =>
 			renderWithProvider({ title: 'Update', action: { label: 'Undo', onClick: () => {} } });
 		});
 		expect(screen.getByRole('button', { name: 'Undo' })).toBeDefined();
+	});
+});
+
+describe('Toast interactions', () =>
+{
+	it('removes the toast when dismiss is clicked', async () =>
+	{
+		await act(async () => { renderWithProvider({ title: 'Saved' }); });
+		expect(screen.getByText('Saved')).toBeDefined();
+
+		await userEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+
+		await waitFor(() => expect(screen.queryByText('Saved')).toBeNull());
+	});
+
+	it('calls action onClick when action button is clicked', async () =>
+	{
+		const onClick = vi.fn();
+		await act(async () =>
+		{
+			renderWithProvider({ title: 'Update', action: { label: 'Undo', onClick } });
+		});
+
+		await userEvent.click(screen.getByRole('button', { name: 'Undo' }));
+
+		expect(onClick).toHaveBeenCalledOnce();
+	});
+
+	it('removes the toast after the action button is clicked', async () =>
+	{
+		await act(async () =>
+		{
+			renderWithProvider({ title: 'Update', action: { label: 'Undo', onClick: () => {} } });
+		});
+
+		await userEvent.click(screen.getByRole('button', { name: 'Undo' }));
+
+		await waitFor(() => expect(screen.queryByText('Update')).toBeNull());
 	});
 });
