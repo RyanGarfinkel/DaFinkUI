@@ -17,6 +17,7 @@ import ToggleGroup, { ToggleGroupItem } from '@/src/components/ToggleGroup/Toggl
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/Tabs/Tabs';
 import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
 import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
+import WorkflowBuilder from '@/src/components/WorkflowBuilder/WorkflowBuilder';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
 import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
 import { ToastProvider, useToast } from '@/src/components/Toast/Toast';
@@ -26,6 +27,7 @@ import Reveal, { RevealGroup } from '@/src/components/Reveal/Reveal';
 import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
 import { DatePicker } from '@/src/components/DatePicker/DatePicker';
 import TextShimmer from '@/src/components/TextShimmer/TextShimmer';
+import AudioPlayer from '@/src/components/AudioPlayer/AudioPlayer';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
 import Typewriter from '@/src/components/Typewriter/Typewriter';
 import Breadcrumb from '@/src/components/Breadcrumb/Breadcrumb';
@@ -48,6 +50,7 @@ import Switch from '@/src/components/Switch/Switch';
 import Slider from '@/src/components/Slider/Slider';
 import Button from '@/src/components/Button/Button';
 import Input from '@/src/components/Input/Input';
+import Tilt from '@/src/components/Tilt/Tilt';
 import { useState } from 'react';
 
 interface ComponentLivePreviewProps {
@@ -72,13 +75,26 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
   switch (slug) {
     case 'button':
       return (
-        <div className='flex flex-wrap gap-3 items-center justify-center'>
-          <Button>Primary</Button>
-          <Button variant='secondary'>Secondary</Button>
-          <Button variant='outlined'>Outlined</Button>
-          <Button variant='ghost'>Ghost</Button>
-          <Button variant='link'>Link</Button>
-          <Button variant='destructive'>Destructive</Button>
+        <div className='flex flex-col gap-4 items-center'>
+          <div className='flex flex-wrap gap-3 items-center justify-center'>
+            <Button>Primary</Button>
+            <Button variant='secondary'>Secondary</Button>
+            <Button variant='outlined'>Outlined</Button>
+            <Button variant='ghost'>Ghost</Button>
+            <Button variant='link'>Link</Button>
+            <Button variant='destructive'>Destructive</Button>
+          </div>
+          <div className='flex gap-2 items-center'>
+            <Button size='icon' variant='ghost' aria-label='Search'>
+              <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>
+            </Button>
+            <Button size='icon' variant='secondary' aria-label='Add'>
+              <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M5 12h14M12 5v14'/></svg>
+            </Button>
+            <Button size='icon' variant='destructive' aria-label='Delete'>
+              <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'/></svg>
+            </Button>
+          </div>
         </div>
       );
 
@@ -1082,6 +1098,40 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
     }
+
+    case 'audioplayer':
+      return (
+        <div className='max-w-md mx-auto w-full'>
+          <AudioPlayer
+            src='https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+            title='SoundHelix Song 1'
+            subtitle='SoundHelix'
+          />
+        </div>
+      );
+
+    case 'tilt':
+      return (
+        <div className='flex gap-4 items-center justify-center'>
+          <Tilt className='w-fit rounded-xl'>
+            <div className='rounded-xl bg-surface border border-surface-border p-8 w-40 h-28 flex items-center justify-center text-sm font-medium text-text'>
+              Hover me
+            </div>
+          </Tilt>
+          <Tilt max={20} scale={1.08} className='w-fit rounded-xl'>
+            <div className='rounded-xl bg-brand/10 border border-brand/20 p-8 w-40 h-28 flex items-center justify-center text-sm font-medium text-brand'>
+              max=20
+            </div>
+          </Tilt>
+        </div>
+      );
+
+    case 'workflow-builder':
+      return (
+        <div className='w-full'>
+          <WorkflowBuilder height={420} />
+        </div>
+      );
 
     default:
       return (

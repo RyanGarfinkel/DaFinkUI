@@ -27,13 +27,26 @@ export const registry: ComponentEntry[] = [
 
 export default function Example() {
   return (
-    <div className="flex flex-wrap gap-2">
-      <Button>Primary</Button>
-      <Button variant="secondary">Secondary</Button>
-      <Button variant="outlined">Outlined</Button>
-      <Button variant="ghost">Ghost</Button>
-      <Button variant="link">Link</Button>
-      <Button variant="destructive">Destructive</Button>
+    <div className="flex flex-col gap-4 items-center">
+      <div className="flex flex-wrap gap-2 items-center justify-center">
+        <Button>Primary</Button>
+        <Button variant="secondary">Secondary</Button>
+        <Button variant="outlined">Outlined</Button>
+        <Button variant="ghost">Ghost</Button>
+        <Button variant="link">Link</Button>
+        <Button variant="destructive">Destructive</Button>
+      </div>
+      <div className="flex gap-2 items-center">
+        <Button size="icon" variant="ghost" aria-label="Search">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </Button>
+        <Button size="icon" variant="secondary" aria-label="Add">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5v14"/></svg>
+        </Button>
+        <Button size="icon" variant="destructive" aria-label="Delete">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </Button>
+      </div>
     </div>
   );
 }`,
@@ -46,9 +59,15 @@ export default function Example() {
       },
       {
         name: 'size',
-        type: '"sm" | "md" | "lg"',
+        type: '"sm" | "md" | "lg" | "icon"',
         default: '"md"',
-        description: 'Height and padding of the button.',
+        description: 'Height and padding. "icon" renders a square with no horizontal padding — requires aria-label when there is no visible text.',
+      },
+      {
+        name: 'loading',
+        type: 'boolean',
+        default: 'false',
+        description: 'Shows a spinner, disables the button, and sets aria-busy="true". Children are hidden while loading.',
       },
       {
         name: 'disabled',
@@ -1402,6 +1421,35 @@ export default function Example() {
     files: ['Kanban/Kanban.tsx'],
   },
   {
+    slug:        'workflow-builder',
+    name:        'WorkflowBuilder',
+    category:    'Drag & Drop',
+    description: 'Drag-and-drop graph editor for building typed workflows. Connects trigger, condition, action, transform, and output nodes. Outputs a serializable WorkflowGraph via onChange.',
+    usage: `import WorkflowBuilder from '@/src/components/WorkflowBuilder/WorkflowBuilder';
+import type { WorkflowGraph } from '@/src/components/WorkflowBuilder/WorkflowBuilder';
+import { useState } from 'react';
+
+export default function Example() {
+  const [graph, setGraph] = useState<WorkflowGraph | null>(null);
+
+  return (
+    <WorkflowBuilder
+      height={480}
+      onChange={setGraph}
+    />
+  );
+}`,
+    props: [
+      { name: 'defaultGraph', type: 'WorkflowGraph',                   default: '—',     description: 'Pre-populated graph loaded on first render. Not reactive after mount — state is managed internally.' },
+      { name: 'onChange',     type: '(graph: WorkflowGraph) => void',  default: '—',     description: 'Fired after every change: node move, edge connection, label edit, or node add/delete.' },
+      { name: 'height',       type: 'number',                          default: '500',   description: 'Canvas height in pixels.' },
+      { name: 'className',    type: 'string',                          default: '""',    description: 'Additional classes on the root container.' },
+    ],
+    dependencies:         ['@xyflow/react'],
+    registryDependencies: [],
+    files:                ['WorkflowBuilder/WorkflowBuilder.tsx'],
+  },
+  {
     slug: 'progress',
     name: 'Progress',
     category: 'Feedback',
@@ -1685,25 +1733,32 @@ export default function Example() {
     category: 'Overlay',
     description: 'A small floating text label that appears next to its trigger on hover or keyboard focus. Never contains interactive content.',
     usage: `import Tooltip from '@/src/components/Tooltip/Tooltip';
-import Button from '@/src/components/Button/Button';
+
+const InfoIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="16" x2="12" y2="12" />
+    <line x1="12" y1="8" x2="12.01" y2="8" />
+  </svg>
+);
 
 export default function Example() {
   return (
-    <div className="flex flex-wrap items-center gap-4">
+    <div className="flex flex-wrap items-center gap-6">
       <Tooltip content="Appears above" side="top">
-        <Button variant="secondary">Top</Button>
+        <span tabIndex={0} className="cursor-default text-text-muted hover:text-text transition-colors"><InfoIcon /></span>
       </Tooltip>
       <Tooltip content="Appears below" side="bottom">
-        <Button variant="secondary">Bottom</Button>
+        <span tabIndex={0} className="cursor-default text-text-muted hover:text-text transition-colors"><InfoIcon /></span>
       </Tooltip>
       <Tooltip content="Appears left" side="left">
-        <Button variant="secondary">Left</Button>
+        <span tabIndex={0} className="cursor-default text-text-muted hover:text-text transition-colors"><InfoIcon /></span>
       </Tooltip>
       <Tooltip content="Appears right" side="right">
-        <Button variant="secondary">Right</Button>
+        <span tabIndex={0} className="cursor-default text-text-muted hover:text-text transition-colors"><InfoIcon /></span>
       </Tooltip>
       <Tooltip content="Opens instantly" delay={0}>
-        <Button variant="secondary">No delay</Button>
+        <span tabIndex={0} className="cursor-default text-text-muted hover:text-text transition-colors"><InfoIcon /></span>
       </Tooltip>
     </div>
   );
@@ -2754,6 +2809,113 @@ export default function Example() {
     dependencies: ['d3-force'],
     registryDependencies: [],
     files: ['Graph/Graph.tsx'],
+  },
+  {
+    slug: 'audioplayer',
+    name: 'AudioPlayer',
+    category: 'Display',
+    description: 'A full-featured audio playback bar with play/pause, seeking, skip, volume, and speed controls.',
+    usage: `import AudioPlayer from '@/src/components/AudioPlayer/AudioPlayer';
+
+export default function Example() {
+  return (
+    <div className="max-w-md mx-auto">
+      <AudioPlayer
+        src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+        title="SoundHelix Song 1"
+        subtitle="SoundHelix"
+      />
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'src',
+        type: 'string',
+        default: '—',
+        description: 'URL of the audio file to play. Required.',
+      },
+      {
+        name: 'title',
+        type: 'string',
+        default: '—',
+        description: 'Track title displayed above the controls.',
+      },
+      {
+        name: 'subtitle',
+        type: 'string',
+        default: '—',
+        description: 'Secondary line displayed below the title. Typically artist, episode name, or any short descriptor.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional classes applied to the container div.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['AudioPlayer/AudioPlayer.tsx'],
+  },
+  {
+    slug: 'tilt',
+    name: 'Tilt',
+    category: 'Display',
+    description: 'A wrapper that applies a mouse-tracking CSS 3D perspective tilt to any child element.',
+    usage: `import Tilt from '@/src/components/Tilt/Tilt';
+
+export default function Example() {
+  return (
+    <div className="flex gap-4 items-center justify-center">
+      <Tilt className="w-fit rounded-xl">
+        <div className="rounded-xl bg-surface border border-surface-border p-8 w-40 h-28 flex items-center justify-center text-sm font-medium text-text">
+          Hover me
+        </div>
+      </Tilt>
+      <Tilt max={20} scale={1.08} className="w-fit rounded-xl">
+        <div className="rounded-xl bg-brand/10 border border-brand/20 p-8 w-40 h-28 flex items-center justify-center text-sm font-medium text-brand">
+          max=20
+        </div>
+      </Tilt>
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'children',
+        type: 'ReactNode',
+        default: '—',
+        description: 'Content to tilt. Can be any element — card, image, hero block.',
+      },
+      {
+        name: 'max',
+        type: 'number',
+        default: '15',
+        description: 'Maximum tilt angle in degrees.',
+      },
+      {
+        name: 'scale',
+        type: 'number',
+        default: '1.05',
+        description: 'Scale factor applied while the cursor is inside the element.',
+      },
+      {
+        name: 'perspective',
+        type: 'number',
+        default: '1000',
+        description: 'CSS perspective distance in pixels. Lower values exaggerate the effect.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional classes applied to the wrapper div.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Tilt/Tilt.tsx'],
   },
 ];
 
