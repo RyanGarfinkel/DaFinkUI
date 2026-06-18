@@ -13,7 +13,7 @@ Design should be invisible. The user's goal is to complete a task — the interf
 - **Functional over decorative** — color, motion, and emphasis exist to communicate, not to decorate.
 - **Accessible by default** — accessibility is not a layer added at the end. Color contrast, keyboard navigation, and screen reader support are built in from the first line of code, not retrofitted. If a component cannot be used with a keyboard alone, it is not finished.
 - **Motion with purpose** — every animation must earn its place. A transition that orients the user or confirms an action is welcome. A transition that exists because it looks nice is noise.
-- **Lively, not static** — a well-built interface feels alive. Every hover, focus change, and state transition should respond with a visible but subtle cue. A UI that doesn't react to the user reads as broken. Micro-animations on interactive elements are the baseline expectation, not a finishing touch.
+- **Lively, not static** — a well-built interface feels alive. Every hover, focus change, and state transition should respond with a visible but subtle cue. A UI that doesn't react to the user reads as broken. Micro-animations on interactive elements are the baseline expectation.
 
 ---
 

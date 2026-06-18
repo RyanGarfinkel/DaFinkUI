@@ -26,7 +26,7 @@ Extends all native `<input>` HTML attributes. Accepts a `ref`.
 
 - **hover**: border shifts to `input-border-hover`
 - **focus**: outline suppressed (`outline-none`)
-- **focus-visible**: 3px outline at offset 0 — `input-ring` default, `input-error-ring` in error state
+- **focus-visible**: 2px ring with 1px offset — `input-ring` default, `input-error-ring` in error state
 - **disabled**: muted background, text, and border; no hover or focus-visible styles
 
 ## Error State
