@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent, DialogHTMLAttributes } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent, DialogHTMLAttributes } from 'react';
 
 // ─── Focus trap selector ──────────────────────────────────────────────────────
 
@@ -67,7 +67,7 @@ const Modal = (
 
 	const titleId = useId();
 
-	const requestClose = () => onOpenChange(false);
+	const requestClose = useCallback(() => onOpenChange(false), [onOpenChange]);
 
 	useEffect(() =>
 	{
@@ -133,7 +133,7 @@ const Modal = (
 		};
 		dialog.addEventListener('cancel', onCancel);
 		return () => dialog.removeEventListener('cancel', onCancel);
-	}, []);
+	}, [requestClose]);
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLDialogElement>) =>
 	{

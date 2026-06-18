@@ -102,7 +102,6 @@ const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelec
 	const connectedEdges = hoveredId
 		? edges.filter(e => e.source === hoveredId || e.target === hoveredId)
 		: [];
-	const connectedIds = new Set(connectedEdges.flatMap(e => [e.source, e.target]));
 
 	const showLabels = nodes.length <= 50;
 
@@ -274,7 +273,7 @@ const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelec
 						})}
 					</g>
 
-					<g role='list' aria-label='Nodes'>
+					<g role='listbox' aria-label='Nodes'>
 						{nodes.map(node =>
 						{
 							const pos        = getPos(node.id);
@@ -291,9 +290,9 @@ const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelec
 								<g
 									key={node.id}
 									data-node={node.id}
-									role='listitem'
+									role='option'
 									aria-label={node.label}
-									aria-pressed={isSelected}
+									aria-selected={isSelected}
 									tabIndex={isSelected ? 0 : -1}
 									ref={el => { if(el) nodeRefs.current.set(node.id, el); else nodeRefs.current.delete(node.id); }}
 									transform={`translate(${pos.x},${pos.y})`}

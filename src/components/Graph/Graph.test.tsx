@@ -13,7 +13,7 @@ describe('Graph', () =>
 		expect(screen.getByRole('application')).toBeTruthy();
 	});
 
-	it('renders the correct number of node list items', () =>
+	it('renders the correct number of node options', () =>
 	{
 		const nodes = [
 			{ id: 'a', label: 'Alpha' },
@@ -24,7 +24,7 @@ describe('Graph', () =>
 
 		act(() => { vi.runAllTimers(); });
 
-		expect(screen.getAllByRole('listitem')).toHaveLength(3);
+		expect(screen.getAllByRole('option')).toHaveLength(3);
 	});
 
 	it('has role="application" and aria-label="Graph" on the SVG', () =>

@@ -208,7 +208,7 @@ export const TreeItem = (
 
     return (
 		<TreeItemContext.Provider value={{ depth, isOpen, setOpen, itemId }}>
-			<div role='treeitem' aria-expanded={isBranch ? isOpen : undefined} aria-disabled={disabled || undefined}>
+			<div role='treeitem' aria-expanded={isBranch ? isOpen : undefined} aria-disabled={disabled || undefined} aria-selected={tree.focusedId === itemId}>
 				<div
 					ref={itemRef}
 					tabIndex={disabled ? -1 : 0}

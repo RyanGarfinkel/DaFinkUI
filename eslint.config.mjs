@@ -18,6 +18,8 @@ const eslintConfig = defineConfig([
     'storybook-static/**',
     // Sub-packages manage their own lint conventions
     'packages/**',
+    // Agent worktrees — isolated scratch dirs, not part of the project
+    '.claude/**',
   ]),
   {
     plugins: {

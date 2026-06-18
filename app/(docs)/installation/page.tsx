@@ -86,23 +86,24 @@ const InstallationPage = () => {
 
         <TimelineItem title='Run the DaFink UI initialiser'>
           <div className='flex flex-col gap-3'>
-            <CodeBlock code={pmCommand(pm, 'dlx', '@dafink/ui init')} />
+            <CodeBlock code={pmCommand(pm, 'dlx', 'dafink-ui init')} />
             <p>
-              This copies <InlineCode>globals.css</InlineCode> (with all design tokens) into your project
-              and writes a minimal <InlineCode>dafink.config.json</InlineCode> in your root.
+              This writes <InlineCode>dafink.config.json</InlineCode> and generates{' '}
+              <InlineCode>dafink-ui.css</InlineCode> with your chosen design tokens, then
+              imports it into your CSS file.
             </p>
           </div>
         </TimelineItem>
 
         <TimelineItem title='Add components'>
           <div className='flex flex-col gap-3'>
-            <CodeBlock code={pmCommand(pm, 'dlx', '@dafink/ui add button')} />
+            <CodeBlock code={pmCommand(pm, 'dlx', 'dafink-ui add button')} />
             <p>
               Each <InlineCode>add</InlineCode> command copies the component source into{' '}
               <InlineCode>src/components/ui/</InlineCode> and installs any required npm
               dependencies automatically. You can add multiple at once:
             </p>
-            <CodeBlock code={pmCommand(pm, 'dlx', '@dafink/ui add button input card form')} />
+            <CodeBlock code={pmCommand(pm, 'dlx', 'dafink-ui add button input card form')} />
           </div>
         </TimelineItem>
 

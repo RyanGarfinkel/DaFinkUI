@@ -123,8 +123,6 @@ const DEMO_EDGES: WFEdge[] = [
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
-const pause = (ms: number) => new Promise<void>(r => setTimeout(r, ms));
-
 // Staggered particle stream: 3 dots loop every 400ms, evenly spaced at 133ms intervals.
 // While isAnimating, there are always ~3 dots visible on the path simultaneously.
 const PARTICLE_STREAM = [
