@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   keywords: [
     'react', 'component library', 'design system', 'tailwind', 'tailwind v4',
     'copy-paste', 'ui components', 'accessible', 'next.js', 'open source',
-    'headless', 'radix', 'shadcn', 'react components', 'typescript',
+    'headless', 'radix', 'react components', 'typescript',
     'wcag', 'keyboard navigation', 'dark mode', 'theming', 'css variables',
   ],
   authors: [{ name: 'DaFink UI', url: 'https://github.com/RyanGarfinkel/DaFinkUI' }],
