@@ -57,6 +57,12 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Build CLI
+        run: npm run build --workspace=packages/cli
+
+      - name: Sync CLI registry
+        run: npm run sync-registry
+
       - name: Validate components
         run: node scripts/validate-components.mjs
 

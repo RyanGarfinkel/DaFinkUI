@@ -183,6 +183,22 @@ for(const entry of entries)
 		fail(`ComponentLivePreview case '${entry.slug}' missing <${entry.name} — preview and usage are out of sync`);
 }
 
+// ─── Check 7: Every component directory has a CLI registry entry ──────────────
+
+console.log('Checking CLI registry coverage…');
+
+const CLI_REGISTRY_FILE = join(ROOT, 'packages/cli/src/lib/registry.ts');
+const cliText  = readFileSync(CLI_REGISTRY_FILE, 'utf8');
+const cliNames = new Set(
+	[...cliText.matchAll(/\bname:\s*'([^']+)'/g)].map(m => m[1])
+);
+
+for(const dir of compDirs)
+{
+	if(!cliNames.has(dir))
+		fail(`${dir} is missing from packages/cli/src/lib/registry.ts`);
+}
+
 // ─── Report ───────────────────────────────────────────────────────────────────
 
 console.log('');

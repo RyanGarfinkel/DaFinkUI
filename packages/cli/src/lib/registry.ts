@@ -7,6 +7,7 @@ export interface RegistryEntry
 }
 
 export const REGISTRY: RegistryEntry[] = [
+	{ name: 'AudioPlayer',     slug: 'audioplayer',      files: ['AudioPlayer/AudioPlayer.tsx'],                                                                deps: [] },
 	{ name: 'Accordion',       slug: 'accordion',        files: ['Accordion/Accordion.tsx'],                                                                   deps: [] },
 	{ name: 'Alert',           slug: 'alert',            files: ['Alert/Alert.tsx'],                                                                           deps: [] },
 	{ name: 'Avatar',          slug: 'avatar',           files: ['Avatar/Avatar.tsx'],                                                                         deps: [] },
@@ -49,12 +50,14 @@ export const REGISTRY: RegistryEntry[] = [
 	{ name: 'Tabs',            slug: 'tabs',             files: ['Tabs/Tabs.tsx'],                                                                             deps: [] },
 	{ name: 'TextShimmer',     slug: 'text-shimmer',     files: ['TextShimmer/TextShimmer.tsx'],                                                               deps: [] },
 	{ name: 'Textarea',        slug: 'textarea',         files: ['Textarea/Textarea.tsx'],                                                                     deps: [] },
+	{ name: 'Tilt',            slug: 'tilt',             files: ['Tilt/Tilt.tsx'],                                                                             deps: [] },
 	{ name: 'Timeline',        slug: 'timeline',         files: ['Timeline/Timeline.tsx'],                                                                     deps: [] },
 	{ name: 'Toast',           slug: 'toast',            files: ['Toast/Toast.tsx'],                                                                           deps: [] },
 	{ name: 'ToggleGroup',     slug: 'toggle-group',     files: ['ToggleGroup/ToggleGroup.tsx'],                                                               deps: [] },
 	{ name: 'Tooltip',         slug: 'tooltip',          files: ['Tooltip/Tooltip.tsx'],                                                                       deps: [] },
 	{ name: 'Tree',            slug: 'tree',             files: ['Tree/Tree.tsx'],                                                                             deps: [] },
 	{ name: 'Typewriter',      slug: 'typewriter',       files: ['Typewriter/Typewriter.tsx'],                                                                 deps: [] },
+	{ name: 'WorkflowBuilder', slug: 'workflow-builder', files: ['WorkflowBuilder/WorkflowBuilder.tsx'],                                                       deps: ['@xyflow/react'] },
 ];
 
 export function findBySlug(slug: string): RegistryEntry | undefined
