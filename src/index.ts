@@ -1,6 +1,9 @@
 export * from './tokens';
 export * from './themes';
 
+export { default as AudioPlayer } from './components/AudioPlayer/AudioPlayer';
+export type { AudioPlayerProps } from './components/AudioPlayer/AudioPlayer';
+
 export { default as Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './components/Accordion/Accordion';
 export type { AccordionType, AccordionProps } from './components/Accordion/Accordion';
 
@@ -62,7 +65,7 @@ export type { DrawerProps, DrawerSide, DrawerHeaderProps, DrawerTitleProps, Draw
 export { default as DropdownMenu } from './components/DropdownMenu/DropdownMenu';
 export type { DropdownMenuProps, DropdownMenuEntry, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSide, DropdownMenuAlign } from './components/DropdownMenu/DropdownMenu';
 
-export { FormSection, FormField, FormLabel, FormControl, FormDescription, FormMessage } from './components/Form/Form';
+export { default as Form, FormSection, FormField, FormLabel, FormControl, FormDescription, FormMessage } from './components/Form/Form';
 
 export { default as FunctionPlotter } from './components/FunctionPlotter/FunctionPlotter';
 
@@ -138,4 +141,7 @@ export type { TooltipProps, TooltipSide } from './components/Tooltip/Tooltip';
 
 export { default as Tree, TreeItem } from './components/Tree/Tree';
 export type { TreeProps } from './components/Tree/Tree';
+
+export { default as Tilt } from './components/Tilt/Tilt';
+export type { TiltProps } from './components/Tilt/Tilt';
 

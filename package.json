@@ -2,6 +2,9 @@
   "name": "@dafink/ui",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,6 +14,7 @@
     "test": "vitest run --project unit",
     "test:watch": "vitest --project unit",
     "tokens": "node scripts/build-tokens.mjs",
+    "sync-registry": "node packages/cli/scripts/build-registry.mjs",
     "prepare": "husky",
     "check-contrast": "npx tsx scripts/check-contrast.ts"
   },
@@ -20,6 +24,7 @@
     "@dnd-kit/utilities": "^3.2.2",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@types/d3-force": "^3.0.10",
+    "@xyflow/react": "^12.11.0",
     "d3-force": "^3.0.0",
     "next": "16.2.3",
     "react": "19.2.4",
