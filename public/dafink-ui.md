@@ -397,6 +397,7 @@ Choose the right feedback component based on persistence and blocking behavior:
 | Blocking confirmation (Delete, Publish) | `Modal` | Forces a decision before proceeding |
 | Side-panel workflow (edit without leaving) | `Drawer` side `right` | Non-blocking; page stays visible |
 | Navigation drawer (mobile) | `Drawer` side `left` | Standard mobile nav pattern |
+| Focused floating task (quick preview, inspector) | `SidePanel` | Non-blocking; page stays visible, scrollable, and undimmed; reads as a floating card, not a pinned sheet |
 
 **Toast guidelines:**
 - Keep `title` to 3–5 words. Use `description` for detail, not the title.
@@ -416,6 +417,14 @@ Choose the right feedback component based on persistence and blocking behavior:
   `side="bottom"` for mobile-style action sheets.
 - Both require a focus trap and Escape-to-close. This is built into the
   components — do not suppress it.
+- `SidePanel`: keyboard focus trap, Escape, dismissal on outside click, and
+  focus return like `Drawer`, but floats with margin from every viewport edge
+  instead of sitting flush against one — rounded corners on all four sides —
+  and has **no backdrop and no scroll lock**: the rest of the page stays fully
+  visible, undimmed, unblurred, and scrollable while it's open. Its body is
+  composed from the real `Card` component.
+  Use it when the task should feel like a floating card rather than a pinned,
+  edge-to-edge sheet.
 
 ---
 

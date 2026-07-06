@@ -49,8 +49,8 @@ Every new component must have an entry in the registry. Categories follow the si
 
 | Category      | Components it contains                                            |
 |---------------|-------------------------------------------------------------------|
-| `Actions`     | Button and any other action-triggering components                 |
-| `Inputs`      | Input, Textarea, Radio, Switch, ToggleGroup, CalendarInput        |
+| `Actions`     | Action-triggering components that aren't a form input (e.g. DropdownMenu triggers) |
+| `Inputs`      | Button, Input, Textarea, Radio, Switch, ToggleGroup, CalendarInput |
 | `Display`     | Card, Table, Skeleton, Typography                                 |
 | `Navigation`  | Tabs, Breadcrumb                                                  |
 | `Forms`       | Form and form-layout primitives                                   |

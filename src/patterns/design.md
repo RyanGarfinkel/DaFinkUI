@@ -17,6 +17,17 @@ Design should be invisible. The user's goal is to complete a task — the interf
 
 ---
 
+## Blocks vs Components
+
+The system has two layers. Know which one you're building.
+
+- **Components** (`src/components/`) are atomic, prop-driven, and stable — a Button takes `variant`/`size` and behaves the same everywhere it's used. They're a long-term API: changing one ripples to every consumer, so changes go through `rules/new-component.md`'s spec/test discipline.
+- **Blocks** (`src/blocks/`) are full compositions — a dashboard, a login flow, a settings form — built entirely from components. They take no props and aren't meant to be a stable API; they're a fast starting point that gets copied in and edited directly for the specific use case. See `rules/new-block.md`.
+
+When extending an existing screen, reach for a block if the whole thing (layout, data shape, flow) is being replaced wholesale; reach for components if you're composing something novel from scratch. If a "block" starts growing configuration props to handle multiple use cases, it's drifting into being a component — stop and reconsider which layer it belongs in.
+
+---
+
 ## Motion
 
 Animation should feel natural, not performative. The goal is to smooth transitions and orient the user — not to entertain them.

@@ -16,6 +16,7 @@ Project-specific rules are in `rules/`. Read the relevant file before starting a
 | `rules/design.md`          | Before any visual, layout, or motion decision                             |
 | `rules/tokens.md`          | Any time you write or touch styles in any component or pattern            |
 | `rules/new-component.md`   | Any time a new UI component is being created or updated                   |
+| `rules/new-block.md`       | Any time a new UI block is being created or updated                       |
 | `rules/docs-site.md`       | Any time you work on files under `app/` (including `app/_docs/`)          |
 | `rules/commits.md`         | Before writing any commit message                                         |
 

@@ -165,7 +165,7 @@ Re-query focusable elements whenever the overlay content changes — dynamic con
 
 ## Popup and Overlay Patterns
 
-This section defines the required keyboard and focus behavior for every popup-type component: **Modal**, **Dialog**, **Drawer**, **Dropdown**, **Menu**, **Combobox**, **Tooltip**, **Popover**, **Toast**.
+This section defines the required keyboard and focus behavior for every popup-type component: **Modal**, **Dialog**, **Drawer**, **SidePanel**, **Dropdown**, **Menu**, **Combobox**, **Tooltip**, **Popover**, **Toast**.
 
 ### All Overlays
 
