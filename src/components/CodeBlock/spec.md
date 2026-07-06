@@ -44,7 +44,7 @@ npx @dafink/ui add code-block
 | Default        | Invisible — `opacity-0`; fades in on group hover or keyboard focus                         |
 | Hover          | `opacity-100`, `bg-surface-hover`, `text-text`                                              |
 | Focus-visible  | `opacity-100`, `ring-2 ring-offset-2 ring-brand-ring`                                       |
-| Active/clicked | Icon and label swap to checkmark + "Copied" for 2 000 ms, then revert                      |
+| Active/clicked | Icon swaps to a checkmark for 2 000 ms, then reverts. No visible text label in either state — the `aria-label` (see Accessibility) carries the "Copy to clipboard" / "Copied" wording for assistive tech. |
 
 ### ToggleGroup tabs (example variant)
 Interaction states are owned by the `ToggleGroup` / `ToggleGroupItem` component — see its spec.

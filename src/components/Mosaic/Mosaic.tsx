@@ -1,14 +1,14 @@
 'use client';
 
 import {
+	createContext, useCallback, useContext, useEffect, useId,
+	useMemo, useRef, useState, Children, isValidElement,
+	HTMLAttributes, ReactNode, ReactElement, CSSProperties,
+} from 'react';
+import {
 	DndContext, DragMoveEvent, DragOverlay, DragStartEvent,
 	KeyboardSensor, PointerSensor, useDraggable, useSensor, useSensors,
 } from '@dnd-kit/core';
-import {
-	createContext, useCallback, useContext, useEffect, useId,
-	useMemo, useRef, useState,
-	HTMLAttributes, ReactNode, CSSProperties,
-} from 'react';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -164,6 +164,48 @@ const computePreview = (
 	return hasOverlaps(result) ? null : result;
 }
 
+// Scans every grid cell for the closest one that yields a valid placement (empty,
+// or a clean single-tile swap) and snaps to it — so the ghost never lingers over a
+// dead zone (e.g. a spot overlapping two tiles) waiting for the pointer to leave it.
+const findBestCell = (
+	layout:    MosaicTileLayout[],
+	activeId:  string,
+	targetCol: number,
+	targetRow: number,
+	cols:      number,
+	rows:      number,
+	colWidth:  number,
+	rowHeight: number,
+	gap:       number,
+): { col: number; row: number } =>
+{
+	const active = layout.find(t => t.id === activeId);
+	if(!active) return { col: targetCol, row: targetRow };
+
+	const distSq = (col: number, row: number): number =>
+	{
+		const dx = (col - targetCol) * (colWidth + gap);
+		const dy = (row - targetRow) * (rowHeight + gap);
+		return dx * dx + dy * dy;
+	};
+
+	let bestCol  = active.col;
+	let bestRow  = active.row;
+	let bestDist = distSq(active.col, active.row);
+
+	for(let row = 1; row <= rows - active.rowSpan + 1; row++)
+		for(let col = 1; col <= cols - active.colSpan + 1; col++)
+		{
+			if(col === active.col && row === active.row) continue;
+			if(!computePreview(layout, activeId, col, row, cols)) continue;
+
+			const dist = distSq(col, row);
+			if(dist < bestDist) { bestDist = dist; bestCol = col; bestRow = row; }
+		}
+
+	return { col: bestCol, row: bestRow };
+};
+
 // ─── Context ──────────────────────────────────────────────────────────────────
 
 interface GridCtx
@@ -298,7 +340,6 @@ export const Mosaic = (
 	const [colWidth, setColWidth]     = useState(0);
 	const [activeId, setActiveId]     = useState<string | null>(null);
 	const [previewLayout, setPreviewLayoutState] = useState<MosaicTileLayout[] | null>(null);
-	const [activeSnapCell, setActiveSnapCell]     = useState<{ col: number; row: number } | null>(null);
 	const maxCol = maxColSpan ?? cols;
 
 	// Refs keep modifier and event handlers stable while always reading fresh values.
@@ -310,6 +351,7 @@ export const Mosaic = (
 	const layoutRef      = useRef(layout);
 	const previewRef     = useRef<MosaicTileLayout[] | null>(null);
 	const activeTileRef  = useRef<MosaicTileLayout | null>(null);
+	const resolvedCellRef = useRef<{ col: number; row: number } | null>(null);
 
 	useEffect(() => { colWidthRef.current  = colWidth;  }, [colWidth]);
 	useEffect(() => { colsRef.current      = cols;      }, [cols]);
@@ -347,8 +389,9 @@ export const Mosaic = (
 		useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
 	);
 
-	// Positions the DragOverlay ghost at the snapped grid cell rather than
-	// directly under the pointer, giving pixel-perfect tile placement feedback.
+	// Positions the DragOverlay ghost at the resolved target cell (the nearest cell
+	// that yields a valid placement) rather than directly under the pointer or the
+	// raw nearest grid cell — so the ghost always sits somewhere a drop will land.
 	const snapModifier = useCallback((args: {
 		draggingNodeRect: { left: number; top: number } | null;
 		transform:        { x: number; y: number; scaleX: number; scaleY: number };
@@ -359,21 +402,16 @@ export const Mosaic = (
 		const colW = colWidthRef.current;
 		const rowH = rowHeightRef.current;
 		const g    = gapRef.current;
-		const c    = colsRef.current;
-		const r    = effectiveRowCount(rowsRef.current, layoutRef.current);
-		const tile = activeTileRef.current;
 		const grid = gridRef.current;
+		const cell = resolvedCellRef.current;
 
-		if(!draggingNodeRect || !grid || !tile || colW === 0) return transform;
+		if(!draggingNodeRect || !grid || !cell || colW === 0) return transform;
 
 		const gridRect = grid.getBoundingClientRect();
-		const relX     = draggingNodeRect.left + transform.x - gridRect.left;
-		const relY     = draggingNodeRect.top  + transform.y - gridRect.top;
-		const { col, row } = snapToGrid(relX, relY, tile.colSpan, tile.rowSpan, c, r, colW, rowH, g);
 
 		return {
-			x:      (col - 1) * (colW + g) + gridRect.left - draggingNodeRect.left,
-			y:      (row - 1) * (rowH + g) + gridRect.top  - draggingNodeRect.top,
+			x:      (cell.col - 1) * (colW + g) + gridRect.left - draggingNodeRect.left,
+			y:      (cell.row - 1) * (rowH + g) + gridRect.top  - draggingNodeRect.top,
 			scaleX: 1,
 			scaleY: 1,
 		};
@@ -383,9 +421,9 @@ export const Mosaic = (
 	{
 		const tile = layoutRef.current.find(t => t.id === String(active.id)) ?? null;
 		activeTileRef.current = tile;
+		resolvedCellRef.current = tile ? { col: tile.col, row: tile.row } : null;
 		setActiveId(String(active.id));
 		setPreviewLayout(null);
-		setActiveSnapCell(tile ? { col: tile.col, row: tile.row } : null);
 	}, [setPreviewLayout]);
 
 	const onDragMove = useCallback(({ active }: DragMoveEvent) =>
@@ -398,26 +436,32 @@ export const Mosaic = (
 		const translated = active.rect.current.translated;
 		if(!translated) return;
 
-		const gridRect    = grid.getBoundingClientRect();
-		const relX        = translated.left - gridRect.left;
-		const relY        = translated.top  - gridRect.top;
-		const effRows      = effectiveRowCount(rowsRef.current, layoutRef.current);
-		const { col, row } = snapToGrid(relX, relY, tile.colSpan, tile.rowSpan, colsRef.current, effRows, colW, rowHeightRef.current, gapRef.current);
-		setActiveSnapCell({ col, row });
+		const gridRect = grid.getBoundingClientRect();
+		const relX     = translated.left - gridRect.left;
+		const relY     = translated.top  - gridRect.top;
+		const rowH     = rowHeightRef.current;
+		const g        = gapRef.current;
+		const c        = colsRef.current;
+		const effRows  = effectiveRowCount(rowsRef.current, layoutRef.current);
 
-		const overlapping = findOverlapping(layoutRef.current, col, row, tile.colSpan, tile.rowSpan, String(active.id));
+		const { col, row } = snapToGrid(relX, relY, tile.colSpan, tile.rowSpan, c, effRows, colW, rowH, g);
+		const best = findBestCell(layoutRef.current, String(active.id), col, row, c, effRows, colW, rowH, g);
+		resolvedCellRef.current = best;
 
-		// Skip positions where multiple tiles would need to displace simultaneously.
-		if(overlapping.length > 1) return;
+		if(best.col === tile.col && best.row === tile.row)
+		{
+			setPreviewLayout(null);
+			return;
+		}
 
-		setPreviewLayout(computePreview(layoutRef.current, String(active.id), col, row, colsRef.current));
+		setPreviewLayout(computePreview(layoutRef.current, String(active.id), best.col, best.row, c));
 	}, [setPreviewLayout]);
 
 	const onDragEnd = useCallback(() =>
 	{
 		setActiveId(null);
-		setActiveSnapCell(null);
 		activeTileRef.current = null;
+		resolvedCellRef.current = null;
 		const preview = previewRef.current;
 		setPreviewLayout(null);
 		if(preview) onLayoutChange(preview);
@@ -426,8 +470,8 @@ export const Mosaic = (
 	const onDragCancel = useCallback(() =>
 	{
 		setActiveId(null);
-		setActiveSnapCell(null);
 		activeTileRef.current = null;
+		resolvedCellRef.current = null;
 		setPreviewLayout(null);
 	}, [setPreviewLayout]);
 
@@ -438,6 +482,22 @@ export const Mosaic = (
 	const ghostH     = activeTile
 		? activeTile.rowSpan * rowHeight + (activeTile.rowSpan - 1) * gap
 		: 0;
+
+	// Renders the same content the tile shows in the grid, so the overlay
+	// reads as the tile itself moving rather than a placeholder standing in for it.
+	const activeContent = useMemo(() =>
+	{
+		if(!activeTile) return null;
+		const match = Children.toArray(children).find(
+			(child): child is ReactElement<MosaicTileProps> =>
+				isValidElement<MosaicTileProps>(child) && child.props.id === activeId
+		);
+		if(!match) return null;
+		const tileChildren = match.props.children;
+		return typeof tileChildren === 'function'
+			? tileChildren({ colSpan: activeTile.colSpan, rowSpan: activeTile.rowSpan })
+			: tileChildren;
+	}, [children, activeId, activeTile]);
 
 	const handleTileChange = useCallback((id: string, col: number, row: number, colSpan: number, rowSpan: number) =>
 		onLayoutChange(layout.map(t => t.id === id ? { ...t, col, row, colSpan, rowSpan } : t)),
@@ -481,13 +541,11 @@ export const Mosaic = (
 					{activeTile && ghostW > 0 && (
 						<div
 							style={{ width: ghostW, height: ghostH, cursor: 'grabbing' }}
-							className='relative rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-brand/20 bg-surface shadow-2xl ring-1 ring-brand/10'
+							className='relative overflow-hidden rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-brand/20 bg-surface shadow-2xl ring-1 ring-brand/10'
 						>
-							{activeSnapCell && (
-								<span className='absolute bottom-2 left-3 text-[11px] font-medium text-text-muted tabular-nums select-none'>
-									col {activeSnapCell.col} · row {activeSnapCell.row}
-								</span>
-							)}
+							<div className='h-full w-full p-5'>
+								{activeContent}
+							</div>
 						</div>
 					)}
 				</DragOverlay>

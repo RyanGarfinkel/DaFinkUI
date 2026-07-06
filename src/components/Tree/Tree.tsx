@@ -9,6 +9,8 @@ interface TreeContextValue
 	unregisterItem: (id: string) => void;
 	getVisibleIds: () => string[];
 	focusItem: (id: string) => void;
+	terminalIcon?: ReactNode;
+	nonTerminalIcon?: ReactNode;
 }
 
 const TreeContext = createContext<TreeContextValue | null>(null);
@@ -24,9 +26,15 @@ export interface TreeProps
 {
 	children: ReactNode;
 	className?: string;
+	terminalIcon?: ReactNode;
+	nonTerminalIcon?: ReactNode;
+	/** Allows text selection/copy inside the tree. Off by default since a normal
+	 *  interactive tree treats click as select/toggle, not text selection. Turn
+	 *  this on for read-only, fully non-collapsible trees (e.g. a diagram). */
+	selectable?: boolean;
 }
 
-const Tree = ({ children, className = '' }: TreeProps) => {
+const Tree = ({ children, className = '', terminalIcon, nonTerminalIcon, selectable = false }: TreeProps) => {
     const [focusedId, setFocusedId] = useState<string | null>(null);
     const itemsRef = useRef<Map<string, HTMLElement>>(new Map());
 
@@ -76,7 +84,13 @@ const Tree = ({ children, className = '' }: TreeProps) => {
 		const visibleIds = getVisibleIds();
 		if(visibleIds.length === 0) return;
 
-		const currentIndex = focusedId ? visibleIds.indexOf(focusedId) : -1;
+		// Read the actual focused DOM node rather than the focusedId state — state set by
+		// a prior onFocus may not have committed yet when this fires (e.g. a raw .focus()
+		// call immediately followed by a keydown), so this matches the more robust
+		// e.currentTarget-based pattern already used in Radio.tsx.
+		let currentIndex = -1;
+		for(const [id, el] of itemsRef.current)
+			if(el === e.target) { currentIndex = visibleIds.indexOf(id); break; }
 
 		if(e.key === 'ArrowDown')
 		{
@@ -103,10 +117,10 @@ const Tree = ({ children, className = '' }: TreeProps) => {
 	};
 
     return (
-		<TreeContext.Provider value={{ focusedId, setFocusedId, registerItem, unregisterItem, getVisibleIds, focusItem }}>
+		<TreeContext.Provider value={{ focusedId, setFocusedId, registerItem, unregisterItem, getVisibleIds, focusItem, terminalIcon, nonTerminalIcon }}>
 			<div
 				role='tree'
-				className={`text-sm select-none ${className}`}
+				className={`text-sm ${selectable ? 'select-text' : 'select-none'} ${className}`}
 				onKeyDown={handleKeyDown}
 			>
 				{children}
@@ -134,33 +148,37 @@ export interface TreeItemProps
 	label: ReactNode;
 	children?: ReactNode;
 	defaultOpen?: boolean;
+	collapsible?: boolean;
 	icon?: ReactNode;
 	disabled?: boolean;
 	className?: string;
 }
 
 export const TreeItem = (
-    { label, children, defaultOpen = false, icon, disabled = false, className = '' }: TreeItemProps
+    { label, children, defaultOpen = false, collapsible = true, icon, disabled = false, className = '' }: TreeItemProps
 ) => {
     const tree = useTreeContext();
     const parent = useTreeItemContext();
     const depth = parent ? parent.depth + 1 : 0;
     const isBranch = Boolean(children);
     const [isOpen, setOpen] = useState(defaultOpen);
+    const open = collapsible ? isOpen : true;
+    const interactive = collapsible && !disabled;
     const itemId = useId();
     const itemRef = useRef<HTMLDivElement>(null);
 
     useEffect(() =>
 	{
+		if(!collapsible) return;
 		const el = itemRef.current;
 		if(!el) return;
 		tree.registerItem(itemId, el);
 		return () => tree.unregisterItem(itemId);
-	}, [itemId, tree]);
+	}, [itemId, tree, collapsible]);
 
     const handleClick = () => {
 		if(disabled) return;
-		if(isBranch) setOpen(prev => !prev);
+		if(isBranch && collapsible) setOpen(prev => !prev);
 		tree.setFocusedId(itemId);
 	};
 
@@ -171,17 +189,17 @@ export const TreeItem = (
 		{
 			e.preventDefault();
 			e.stopPropagation();
-			if(isBranch) setOpen(prev => !prev);
+			if(isBranch && collapsible) setOpen(prev => !prev);
 		}
 		else if(e.key === 'ArrowRight')
 		{
 			e.preventDefault();
 			e.stopPropagation();
-			if(isBranch && !isOpen)
+			if(isBranch && !open)
 			{
 				setOpen(true);
 			}
-			else if(isBranch && isOpen)
+			else if(isBranch && open)
 			{
 				const visibleIds = tree.getVisibleIds();
 				const currentIndex = visibleIds.indexOf(itemId);
@@ -193,9 +211,9 @@ export const TreeItem = (
 		{
 			e.preventDefault();
 			e.stopPropagation();
-			if(isBranch && isOpen)
+			if(isBranch && open)
 			{
-				setOpen(false);
+				if(collapsible) setOpen(false);
 			}
 			else if(parent)
 			{
@@ -207,20 +225,22 @@ export const TreeItem = (
     const paddingLeft = depth === 0 ? 0 : depth * 16;
 
     return (
-		<TreeItemContext.Provider value={{ depth, isOpen, setOpen, itemId }}>
-			<div role='treeitem' aria-expanded={isBranch ? isOpen : undefined} aria-disabled={disabled || undefined} aria-selected={tree.focusedId === itemId}>
+		<TreeItemContext.Provider value={{ depth, isOpen: open, setOpen, itemId }}>
+			<div role='treeitem' aria-expanded={isBranch ? open : undefined} aria-disabled={disabled || undefined} aria-selected={tree.focusedId === itemId}>
 				<div
 					ref={itemRef}
-					tabIndex={disabled ? -1 : 0}
-					onClick={handleClick}
-					onKeyDown={handleKeyDown}
-					onFocus={() => !disabled && tree.setFocusedId(itemId)}
+					tabIndex={disabled || !collapsible ? -1 : 0}
+					onClick={collapsible ? handleClick : undefined}
+					onKeyDown={collapsible ? handleKeyDown : undefined}
+					onFocus={collapsible ? () => !disabled && tree.setFocusedId(itemId) : undefined}
 					className={[
-						'flex items-center gap-1.5 rounded-[var(--radius)] py-1 pr-2 cursor-pointer',
+						'flex items-center gap-1.5 rounded-[var(--radius)] py-1 pr-2',
 						'text-text transition-colors duration-[var(--duration-fast)]',
 						disabled
 							? 'opacity-40 cursor-not-allowed pointer-events-none'
-							: 'hover:bg-surface-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring active:bg-surface-active',
+							: interactive
+								? 'cursor-pointer hover:bg-surface-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring active:bg-surface-active'
+								: 'cursor-default',
 						className,
 					].filter(Boolean).join(' ')}
 					style={{ paddingLeft: `${paddingLeft + 4}px` }}
@@ -229,39 +249,28 @@ export const TreeItem = (
 						{icon ?? (
 							isBranch
 								? (
-									<svg
-										width='12'
-										height='12'
-										viewBox='0 0 24 24'
-										fill='none'
-										stroke='currentColor'
-										strokeWidth='2.5'
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										className={[
-											'text-text-muted motion-safe:transition-transform motion-safe:duration-[var(--duration-fast)]',
-											isOpen ? 'rotate-90' : '',
-										].join(' ')}
-									>
-										<path d='m9 18 6-6-6-6' />
-									</svg>
+									collapsible
+										? (
+											<svg
+												width='12'
+												height='12'
+												viewBox='0 0 24 24'
+												fill='none'
+												stroke='currentColor'
+												strokeWidth='2.5'
+												strokeLinecap='round'
+												strokeLinejoin='round'
+												className={[
+													'text-text-muted motion-safe:transition-transform motion-safe:duration-[var(--duration-fast)]',
+													open ? 'rotate-90' : '',
+												].join(' ')}
+											>
+												<path d='m9 18 6-6-6-6' />
+											</svg>
+										)
+										: (tree.nonTerminalIcon ?? null)
 								)
-								: (
-									<svg
-										width='12'
-										height='12'
-										viewBox='0 0 24 24'
-										fill='none'
-										stroke='currentColor'
-										strokeWidth='2'
-										strokeLinecap='round'
-										strokeLinejoin='round'
-										className='text-text-subtle'
-									>
-										<path d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z' />
-										<polyline points='14 2 14 8 20 8' />
-									</svg>
-								)
+								: (tree.terminalIcon ?? null)
 						)}
 					</span>
 					<span className='truncate leading-none py-0.5'>{label}</span>
@@ -270,7 +279,7 @@ export const TreeItem = (
 				{isBranch && (
 					<div
 						className='motion-safe:transition-[grid-template-rows] motion-safe:duration-[var(--duration-fast)]'
-						style={{ display: 'grid', gridTemplateRows: isOpen ? '1fr' : '0fr' }}
+						style={{ display: 'grid', gridTemplateRows: open ? '1fr' : '0fr' }}
 					>
 						<div style={{ overflow: 'hidden' }} role='group'>
 							{children}

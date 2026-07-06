@@ -139,7 +139,7 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 					focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring
 				'
 			>
-				{copied ? <><CheckIcon /><span>Copied</span></> : <CopyIcon />}
+				{copied ? <CheckIcon /> : <CopyIcon />}
 			</button>
 		</div>
 	);

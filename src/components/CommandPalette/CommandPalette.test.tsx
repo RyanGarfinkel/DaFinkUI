@@ -401,4 +401,30 @@ describe('CommandPalette', () =>
 			expect(enabled[0].getAttribute('aria-selected')).toBe('true');
 		});
 	});
+
+	it('locks body scroll when open', async () =>
+	{
+		document.body.style.overflow = '';
+
+		const { unmount } = renderPalette({ open: true });
+		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
+
+		expect(document.body.style.overflow).toBe('hidden');
+
+		unmount();
+		document.body.style.overflow = '';
+	});
+
+	it('restores the original body overflow when it closes', async () =>
+	{
+		document.body.style.overflow = '';
+
+		const { unmount } = renderPalette({ open: true });
+		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
+		expect(document.body.style.overflow).toBe('hidden');
+
+		unmount();
+
+		expect(document.body.style.overflow).toBe('');
+	});
 });

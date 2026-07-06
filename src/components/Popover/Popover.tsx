@@ -192,7 +192,7 @@ export const Popover = (
 					style={{ position: 'fixed', top: position.top, left: position.left, zIndex: 50 }}
 					className={[
 						'min-w-56 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel p-4 shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)] outline-none',
-						'transition-all',
+						'transition-[opacity,transform]',
 						visible
 							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'
 							: 'opacity-0 scale-95 duration-[var(--duration-fast)] ease-[var(--ease-exit)]',

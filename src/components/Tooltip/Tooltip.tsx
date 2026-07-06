@@ -146,7 +146,10 @@ export const Tooltip = (
 					className={[
 						'pointer-events-none select-none whitespace-nowrap',
 						'rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel px-2.5 py-1 text-xs text-text shadow-[var(--shadow)] backdrop-blur-[var(--backdrop-blur)]',
-						'transition-all',
+						// Only animate opacity/transform — top/left are set from a post-mount
+						// getBoundingClientRect() measurement, and must snap instantly or the
+						// panel visibly slides in from its unmeasured {0,0} starting position.
+						'transition-[opacity,transform]',
 						visible
 							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'
 							: 'opacity-0 scale-95 duration-[var(--duration-fast)] ease-[var(--ease-exit)]',

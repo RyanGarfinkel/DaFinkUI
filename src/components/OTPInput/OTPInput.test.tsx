@@ -108,4 +108,38 @@ describe('OTPInput', () =>
 		const inputs = screen.getAllByRole('textbox');
 		inputs.forEach(input => expect(input.className).toContain('caret-transparent'));
 	});
+
+	it('does not render a blinking cursor before any cell is focused', () =>
+	{
+		const { container } = render(<OTPInput length={4} value='' />);
+		expect(container.querySelector('.dafink-otp-cursor')).toBeNull();
+	});
+
+	it('renders a blinking cursor only inside the focused cell', () =>
+	{
+		const { container } = render(<OTPInput length={4} value='' />);
+		const inputs = screen.getAllByRole('textbox');
+		fireEvent.focus(inputs[2]);
+		expect(container.querySelectorAll('.dafink-otp-cursor')).toHaveLength(1);
+		expect(inputs[2].parentElement?.querySelector('.dafink-otp-cursor')).not.toBeNull();
+	});
+
+	it('removes the blinking cursor when the cell loses focus', () =>
+	{
+		const { container } = render(<OTPInput length={4} value='' />);
+		const inputs = screen.getAllByRole('textbox');
+		fireEvent.focus(inputs[0]);
+		expect(container.querySelector('.dafink-otp-cursor')).not.toBeNull();
+		fireEvent.blur(inputs[0]);
+		expect(container.querySelector('.dafink-otp-cursor')).toBeNull();
+	});
+
+	it('injects the same blinking-cursor animation technique used by Typewriter', () =>
+	{
+		const { container } = render(<OTPInput length={4} value='' />);
+		const css = container.querySelector('style')?.textContent ?? '';
+		expect(css).toContain('dafink-cursor-blink');
+		expect(css).toContain('dafink-otp-cursor');
+		expect(css).toContain('prefers-reduced-motion');
+	});
 });

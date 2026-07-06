@@ -167,4 +167,17 @@ describe('Tooltip', () =>
 		expect(onFocus).toHaveBeenCalled();
 		expect(screen.getByRole('tooltip')).toBeInTheDocument();
 	});
+
+	it('does not transition top/left, only opacity/transform, so the initial {0,0} position never visibly animates in', () =>
+	{
+		render(
+			<Tooltip content='Helpful hint'>
+				<button>Trigger</button>
+			</Tooltip>
+		);
+		fireEvent.focus(screen.getByRole('button'));
+		const tooltip = screen.getByRole('tooltip');
+		expect(tooltip.className).not.toContain('transition-all');
+		expect(tooltip.className).toContain('transition-[opacity,transform]');
+	});
 });

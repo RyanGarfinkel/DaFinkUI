@@ -5,9 +5,12 @@ import Form, {
 	FormControl,
 	FormDescription,
 	FormMessage,
+	useZodForm,
 } from './Form';
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, it, expect, vi } from 'vitest';
+import { z } from 'zod';
 
 describe('Form', () =>
 {
@@ -241,5 +244,66 @@ describe('FormControl', () =>
 			<FormControl className='custom-control'><input /></FormControl>
 		);
 		expect((container.firstChild as HTMLElement).className).toContain('custom-control');
+	});
+});
+
+const zodTestSchema = z.object({
+	email: z.email('Enter a valid email address.'),
+});
+
+const ZodTestForm = ({ onSubmit }: { onSubmit: (values: z.infer<typeof zodTestSchema>) => void }) =>
+{
+	const form = useZodForm(zodTestSchema);
+
+	return (
+		<Form aria-label='zod form' onSubmit={form.handleSubmit(onSubmit)}>
+			<FormField>
+				<FormLabel htmlFor='email'>Email</FormLabel>
+				<FormControl>
+					<input id='email' {...form.register('email')} />
+				</FormControl>
+				<FormMessage>{form.formState.errors.email?.message}</FormMessage>
+			</FormField>
+			<button type='submit'>Submit</button>
+		</Form>
+	);
+};
+
+describe('useZodForm', () =>
+{
+	it('renders without errors', () =>
+	{
+		render(<ZodTestForm onSubmit={() => {}} />);
+		expect(screen.getByRole('form')).toBeDefined();
+	});
+
+	it('populates formState.errors when handleSubmit runs against invalid data', async () =>
+	{
+		const onSubmit = vi.fn();
+		render(<ZodTestForm onSubmit={onSubmit} />);
+
+		await userEvent.type(screen.getByLabelText('Email'), 'not-an-email');
+		await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+
+		await waitFor(() =>
+		{
+			expect(screen.getByText('Enter a valid email address.')).toBeDefined();
+		});
+		expect(onSubmit).not.toHaveBeenCalled();
+	});
+
+	it('calls onSubmit with parsed values when data is valid', async () =>
+	{
+		const onSubmit = vi.fn();
+		render(<ZodTestForm onSubmit={onSubmit} />);
+
+		await userEvent.type(screen.getByLabelText('Email'), 'jane@example.com');
+		await userEvent.click(screen.getByRole('button', { name: 'Submit' }));
+
+		await waitFor(() =>
+		{
+			expect(onSubmit).toHaveBeenCalledOnce();
+		});
+		expect(onSubmit.mock.calls[0][0]).toEqual({ email: 'jane@example.com' });
 	});
 });

@@ -42,6 +42,7 @@ const OTPInput = ({
 	const [slots, setSlots] = useState<string[]>(() =>
 		Array.from({ length }, (_, i) => value[i] ?? '')
 	);
+	const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 	const lastEmitted = useRef(value);
 
 	useEffect(() =>
@@ -133,11 +134,14 @@ const OTPInput = ({
 		refs.current[Math.min(pasted.length, length - 1)]?.focus();
 	};
 
-	const handleFocus = (e: React.FocusEvent<HTMLInputElement>) =>
+	const handleFocus = (index: number) => (e: React.FocusEvent<HTMLInputElement>) =>
 	{
 		const el = e.currentTarget;
 		requestAnimationFrame(() => el.setSelectionRange(el.value.length, el.value.length));
+		setFocusedIndex(index);
 	};
+
+	const handleBlur = () => setFocusedIndex(null);
 
 	const cellClass = [
 		'w-10 h-12 text-center text-lg font-semibold rounded-[var(--radius)] border-[length:var(--border-width)] bg-surface text-text',
@@ -150,69 +154,84 @@ const OTPInput = ({
 	].join(' ');
 
 	return (
-		<div className={`flex flex-col gap-1.5 ${className}`}>
-			{label && (
-				<label
-					id={`${inputId}-label`}
-					htmlFor={`${inputId}-0`}
-					className='text-sm font-medium text-text'
-				>
-					{label}
-				</label>
-			)}
-			<div
-				role='group'
-				aria-labelledby={label ? `${inputId}-label` : undefined}
-				aria-describedby={feedbackId}
-				className='flex gap-2'
-			>
-				{Array.from({ length }).map((_, index) => (
-					<div key={index} className='relative group'>
-						<input
-							ref={el => { refs.current[index] = el; }}
-							id={index === 0 ? `${inputId}-0` : undefined}
-							type='text'
-							inputMode={inputMode}
-							pattern={pattern}
-							maxLength={1}
-							value={slots[index]}
-							onChange={handleChange(index)}
-							onKeyDown={handleKeyDown(index)}
-							onPaste={handlePaste}
-							onFocus={handleFocus}
-							disabled={disabled}
-							autoComplete={index === 0 ? 'one-time-code' : 'off'}
-							aria-label={`Character ${index + 1} of ${length}`}
-							className={cellClass}
-						/>
-						<span
-							aria-hidden='true'
-							className={[
-								'absolute bottom-2.5 left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full',
-								'opacity-0 group-focus-within:opacity-100',
-								'motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)]',
-								error ? 'bg-input-error-ring' : 'bg-input-ring',
-							].join(' ')}
-						/>
-					</div>
-				))}
-			</div>
-			<div
-				className={[
-					'grid motion-safe:transition-all motion-safe:duration-[var(--duration-fast)]',
-					feedbackText ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-				].join(' ')}
-			>
-				<div className='overflow-hidden'>
-					<p
-						id={feedbackId}
-						className={`pt-1 text-sm ${error ? 'text-input-error' : 'text-text-muted'}`}
+		<>
+			<style>{`
+				@keyframes dafink-cursor-blink {
+					0%, 100% { opacity: 1; }
+					50%       { opacity: 0; }
+				}
+				.dafink-otp-cursor {
+					animation: dafink-cursor-blink 1s step-start infinite;
+				}
+				@media (prefers-reduced-motion: reduce) {
+					.dafink-otp-cursor { animation: none; }
+				}
+			`}</style>
+			<div className={`flex flex-col gap-1.5 ${className}`}>
+				{label && (
+					<label
+						id={`${inputId}-label`}
+						htmlFor={`${inputId}-0`}
+						className='text-sm font-medium text-text'
 					>
-						{feedbackText ?? ''}
-					</p>
+						{label}
+					</label>
+				)}
+				<div
+					role='group'
+					aria-labelledby={label ? `${inputId}-label` : undefined}
+					aria-describedby={feedbackId}
+					className='flex gap-2'
+				>
+					{Array.from({ length }).map((_, index) => (
+						<div key={index} className='relative'>
+							<input
+								ref={el => { refs.current[index] = el; }}
+								id={index === 0 ? `${inputId}-0` : undefined}
+								type='text'
+								inputMode={inputMode}
+								pattern={pattern}
+								maxLength={1}
+								value={slots[index]}
+								onChange={handleChange(index)}
+								onKeyDown={handleKeyDown(index)}
+								onPaste={handlePaste}
+								onFocus={handleFocus(index)}
+								onBlur={handleBlur}
+								disabled={disabled}
+								autoComplete={index === 0 ? 'one-time-code' : 'off'}
+								aria-label={`Character ${index + 1} of ${length}`}
+								className={cellClass}
+							/>
+							{focusedIndex === index && (
+								<span
+									aria-hidden='true'
+									className={[
+										'dafink-otp-cursor absolute bottom-2.5 left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full',
+										error ? 'bg-input-error-ring' : 'bg-input-ring',
+									].join(' ')}
+								/>
+							)}
+						</div>
+					))}
+				</div>
+				<div
+					className={[
+						'grid motion-safe:transition-all motion-safe:duration-[var(--duration-fast)]',
+						feedbackText ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
+					].join(' ')}
+				>
+					<div className='overflow-hidden'>
+						<p
+							id={feedbackId}
+							className={`pt-1 text-sm ${error ? 'text-input-error' : 'text-text-muted'}`}
+						>
+							{feedbackText ?? ''}
+						</p>
+					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 };
 

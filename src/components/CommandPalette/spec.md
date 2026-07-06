@@ -10,7 +10,7 @@ A global command palette overlay for quick navigation and action execution. Open
 npx @dafink/ui add command-palette
 ```
 
-No additional npm packages required. No registry dependencies.
+No additional npm packages required. Registry dependency: `ScrollFade` (wraps the results listbox so it fades at whichever edge still has more matches).
 
 ---
 
@@ -103,7 +103,9 @@ Disabled items are completely skipped during keyboard navigation.
 
 ### Scroll Lock
 
-While the palette is open, `document.body.style.overflow` is set to `'hidden'`. This is removed when `open` becomes false (or on component unmount). The previous overflow value is restored.
+While the palette is open, `document.body.style.overflow` is set to `'hidden'`. This is removed when `open` becomes false (or on component unmount), restoring the previous overflow value.
+
+To prevent the page content from shifting horizontally when the scrollbar disappears, the scrollbar's width (`window.innerWidth - document.documentElement.clientWidth`) is measured on lock and applied as `document.body.style.paddingRight`. This is restored to its original value alongside `overflow` when the lock is released.
 
 ### Reduced Motion
 

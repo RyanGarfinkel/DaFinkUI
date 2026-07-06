@@ -1,4 +1,5 @@
-'use client';;
+'use client';
+
 import {
 	createContext,
 	useCallback,
@@ -10,6 +11,7 @@ import {
 	KeyboardEvent,
 	ReactNode,
 } from 'react';
+import ScrollFade from '../ScrollFade/ScrollFade';
 
 // ─── Item registry entry ──────────────────────────────────────────────────────
 
@@ -191,9 +193,13 @@ export const CommandPalette = (
     useEffect(() =>
 	{
 		if(!open) return;
-		const prev = document.body.style.overflow;
+		// No scrollbar-width compensation needed: `html` permanently reserves its
+		// scrollbar gutter (see globals.css), so toggling overflow here never
+		// changes the page's rendered width — nothing to compensate for.
+		const prevOverflow = document.body.style.overflow;
 		document.body.style.overflow = 'hidden';
-		return () => { document.body.style.overflow = prev; };
+
+		return () => { document.body.style.overflow = prevOverflow; };
 	}, [open]);
 
     useEffect(() =>
@@ -397,11 +403,12 @@ export const CommandPalette = (
 						</kbd>
 					</div>
 
-					<div
+					<ScrollFade
 						id={listId}
 						role='listbox'
 						aria-label='Commands'
-						className='max-h-[60vh] overflow-y-auto py-1.5'
+						fadeFrom='from-surface-panel'
+						className='max-h-[60vh] py-1.5'
 					>
 						{children}
 
@@ -411,7 +418,7 @@ export const CommandPalette = (
 								<span className='font-medium text-text'>&ldquo;{query}&rdquo;</span>
 							</div>
 						)}
-					</div>
+					</ScrollFade>
 				</div>
 			</div>
 		</PaletteContext.Provider>

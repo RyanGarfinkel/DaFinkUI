@@ -1,11 +1,14 @@
-'use client';;
-import { TableHTMLAttributes, ThHTMLAttributes, TdHTMLAttributes, HTMLAttributes } from 'react';
+'use client';
+
+import { createContext, useContext, TableHTMLAttributes, ThHTMLAttributes, TdHTMLAttributes, HTMLAttributes } from 'react';
 
 export type SortDirection = 'asc' | 'desc' | null;
+export type TableVariant = 'default' | 'minimal';
 
 export interface TableProps extends TableHTMLAttributes<HTMLTableElement>
 {
 	striped?: boolean;
+	variant?: TableVariant;
 	className?: string;
 }
 
@@ -39,40 +42,60 @@ export interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement>
 
 const CELL_BASE = 'px-4 py-3 text-sm text-text';
 
-export const Table = ({ striped = false, className = '', children, ...props }: TableProps) => {
+const TableVariantContext = createContext<TableVariant>('default');
+
+const useTableVariant = () => useContext(TableVariantContext);
+
+export const Table = ({ striped = false, variant = 'default', className = '', children, ...props }: TableProps) => {
+	const isMinimal = variant === 'minimal';
+	const wrapperClass = isMinimal
+		? 'w-full overflow-x-auto'
+		: 'w-full overflow-x-auto rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border';
+	const stripedClass = !isMinimal && striped ? '[&_tbody_tr:nth-child(odd)]:bg-surface [&_tbody_tr:nth-child(even)]:bg-surface-hover' : '';
+
 	return (
-		<div className='w-full overflow-x-auto rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border'>
-			<table
-				className={`w-full border-collapse ${striped ? '[&_tbody_tr:nth-child(odd)]:bg-surface [&_tbody_tr:nth-child(even)]:bg-surface-hover' : ''} ${className}`}
-				{...props}
-			>
-				{children}
-			</table>
-		</div>
+		<TableVariantContext.Provider value={variant}>
+			<div className={wrapperClass}>
+				<table
+					className={`w-full border-collapse ${stripedClass} ${className}`}
+					{...props}
+				>
+					{children}
+				</table>
+			</div>
+		</TableVariantContext.Provider>
 	);
 };
 
 export const TableHead = ({ className = '', children, ...props }: TableHeadProps) => {
+	const variant = useTableVariant();
+	const baseClass = variant === 'minimal' ? '' : 'border-b-[length:var(--border-width)] border-surface-border bg-surface-active';
+
 	return (
-		<thead className={`border-b-[length:var(--border-width)] border-surface-border bg-surface-active ${className}`} {...props}>
+		<thead className={`${baseClass} ${className}`} {...props}>
 			{children}
 		</thead>
 	);
 };
 
 export const TableBody = ({ className = '', children, ...props }: TableBodyProps) => {
+	const variant = useTableVariant();
+	const baseClass = variant === 'minimal' ? '' : 'divide-y divide-surface-border';
+
 	return (
-		<tbody className={`divide-y divide-surface-border ${className}`} {...props}>
+		<tbody className={`${baseClass} ${className}`} {...props}>
 			{children}
 		</tbody>
 	);
 };
 
 export const TableRow = ({ header = false, className = '', children, ...props }: TableRowProps) => {
+	const variant = useTableVariant();
 	const hoverClass = header ? '' : 'hover:bg-surface-hover transition-colors duration-150 motion-reduce:transition-none';
+	const borderClass = variant === 'minimal' && !header ? 'border-b border-surface-border' : '';
 
 	return (
-		<tr className={`${hoverClass} ${className}`} {...props}>
+		<tr className={`${hoverClass} ${borderClass} ${className}`} {...props}>
 			{children}
 		</tr>
 	);
@@ -101,14 +124,17 @@ export const TableHeader = (
         ...props
     }: TableHeaderProps
 ) => {
+	const variant = useTableVariant();
 	const isSortable = onSort !== undefined;
-	const labelBase = 'text-xs font-semibold uppercase tracking-wide text-text-muted';
+	const labelClass = variant === 'minimal'
+		? 'pb-2 text-xs font-medium text-text-muted uppercase tracking-wide border-b border-surface-border text-left'
+		: `${CELL_BASE} text-xs font-semibold uppercase tracking-wide text-text-muted text-left`;
 
 	if(isSortable)
 	{
 		return (
 			<th
-				className={`${CELL_BASE} ${labelBase} text-left ${className}`}
+				className={`${labelClass} ${className}`}
 				aria-sort={sortDirection === 'asc' ? 'ascending' : sortDirection === 'desc' ? 'descending' : 'none'}
 				{...props}
 			>
@@ -126,7 +152,7 @@ export const TableHeader = (
 
 	return (
 		<th
-			className={`${CELL_BASE} ${labelBase} text-left ${className}`}
+			className={`${labelClass} ${className}`}
 			{...props}
 		>
 			{children}
@@ -135,8 +161,11 @@ export const TableHeader = (
 };
 
 export const TableCell = ({ className = '', children, ...props }: TableCellProps) => {
+	const variant = useTableVariant();
+	const cellClass = variant === 'minimal' ? 'py-3 align-top text-sm text-text' : CELL_BASE;
+
 	return (
-		<td className={`${CELL_BASE} ${className}`} {...props}>
+		<td className={`${cellClass} ${className}`} {...props}>
 			{children}
 		</td>
 	);

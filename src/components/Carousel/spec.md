@@ -120,6 +120,18 @@ Renders nothing when there is only one slide. Each dot is a `role="tab"` button;
 | Tab         | Moves focus between Previous, Next, and dots |
 | Enter/Space | Activates focused Previous, Next, or dot     |
 
+### Drag / Swipe
+
+`CarouselContent`'s track supports pointer-based drag-to-navigate as an enhancement on top of the button and keyboard controls — it does not replace either.
+
+- Implemented with native Pointer Events (`onPointerDown` / `onPointerMove` / `onPointerUp` / `onPointerCancel`) so mouse, touch, and pen input are handled uniformly.
+- A gesture is only treated as a drag once the pointer moves more than 5px from its start position. Below that threshold, clicks on interactive content inside a `CarouselItem` (e.g. a button) fire normally.
+- While dragging past the activation threshold, the track follows the pointer 1:1 via `transform: translateX(...)` with no transition, then calls `setPointerCapture` so the drag continues even if the pointer leaves the track.
+- On release, if the drag distance exceeds 20% of the track's width (falls back to a fixed 50px when the track has no measured width, e.g. in a non-layout environment), the carousel advances to the next slide (dragged left) or previous slide (dragged right) via the same `scrollNext`/`scrollPrev` logic the buttons use — so `loop` and boundary clamping behave identically. Below the threshold, the track snaps back to the current slide.
+- The snap/settle animation reuses the existing `motion-safe:transition-transform motion-safe:duration-300` class (removed only while actively dragging), so it automatically respects `prefers-reduced-motion` the same way index-driven transitions already do.
+- `CarouselDots` reads the same `currentIndex` from context, so dragging to a new slide keeps the active dot in sync automatically.
+- The track uses `touch-action: pan-y` (`touch-pan-y`) so vertical page scrolling on touch devices is unaffected — only horizontal panning is captured for the swipe gesture.
+
 ---
 
 ## Tokens used

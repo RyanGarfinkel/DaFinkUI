@@ -21,7 +21,7 @@ export const neumorphStyle: Style =
 		'--backdrop-blur': '0px',
 		'--surface-alpha': '1',
 		'--inner-shadow':  'inset 5px 5px 12px rgb(0 0 0 / 0.14), inset -5px -5px 12px rgb(255 255 255 / 0.80)',
-		'--input-focus-shadow': '0 0 0 2px var(--color-input-ring), inset 5px 5px 12px rgb(0 0 0 / 0.14), inset -5px -5px 12px rgb(255 255 255 / 0.80)',
+		'--input-focus-shadow': '0 0 0 1px var(--color-input-ring), inset 5px 5px 12px rgb(0 0 0 / 0.14), inset -5px -5px 12px rgb(255 255 255 / 0.80)',
 	},
 	dark:
 	{
@@ -35,6 +35,6 @@ export const neumorphStyle: Style =
 		'--backdrop-blur': '0px',
 		'--surface-alpha': '1',
 		'--inner-shadow':  'inset 5px 5px 12px rgb(0 0 0 / 0.55), inset -5px -5px 12px rgb(255 255 255 / 0.06)',
-		'--input-focus-shadow': '0 0 0 2px var(--color-input-ring), inset 5px 5px 12px rgb(0 0 0 / 0.55), inset -5px -5px 12px rgb(255 255 255 / 0.06)',
+		'--input-focus-shadow': '0 0 0 1px var(--color-input-ring), inset 5px 5px 12px rgb(0 0 0 / 0.55), inset -5px -5px 12px rgb(255 255 255 / 0.06)',
 	},
 };

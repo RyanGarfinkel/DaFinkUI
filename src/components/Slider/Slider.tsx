@@ -1,6 +1,6 @@
 'use client';
 
-import { useId } from 'react';
+import { useId, useState } from 'react';
 
 export interface SliderProps
 {
@@ -33,7 +33,12 @@ const Slider = ({
 	const inputId = label ? `slider-${uid}` : undefined;
 	const hintId  = hint  ? `slider-hint-${uid}` : undefined;
 
+	const [isDragging, setIsDragging] = useState(false);
+
 	const pct = ((value - min) / (max - min)) * 100;
+
+	const startDragging = () => setIsDragging(true);
+	const stopDragging  = () => setIsDragging(false);
 
 	return (
 		<div className={`flex flex-col gap-1.5 ${className}`}>
@@ -58,7 +63,10 @@ const Slider = ({
 			<div className='relative flex items-center h-5'>
 				<div className='absolute inset-x-0 h-1.5 rounded-full bg-surface-active overflow-hidden'>
 					<div
-						className='h-full rounded-full bg-brand motion-safe:transition-all motion-safe:duration-[var(--duration-fast)] motion-safe:ease-out'
+						className={[
+							'h-full rounded-full bg-brand',
+							isDragging ? '' : 'motion-safe:transition-all motion-safe:duration-[var(--duration-fast)] motion-safe:ease-out',
+						].join(' ')}
 						style={{ width: `${pct}%` }}
 					/>
 				</div>
@@ -76,6 +84,10 @@ const Slider = ({
 					aria-valuenow={value}
 					aria-describedby={hintId}
 					onChange={e => onValueChange(Number(e.target.value))}
+					onPointerDown={startDragging}
+					onPointerUp={stopDragging}
+					onPointerCancel={stopDragging}
+					onBlur={stopDragging}
 					className={[
 						'relative w-full h-5 appearance-none bg-transparent cursor-pointer',
 						'focus:outline-none',

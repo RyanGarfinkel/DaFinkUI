@@ -1,6 +1,6 @@
 # Form
 
-A set of composable layout primitives for building forms. This is a structural and visual system — it handles spacing, labeling, error display, and section grouping. It does not manage form state, validation, or submission.
+A set of composable layout primitives for building forms. This is a structural and visual system — it handles spacing, labeling, error display, and section grouping. It does not own form state or validation by default, but ships an optional `useZodForm` hook (react-hook-form + Zod) for consumers who want schema-based validation without wiring it up by hand.
 
 ---
 
@@ -99,6 +99,66 @@ Validation or error message. **Renders nothing when `children` is falsy** — us
 
 ---
 
+## `useZodForm` (optional)
+
+A thin wrapper around react-hook-form's `useForm` that wires up `zodResolver` for you. Purely additive — the manual-composition API above works exactly as it always has if you don't use this hook.
+
+```ts
+function useZodForm<TSchema extends z.ZodType>(
+  schema: TSchema,
+  options?: Omit<UseFormProps<z.infer<TSchema>>, 'resolver'>
+): UseFormReturn<z.infer<TSchema>>
+```
+
+| Param      | Type                                              | Default | Description                                                                 |
+|------------|----------------------------------------------------|---------|-------------------------------------------------------------------------------|
+| `schema`   | `z.ZodType`                                        | —       | A Zod schema describing the form's shape. Validation errors surface via `form.formState.errors`, keyed by field name, with `.message` set to the schema's error string. |
+| `options`  | `Omit<UseFormProps<z.infer<TSchema>>, 'resolver'>` | `undefined` | Any react-hook-form `useForm` option (`defaultValues`, `mode`, etc.) except `resolver`, which `useZodForm` sets for you. |
+
+Returns the same `UseFormReturn<z.infer<TSchema>>` object `useForm` would — `register`, `handleSubmit`, `formState`, `watch`, `reset`, etc. — typed against the schema's inferred output.
+
+**When to use:** reach for `useZodForm` when a form has real validation rules (required fields, email/format checks, min/max length, cross-field rules) and you want the schema to be the single source of truth for both the TypeScript type and the runtime validation. Wire each input with `form.register('fieldName')` and render its error with `<FormMessage>{form.formState.errors.fieldName?.message}</FormMessage>`.
+
+**When to use plain manual state instead:** a one-off field with no real validation (e.g. a search box), or a form whose fields aren't known statically. In those cases, `useState` plus conditionally rendering `<FormMessage>` is simpler and doesn't require a schema.
+
+```tsx
+import { Form, FormField, FormLabel, FormControl, FormMessage, useZodForm } from '@/src/components/Form/Form';
+import Input from '@/src/components/Input/Input';
+import Button from '@/src/components/Button/Button';
+import { z } from 'zod';
+
+const schema = z.object({
+  email: z.email('Enter a valid email address.'),
+});
+
+type FormValues = z.infer<typeof schema>;
+
+function LoginForm() {
+  const form = useZodForm(schema);
+
+  const onSubmit = (values: FormValues) => {
+    // values is fully typed from the schema
+  };
+
+  return (
+    <Form onSubmit={form.handleSubmit(onSubmit)}>
+      <FormField>
+        <FormLabel htmlFor="email" required>Email</FormLabel>
+        <FormControl>
+          <Input id="email" type="email" aria-required="true" {...form.register('email')} />
+        </FormControl>
+        <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+      </FormField>
+      <Button type="submit">Continue</Button>
+    </Form>
+  );
+}
+```
+
+npm dependencies: `zod`, `react-hook-form`, `@hookform/resolvers`.
+
+---
+
 ## When to use
 
 Use `Form` layout primitives when you need:
@@ -166,3 +226,14 @@ Use `Form` layout primitives when you need:
 | `text-text`        | `FormLabel`, `FormSection` title                |
 | `text-text-muted`  | `FormDescription`, `FormSection` description    |
 | `text-input-error` | `FormMessage`, `FormLabel` required indicator   |
+
+---
+
+## Installation
+
+```bash
+npx @dafink/ui add form
+```
+
+npm dependencies: none for the layout primitives (`Form`, `FormSection`, `FormField`, `FormLabel`, `FormControl`, `FormDescription`, `FormMessage`). Using `useZodForm` requires `zod`, `react-hook-form`, and `@hookform/resolvers` — installed automatically by the CLI, or via `npm install zod react-hook-form @hookform/resolvers` if adding validation to a project that already has the layout primitives.
+No registry dependencies.

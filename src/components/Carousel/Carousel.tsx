@@ -122,6 +122,18 @@ export const Carousel = (
 	);
 };
 
+const DRAG_ACTIVATION_PX = 5;
+const DRAG_SNAP_RATIO    = 0.2;
+const DRAG_FALLBACK_PX   = 50;
+
+interface DragState
+{
+	pointerId: number;
+	startX:    number;
+	delta:     number;
+	dragging:  boolean;
+}
+
 export interface CarouselContentProps extends HTMLAttributes<HTMLDivElement>
 {
 	children: React.ReactNode;
@@ -129,19 +141,87 @@ export interface CarouselContentProps extends HTMLAttributes<HTMLDivElement>
 
 export const CarouselContent = ({ children, className = '', ...props }: CarouselContentProps) =>
 {
-	const { currentIndex, registerCount } = useCarouselContext();
-	const slideCount = Children.count(children);
+	const { currentIndex, registerCount, scrollPrev, scrollNext } = useCarouselContext();
+	const slideCount   = Children.count(children);
+	const trackRef     = useRef<HTMLDivElement>(null);
+	const dragRef      = useRef<DragState | null>(null);
+	const draggedRef   = useRef(false);
+	const [dragOffset, setDragOffset] = useState(0);
+	const [isDragging, setIsDragging] = useState(false);
 
 	useEffect(() =>
 	{
 		registerCount(slideCount);
 	}, [slideCount, registerCount]);
 
+	const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) =>
+	{
+		if(dragRef.current) return;
+		if(e.pointerType === 'mouse' && e.button !== 0) return;
+		dragRef.current = { pointerId: e.pointerId, startX: e.clientX, delta: 0, dragging: false };
+	};
+
+	const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) =>
+	{
+		const drag = dragRef.current;
+		if(!drag || drag.pointerId !== e.pointerId) return;
+
+		drag.delta = e.clientX - drag.startX;
+
+		if(!drag.dragging)
+		{
+			if(Math.abs(drag.delta) < DRAG_ACTIVATION_PX) return;
+			drag.dragging = true;
+			draggedRef.current = true;
+			setIsDragging(true);
+			if(typeof trackRef.current?.setPointerCapture === 'function')
+				trackRef.current.setPointerCapture(e.pointerId);
+		}
+
+		e.preventDefault();
+		setDragOffset(drag.delta);
+	};
+
+	const endDrag = (e: React.PointerEvent<HTMLDivElement>) =>
+	{
+		const drag = dragRef.current;
+		if(!drag || drag.pointerId !== e.pointerId) return;
+
+		if(drag.dragging)
+		{
+			const width     = trackRef.current?.offsetWidth ?? 0;
+			const threshold = width > 0 ? width * DRAG_SNAP_RATIO : DRAG_FALLBACK_PX;
+
+			if(drag.delta <= -threshold) scrollNext();
+			else if(drag.delta >= threshold) scrollPrev();
+		}
+
+		dragRef.current = null;
+		setIsDragging(false);
+		setDragOffset(0);
+	};
+
+	const onClickCapture = (e: React.MouseEvent<HTMLDivElement>) =>
+	{
+		if(!draggedRef.current) return;
+		e.preventDefault();
+		e.stopPropagation();
+		draggedRef.current = false;
+	};
+
 	return (
 		<div className={`overflow-hidden ${className}`} {...props}>
 			<div
-				className='flex motion-safe:transition-transform motion-safe:duration-300'
-				style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+				ref={trackRef}
+				onPointerDown={onPointerDown}
+				onPointerMove={onPointerMove}
+				onPointerUp={endDrag}
+				onPointerCancel={endDrag}
+				onClickCapture={onClickCapture}
+				className={`flex touch-pan-y cursor-grab active:cursor-grabbing ${
+					isDragging ? 'select-none' : 'motion-safe:transition-transform motion-safe:duration-300'
+				}`}
+				style={{ transform: `translateX(calc(-${currentIndex * 100}% + ${dragOffset}px))` }}
 			>
 				{children}
 			</div>

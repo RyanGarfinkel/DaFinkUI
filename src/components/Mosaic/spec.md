@@ -62,9 +62,9 @@ interface MosaicTileSize {
 
 Each tile shows a 6-dot grip handle in the top-right corner on hover. Dragging it moves the tile to any empty cell or swaps it with the tile currently occupying the target cell.
 
-- The DragOverlay ghost snaps to the nearest grid cell as the user drags, showing exactly where the tile will land.
+- The DragOverlay ghost renders the tile's actual content and snaps to the nearest grid cell that yields a valid placement — not necessarily the cell directly under the pointer.
 - If the target cell is occupied by exactly one other tile, that tile slides to the vacated position (swap). If it is empty, the dragged tile moves there and no other tile moves.
-- Positions that would require displacing two or more tiles simultaneously are skipped — the displacement preview reverts to the last valid state and the drop has no effect.
+- Positions that would require displacing two or more tiles simultaneously are treated as invalid. Rather than freezing the ghost over a dead zone, the grid is scanned for the closest cell (by pixel distance) that is either empty or resolves to a clean single-tile swap, and the ghost snaps there instead — so wherever the ghost is shown, dropping there always has an effect.
 - Drag activation requires moving 5px (prevents accidental drags on click).
 
 ### Resize width and height

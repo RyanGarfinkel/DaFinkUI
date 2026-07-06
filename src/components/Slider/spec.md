@@ -31,6 +31,12 @@ A styled range input for selecting a numeric value within a defined range. Built
 - **Label row**: Flexbox row with the label on the left and the current value (when `showValue` is true) on the right.
 - **Hint**: `text-sm text-text-muted` below the track; associated to the input via `aria-describedby`.
 
+## Drag Behavior
+
+The fill bar tracks the pointer 1:1 during an active drag — no transition is applied while `onPointerDown` through `onPointerUp`/`onPointerCancel` is in progress, so the fill snaps instantly to the input's live value instead of animating toward it. This prevents the fill from lagging behind a fast pointer move.
+
+The `motion-safe:transition-all` classes are re-applied as soon as the drag ends, so value changes from keyboard input (arrow keys, Home/End, Page Up/Down) or from a parent component changing `value` programmatically still animate smoothly.
+
 ## Accessibility
 
 - Uses native `<input type="range">` — keyboard-navigable by default (arrow keys, Home/End, Page Up/Down).

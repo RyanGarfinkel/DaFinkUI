@@ -290,7 +290,7 @@ export const DropdownMenu = (
 					style={{ position: 'fixed', top: position.top, left: position.left, zIndex: 50 }}
 					className={[
 						'min-w-48 max-h-72 overflow-y-auto rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel py-2 shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)] outline-none',
-						'transition-all',
+						'transition-[opacity,transform]',
 						visible
 							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'
 							: 'opacity-0 scale-95 duration-[var(--duration-fast)] ease-[var(--ease-exit)]',

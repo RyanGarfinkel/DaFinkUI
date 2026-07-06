@@ -1,6 +1,6 @@
 # Charts
 
-Recharts-based chart primitives: `LineChart`, `BarChart`, `AreaChart`, and `DonutChart`. Shipped as a separate entry point (`@dafink/ui/charts`) so the Recharts dependency is not pulled into projects that only use primitives.
+Recharts-based chart primitives: `LineChart`, `BarChart`, `AreaChart`, `DonutChart`, and `RadarChart`. Shipped as a separate entry point (`@dafink/ui/charts`) so the Recharts dependency is not pulled into projects that only use primitives.
 
 ## Installation
 
@@ -68,6 +68,20 @@ Donut (or pie) chart from named slices.
 | showLegend | boolean | true | Whether to show the legend |
 | className | string | "" | Extra classes |
 
+### RadarChart
+
+Polygon chart comparing series across shared category axes.
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| data | ChartDataPoint[] | required | Array of data objects |
+| xKey | string | required | Key to use for the category (angle) axis |
+| series | ChartSeries[] | required | Polygons to render |
+| height | number | 240 | Chart height in px |
+| showLegend | boolean | true | Whether to show the legend |
+| showGrid | boolean | true | Whether to show the polar grid |
+| className | string | "" | Extra classes |
+
 ## Shared types
 
 ```ts
@@ -82,6 +96,7 @@ interface DonutSlice   { label: string; value: number; color?: string }
 - **BarChart** — comparisons across categories; use `stacked` for part-to-whole
 - **AreaChart** — cumulative values or emphasising volume beneath a trend line
 - **DonutChart** — part-to-whole proportions (5 slices or fewer for readability)
+- **RadarChart** — comparing multiple entities across several shared metrics or dimensions at once (e.g. comparing products, teams, or skill sets across 3+ axes). Avoid it for more than ~8 categories (the polygon gets unreadable) and avoid it for trends over time — use `LineChart` or `AreaChart` instead
 
 ## Theming
 

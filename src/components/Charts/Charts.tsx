@@ -11,6 +11,11 @@ import {
 	LineChart as RechartsLineChart,
 	Pie,
 	PieChart as RechartsPieChart,
+	PolarAngleAxis,
+	PolarGrid,
+	PolarRadiusAxis,
+	Radar,
+	RadarChart as RechartsRadarChart,
 	ResponsiveContainer,
 	Sector,
 	Tooltip,
@@ -411,6 +416,53 @@ export const DonutChart = (
 					<Tooltip content={(props) => <ChartTooltip {...(props as unknown as Parameters<typeof ChartTooltip>[0])} />} />
 					{showLegend && <Legend wrapperStyle={LEGEND_STYLE} iconType='circle' iconSize={8} />}
 				</RechartsPieChart>
+			</ResponsiveContainer>
+		</div>
+	);
+};
+
+// ─── RadarChart ───────────────────────────────────────────────────────────────
+
+export type RadarChartProps = BaseChartProps;
+
+export const RadarChart = (
+    {
+        data,
+        xKey,
+        series,
+        height     = 240,
+        showLegend = true,
+        showGrid   = true,
+        className  = '',
+    }: RadarChartProps
+) => {
+	return (
+		<div className={`w-full ${className}`} style={{ height }} role='img' aria-label='Radar chart'>
+			<ResponsiveContainer width='100%' height='100%'>
+				<RechartsRadarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 8 }}>
+					{showGrid && <PolarGrid stroke='var(--color-surface-border)' />}
+					<PolarAngleAxis dataKey={xKey} tick={AXIS_TICK} />
+					<PolarRadiusAxis tick={false} axisLine={false} />
+					<Tooltip content={(props) => <ChartTooltip {...(props as unknown as Parameters<typeof ChartTooltip>[0])} />} />
+					{showLegend && <Legend wrapperStyle={LEGEND_STYLE} iconType='circle' iconSize={8} />}
+					{series.map((s, i) => {
+						const color = seriesColor(s, i);
+						return (
+							<Radar
+								key={s.key}
+								dataKey={s.key}
+								name={s.label}
+								stroke={color}
+								strokeWidth={2}
+								fill={color}
+								fillOpacity={0.15}
+								dot={{ r: 3, fill: color, strokeWidth: 0 }}
+								animationDuration={ANIMATION_DURATION}
+								animationEasing={ANIMATION_EASING}
+							/>
+						);
+					})}
+				</RechartsRadarChart>
 			</ResponsiveContainer>
 		</div>
 	);

@@ -70,6 +70,99 @@ describe('Table', () =>
 		render(<Table aria-label='users table'><tbody /></Table>);
 		expect(screen.getByRole('table').getAttribute('aria-label')).toBe('users table');
 	});
+
+	it('applies default variant wrapper classes when variant is not set', () =>
+	{
+		render(<BasicTable />);
+		const wrapper = screen.getByRole('table').parentElement!;
+		expect(wrapper.className).toContain('border-surface-border');
+		expect(wrapper.className).toContain('rounded-[var(--radius)]');
+	});
+});
+
+describe('Table variant="minimal"', () =>
+{
+	const MinimalTable = () => {
+		return (
+			<Table variant='minimal'>
+				<TableHead>
+					<TableRow header>
+						<TableHeader>Name</TableHeader>
+						<TableHeader>Role</TableHeader>
+					</TableRow>
+				</TableHead>
+				<TableBody>
+					<TableRow>
+						<TableCell>Alice</TableCell>
+						<TableCell>Engineer</TableCell>
+					</TableRow>
+				</TableBody>
+			</Table>
+		);
+	};
+
+	it('does not apply the outer border wrapper', () =>
+	{
+		render(<MinimalTable />);
+		const wrapper = screen.getByRole('table').parentElement!;
+		expect(wrapper.className).not.toContain('border-surface-border');
+		expect(wrapper.className).not.toContain('rounded-[var(--radius)]');
+	});
+
+	it('does not apply header background fill', () =>
+	{
+		render(<MinimalTable />);
+		expect(document.querySelector('thead')!.className).not.toContain('bg-surface-active');
+	});
+
+	it('does not apply tbody divide classes', () =>
+	{
+		render(<MinimalTable />);
+		expect(document.querySelector('tbody')!.className).not.toContain('divide-y');
+	});
+
+	it('applies border-b to body rows', () =>
+	{
+		render(<MinimalTable />);
+		const cell = screen.getByText('Alice');
+		const row = cell.closest('tr')!;
+		expect(row.className).toContain('border-b');
+		expect(row.className).toContain('border-surface-border');
+	});
+
+	it('applies border-b to header cells', () =>
+	{
+		render(<MinimalTable />);
+		const th = screen.getByText('Name');
+		expect(th.className).toContain('border-b');
+		expect(th.className).toContain('border-surface-border');
+	});
+
+	it('applies minimal header cell text classes', () =>
+	{
+		render(<MinimalTable />);
+		const th = screen.getByText('Name');
+		expect(th.className).toContain('text-xs');
+		expect(th.className).toContain('font-medium');
+		expect(th.className).toContain('text-text-muted');
+		expect(th.className).toContain('uppercase');
+		expect(th.className).toContain('tracking-wide');
+	});
+
+	it('applies minimal body cell classes', () =>
+	{
+		render(<MinimalTable />);
+		const td = screen.getByText('Alice');
+		expect(td.className).toContain('py-3');
+		expect(td.className).toContain('align-top');
+		expect(td.className).not.toContain('px-4');
+	});
+
+	it('ignores striped when variant is minimal', () =>
+	{
+		render(<Table variant='minimal' striped><tbody /></Table>);
+		expect(screen.getByRole('table').className).not.toContain('nth-child(odd)');
+	});
 });
 
 describe('TableHead', () =>

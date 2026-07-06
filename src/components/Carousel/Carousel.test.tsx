@@ -138,4 +138,111 @@ describe('Carousel', () =>
 		expect(() => render(<CarouselPrevious />)).toThrow();
 		spy.mockRestore();
 	});
+
+	it('advances to the next slide on a leftward drag past the threshold', () =>
+	{
+		render(<BasicCarousel />);
+		const track = screen.getAllByText('Slide 1')[0].parentElement!;
+
+		fireEvent.pointerDown(track, { pointerId: 1, clientX: 200 });
+		fireEvent.pointerMove(track, { pointerId: 1, clientX: 130 });
+		fireEvent.pointerUp(track, { pointerId: 1, clientX: 130 });
+
+		expect(screen.getByText('Slide 2 of 3')).toBeDefined();
+	});
+
+	it('goes back to the previous slide on a rightward drag past the threshold', () =>
+	{
+		render(<BasicCarousel />);
+		fireEvent.click(screen.getByLabelText('Next slide'));
+		const track = screen.getAllByText('Slide 1')[0].parentElement!;
+
+		fireEvent.pointerDown(track, { pointerId: 1, clientX: 100 });
+		fireEvent.pointerMove(track, { pointerId: 1, clientX: 170 });
+		fireEvent.pointerUp(track, { pointerId: 1, clientX: 170 });
+
+		expect(screen.getByText('Slide 1 of 3')).toBeDefined();
+	});
+
+	it('snaps back without changing slide when the drag stays below the threshold', () =>
+	{
+		render(<BasicCarousel />);
+		const track = screen.getAllByText('Slide 1')[0].parentElement!;
+
+		fireEvent.pointerDown(track, { pointerId: 1, clientX: 200 });
+		fireEvent.pointerMove(track, { pointerId: 1, clientX: 185 });
+		fireEvent.pointerUp(track, { pointerId: 1, clientX: 185 });
+
+		expect(screen.getByText('Slide 1 of 3')).toBeDefined();
+	});
+
+	it('does not treat a tiny pointer movement as a drag, so clicks inside a slide still fire', () =>
+	{
+		const onClick = vi.fn();
+		render(
+			<Carousel aria-label='Test carousel'>
+				<CarouselContent>
+					<CarouselItem><button onClick={onClick}>Action</button></CarouselItem>
+					<CarouselItem>Slide 2</CarouselItem>
+				</CarouselContent>
+			</Carousel>
+		);
+		const button = screen.getByText('Action');
+		const track  = button.parentElement!.parentElement!;
+
+		fireEvent.pointerDown(track, { pointerId: 1, clientX: 200 });
+		fireEvent.pointerMove(track, { pointerId: 1, clientX: 202 });
+		fireEvent.pointerUp(track, { pointerId: 1, clientX: 202 });
+		fireEvent.click(button);
+
+		expect(onClick).toHaveBeenCalledTimes(1);
+	});
+
+	it('suppresses the click on interactive content after a real drag', () =>
+	{
+		const onClick = vi.fn();
+		render(
+			<Carousel aria-label='Test carousel'>
+				<CarouselContent>
+					<CarouselItem><button onClick={onClick}>Action</button></CarouselItem>
+					<CarouselItem>Slide 2</CarouselItem>
+				</CarouselContent>
+			</Carousel>
+		);
+		const button = screen.getByText('Action');
+		const track  = button.parentElement!.parentElement!;
+
+		fireEvent.pointerDown(track, { pointerId: 1, clientX: 200 });
+		fireEvent.pointerMove(track, { pointerId: 1, clientX: 130 });
+		fireEvent.pointerUp(track, { pointerId: 1, clientX: 130 });
+		fireEvent.click(button);
+
+		expect(onClick).not.toHaveBeenCalled();
+	});
+
+	it('keeps the active dot in sync after a drag advances the slide', () =>
+	{
+		render(<BasicCarousel />);
+		const track = screen.getAllByText('Slide 1')[0].parentElement!;
+
+		fireEvent.pointerDown(track, { pointerId: 1, clientX: 200 });
+		fireEvent.pointerMove(track, { pointerId: 1, clientX: 130 });
+		fireEvent.pointerUp(track, { pointerId: 1, clientX: 130 });
+
+		const dots = screen.getAllByRole('tab');
+		expect(dots[1].getAttribute('aria-selected')).toBe('true');
+		expect(dots[0].getAttribute('aria-selected')).toBe('false');
+	});
+
+	it('respects loop on a rightward drag from the first slide', () =>
+	{
+		render(<BasicCarousel loop />);
+		const track = screen.getAllByText('Slide 1')[0].parentElement!;
+
+		fireEvent.pointerDown(track, { pointerId: 1, clientX: 100 });
+		fireEvent.pointerMove(track, { pointerId: 1, clientX: 170 });
+		fireEvent.pointerUp(track, { pointerId: 1, clientX: 170 });
+
+		expect(screen.getByText('Slide 3 of 3')).toBeDefined();
+	});
 });

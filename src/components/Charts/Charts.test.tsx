@@ -1,4 +1,4 @@
-import { AreaChart, BarChart, DonutChart, LineChart } from './Charts';
+import { AreaChart, BarChart, DonutChart, LineChart, RadarChart } from './Charts';
 import { render } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
@@ -61,6 +61,22 @@ describe('DonutChart', () => {
 
   it('renders pie variant with innerRadius 0', () => {
     const { container } = render(<DonutChart data={donutData} innerRadius={0} />);
+    expect(container).toBeTruthy();
+  });
+});
+
+describe('RadarChart', () => {
+  it('renders without errors', () => {
+    const { container } = render(
+      <RadarChart data={lineData} xKey='month' series={series} />,
+    );
+    expect(container).toBeTruthy();
+  });
+
+  it('renders without grid or legend', () => {
+    const { container } = render(
+      <RadarChart data={lineData} xKey='month' series={series} showGrid={false} showLegend={false} />,
+    );
     expect(container).toBeTruthy();
   });
 });

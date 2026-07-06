@@ -123,4 +123,47 @@ describe('Slider', () =>
 		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
 		expect(input).toHaveProperty('disabled', true);
 	});
+
+	it('fill bar has transition classes before any drag interaction', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} />);
+		const fill = container.querySelector('input[type="range"]')?.previousElementSibling?.querySelector('div');
+		expect(fill?.className).toContain('motion-safe:transition-all');
+	});
+
+	it('removes fill bar transition classes while actively dragging', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		const fill  = input.previousElementSibling?.querySelector('div');
+
+		fireEvent.pointerDown(input);
+
+		expect(fill?.className).not.toContain('motion-safe:transition-all');
+	});
+
+	it('restores fill bar transition classes after the drag ends', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		const fill  = input.previousElementSibling?.querySelector('div');
+
+		fireEvent.pointerDown(input);
+		expect(fill?.className).not.toContain('motion-safe:transition-all');
+
+		fireEvent.pointerUp(input);
+		expect(fill?.className).toContain('motion-safe:transition-all');
+	});
+
+	it('restores fill bar transition classes when the drag is cancelled', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		const fill  = input.previousElementSibling?.querySelector('div');
+
+		fireEvent.pointerDown(input);
+		fireEvent.pointerCancel(input);
+
+		expect(fill?.className).toContain('motion-safe:transition-all');
+	});
 });

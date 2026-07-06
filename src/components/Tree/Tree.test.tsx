@@ -262,4 +262,204 @@ describe('Tree', () =>
 		const wrapper = group.parentElement as HTMLElement;
 		expect(wrapper.style.gridTemplateRows).toBe('1fr');
 	});
+
+	it('renders children of a collapsible={false} branch without defaultOpen', () =>
+	{
+		render(
+			<Tree>
+				<TreeItem label='always-open' collapsible={false}>
+					<TreeItem label='always-visible-child' />
+				</TreeItem>
+			</Tree>
+		);
+		const group = screen.getByText('always-visible-child').closest('[role="group"]') as HTMLElement;
+		const wrapper = group.parentElement as HTMLElement;
+		expect(wrapper.style.gridTemplateRows).toBe('1fr');
+	});
+
+	it('renders no chevron toggle for a collapsible={false} branch', () =>
+	{
+		render(
+			<Tree>
+				<TreeItem label='no-chevron' collapsible={false}>
+					<TreeItem label='child' />
+				</TreeItem>
+			</Tree>
+		);
+		const row = screen.getByText('no-chevron').closest('[tabindex]') as HTMLElement;
+		expect(row.querySelector('svg')).toBeNull();
+	});
+
+	it('does not collapse a collapsible={false} branch on click', () =>
+	{
+		render(
+			<Tree>
+				<TreeItem label='locked-open' collapsible={false}>
+					<TreeItem label='child' />
+				</TreeItem>
+			</Tree>
+		);
+		const row = screen.getByText('locked-open').closest('[tabindex]') as HTMLElement;
+		const group = screen.getByText('child').closest('[role="group"]') as HTMLElement;
+		const wrapper = group.parentElement as HTMLElement;
+
+		fireEvent.click(row);
+		expect(wrapper.style.gridTemplateRows).toBe('1fr');
+	});
+
+	it('does not collapse a collapsible={false} branch on Enter', () =>
+	{
+		render(
+			<Tree>
+				<TreeItem label='locked-open' collapsible={false}>
+					<TreeItem label='child' />
+				</TreeItem>
+			</Tree>
+		);
+		const row = screen.getByText('locked-open').closest('[tabindex]') as HTMLElement;
+		const group = screen.getByText('child').closest('[role="group"]') as HTMLElement;
+		const wrapper = group.parentElement as HTMLElement;
+
+		fireEvent.keyDown(row, { key: 'Enter' });
+		expect(wrapper.style.gridTemplateRows).toBe('1fr');
+	});
+
+	it('does not collapse a collapsible={false} branch on ArrowLeft', () =>
+	{
+		render(
+			<Tree>
+				<TreeItem label='locked-open' collapsible={false}>
+					<TreeItem label='child' />
+				</TreeItem>
+			</Tree>
+		);
+		const row = screen.getByText('locked-open').closest('[tabindex]') as HTMLElement;
+		const group = screen.getByText('child').closest('[role="group"]') as HTMLElement;
+		const wrapper = group.parentElement as HTMLElement;
+
+		fireEvent.keyDown(row, { key: 'ArrowLeft' });
+		expect(wrapper.style.gridTemplateRows).toBe('1fr');
+	});
+
+	it('reports aria-expanded="true" on a collapsible={false} branch', () =>
+	{
+		render(
+			<Tree>
+				<TreeItem label='always-expanded' collapsible={false}>
+					<TreeItem label='child' />
+				</TreeItem>
+			</Tree>
+		);
+		const branchItem = screen.getAllByRole('treeitem')[0];
+		expect(branchItem.getAttribute('aria-expanded')).toBe('true');
+	});
+
+	it('sets tabIndex to -1 on a collapsible={false} branch', () =>
+	{
+		render(
+			<Tree>
+				<TreeItem label='inert-branch' collapsible={false}>
+					<TreeItem label='child' />
+				</TreeItem>
+			</Tree>
+		);
+		const row = screen.getByText('inert-branch').closest('[tabindex]') as HTMLElement;
+		expect(row.getAttribute('tabindex')).toBe('-1');
+	});
+
+	it('sets tabIndex to -1 on a collapsible={false} leaf', () =>
+	{
+		render(<Tree><TreeItem label='inert-leaf' collapsible={false} /></Tree>);
+		const row = screen.getByText('inert-leaf').closest('[tabindex]') as HTMLElement;
+		expect(row.getAttribute('tabindex')).toBe('-1');
+	});
+
+	it('does not apply hover, focus-visible, or active classes to a collapsible={false} item', () =>
+	{
+		render(<Tree><TreeItem label='no-affordance' collapsible={false} /></Tree>);
+		const row = screen.getByText('no-affordance').closest('[tabindex]') as HTMLElement;
+		expect(row.className).not.toContain('hover:bg-surface-hover');
+		expect(row.className).not.toContain('focus-visible:ring-2');
+		expect(row.className).not.toContain('active:bg-surface-active');
+	});
+
+	it('still applies hover and focus-visible classes to a default collapsible item', () =>
+	{
+		render(<Tree><TreeItem label='affordance' /></Tree>);
+		const row = screen.getByText('affordance').closest('[tabindex]') as HTMLElement;
+		expect(row.className).toContain('hover:bg-surface-hover');
+		expect(row.className).toContain('focus-visible:ring-2');
+	});
+
+	it('excludes a collapsible={false} item from arrow-key roving focus', () =>
+	{
+		render(
+			<Tree>
+				<TreeItem label='first' />
+				<TreeItem label='inert' collapsible={false} />
+				<TreeItem label='last' />
+			</Tree>
+		);
+
+		const first = screen.getByText('first').closest('[tabindex]') as HTMLElement;
+		const last = screen.getByText('last').closest('[tabindex]') as HTMLElement;
+
+		first.focus();
+		fireEvent.keyDown(first, { key: 'ArrowDown' });
+		expect(document.activeElement).toBe(last);
+	});
+
+	it('renders no icon on a leaf by default', () =>
+	{
+		render(<Tree><TreeItem label='plain-leaf' /></Tree>);
+		const row = screen.getByText('plain-leaf').closest('[tabindex]') as HTMLElement;
+		expect(row.querySelector('svg')).toBeNull();
+	});
+
+	it('renders terminalIcon on a leaf when Tree provides one', () =>
+	{
+		render(
+			<Tree terminalIcon={<span data-testid='terminal-icon' />}>
+				<TreeItem label='leaf' />
+			</Tree>
+		);
+		expect(screen.getByTestId('terminal-icon')).toBeDefined();
+	});
+
+	it('renders nonTerminalIcon on a collapsible={false} branch when Tree provides one', () =>
+	{
+		render(
+			<Tree nonTerminalIcon={<span data-testid='nonterminal-icon' />}>
+				<TreeItem label='branch' collapsible={false}>
+					<TreeItem label='child' />
+				</TreeItem>
+			</Tree>
+		);
+		expect(screen.getByTestId('nonterminal-icon')).toBeDefined();
+	});
+
+	it('renders no icon on a collapsible={false} branch when Tree has no nonTerminalIcon', () =>
+	{
+		render(
+			<Tree>
+				<TreeItem label='branch' collapsible={false}>
+					<TreeItem label='child' />
+				</TreeItem>
+			</Tree>
+		);
+		const row = screen.getByText('branch').closest('[tabindex]') as HTMLElement;
+		expect(row.querySelector('svg')).toBeNull();
+	});
+
+	it('per-item icon overrides both terminalIcon and nonTerminalIcon', () =>
+	{
+		render(
+			<Tree terminalIcon={<span data-testid='terminal-icon' />} nonTerminalIcon={<span data-testid='nonterminal-icon' />}>
+				<TreeItem label='leaf' icon={<span data-testid='item-icon' />} />
+			</Tree>
+		);
+		expect(screen.getByTestId('item-icon')).toBeDefined();
+		expect(screen.queryByTestId('terminal-icon')).toBeNull();
+		expect(screen.queryByTestId('nonterminal-icon')).toBeNull();
+	});
 });

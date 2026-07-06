@@ -57,6 +57,8 @@ The tooltip element is portalled to `document.body` via `createPortal` and posit
 
 Fade + scale from `opacity-0 scale-95` to `opacity-100 scale-100`. Respects `prefers-reduced-motion` via the global rule in `globals.css`.
 
+Only `opacity` and `transform` are transitioned (`transition-[opacity,transform]`, not `transition-all`) — `top`/`left` are set from a post-mount `getBoundingClientRect()` measurement and must snap to their computed value instantly. Transitioning them would visibly animate the panel from its unmeasured `{0, 0}` starting position to its real position on every open.
+
 ## Tokens Used
 
 `--color-surface`, `--color-surface-border`, `--color-text`, `--duration-base`, `--duration-fast`, `--ease-enter`, `--ease-exit`

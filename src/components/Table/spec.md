@@ -21,10 +21,11 @@ A set of composable table subcomponents for displaying structured, tabular data.
 
 ### Table
 
-| Prop        | Type      | Default | Description                                              |
-|-------------|-----------|---------|----------------------------------------------------------|
-| `striped`   | `boolean` | `false` | Alternates odd/even row background colors in the body.   |
-| `className` | `string`  | `''`    | Additional classes merged onto the `<table>` element.    |
+| Prop        | Type                     | Default     | Description                                                                        |
+|-------------|--------------------------|-------------|-------------------------------------------------------------------------------------|
+| `striped`   | `boolean`                | `false`     | Alternates odd/even row background colors in the body. No effect when `variant="minimal"`. |
+| `variant`   | `'default' \| 'minimal'` | `'default'` | Visual style. See Variants below.                                                  |
+| `className` | `string`                 | `''`        | Additional classes merged onto the `<table>` element.                              |
 | `...props`  | `TableHTMLAttributes<HTMLTableElement>` | — | All native table attributes are forwarded. |
 
 ### TableHead / TableBody
@@ -57,6 +58,19 @@ A set of composable table subcomponents for displaying structured, tabular data.
 |-------------|----------|---------|------------------------------------------------------|
 | `className` | `string` | `''`    | Additional classes merged onto the `<td>` element.   |
 | `...props`  | `TdHTMLAttributes<HTMLTableCellElement>` | — | All native td attributes forwarded. |
+
+---
+
+## Variants
+
+The `variant` prop on `Table` is threaded down to all subcomponents via context — you only ever set it on the outer `<Table>`, never on individual subcomponents.
+
+| Variant     | Look                                                                                                    |
+|-------------|-----------------------------------------------------------------------------------------------------------|
+| `'default'` | Card-like: outer border, rounded corners, filled header background, `divide-y` row separators, optional `striped` zebra rows. |
+| `'minimal'` | Flat, borderless list look (matches the docs site's `PropsTable`): no outer wrapper border, no header background fill, no zebra striping, no vertical column borders. Only a `border-b border-surface-border` under the header cells and under each body row. Header cells are `text-xs font-medium text-text-muted uppercase tracking-wide`. Body cells are `py-3 align-top text-sm text-text` — pass `className` per `<TableCell>` (e.g. `font-mono`, `text-text-muted`) to differentiate columns. |
+
+`striped` has no effect when `variant="minimal"` — the two are mutually exclusive by design (minimal is the flat, no-fill look).
 
 ---
 
@@ -104,6 +118,7 @@ A set of composable table subcomponents for displaying structured, tabular data.
 - Lists of records (users, orders, products) where each row is an entity
 - Data that benefits from column-level sorting
 - Use `striped` when the table has many rows and visual row separation aids scanning
+- Use `variant="minimal"` for flatter, denser tables inside docs, sidebars, or panels where a card-style border would be too heavy
 - Prefer this over a plain `<ul>` whenever the data is genuinely tabular (two-dimensional)
 
 **Do not use** for layout purposes. Tables are for data.
