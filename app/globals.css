@@ -26,7 +26,7 @@
 	--color-surface-panel: var(--color-surface);
 	/* Focus ring for inputs — uses box-shadow so it never causes layout shift.
 	   Styles that add their own inset shadow (neumorph) override this to combine both. */
-	--input-focus-shadow: 0 0 0 2px var(--color-input-ring);
+	--input-focus-shadow: 0 0 0 1px var(--color-input-ring);
 }
 
 /* ─── Design tokens ─────────────────────────────────── */
@@ -228,13 +228,15 @@
 /* ─── Base styles ────────────────────────────────────── */
 
 html {
-	overflow-x: clip;
+	overflow-x:       clip;
+	/* Permanently non-visible so scrollbar-gutter stays active at all times — see below. */
+	overflow-y:       scroll;
+	scrollbar-gutter: stable;
 }
 
 body {
 	background-color: var(--color-surface);
 	color:            var(--color-text);
-	scrollbar-gutter: stable;
 }
 
 /* ─── Native dialog ─────────────────────────────────── */

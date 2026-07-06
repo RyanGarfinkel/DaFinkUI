@@ -1,8 +1,10 @@
 'use client';
+import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, AuditIcon } from '@/app/_docs/components/NavIcons';
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerClose } from '@/src/components/Drawer/Drawer';
+import { SidebarSection, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
 import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
-import { SidebarSection } from '@/src/components/Sidebar/Sidebar';
 import { CATEGORIES } from '@/app/_docs/registry/categories';
+import { blocks } from '@/app/_docs/registry/blocks';
 import { registry } from '@/app/_docs/registry';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -19,6 +21,9 @@ export const MobileNav = () =>
 		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setOpen(false);
 	}, [pathname]);
+
+	const showComponents = pathname === '/components' || pathname.startsWith('/components/');
+	const showBlocks = pathname === '/blocks' || pathname.startsWith('/blocks/');
 
 	const byCategory = CATEGORIES.reduce<Record<string, typeof registry>>((acc, cat) =>
 	{
@@ -57,20 +62,26 @@ export const MobileNav = () =>
 				</DrawerHeader>
 				<DrawerClose />
 				<DrawerContent className='px-3'>
-					<div className='flex flex-col gap-6 pb-6'>
+					<div className='flex flex-col gap-4 pb-6'>
 						<nav className='flex flex-col gap-1'>
-							<DocsSidebarLink href='/' className='py-3'>Home</DocsSidebarLink>
-							<DocsSidebarLink href='/installation' className='py-3'>Installation</DocsSidebarLink>
-							<DocsSidebarLink href='/themes' className='py-3'>Themes</DocsSidebarLink>
-							<DocsSidebarLink href='/styles' className='py-3'>Styles</DocsSidebarLink>
-							<DocsSidebarLink href='/typography' className='py-3'>Typography</DocsSidebarLink>
-							<DocsSidebarLink href='/components' className='py-3'>All Components</DocsSidebarLink>
-							<DocsSidebarLink href='/examples' className='py-3'>Examples</DocsSidebarLink>
-							<DocsSidebarLink href='/mcp' className='py-3'>MCP Server</DocsSidebarLink>
-							<DocsSidebarLink href='/skill' className='py-3'>Design Skill</DocsSidebarLink>
+							<DocsSidebarLink href='/' icon={<HomeIcon />} className='py-3'>Home</DocsSidebarLink>
+							<DocsSidebarLink href='/installation' icon={<InstallationIcon />} className='py-3'>Installation</DocsSidebarLink>
+							<DocsSidebarLink href='/theme' icon={<ThemeIcon />} className='py-3'>Theme</DocsSidebarLink>
+							<DocsSidebarLink href='/typography' icon={<TypographyIcon />} className='py-3'>Typography</DocsSidebarLink>
+							<DocsSidebarLink href='/mcp' icon={<McpIcon />} className='py-3'>MCP Server</DocsSidebarLink>
+							<DocsSidebarLink href='/skill' icon={<SkillIcon />} className='py-3'>Design Skill</DocsSidebarLink>
+							<DocsSidebarLink href='/audit' icon={<AuditIcon />} className='py-3'>Audit</DocsSidebarLink>
+							<DocsSidebarLink href='/playground' icon={<PlaygroundIcon />} className='py-3'>Playground</DocsSidebarLink>
 						</nav>
 
-						{CATEGORIES.filter((cat) => byCategory[cat]).map((category) => (
+						<SidebarDivider />
+
+						<nav className='flex flex-col gap-1'>
+							<DocsSidebarLink href='/components' icon={<ComponentsIcon />} className='py-3'>All Components</DocsSidebarLink>
+							<DocsSidebarLink href='/blocks' icon={<BlocksIcon />} className='py-3'>All Blocks</DocsSidebarLink>
+						</nav>
+
+						{showComponents && CATEGORIES.filter((cat) => byCategory[cat]).map((category) => (
 							<SidebarSection key={category} label={category}>
 								{byCategory[category].map((entry) => (
 									<DocsSidebarLink
@@ -83,6 +94,20 @@ export const MobileNav = () =>
 								))}
 							</SidebarSection>
 						))}
+
+						{showBlocks && (
+							<nav className='flex flex-col gap-1'>
+								{blocks.map((entry) => (
+									<DocsSidebarLink
+										key={entry.slug}
+										href={`/blocks/${entry.slug}`}
+										className='py-3'
+									>
+										{entry.name}
+									</DocsSidebarLink>
+								))}
+							</nav>
+						)}
 					</div>
 				</DrawerContent>
 			</Drawer>

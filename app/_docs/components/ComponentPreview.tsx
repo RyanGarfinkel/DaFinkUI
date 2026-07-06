@@ -31,6 +31,7 @@ export const ComponentPreview = ({ children, className }: ComponentPreviewProps)
       tabIndex={isOverflowing ? 0 : -1}
       role={isOverflowing ? 'region' : undefined}
       aria-label={isOverflowing ? 'Component preview' : undefined}
+      data-toc-exclude=''
       className={[
         'border border-surface-border rounded-lg bg-surface overflow-x-auto',
         isOverflowing ? 'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring' : '',

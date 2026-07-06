@@ -1,21 +1,25 @@
 'use client';
 
+import SidePanel, { SidePanelHeader, SidePanelTitle, SidePanelContent, SidePanelFooter, SidePanelClose, type SidePanelSide } from '@/src/components/SidePanel/SidePanel';
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, type DrawerSide } from '@/src/components/Drawer/Drawer';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots } from '@/src/components/Carousel/Carousel';
+import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
+import Form, { FormControl, FormDescription, FormField, FormLabel, FormMessage, useZodForm } from '@/src/components/Form/Form';
 import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
 import Accordion, { AccordionContent, AccordionItem, AccordionTrigger } from '@/src/components/Accordion/Accordion';
 import Collapsible, { CollapsibleTrigger, CollapsibleContent } from '@/src/components/Collapsible/Collapsible';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/src/components/Table/Table';
 import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
-import { Sidebar, SidebarSection, SidebarLink, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
 import DataTable, { type ColumnDef, type PaginatorVariant } from '@/src/components/DataTable/DataTable';
-import { FormDescription, FormField, FormLabel, FormSection } from '@/src/components/Form/Form';
-import { AreaChart, BarChart, DonutChart, LineChart } from '@/src/components/Charts/Charts';
+import { AreaChart, BarChart, DonutChart, LineChart, RadarChart } from '@/src/components/Charts/Charts';
+import { Message, MessageReactions, MessageReaction } from '@/src/components/Message/Message';
 import Mosaic, { MosaicTile, type MosaicTileLayout } from '@/src/components/Mosaic/Mosaic';
 import { Skeleton, SkeletonCard, SkeletonImage } from '@/src/components/Skeleton/Skeleton';
 import ToggleGroup, { ToggleGroupItem } from '@/src/components/ToggleGroup/ToggleGroup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/Tabs/Tabs';
 import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
+import { Attachment, AttachmentGroup } from '@/src/components/Attachment/Attachment';
+import { TopNav, TopNavBrand, TopNavActions } from '@/src/components/TopNav/TopNav';
 import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
 import WorkflowBuilder from '@/src/components/WorkflowBuilder/WorkflowBuilder';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
@@ -25,12 +29,14 @@ import DropdownMenu from '@/src/components/DropdownMenu/DropdownMenu';
 import Avatar, { AvatarGroup } from '@/src/components/Avatar/Avatar';
 import Reveal, { RevealGroup } from '@/src/components/Reveal/Reveal';
 import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
+import { ScrollFade } from '@/src/components/ScrollFade/ScrollFade';
 import { DatePicker } from '@/src/components/DatePicker/DatePicker';
 import TextShimmer from '@/src/components/TextShimmer/TextShimmer';
 import AudioPlayer from '@/src/components/AudioPlayer/AudioPlayer';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
 import Typewriter from '@/src/components/Typewriter/Typewriter';
 import Breadcrumb from '@/src/components/Breadcrumb/Breadcrumb';
+import CodeEditor from '@/src/components/CodeEditor/CodeEditor';
 import { Combobox } from '@/src/components/Combobox/Combobox';
 import { Progress } from '@/src/components/Progress/Progress';
 import { Checkbox } from '@/src/components/Checkbox/Checkbox';
@@ -52,6 +58,7 @@ import Button from '@/src/components/Button/Button';
 import Input from '@/src/components/Input/Input';
 import Tilt from '@/src/components/Tilt/Tilt';
 import { useState } from 'react';
+import { z } from 'zod';
 
 interface ComponentLivePreviewProps {
   slug: string;
@@ -71,6 +78,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
   const [tabValue, setTabValue] = useState('account');
   const [pickerDate, setPickerDate] = useState<Date | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [editorCode, setEditorCode] = useState('<Button>Click me</Button>');
 
   switch (slug) {
     case 'button':
@@ -189,6 +197,24 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
     }
 
+    case 'code-editor':
+      return (
+        <div className='w-full max-w-2xl'>
+          <CodeEditor value={editorCode} onChange={setEditorCode} aria-label='JSX code editor' minHeight='160px' />
+        </div>
+      );
+
+    case 'scroll-fade':
+      return (
+        <ScrollFade className='h-48 w-full max-w-sm rounded-[var(--radius-lg)] border border-surface-border bg-surface p-4'>
+          <ul className='flex flex-col gap-3 text-sm text-text'>
+            {Array.from({ length: 12 }, (_, i) => (
+              <li key={i}>Item {i + 1}</li>
+            ))}
+          </ul>
+        </ScrollFade>
+      );
+
     case 'card':
       return (
         <div className='w-full max-w-sm'>
@@ -257,21 +283,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
 
     case 'form':
-      return (
-        <div className='w-full max-w-sm'>
-          <FormSection title='Personal information' description='Update your basic profile details.'>
-            <FormField>
-              <FormLabel required>Full name</FormLabel>
-              <Input placeholder='Jane Smith' />
-              <FormDescription>This is how your name will appear publicly.</FormDescription>
-            </FormField>
-            <FormField>
-              <FormLabel>Bio</FormLabel>
-              <Textarea placeholder='Tell us a bit about yourself.' rows={3} />
-            </FormField>
-          </FormSection>
-        </div>
-      );
+      return <FormDemo />;
 
     case 'collapsible':
       return (
@@ -334,21 +346,50 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
 
-    case 'sidebar':
+    case 'sidebar': {
+      const NavIcon = ({ d }: { d: string }) => (
+        <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+          <path d={d} />
+        </svg>
+      );
       return (
-        <div className='h-64 w-56 border border-surface-border rounded-lg overflow-hidden'>
-          <Sidebar width='w-full'>
+        <div className='h-96 w-56 border border-surface-border rounded-lg overflow-hidden'>
+          <Sidebar width='w-full' collapsible>
+            <SidebarHeader>
+              <span className='font-semibold text-text'>Acme</span>
+            </SidebarHeader>
             <SidebarSection>
-              <SidebarLink href='#' isActive>Home</SidebarLink>
-              <SidebarLink href='#'>Documentation</SidebarLink>
-              <SidebarLink href='#'>Examples</SidebarLink>
+              <SidebarLink href='#' isActive icon={<NavIcon d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' />}>Home</SidebarLink>
+              <SidebarLink href='#' icon={<NavIcon d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z' />}>Documentation</SidebarLink>
+              <SidebarLink href='#' icon={<NavIcon d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z' />}>Examples</SidebarLink>
             </SidebarSection>
             <SidebarDivider />
             <SidebarSection label='Components'>
-              <SidebarLink href='#'>Button</SidebarLink>
-              <SidebarLink href='#'>Input</SidebarLink>
+              <SidebarLink href='#' icon={<NavIcon d='M9 9h6v6H9zM4 4h16v16H4z' />}>Button</SidebarLink>
+              <SidebarLink href='#' icon={<NavIcon d='M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2' />}>Input</SidebarLink>
             </SidebarSection>
+            <SidebarFooter>
+              <SidebarLink href='#' icon={<NavIcon d='M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z' />}>Settings</SidebarLink>
+            </SidebarFooter>
           </Sidebar>
+        </div>
+      );
+    }
+
+    case 'top-nav':
+      return (
+        <div className='w-full max-w-xl overflow-hidden rounded-lg border border-surface-border'>
+          <TopNav className='relative'>
+            <TopNavBrand>
+              <span className='font-semibold text-text'>Acme</span>
+            </TopNavBrand>
+            <TopNavActions>
+              <Button variant='ghost' size='icon' aria-label='Search'>
+                <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>
+              </Button>
+              <Button size='sm'>Sign in</Button>
+            </TopNavActions>
+          </TopNav>
         </div>
       );
 
@@ -444,7 +485,47 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
 
-    case 'mosaic':
+    case 'radar-chart': {
+      const data = [
+        { metric: 'Speed', modelX: 90, modelY: 70 },
+        { metric: 'Reliability', modelX: 80, modelY: 95 },
+        { metric: 'Comfort', modelX: 70, modelY: 85 },
+        { metric: 'Safety', modelX: 95, modelY: 90 },
+        { metric: 'Efficiency', modelX: 60, modelY: 80 },
+        { metric: 'Design', modelX: 85, modelY: 75 },
+      ];
+      return (
+        <div className='w-full'>
+          <RadarChart
+            data={data}
+            xKey='metric'
+            series={[
+              { key: 'modelX', label: 'Model X' },
+              { key: 'modelY', label: 'Model Y' },
+            ]}
+          />
+        </div>
+      );
+    }
+
+    case 'mosaic': {
+      const REVENUE_TREND = [
+        { month: 'Jan', revenue: 32000 },
+        { month: 'Feb', revenue: 35500 },
+        { month: 'Mar', revenue: 34000 },
+        { month: 'Apr', revenue: 39800 },
+        { month: 'May', revenue: 41200 },
+        { month: 'Jun', revenue: 44000 },
+        { month: 'Jul', revenue: 45800 },
+        { month: 'Aug', revenue: 48500 },
+      ];
+
+      const QUARTER_GROWTH = [
+        { quarter: 'Q1', growth: 18 },
+        { quarter: 'Q2', growth: 21 },
+        { quarter: 'Q3', growth: 24 },
+      ];
+
       return (
         <Mosaic
           layout={dashboardLayout}
@@ -459,12 +540,16 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
               <div className='h-full flex flex-col justify-between'>
                 <span className='text-xs text-text-muted'>Revenue</span>
                 {colSpan === 1 ? (
-                  <span className='text-2xl font-semibold text-text'>$48.5k</span>
+                  <span className='text-2xl font-semibold text-text'>
+                    <CountUp value={48.5} decimals={1} prefix='$' suffix='k' />
+                  </span>
                 ) : (
                   <div className='flex items-end justify-between'>
-                    <span className='text-3xl font-semibold text-text'>$48.5k</span>
+                    <span className='text-3xl font-semibold text-text'>
+                      <CountUp value={48.5} decimals={1} prefix='$' suffix='k' />
+                    </span>
                     <div className='flex flex-col items-end gap-1'>
-                      <span className='text-xs text-brand font-medium'>+12%</span>
+                      <Badge variant='success'>+12%</Badge>
                       {colSpan >= 3 && (
                         <span className='text-xs text-text-muted'>vs last month</span>
                       )}
@@ -478,7 +563,12 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
           <MosaicTile id='users' minColSpan={1} maxColSpan={1} minRowSpan={1} maxRowSpan={1}>
             <div className='h-full flex flex-col justify-between'>
               <span className='text-xs text-text-muted'>Active users</span>
-              <span className='text-2xl font-semibold text-text'>3,204</span>
+              <div className='flex flex-col gap-1.5'>
+                <span className='text-2xl font-semibold text-text'>
+                  <CountUp value={3204} separator=',' />
+                </span>
+                <Badge variant='success' className='w-fit'>+5.2%</Badge>
+              </div>
             </div>
           </MosaicTile>
 
@@ -491,44 +581,46 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
                     <span className='text-xs text-text-subtle'>Last 8 months</span>
                   )}
                 </div>
-                <div className='flex-1 flex items-end gap-1'>
-                  {[40, 65, 50, 80, 60, 90, 75, 85].map((h, i) => (
-                    <div key={i} className='flex-1 flex flex-col justify-end gap-0.5'>
-                      {rowSpan >= 2 && (
-                        <span className='text-[9px] text-text-subtle text-center tabular-nums'>{h}</span>
-                      )}
-                      <div className='relative rounded-sm overflow-hidden bg-brand/10' style={{ height: rowSpan >= 2 ? '80%' : '60%' }}>
-                        <div className='absolute bottom-0 w-full bg-brand/70 rounded-sm motion-safe:transition-all motion-safe:duration-300' style={{ height: `${h}%` }} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <AreaChart
+                  data={REVENUE_TREND}
+                  xKey='month'
+                  series={[{ key: 'revenue', label: 'Revenue' }]}
+                  height={Math.max(70, rowSpan * 140 + (rowSpan - 1) * 12 - 76)}
+                  showLegend={false}
+                  showGrid={rowSpan >= 2}
+                />
               </div>
             )}
           </MosaicTile>
 
           <MosaicTile id='growth' minColSpan={1} maxColSpan={2} minRowSpan={1} maxRowSpan={2}>
             {({ colSpan, rowSpan }) => (
-              <div className='h-full flex flex-col justify-between'>
-                <span className='text-xs text-text-muted'>Growth</span>
+              <div className='h-full flex flex-col justify-between gap-2'>
                 <div className='flex flex-col gap-1'>
-                  <span className={`font-semibold text-brand ${rowSpan >= 2 ? 'text-5xl' : 'text-3xl'}`}>+24%</span>
+                  <span className='text-xs text-text-muted'>Growth</span>
+                  <span className={`font-semibold text-brand ${rowSpan >= 2 ? 'text-5xl' : 'text-3xl'}`}>
+                    <CountUp value={24} prefix='+' suffix='%' />
+                  </span>
                   {(rowSpan >= 2 || colSpan >= 2) && (
                     <span className='text-xs text-text-muted'>Quarter over quarter</span>
                   )}
-                  {rowSpan >= 2 && (
-                    <div className='mt-2 flex gap-2 text-xs text-text-muted'>
-                      <span>Q1 <span className='text-text font-medium'>+18%</span></span>
-                      <span>Q2 <span className='text-text font-medium'>+21%</span></span>
-                      <span>Q3 <span className='text-brand font-medium'>+24%</span></span>
-                    </div>
-                  )}
                 </div>
+                {rowSpan >= 2 && (
+                  <BarChart
+                    data={QUARTER_GROWTH}
+                    xKey='quarter'
+                    series={[{ key: 'growth', label: 'QoQ growth' }]}
+                    height={90}
+                    showLegend={false}
+                    showGrid={false}
+                  />
+                )}
               </div>
             )}
           </MosaicTile>
         </Mosaic>
       );
+    }
 
     case 'kanban': {
       const columns = [
@@ -942,6 +1034,55 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
 
+    case 'attachment':
+      return (
+        <AttachmentGroup>
+          <Attachment
+            name='Q3-financials.pdf'
+            href='#'
+            type='PDF'
+            size='1.2 MB'
+            onClick={(event) => {
+              event.preventDefault();
+              window.open('#', '_blank');
+            }}
+          />
+          <Attachment
+            name='hero-shot.png'
+            href='#'
+            size='840 KB'
+            onClick={(event) => {
+              event.preventDefault();
+              window.open('#', '_blank');
+            }}
+          />
+          <Attachment name='archive.zip' href='#' size='14.6 MB' />
+        </AttachmentGroup>
+      );
+
+    case 'message':
+      return (
+        <div className='flex flex-col gap-3 w-full max-w-sm'>
+          <Message variant='received'>
+            Hey, are we still on for 3pm?
+            <MessageReactions max={2}>
+              <MessageReaction icon='👍' count={3} active onClick={() => {}} />
+              <MessageReaction icon='❤️' count={1} onClick={() => {}} />
+              <MessageReaction icon='😂' count={2} onClick={() => {}} />
+            </MessageReactions>
+          </Message>
+          <Message variant='sent'>Yep, see you then!</Message>
+
+          <Message variant='received'>
+            The Eiffel Tower is 330 meters tall, including antennas.
+          </Message>
+          <MessageReactions aria-label='Sources'>
+            <MessageReaction label='1' href='https://en.wikipedia.org/wiki/Eiffel_Tower' aria-label='Source 1: wikipedia.org' />
+            <MessageReaction label='2' href='https://www.toureiffel.paris' aria-label='Source 2: toureiffel.paris' />
+          </MessageReactions>
+        </div>
+      );
+
     case 'reveal':
       return (
         <RevealGroup stagger={120} effect='slide-up' className='flex flex-col gap-3 w-full max-w-sm'>
@@ -1058,6 +1199,43 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         );
       };
       return <DrawerPreview />;
+    }
+
+    case 'side-panel': {
+      const SidePanelPreview = () =>
+      {
+        const [open, setOpen] = useState(false);
+        const [side, setSide] = useState<SidePanelSide>('right');
+
+        const openFrom = (s: SidePanelSide) =>
+        {
+          setSide(s);
+          setOpen(true);
+        };
+
+        return (
+          <div className='flex flex-wrap gap-2 justify-center'>
+            <Button variant='secondary' onClick={() => openFrom('left')}>Left</Button>
+            <Button variant='secondary' onClick={() => openFrom('right')}>Right</Button>
+            <Button variant='secondary' onClick={() => openFrom('top')}>Top</Button>
+            <Button variant='secondary' onClick={() => openFrom('bottom')}>Bottom</Button>
+
+            <SidePanel open={open} onOpenChange={setOpen} side={side}>
+              <SidePanelClose />
+              <SidePanelHeader>
+                <SidePanelTitle>Quick preview</SidePanelTitle>
+              </SidePanelHeader>
+              <SidePanelContent>
+                A floating panel, inset from every edge it does not anchor to.
+              </SidePanelContent>
+              <SidePanelFooter>
+                <Button variant='secondary' onClick={() => setOpen(false)}>Close</Button>
+              </SidePanelFooter>
+            </SidePanel>
+          </div>
+        );
+      };
+      return <SidePanelPreview />;
     }
 
     case 'graph': {
@@ -1178,6 +1356,42 @@ const SelectDemo = () => {
         error='This field is required.'
       />
     </div>
+  );
+};
+
+const zodFormSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  email: z.email('Enter a valid email address.'),
+});
+
+type ZodFormValues = z.infer<typeof zodFormSchema>;
+
+const FormDemo = () => {
+  const form = useZodForm(zodFormSchema);
+
+  const onSubmit = (values: ZodFormValues) => {
+    console.log(values);
+  };
+
+  return (
+    <Form className='w-full max-w-sm' onSubmit={form.handleSubmit(onSubmit)}>
+      <FormField>
+        <FormLabel htmlFor='name' required>Name</FormLabel>
+        <FormControl>
+          <Input id='name' placeholder='Jane Smith' aria-required='true' {...form.register('name')} />
+        </FormControl>
+        <FormMessage>{form.formState.errors.name?.message}</FormMessage>
+      </FormField>
+      <FormField>
+        <FormLabel htmlFor='email' required>Email</FormLabel>
+        <FormControl>
+          <Input id='email' type='email' placeholder='you@example.com' aria-required='true' {...form.register('email')} />
+        </FormControl>
+        <FormDescription>We will never share your email.</FormDescription>
+        <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+      </FormField>
+      <Button type='submit'>Save changes</Button>
+    </Form>
   );
 };
 

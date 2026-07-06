@@ -37,7 +37,7 @@ const TypographyPage = () =>
 			<section className='flex flex-col gap-8'>
 				<h2 className='text-2xl font-semibold tracking-tight text-text'>Live preview</h2>
 
-				<div className='flex flex-col gap-6 rounded-lg border border-surface-border bg-surface-hover/30 p-8'>
+				<div data-toc-exclude='' className='flex flex-col gap-6 rounded-lg border border-surface-border bg-surface-hover/30 p-8'>
 
 					<div className='flex flex-col gap-1'>
 						<p className='text-xs text-text-muted font-mono mb-2'>h1</p>

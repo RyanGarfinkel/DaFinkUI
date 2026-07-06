@@ -5,6 +5,12 @@ export interface PropRow {
   description: string;
 }
 
+export interface CompositionNode {
+  name: string;
+  description?: string;
+  children?: CompositionNode[];
+}
+
 export interface ComponentEntry {
   slug: string;
   name: string;
@@ -15,13 +21,14 @@ export interface ComponentEntry {
   dependencies: string[];
   registryDependencies: string[];
   files: string[];
+  composition?: CompositionNode;
 }
 
 export const registry: ComponentEntry[] = [
   {
     slug: 'button',
     name: 'Button',
-    category: 'Actions',
+    category: 'Inputs',
     description: 'A clickable control that triggers an action, supporting six visual variants and three sizes.',
     usage: `import Button from '@/src/components/Button/Button';
 
@@ -320,6 +327,12 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Radio/Radio.tsx'],
+    composition: {
+      name: 'RadioGroup',
+      children: [
+        { name: 'RadioItem' },
+      ],
+    },
   },
   {
     slug: 'switch',
@@ -447,6 +460,12 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['ToggleGroup/ToggleGroup.tsx'],
+    composition: {
+      name: 'ToggleGroup',
+      children: [
+        { name: 'ToggleGroupItem' },
+      ],
+    },
   },
   {
     slug: 'badge',
@@ -467,6 +486,28 @@ export default function Example() {
     dependencies:         [],
     registryDependencies: [],
     files:                ['Badge/Badge.tsx'],
+  },
+  {
+    slug: 'scroll-fade',
+    name: 'ScrollFade',
+    category: 'Effects',
+    description: 'A scroll container that fades whichever edge still has more content to reveal, instead of cutting content off abruptly.',
+    usage: `import { ScrollFade } from '@/src/components/ScrollFade/ScrollFade';
+
+<ScrollFade className="h-48 rounded-[var(--radius-lg)] border border-surface-border bg-surface p-4">
+  <p>Long content that overflows vertically…</p>
+</ScrollFade>`,
+    props: [
+      { name: 'direction', type: "'vertical' | 'horizontal'", default: "'vertical'", description: 'Which axis scrolls. Vertical fades top/bottom; horizontal fades left/right.' },
+      { name: 'fadeSize',  type: 'string', default: "'h-10' / 'w-10'", description: 'Tailwind size class for how deep the fade extends from the edge.' },
+      { name: 'fadeFrom',  type: 'string', default: "'from-surface'", description: "Tailwind gradient-from color class. Match the scrolling content's actual background or the fade won't blend." },
+      { name: 'className', type: 'string', default: "''", description: 'Additional CSS classes merged onto the scrollable element.' },
+      { name: 'wrapperClassName', type: 'string', default: "''", description: 'Additional CSS classes merged onto the outer wrapper — use for flex-sizing (e.g. flex-1 min-h-0) when ScrollFade must grow inside a flex-col parent.' },
+      { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'The scrollable content.' },
+    ],
+    dependencies:         [],
+    registryDependencies: [],
+    files:                ['ScrollFade/ScrollFade.tsx'],
   },
   {
     slug: 'card',
@@ -522,6 +563,14 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Card/Card.tsx'],
+    composition: {
+      name: 'Card',
+      children: [
+        { name: 'CardHeader' },
+        { name: 'CardContent' },
+        { name: 'CardFooter' },
+      ],
+    },
   },
   {
     slug: 'select',
@@ -640,7 +689,13 @@ export default function Example() {
         name: 'striped',
         type: 'boolean',
         default: 'false',
-        description: 'Alternates odd/even row background colors in the body.',
+        description: 'Alternates odd/even row background colors in the body. No effect when variant is "minimal".',
+      },
+      {
+        name: 'variant',
+        type: "'default' | 'minimal'",
+        default: "'default'",
+        description: 'Visual style. "minimal" is a flat, borderless look (matches the docs PropsTable) with no outer border or header fill.',
       },
       {
         name: 'className',
@@ -652,6 +707,23 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Table/Table.tsx'],
+    composition: {
+      name: 'Table',
+      children: [
+        {
+          name: 'TableHead',
+          children: [
+            { name: 'TableRow', children: [{ name: 'TableHeader' }] },
+          ],
+        },
+        {
+          name: 'TableBody',
+          children: [
+            { name: 'TableRow', children: [{ name: 'TableCell' }] },
+          ],
+        },
+      ],
+    },
   },
   {
     slug: 'skeleton',
@@ -754,38 +826,43 @@ export default function Example() {
     slug: 'form',
     name: 'Form',
     category: 'Forms',
-    description: 'A set of composable layout primitives for building forms — handling spacing, labeling, error display, and section grouping without owning form state.',
-    usage: `import {
-  Form,
-  FormSection,
-  FormField,
-  FormLabel,
-  FormControl,
-  FormDescription,
-  FormMessage,
-} from '@/src/components/Form/Form';
+    description: 'A set of composable layout primitives for building forms — handling spacing, labeling, error display, and section grouping. Optionally pair with the useZodForm hook for Zod schema validation powered by react-hook-form.',
+    usage: `import { Form, FormField, FormLabel, FormControl, FormDescription, FormMessage, useZodForm } from '@/src/components/Form/Form';
 import Input from '@/src/components/Input/Input';
 import Button from '@/src/components/Button/Button';
+import { z } from 'zod';
+
+const schema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters.'),
+  email: z.email('Enter a valid email address.'),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 export default function Example() {
+  const form = useZodForm(schema);
+
+  const onSubmit = (values: FormValues) => {
+    console.log(values);
+  };
+
   return (
-    <Form className="max-w-sm">
-      <FormSection title="Account details" description="Update your login information.">
-        <FormField>
-          <FormLabel htmlFor="email" required>Email</FormLabel>
-          <FormControl>
-            <Input id="email" type="email" placeholder="you@example.com" aria-required="true" />
-          </FormControl>
-          <FormDescription>We will never share your email.</FormDescription>
-          <FormMessage>{''}</FormMessage>
-        </FormField>
-        <FormField>
-          <FormLabel htmlFor="username">Username</FormLabel>
-          <FormControl>
-            <Input id="username" placeholder="johndoe" />
-          </FormControl>
-        </FormField>
-      </FormSection>
+    <Form className="w-full max-w-sm" onSubmit={form.handleSubmit(onSubmit)}>
+      <FormField>
+        <FormLabel htmlFor="name" required>Name</FormLabel>
+        <FormControl>
+          <Input id="name" placeholder="Jane Smith" aria-required="true" {...form.register('name')} />
+        </FormControl>
+        <FormMessage>{form.formState.errors.name?.message}</FormMessage>
+      </FormField>
+      <FormField>
+        <FormLabel htmlFor="email" required>Email</FormLabel>
+        <FormControl>
+          <Input id="email" type="email" placeholder="you@example.com" aria-required="true" {...form.register('email')} />
+        </FormControl>
+        <FormDescription>We will never share your email.</FormDescription>
+        <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+      </FormField>
       <Button type="submit">Save changes</Button>
     </Form>
   );
@@ -797,10 +874,41 @@ export default function Example() {
         default: '""',
         description: 'Additional classes merged onto the form element.',
       },
+      {
+        name: 'schema',
+        type: 'z.ZodType',
+        default: '—',
+        description: 'useZodForm(schema, options) — a Zod schema describing the form shape. Passed to zodResolver internally so validation runs on submit (and on change/blur if configured via options.mode).',
+      },
+      {
+        name: 'options',
+        type: "Omit<UseFormProps<z.infer<TSchema>>, 'resolver'>",
+        default: 'undefined',
+        description: 'useZodForm(schema, options) — any react-hook-form useForm option (defaultValues, mode, etc.) except resolver, which useZodForm sets for you.',
+      },
     ],
-    dependencies: [],
+    dependencies: ['zod', 'react-hook-form', '@hookform/resolvers'],
     registryDependencies: ['input', 'button'],
     files: ['Form/Form.tsx'],
+    composition: {
+      name: 'Form',
+      children: [
+        {
+          name: 'FormSection',
+          children: [
+            {
+              name: 'FormField',
+              children: [
+                { name: 'FormLabel' },
+                { name: 'FormControl' },
+                { name: 'FormDescription' },
+                { name: 'FormMessage' },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   },
   {
     slug: 'alert',
@@ -886,6 +994,13 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Collapsible/Collapsible.tsx'],
+    composition: {
+      name: 'Collapsible',
+      children: [
+        { name: 'CollapsibleTrigger' },
+        { name: 'CollapsibleContent' },
+      ],
+    },
   },
   {
     slug: 'accordion',
@@ -953,6 +1068,18 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Accordion/Accordion.tsx'],
+    composition: {
+      name: 'Accordion',
+      children: [
+        {
+          name: 'AccordionItem',
+          children: [
+            { name: 'AccordionTrigger' },
+            { name: 'AccordionContent' },
+          ],
+        },
+      ],
+    },
   },
   {
     slug: 'tabs',
@@ -1009,34 +1136,77 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Tabs/Tabs.tsx'],
+    composition: {
+      name: 'Tabs',
+      children: [
+        {
+          name: 'TabsList',
+          children: [
+            { name: 'TabsTrigger' },
+          ],
+        },
+        { name: 'TabsContent' },
+      ],
+    },
   },
   {
     slug: 'sidebar',
     name: 'Sidebar',
     category: 'Navigation',
-    description: 'Vertical navigation sidebar with sections, links, and dividers.',
-    usage: `import { Sidebar, SidebarSection, SidebarLink, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
+    description: 'Vertical navigation sidebar with a header, footer, sections, links, dividers, and an optional collapse toggle.',
+    usage: `import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
 
-<Sidebar>
+<Sidebar collapsible>
+  <SidebarHeader>
+    <span className="font-semibold text-text">Acme</span>
+  </SidebarHeader>
   <SidebarSection>
-    <SidebarLink href="/" isActive>Home</SidebarLink>
-    <SidebarLink href="/docs">Documentation</SidebarLink>
-    <SidebarLink href="/examples">Examples</SidebarLink>
+    <SidebarLink href="/" icon={<HomeIcon />} isActive>Home</SidebarLink>
+    <SidebarLink href="/docs" icon={<DocsIcon />}>Documentation</SidebarLink>
+    <SidebarLink href="/examples" icon={<ExamplesIcon />}>Examples</SidebarLink>
   </SidebarSection>
   <SidebarDivider />
   <SidebarSection label="Components">
     <SidebarLink href="/components/button">Button</SidebarLink>
     <SidebarLink href="/components/input">Input</SidebarLink>
   </SidebarSection>
+  <SidebarFooter>
+    <SidebarLink href="/settings" icon={<SettingsIcon />}>Settings</SidebarLink>
+  </SidebarFooter>
 </Sidebar>`,
     props: [
-      { name: 'width',     type: 'string',    default: "'w-56'",    description: 'Tailwind width class for the sidebar.' },
-      { name: 'className', type: 'string',    default: "''",        description: 'Additional CSS classes.' },
-      { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'Sidebar content (sections, links, dividers).' },
+      { name: 'width',             type: 'string',                       default: "'w-56'",    description: 'Tailwind width class used when expanded.' },
+      { name: 'collapsedWidth',    type: 'string',                       default: "'w-16'",    description: 'Tailwind width class used when collapsed.' },
+      { name: 'collapsible',       type: 'boolean',                      default: 'false',     description: 'Renders the built-in expand/collapse toggle button.' },
+      { name: 'collapsed',         type: 'boolean',                      default: 'undefined', description: 'Controlled collapsed state. Omit to let Sidebar manage its own state.' },
+      { name: 'defaultCollapsed',  type: 'boolean',                      default: 'false',     description: 'Initial collapsed state when uncontrolled.' },
+      { name: 'onCollapsedChange', type: '(collapsed: boolean) => void', default: 'undefined', description: 'Called whenever the toggle button changes the collapsed state.' },
+      { name: 'togglePosition',    type: "'top' | 'middle' | 'bottom'",  default: "'middle'",  description: 'Where the collapse toggle button sits along the right border.' },
+      { name: 'className',         type: 'string',                       default: "''",        description: 'Additional CSS classes.' },
+      { name: 'children',          type: 'ReactNode',                    default: 'undefined', description: 'Sidebar content (header, sections, links, dividers, footer).' },
     ],
     dependencies:         ['next/link'],
-    registryDependencies: [],
+    registryDependencies: ['tooltip', 'scroll-fade'],
     files:                ['Sidebar/Sidebar.tsx'],
+    composition: {
+      name: 'Sidebar',
+      children: [
+        { name: 'SidebarHeader' },
+        {
+          name: 'SidebarSection',
+          children: [
+            { name: 'SidebarLink' },
+          ],
+        },
+        { name: 'SidebarDivider' },
+        {
+          name: 'SidebarFooter',
+          children: [
+            { name: 'SidebarLink' },
+          ],
+        },
+      ],
+    },
   },
   {
     slug: 'breadcrumb',
@@ -1079,6 +1249,41 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Breadcrumb/Breadcrumb.tsx'],
+  },
+  {
+    slug: 'top-nav',
+    name: 'TopNav',
+    category: 'Navigation',
+    description: 'A fixed horizontal top bar composed of a brand slot and a right-aligned actions slot.',
+    usage: `import { TopNav, TopNavBrand, TopNavActions } from '@/src/components/TopNav/TopNav';
+import Button from '@/src/components/Button/Button';
+
+<TopNav>
+  <TopNavBrand>
+    <span className="font-semibold text-text">Acme</span>
+  </TopNavBrand>
+  <TopNavActions>
+    <Button variant="ghost" size="icon" aria-label="Search">
+      <SearchIcon />
+    </Button>
+    <Button size="sm">Sign in</Button>
+  </TopNavActions>
+</TopNav>`,
+    props: [
+      { name: 'height',    type: 'string',    default: "'h-14'",    description: 'Tailwind height class for the bar.' },
+      { name: 'className', type: 'string',    default: "''",        description: 'Additional CSS classes.' },
+      { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'TopNav content (brand, search, actions).' },
+    ],
+    dependencies:         [],
+    registryDependencies: [],
+    files:                ['TopNav/TopNav.tsx'],
+    composition: {
+      name: 'TopNav',
+      children: [
+        { name: 'TopNavBrand' },
+        { name: 'TopNavActions' },
+      ],
+    },
   },
 
   // ─── Charts ──────────────────────────────────────────────────────────────
@@ -1236,6 +1441,47 @@ export default function Example() {
     files: ['Charts/Charts.tsx'],
   },
   {
+    slug: 'radar-chart',
+    name: 'RadarChart',
+    category: 'Charts',
+    description: 'A radar chart for comparing multiple entries across several shared dimensions.',
+    usage: `import { RadarChart } from '@/src/components/Charts/Charts';
+
+const data = [
+  { metric: 'Speed', modelX: 90, modelY: 70 },
+  { metric: 'Reliability', modelX: 80, modelY: 95 },
+  { metric: 'Comfort', modelX: 70, modelY: 85 },
+  { metric: 'Safety', modelX: 95, modelY: 90 },
+  { metric: 'Efficiency', modelX: 60, modelY: 80 },
+  { metric: 'Design', modelX: 85, modelY: 75 },
+];
+
+export default function Example() {
+  return (
+    <RadarChart
+      data={data}
+      xKey="metric"
+      series={[
+        { key: 'modelX', label: 'Model X' },
+        { key: 'modelY', label: 'Model Y' },
+      ]}
+    />
+  );
+}`,
+    props: [
+      { name: 'data', type: 'ChartDataPoint[]', default: '—', description: 'Array of data objects.' },
+      { name: 'xKey', type: 'string', default: '—', description: 'Key in each data object used as the category label around the radar.' },
+      { name: 'series', type: 'ChartSeries[]', default: '—', description: 'Polygons to render. Each entry has key, label, and optional color.' },
+      { name: 'height', type: 'number', default: '240', description: 'Chart height in px.' },
+      { name: 'showLegend', type: 'boolean', default: 'true', description: 'Whether to show the legend.' },
+      { name: 'showGrid', type: 'boolean', default: 'true', description: 'Whether to show the background grid.' },
+      { name: 'className', type: 'string', default: '""', description: 'Extra classes applied to the container.' },
+    ],
+    dependencies: ['recharts'],
+    registryDependencies: [],
+    files: ['Charts/Charts.tsx'],
+  },
+  {
     slug: 'mosaic',
     name: 'Mosaic',
     category: 'Drag & Drop',
@@ -1376,6 +1622,12 @@ export default function Example() {
     dependencies: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
     registryDependencies: [],
     files: ['Mosaic/Mosaic.tsx'],
+    composition: {
+      name: 'Mosaic',
+      children: [
+        { name: 'MosaicTile' },
+      ],
+    },
   },
   {
     slug: 'kanban',
@@ -1419,6 +1671,18 @@ export default function Example() {
     dependencies: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
     registryDependencies: [],
     files: ['Kanban/Kanban.tsx'],
+    composition: {
+      name: 'KanbanBoard',
+      description: 'data-driven',
+      children: [
+        {
+          name: 'KanbanColumn',
+          children: [
+            { name: 'KanbanCard' },
+          ],
+        },
+      ],
+    },
   },
   {
     slug:        'workflow-builder',
@@ -1607,10 +1871,16 @@ export default function Example() {
         description: 'Whether a branch starts expanded on initial render. (TreeItem)',
       },
       {
+        name: 'collapsible',
+        type: 'boolean',
+        default: 'true',
+        description: 'When false, the branch is always expanded with no toggle affordance — no chevron, not focusable, no hover/focus state. For read-only structural diagrams. (TreeItem)',
+      },
+      {
         name: 'icon',
         type: 'ReactNode',
         default: '—',
-        description: 'Custom icon overriding the default chevron or file icon. (TreeItem)',
+        description: 'Custom icon for this item, overriding the tree-level terminalIcon/nonTerminalIcon and (for collapsible branches) the default chevron. (TreeItem)',
       },
       {
         name: 'disabled',
@@ -1624,10 +1894,39 @@ export default function Example() {
         default: '""',
         description: 'Additional classes on the item row or tree root element.',
       },
+      {
+        name: 'terminalIcon',
+        type: 'ReactNode',
+        default: '—',
+        description: 'Default icon shown for leaf items (no children) that don’t set their own icon. No icon renders if unset. (Tree)',
+      },
+      {
+        name: 'nonTerminalIcon',
+        type: 'ReactNode',
+        default: '—',
+        description: 'Default icon shown for non-collapsible branch items that don’t set their own icon. Collapsible branches keep the chevron instead. No icon renders if unset. (Tree)',
+      },
+      {
+        name: 'selectable',
+        type: 'boolean',
+        default: 'false',
+        description: 'Allows text selection/copy inside the tree. Off by default since a normal interactive tree treats click as select/toggle. Turn on for read-only, fully non-collapsible trees. (Tree)',
+      },
     ],
     dependencies: [],
     registryDependencies: [],
     files: ['Tree/Tree.tsx'],
+    composition: {
+      name: 'Tree',
+      children: [
+        {
+          name: 'TreeItem',
+          children: [
+            { name: 'TreeItem', description: 'recursive' },
+          ],
+        },
+      ],
+    },
   },
   {
     slug: 'timeline',
@@ -1686,6 +1985,12 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Timeline/Timeline.tsx'],
+    composition: {
+      name: 'Timeline',
+      children: [
+        { name: 'TimelineItem' },
+      ],
+    },
   },
 
   {
@@ -1724,8 +2029,19 @@ export default function Example() {
       { name: 'children',    type: 'ReactNode',         default: '—',                   description: 'CommandGroup and CommandItem elements.' },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['scroll-fade'],
     files: ['CommandPalette/CommandPalette.tsx'],
+    composition: {
+      name: 'CommandPalette',
+      children: [
+        {
+          name: 'CommandGroup',
+          children: [
+            { name: 'CommandItem' },
+          ],
+        },
+      ],
+    },
   },
   {
     slug: 'tooltip',
@@ -2066,6 +2382,20 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Carousel/Carousel.tsx'],
+    composition: {
+      name: 'Carousel',
+      children: [
+        {
+          name: 'CarouselContent',
+          children: [
+            { name: 'CarouselItem' },
+          ],
+        },
+        { name: 'CarouselPrevious' },
+        { name: 'CarouselNext' },
+        { name: 'CarouselDots' },
+      ],
+    },
   },
   {
     slug: 'slider',
@@ -2244,6 +2574,70 @@ export default function Example() {
     files: ['CodeBlock/CodeBlock.tsx'],
   },
   {
+    slug: 'code-editor',
+    name: 'CodeEditor',
+    category: 'Inputs',
+    description: 'A CodeMirror-backed JSX/JavaScript editor with syntax highlighting, dark/light theming, and Tab-to-indent.',
+    usage: `'use client';
+
+import { useState } from 'react';
+import CodeEditor from '@/src/components/CodeEditor/CodeEditor';
+
+export default function Example() {
+  const [code, setCode] = useState('<Button>Click me</Button>');
+
+  return (
+    <CodeEditor
+      value={code}
+      onChange={setCode}
+      aria-label="JSX code editor"
+      minHeight="160px"
+    />
+  );
+}`,
+    props: [
+      {
+        name: 'value',
+        type: 'string',
+        default: '—',
+        description: 'Required. The current code string.',
+      },
+      {
+        name: 'onChange',
+        type: '(value: string) => void',
+        default: '—',
+        description: 'Required. Fires with the updated value on every edit.',
+      },
+      {
+        name: 'extensions',
+        type: 'Extension[]',
+        default: '[]',
+        description: 'Extra CodeMirror extensions layered on top of the built-ins — e.g. a project-specific autocompletion({ override: [...] }) call.',
+      },
+      {
+        name: 'aria-label',
+        type: 'string',
+        default: '—',
+        description: 'Accessible name for the editor region.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional Tailwind classes merged onto the root wrapper.',
+      },
+      {
+        name: 'minHeight',
+        type: 'string',
+        default: '—',
+        description: 'CSS min-height for the editor surface (e.g. "200px"). Keeps the editor from collapsing to a single line on short content.',
+      },
+    ],
+    dependencies: ['@uiw/react-codemirror', '@codemirror/lang-javascript', '@codemirror/autocomplete'],
+    registryDependencies: [],
+    files: ['CodeEditor/CodeEditor.tsx'],
+  },
+  {
     slug: 'avatar',
     name: 'Avatar',
     category: 'Display',
@@ -2322,6 +2716,120 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Avatar/Avatar.tsx'],
+    composition: {
+      name: 'AvatarGroup',
+      children: [
+        { name: 'Avatar' },
+      ],
+    },
+  },
+  {
+    slug: 'attachment',
+    name: 'Attachment',
+    category: 'Display',
+    description: 'A compact chip for a linked file — icon, filename, and optional size/type — with an automatic image/PDF thumbnail, plus AttachmentGroup for a wrapped row of files.',
+    usage: `import { Attachment, AttachmentGroup } from '@/src/components/Attachment/Attachment';
+
+export default function Example() {
+  return (
+    <AttachmentGroup>
+      <Attachment
+        name="Q3-financials.pdf"
+        href="/files/q3-financials.pdf"
+        thumbnail="/files/q3-financials-cover.png"
+        type="PDF"
+        size="1.2 MB"
+        onClick={(event) => {
+          event.preventDefault();
+          window.open('/files/q3-financials.pdf', '_blank');
+        }}
+      />
+      <Attachment
+        name="hero-shot.png"
+        href="/files/hero-shot.png"
+        size="840 KB"
+        onClick={(event) => {
+          event.preventDefault();
+          window.open('/files/hero-shot.png', '_blank');
+        }}
+      />
+      <Attachment name="archive.zip" href="/files/archive.zip" size="14.6 MB" />
+    </AttachmentGroup>
+  );
+}`,
+    props: [
+      { name: 'name',      type: 'string',  default: '—',              description: 'The filename shown in the chip. Also used to infer the file-type icon and as the fallback title (full name on hover/truncation).' },
+      { name: 'href',      type: 'string',  default: '—',              description: 'Link target for the file. When set, the primary control renders as a real <a>; otherwise a real <button type="button">.' },
+      { name: 'size',      type: 'string',  default: '—',              description: 'Pre-formatted file size (e.g. "2.4 MB"), shown as secondary muted text.' },
+      { name: 'type',      type: 'string',  default: '—',              description: 'Pre-formatted file type label (e.g. "PDF"), shown alongside size ("PDF · 2.4 MB").' },
+      { name: 'icon',      type: "'file' | 'image' | 'video' | 'audio' | 'archive' | 'code'", default: 'inferred from name', description: 'Overrides the automatically inferred icon.' },
+      { name: 'thumbnail', type: 'string',  default: '—', description: 'Image URL shown instead of the icon glyph. Defaults to href automatically for image-type attachments; pass explicitly for anything else (e.g. a PDF cover preview).' },
+      { name: 'onClick',   type: '(event: MouseEvent) => void', default: '—', description: 'Fires when the primary control (link or button) is activated.' },
+      { name: 'className', type: 'string',  default: "''",             description: 'Additional classes merged onto the root chip wrapper.' },
+    ],
+    dependencies:         [],
+    registryDependencies: [],
+    files:                ['Attachment/Attachment.tsx'],
+    composition: {
+      name: 'AttachmentGroup',
+      children: [
+        { name: 'Attachment' },
+      ],
+    },
+  },
+  {
+    slug: 'message',
+    name: 'Message',
+    category: 'Display',
+    description: 'A chat-style message bubble with sent/received variants and iOS-tapback-style reactions overlapping the bubble corner, a MessageReactions max/+N overflow stack like AvatarGroup, plus a source-citation use case for LLM responses.',
+    usage: `import { Message, MessageReactions, MessageReaction } from '@/src/components/Message/Message';
+
+export default function Example() {
+  return (
+    <div className="flex flex-col gap-3">
+      <Message variant="received">
+        Hey, are we still on for 3pm?
+        {/* max collapses extra chips into a "+N" indicator, overlapped like AvatarGroup */}
+        <MessageReactions max={2}>
+          <MessageReaction icon="👍" count={3} active onClick={() => {}} />
+          <MessageReaction icon="❤️" count={1} onClick={() => {}} />
+          <MessageReaction icon="😂" count={2} onClick={() => {}} />
+        </MessageReactions>
+      </Message>
+      <Message variant="sent">Yep, see you then!</Message>
+
+      {/* Source citations: MessageReactions used standalone, no chat bubble */}
+      <Message variant="received">
+        The Eiffel Tower is 330 meters tall, including antennas.
+      </Message>
+      <MessageReactions aria-label="Sources">
+        <MessageReaction label="1" href="https://en.wikipedia.org/wiki/Eiffel_Tower" aria-label="Source 1: wikipedia.org" />
+        <MessageReaction label="2" href="https://www.toureiffel.paris" aria-label="Source 2: toureiffel.paris" />
+      </MessageReactions>
+    </div>
+  );
+}`,
+    props: [
+      { name: 'variant',   type: "'sent' | 'received'", default: "'received'", description: "'sent' right-aligns the bubble in brand fill; 'received' left-aligns it in a neutral surface tint." },
+      { name: 'avatar',    type: 'ReactNode', default: '—', description: 'Optional avatar rendered beside the bubble.' },
+      { name: 'className', type: 'string',    default: "''", description: 'Additional CSS classes merged onto the root row.' },
+      { name: 'children',  type: 'ReactNode', default: '—', description: 'The message content. A MessageReactions child is detected and extracted automatically — it can appear anywhere inside.' },
+    ],
+    dependencies:         [],
+    registryDependencies: [],
+    files:                ['Message/Message.tsx'],
+    composition: {
+      name: 'Message',
+      children: [
+        {
+          name: 'MessageReactions',
+          description: 'auto-detected',
+          children: [
+            { name: 'MessageReaction' },
+          ],
+        },
+      ],
+    },
   },
   {
     slug: 'reveal',
@@ -2386,6 +2894,12 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Reveal/Reveal.tsx'],
+    composition: {
+      name: 'RevealGroup',
+      children: [
+        { name: 'Reveal' },
+      ],
+    },
   },
   {
     slug: 'count-up',
@@ -2575,6 +3089,20 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Modal/Modal.tsx'],
+    composition: {
+      name: 'Modal',
+      children: [
+        { name: 'ModalClose' },
+        {
+          name: 'ModalHeader',
+          children: [
+            { name: 'ModalTitle' },
+          ],
+        },
+        { name: 'ModalContent' },
+        { name: 'ModalFooter' },
+      ],
+    },
   },
   {
     slug: 'drawer',
@@ -2660,6 +3188,119 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Drawer/Drawer.tsx'],
+    composition: {
+      name: 'Drawer',
+      children: [
+        { name: 'DrawerClose' },
+        {
+          name: 'DrawerHeader',
+          children: [
+            { name: 'DrawerTitle' },
+          ],
+        },
+        { name: 'DrawerContent' },
+        { name: 'DrawerFooter' },
+      ],
+    },
+  },
+  {
+    slug: 'side-panel',
+    name: 'SidePanel',
+    category: 'Overlay',
+    description: 'A non-modal overlay panel that slides in from an edge of the screen but floats with margin on every side — a rounded, elevated Card rather than an edge-to-edge sheet. No backdrop, no scroll lock, and no focus trap — the rest of the page stays fully visible, clickable, and interactive. Panels on the same side stack automatically: opening a second one shifts earlier ones toward the center.',
+    usage: `'use client';
+
+import { useState } from 'react';
+import SidePanel, {
+  SidePanelHeader,
+  SidePanelTitle,
+  SidePanelContent,
+  SidePanelFooter,
+  SidePanelClose,
+  type SidePanelSide,
+} from '@/src/components/SidePanel/SidePanel';
+import Button from '@/src/components/Button/Button';
+
+export default function Example() {
+  const [open, setOpen] = useState(false);
+  const [side, setSide] = useState<SidePanelSide>('right');
+
+  const openFrom = (s: SidePanelSide) => {
+    setSide(s);
+    setOpen(true);
+  };
+
+  return (
+    <div className="flex flex-wrap gap-2 justify-center">
+      <Button variant="secondary" onClick={() => openFrom('left')}>Left</Button>
+      <Button variant="secondary" onClick={() => openFrom('right')}>Right</Button>
+      <Button variant="secondary" onClick={() => openFrom('top')}>Top</Button>
+      <Button variant="secondary" onClick={() => openFrom('bottom')}>Bottom</Button>
+
+      <SidePanel open={open} onOpenChange={setOpen} side={side}>
+        <SidePanelClose />
+        <SidePanelHeader>
+          <SidePanelTitle>Quick preview</SidePanelTitle>
+        </SidePanelHeader>
+        <SidePanelContent>
+          A floating panel, inset from every edge it does not anchor to.
+        </SidePanelContent>
+        <SidePanelFooter>
+          <Button variant="secondary" onClick={() => setOpen(false)}>Close</Button>
+        </SidePanelFooter>
+      </SidePanel>
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'open',
+        type: 'boolean',
+        default: '—',
+        description: 'Controls whether the panel is rendered and visible (controlled).',
+      },
+      {
+        name: 'onOpenChange',
+        type: '(open: boolean) => void',
+        default: '—',
+        description: 'Called with false when the user dismisses via Escape or SidePanelClose. Ignored while another panel opened after this one on the same side is still open.',
+      },
+      {
+        name: 'side',
+        type: '"left" | "right" | "top" | "bottom"',
+        default: '"right"',
+        description: 'Which edge of the screen the panel slides in from.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional classes merged onto the panel element.',
+      },
+      {
+        name: 'children',
+        type: 'ReactNode',
+        default: '—',
+        description: 'SidePanel subcomponents (SidePanelHeader, SidePanelTitle, SidePanelContent, SidePanelFooter, SidePanelClose) and arbitrary content.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: ['card'],
+    files: ['SidePanel/SidePanel.tsx', 'SidePanel/sidePanelStack.ts'],
+    composition: {
+      name: 'SidePanel',
+      children: [
+        { name: 'SidePanelClose' },
+        {
+          name: 'SidePanelHeader',
+          children: [
+            { name: 'SidePanelTitle' },
+          ],
+        },
+        { name: 'SidePanelContent' },
+        { name: 'SidePanelFooter' },
+      ],
+    },
   },
   {
     slug: 'typewriter',

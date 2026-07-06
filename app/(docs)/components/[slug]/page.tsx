@@ -1,9 +1,8 @@
-import { WorkflowBuilderShowcase } from '@/app/_docs/components/examples/WorkflowBuilderShowcase';
-import { TimelineHorizontalDemo } from '@/app/_docs/components/examples/TimelineHorizontalDemo';
-import { TimelineDeployDemo } from '@/app/_docs/components/examples/TimelineDeployDemo';
-import { SkeletonShowcase } from '@/app/_docs/components/examples/SkeletonShowcase';
 import { ComponentLivePreview } from '@/app/_docs/components/ComponentLivePreview';
+import { ComponentComposition } from '@/app/_docs/components/ComponentComposition';
+import { componentExamples } from '@/app/_docs/registry/componentExamples';
 import { ComponentPreview } from '@/app/_docs/components/ComponentPreview';
+import { extraSections } from '@/app/_docs/registry/extraSections';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
 import { PropsTable } from '@/app/_docs/components/PropsTable';
 import { getComponent, registry } from '@/app/_docs/registry';
@@ -42,6 +41,8 @@ const ComponentPage = async (
   if (!entry) notFound();
 
   const installCommand = `npx @dafink/ui add ${entry.slug}`;
+  const extraDemos = componentExamples[slug] ?? [];
+  const demosHeading = extraDemos.length === 0 ? 'Demo' : 'Demos';
 
   return (
     <div className='flex flex-col gap-10'>
@@ -80,73 +81,67 @@ const ComponentPage = async (
         )}
       </section>
 
-      {/* Live preview */}
+      {/* Demo(s) — a list of at least one (the primary live preview + its usage
+          code), plus any additional named examples registered for this slug in
+          componentExamples. Every item shows its own Preview/Code toggle, so
+          there is no separate standalone "Usage" section. */}
       <section className='flex flex-col gap-3'>
         <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
-          Preview
+          {demosHeading}
         </h2>
-        <ComponentPreview>
+        <CodeBlock variant='example' label={slug} code={entry.usage}>
           <ComponentLivePreview slug={slug} />
-        </ComponentPreview>
+        </CodeBlock>
+
+        {extraDemos.length > 0 && (
+          <div className='flex flex-col gap-10 mt-2 pt-6 border-t border-surface-border'>
+            {extraDemos.map((example) => (
+              <section key={example.id} className='flex flex-col gap-1'>
+                <h3 className='text-sm font-semibold text-text font-mono'>
+                  {example.title}
+                </h3>
+                {example.description && (
+                  <p className='text-sm text-text-muted mb-3'>
+                    {example.description}
+                  </p>
+                )}
+                <CodeBlock variant='example' label={example.id} code={example.usage} minHeight='120px' align='start'>
+                  {example.preview}
+                </CodeBlock>
+              </section>
+            ))}
+          </div>
+        )}
       </section>
 
-      {/* Per-type examples — Skeleton only */}
-      {slug === 'skeleton' && (
+      {/* Composition — only rendered for compound components */}
+      {entry.composition && (
         <section className='flex flex-col gap-3'>
           <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
-            Examples
+            Composition
           </h2>
-          <SkeletonShowcase />
-        </section>
-      )}
-
-      {/* Showcase — WorkflowBuilder only */}
-      {slug === 'workflow-builder' && (
-        <section className='flex flex-col gap-3'>
-          <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
-            Examples
-          </h2>
-          <WorkflowBuilderShowcase />
-        </section>
-      )}
-
-      {/* Horizontal variant — Timeline only */}
-      {slug === 'timeline' && (
-        <section className='flex flex-col gap-3'>
-          <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
-            Horizontal variant
-          </h2>
-          <p className='text-sm text-text-muted'>
-            Pass <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>direction=&quot;horizontal&quot;</code> to lay steps out in a row with a connecting line across the top.
-          </p>
           <ComponentPreview>
-            <TimelineHorizontalDemo />
+            <ComponentComposition composition={entry.composition} />
           </ComponentPreview>
         </section>
       )}
 
-      {/* Interactive example — Timeline only */}
-      {slug === 'timeline' && (
-        <section className='flex flex-col gap-3'>
+      {/* Extra sections (variant demos, interactive examples) — data-driven per slug */}
+      {(extraSections[slug] ?? []).map((section) => (
+        <section key={section.heading} className='flex flex-col gap-3'>
           <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
-            Interactive example
+            {section.heading}
           </h2>
-          <p className='text-sm text-text-muted'>
-            Click the button to append steps one at a time. Each new entry slides in and the indicator dot pops.
-          </p>
+          {section.description && (
+            <p className='text-sm text-text-muted'>
+              {section.description}
+            </p>
+          )}
           <ComponentPreview>
-            <TimelineDeployDemo />
+            {section.demo}
           </ComponentPreview>
         </section>
-      )}
-
-      {/* Usage */}
-      <section className='flex flex-col gap-3'>
-        <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
-          Usage
-        </h2>
-        <CodeBlock code={entry.usage} />
-      </section>
+      ))}
 
       {/* Props */}
       {entry.props.length > 0 && (

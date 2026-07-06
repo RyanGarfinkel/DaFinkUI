@@ -1,49 +1,32 @@
 'use client';
 import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
+import { DarkModeToggle } from '@/app/_docs/components/DarkModeToggle';
 import { themes, getThemeByName, type Theme } from '@/src/themes';
 import { styles, getStyleByName, type Style } from '@/src/styles';
+import { ArrowRightIcon } from '@/app/_docs/components/NavIcons';
+import { TOP_NAV_PAGES } from '@/app/_docs/registry/pageOrder';
 import { MobileNav } from '@/app/_docs/components/MobileNav';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { Select } from '@/src/components/Select/Select';
+import { blocks } from '@/app/_docs/registry/blocks';
 import { registry } from '@/app/_docs/registry';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-export const TopNav = () =>
+interface TopNavProps
+{
+	collapsed?: boolean;
+}
+
+export const TopNav = ({ collapsed = false }: TopNavProps) =>
 {
 	const [paletteOpen, setPaletteOpen] = useState(false);
-	const [isDark,      setIsDark]      = useState(false);
 	const [activeTheme, setActiveTheme] = useState<Theme>(themes[0]);
 	const [activeStyle, setActiveStyle] = useState<Style>(styles[0]);
 
 	const router = useRouter();
 
-	const grouped = useMemo(() =>
-	{
-		const map: Record<string, typeof registry> = {};
-		for(const entry of registry)
-		{
-			if(!map[entry.category]) map[entry.category] = [];
-			map[entry.category].push(entry);
-		}
-		return map;
-	}, []);
-
-	const categories = useMemo(() => Object.keys(grouped).sort(), [grouped]);
-
-	useEffect(() =>
-	{
-		const stored     = localStorage.getItem('theme');
-		const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-		const dark       = stored === 'dark' || (!stored && systemDark);
-
-		if(dark) document.documentElement.classList.add('dark');
-		else document.documentElement.classList.remove('dark');
-
-		// eslint-disable-next-line react-hooks/set-state-in-effect
-		setIsDark(dark);
-		document.cookie = `theme=${dark ? 'dark' : 'light'}; path=/; max-age=31536000; SameSite=Lax`;
-	}, []);
+	const sortedComponents = useMemo(() => [...registry].sort((a, b) => a.name.localeCompare(b.name)), []);
 
 	const applyTheme = (theme: Theme) =>
 	{
@@ -128,32 +111,34 @@ export const TopNav = () =>
 		applyStyle(style);
 	};
 
-	const toggleDark = () =>
+	const goTo = (href: string) =>
 	{
-		const root  = document.documentElement;
-		const going = root.classList.contains('dark') ? 'light' : 'dark';
-		root.classList.toggle('dark', going === 'dark');
-		localStorage.setItem('theme', going);
-		document.cookie = `theme=${going}; path=/; max-age=31536000; SameSite=Lax`;
-		setIsDark(going === 'dark');
+		router.push(href);
+		setPaletteOpen(false);
 	};
 
-	const navigate = (slug: string) =>
+	const goToExternal = (href: string) =>
 	{
-		router.push(`/components/${slug}`);
+		window.open(href, '_blank', 'noopener,noreferrer');
 		setPaletteOpen(false);
 	};
 
 	return (
 		<>
-			<header className='fixed top-0 left-0 right-0 z-50 h-14 border-b border-surface-border bg-surface/95 backdrop-blur-md flex items-center px-3 gap-2 sm:px-6 sm:gap-3'>
+			<header
+				className={[
+					'fixed top-0 left-0 right-0 z-50 h-14 border-b border-surface-border bg-surface/95 backdrop-blur-md flex items-center px-3 gap-2 sm:px-6 sm:gap-3',
+					'motion-safe:transition-[margin-left] motion-safe:duration-200 motion-safe:ease-[var(--ease-standard)]',
+					collapsed ? 'md:ml-16' : 'md:ml-56',
+				].join(' ')}
+			>
 				{/* Mobile nav drawer trigger */}
 				<MobileNav />
 
-				{/* Brand */}
+				{/* Brand — hidden at md: and up, where the sidebar header shows it instead */}
 				<Link
 					href='/'
-					className='hidden sm:flex items-center gap-2 shrink-0 text-text rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
+					className='hidden sm:flex md:hidden items-center gap-2 shrink-0 text-text rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
 				>
 					<svg width='20' height='20' viewBox='0 0 22 22' fill='currentColor' aria-hidden='true'>
 						<path
@@ -229,26 +214,7 @@ export const TopNav = () =>
 
 					<div className='hidden sm:block h-4 w-px bg-surface-border mx-0.5' aria-hidden='true' />
 
-					<button
-						type='button'
-						onClick={toggleDark}
-						aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-						className='flex h-9 w-9 md:h-8 md:w-8 items-center justify-center rounded-md text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
-					>
-						{isDark
-							? (
-								<svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-									<circle cx='12' cy='12' r='4' />
-									<path d='M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41' />
-								</svg>
-							)
-							: (
-								<svg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-									<path d='M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z' />
-								</svg>
-							)
-						}
-					</button>
+					<DarkModeToggle />
 				</div>
 			</header>
 
@@ -258,19 +224,54 @@ export const TopNav = () =>
 				onClose={() => setPaletteOpen(false)}
 				placeholder='Search components…'
 			>
-				{categories.map(cat => (
-					<CommandGroup key={cat} label={cat}>
-						{grouped[cat].map(entry => (
-							<CommandItem
-								key={entry.slug}
-								value={`${entry.name} ${entry.description} ${entry.category}`}
-								onSelect={() => navigate(entry.slug)}
-							>
-								{entry.name}
-							</CommandItem>
-						))}
-					</CommandGroup>
-				))}
+				<CommandGroup label='Pages'>
+					{TOP_NAV_PAGES.map(page => (
+						<CommandItem
+							key={page.href}
+							value={page.label}
+							icon={<ArrowRightIcon />}
+							onSelect={() => goTo(page.href)}
+						>
+							{page.label}
+						</CommandItem>
+					))}
+				</CommandGroup>
+
+				<CommandGroup label='Components'>
+					{sortedComponents.map(entry => (
+						<CommandItem
+							key={entry.slug}
+							value={entry.name}
+							onSelect={() => goTo(`/components/${entry.slug}`)}
+						>
+							{entry.name}
+						</CommandItem>
+					))}
+				</CommandGroup>
+
+				<CommandGroup label='Blocks'>
+					{blocks.map(entry => (
+						<CommandItem
+							key={entry.slug}
+							value={entry.name}
+							onSelect={() => goTo(`/blocks/${entry.slug}`)}
+						>
+							{entry.name}
+						</CommandItem>
+					))}
+				</CommandGroup>
+
+				<CommandGroup label='Misc'>
+					<CommandItem value='Changelog' onSelect={() => goTo('/changelog')}>
+						Changelog
+					</CommandItem>
+					<CommandItem value='GitHub' onSelect={() => goToExternal('https://github.com/RyanGarfinkel/DaFinkUI')}>
+						GitHub
+					</CommandItem>
+					<CommandItem value='npm' onSelect={() => goToExternal('https://www.npmjs.com/package/dafink-ui')}>
+						npm
+					</CommandItem>
+				</CommandGroup>
 			</CommandPalette>
 
 			<GlobalShortcuts onOpen={() => setPaletteOpen(true)} />
@@ -294,7 +295,7 @@ const GlobalShortcuts = ({ onOpen }: { onOpen: () => void }) =>
 		const handler = (e: KeyboardEvent) =>
 		{
 			const active = document.activeElement;
-			const inInput = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement;
+			const inInput = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || (active instanceof HTMLElement && active.isContentEditable);
 
 			// Slash opens palette when not in a text field
 			if(e.key === '/' && !inInput)
