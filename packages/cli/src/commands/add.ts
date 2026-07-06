@@ -1,10 +1,12 @@
+import { BLOCKS_REGISTRY, resolveBlock, type BlockRegistryEntry } from '../lib/blocksRegistry.js';
 import { REGISTRY, resolve as resolveEntry } from '../lib/registry.js';
 import { mkdirSync, copyFileSync, existsSync } from 'fs';
 import type { RegistryEntry } from '../lib/registry.js';
-import { resolve, dirname, basename } from 'path';
+import { generateBarrel } from '../lib/barrel.js';
 import { spinner, log } from '@clack/prompts';
 import { readConfig } from '../lib/config.js';
 import { execSync } from 'child_process';
+import { resolve, dirname } from 'path';
 import pc from 'picocolors';
 
 function detectPackageManager(cwd: string): 'pnpm' | 'yarn' | 'npm'
@@ -22,7 +24,7 @@ function installCmd(pm: 'pnpm' | 'yarn' | 'npm', deps: string[]): string
 	return `npm install ${pkgs}`;
 }
 
-function copyComponent(entry: RegistryEntry, registryDir: URL, targetDir: string): void
+function copyEntry(entry: { files: string[] }, registryDir: URL, targetDir: string): void
 {
 	for(const file of entry.files)
 	{
@@ -36,62 +38,107 @@ function copyComponent(entry: RegistryEntry, registryDir: URL, targetDir: string
 	}
 }
 
+/** Walks `registryDependencies` to a fixed point, so e.g. requesting a block
+ * that depends on Form also pulls in Form's own dependencies (Input, Button). */
+function resolveComponentsTransitive(initialSlugs: string[]): RegistryEntry[]
+{
+	const resolved = new Map<string, RegistryEntry>();
+	const queue = [...initialSlugs];
+
+	while(queue.length > 0)
+	{
+		const slug = queue.shift()!;
+		if(resolved.has(slug)) continue;
+
+		const entry = REGISTRY.find(e => e.slug === slug);
+		if(!entry) continue;
+
+		resolved.set(slug, entry);
+		queue.push(...entry.registryDependencies);
+	}
+
+	return [...resolved.values()];
+}
+
 export async function runAdd(inputs: string[], options: { all?: boolean }, cwd: string): Promise<void>
 {
 	const config = readConfig(cwd);
-	const targetDir = resolve(cwd, config.componentsDir);
+	const componentsTargetDir = resolve(cwd, config.componentsDir);
+	const blocksTargetDir = resolve(cwd, config.blocksDir);
 	const pm = detectPackageManager(cwd);
 
-	const registryDir = new URL('../registry/', import.meta.url);
+	// import.meta.url here is dist/commands/add.js — registry/ and blocks/ are
+	// siblings of dist/ at the package root, so this needs two levels up, not one.
+	const componentsRegistryDir = new URL('../../registry/', import.meta.url);
+	const blocksRegistryDir = new URL('../../blocks/', import.meta.url);
 
-	let entries: RegistryEntry[];
+	const blockEntries: BlockRegistryEntry[] = [];
+	const requestedComponentSlugs: string[] = [];
 
 	if(options.all)
 	{
-		entries = REGISTRY;
+		requestedComponentSlugs.push(...REGISTRY.map(e => e.slug));
 	}
 	else
 	{
 		if(inputs.length === 0)
 		{
-			log.error('Specify component name(s) or use --all');
+			log.error('Specify component/block name(s) or use --all');
 			process.exit(1);
 		}
 
-		entries = [];
-
 		for(const input of inputs)
 		{
-			const entry = resolveEntry(input);
+			const componentEntry = resolveEntry(input);
 
-			if(!entry)
+			if(componentEntry)
 			{
-				log.warn(pc.yellow(`Unknown component: ${input}`) + ' — skipping');
+				requestedComponentSlugs.push(componentEntry.slug);
 				continue;
 			}
 
-			entries.push(entry);
+			const blockEntry = resolveBlock(input);
+
+			if(blockEntry)
+			{
+				blockEntries.push(blockEntry);
+				requestedComponentSlugs.push(...blockEntry.registryDependencies);
+				continue;
+			}
+
+			log.warn(pc.yellow(`Unknown component or block: ${input}`) + ' — skipping');
 		}
 	}
 
-	if(entries.length === 0)
+	const componentEntries = resolveComponentsTransitive(requestedComponentSlugs);
+
+	if(blockEntries.length === 0 && componentEntries.length === 0)
 	{
-		log.error('No valid components to add.');
+		log.error('No valid components or blocks to add.');
 		process.exit(1);
 	}
 
 	const s = spinner();
-	s.start(`Copying ${entries.length} component(s)...`);
+	s.start(`Copying ${blockEntries.length + componentEntries.length} item(s)...`);
 
 	const allDeps = new Set<string>();
 
-	for(const entry of entries)
+	for(const entry of blockEntries)
 	{
-		copyComponent(entry, registryDir, targetDir);
+		copyEntry(entry, blocksRegistryDir, blocksTargetDir);
+		entry.deps.forEach(d => allDeps.add(d));
+	}
+
+	for(const entry of componentEntries)
+	{
+		copyEntry(entry, componentsRegistryDir, componentsTargetDir);
 		entry.deps.forEach(d => allDeps.add(d));
 	}
 
 	s.stop('Files copied.');
+
+	if(componentEntries.length > 0)
+		generateBarrel(componentsTargetDir);
 
 	if(allDeps.size > 0)
 	{
@@ -105,7 +152,9 @@ export async function runAdd(inputs: string[], options: { all?: boolean }, cwd: 
 		log.success('Dependencies installed.');
 	}
 
+	const addedNames = [...blockEntries, ...componentEntries].map(e => pc.bold(e.name)).join(', ');
+
 	log.success(
-		`Added ${entries.map(e => pc.bold(e.name)).join(', ')} to ${pc.dim(config.componentsDir)}`
+		`Added ${addedNames} to ${pc.dim(config.blocksDir)} / ${pc.dim(config.componentsDir)}`
 	);
 }

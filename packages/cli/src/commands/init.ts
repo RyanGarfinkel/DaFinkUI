@@ -1,5 +1,6 @@
 import { intro, select, text, outro, isCancel, cancel } from '@clack/prompts';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { addComponentsAlias } from '../lib/tsconfig.js';
 import type { DaFinkConfig } from '../lib/config.js';
 import { resolve, dirname, basename } from 'path';
 import { writeConfig } from '../lib/config.js';
@@ -104,6 +105,7 @@ export async function runInit(cwd: string): Promise<void>
 		style: style as DaFinkConfig['style'],
 		palette: palette as DaFinkConfig['palette'],
 		componentsDir: (componentsDir as string) || 'src/components/ui',
+		blocksDir: 'src/blocks',
 		cssFile,
 	};
 
@@ -118,11 +120,18 @@ export async function runInit(cwd: string): Promise<void>
 	const importLine = `@import './${basename(dafinkCssPath)}';`;
 	prependImport(resolve(cwd, cssFile), importLine);
 
+	const aliasResult = addComponentsAlias(cwd, config.componentsDir);
+
+	const aliasLine = aliasResult.updated
+		? '  ' + pc.dim(aliasResult.configFile!) + ' updated with ' + pc.dim('@components/*') + ' alias\n'
+		: '  ' + pc.yellow(aliasResult.reason ?? 'skipped @components alias setup') + '\n';
+
 	outro(
 		pc.green('Done!') + '\n\n' +
 		'  ' + pc.dim('dafink.config.json') + ' written\n' +
 		'  ' + pc.dim(dafinkCssPath.replace(cwd + '/', '')) + ' written\n' +
-		'  import prepended to ' + pc.dim(cssFile) + '\n\n' +
+		'  import prepended to ' + pc.dim(cssFile) + '\n' +
+		aliasLine + '\n' +
 		'Next: ' + pc.cyan('npx dafink-ui add button') + ' to copy your first component.'
 	);
 }

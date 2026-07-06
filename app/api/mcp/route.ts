@@ -1,4 +1,5 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
+import { getFullBlockRegistry, getBlockRegistryEntry, listBlocksByCategory, searchBlocks } from './resources/blocks';
 import { getFullRegistry, getRegistryEntry, listByCategory, searchComponents } from './resources/registry';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { listPatterns, getPattern } from './resources/patterns';
@@ -14,6 +15,10 @@ const buildServer = (): McpServer =>
 
 	server.resource('components', 'dafink://components', async () => ({
 		contents: [{ uri: 'dafink://components', text: JSON.stringify(getFullRegistry()) }],
+	}));
+
+	server.resource('blocks', 'dafink://blocks', async () => ({
+		contents: [{ uri: 'dafink://blocks', text: JSON.stringify(getFullBlockRegistry()) }],
 	}));
 
 	server.resource('tokens', 'dafink://tokens', async () => ({
@@ -61,6 +66,34 @@ const buildServer = (): McpServer =>
 		'Get every component with its full registry entry — usage code, props, and dependencies for all 48 components',
 		{},
 		async () => ({ content: [{ type: 'text', text: JSON.stringify(getFullRegistry()) }] })
+	);
+
+	server.tool(
+		'get_block_registry_entry',
+		'Get the registry entry for a block — usage code, npm dependencies, component dependencies, and category',
+		{ name: z.string().describe('Block name or slug, e.g. "Dashboard" or "dashboard"') },
+		async ({ name }) => ({ content: [{ type: 'text', text: getBlockRegistryEntry(name) }] })
+	);
+
+	server.tool(
+		'search_blocks',
+		'Search blocks by name, slug, category, or description — use when you need a prebuilt composition (dashboard, login flow, form) rather than a single component',
+		{ query: z.string().describe('Search query, e.g. "login" or "settings"') },
+		async ({ query }) => ({ content: [{ type: 'text', text: searchBlocks(query) }] })
+	);
+
+	server.tool(
+		'list_blocks_by_category',
+		'List blocks grouped by category. Pass a category name to filter, or omit to get all categories.',
+		{ category: z.string().optional().describe('Category name, e.g. "Dashboards", "Authentication", "Forms". Omit for all.') },
+		async ({ category }) => ({ content: [{ type: 'text', text: listBlocksByCategory(category) }] })
+	);
+
+	server.tool(
+		'get_full_block_registry',
+		'Get every block with its full registry entry — usage code and dependencies for all blocks',
+		{},
+		async () => ({ content: [{ type: 'text', text: JSON.stringify(getFullBlockRegistry()) }] })
 	);
 
 	server.tool(

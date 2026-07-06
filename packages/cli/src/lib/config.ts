@@ -6,6 +6,7 @@ export interface DaFinkConfig
 	style: 'minimal' | 'neumorph' | 'brutalist';
 	palette: 'zinc' | 'ocean' | 'ember' | 'forest' | 'noir' | 'plum';
 	componentsDir: string;
+	blocksDir: string;
 	cssFile: string;
 }
 
@@ -18,7 +19,9 @@ export function readConfig(cwd: string): DaFinkConfig
 	if(!existsSync(configPath))
 		throw new Error(`No dafink.config.json found in ${cwd}. Run \`npx dafink-ui init\` first.`);
 
-	return JSON.parse(readFileSync(configPath, 'utf8')) as DaFinkConfig;
+	const parsed = JSON.parse(readFileSync(configPath, 'utf8')) as Partial<DaFinkConfig>;
+
+	return { blocksDir: 'src/blocks', ...parsed } as DaFinkConfig;
 }
 
 export function writeConfig(cwd: string, config: DaFinkConfig): void

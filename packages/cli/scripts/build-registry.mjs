@@ -5,33 +5,42 @@ import { fileURLToPath } from 'url';
 const __dirname   = dirname(fileURLToPath(import.meta.url));
 const srcRoot     = resolve(__dirname, '../../../src/components');
 const registryRoot = resolve(__dirname, '../registry');
+const blocksSrcRoot = resolve(__dirname, '../../../src/blocks');
+const blocksRoot    = resolve(__dirname, '../blocks');
 
-let copied = 0;
-
-const componentDirs = readdirSync(srcRoot).filter(name =>
-	statSync(resolve(srcRoot, name)).isDirectory()
-);
-
-for(const componentName of componentDirs)
+function copyDirs(root, destRoot, label)
 {
-	const componentDir = resolve(srcRoot, componentName);
-	const files = readdirSync(componentDir).filter(f =>
-		extname(f) === '.tsx' && !f.endsWith('.test.tsx')
+	let count = 0;
+
+	const dirs = readdirSync(root).filter(name =>
+		statSync(resolve(root, name)).isDirectory()
 	);
 
-	for(const file of files)
+	for(const name of dirs)
 	{
-		const src  = resolve(componentDir, file);
-		const dest = resolve(registryRoot, componentName, file);
+		const dir = resolve(root, name);
+		const files = readdirSync(dir).filter(f =>
+			extname(f) === '.tsx' && !f.endsWith('.test.tsx')
+		);
 
-		mkdirSync(dirname(dest), { recursive: true });
-		copyFileSync(src, dest);
-		console.log(`  copied: ${componentName}/${file}`);
-		copied++;
+		for(const file of files)
+		{
+			const src  = resolve(dir, file);
+			const dest = resolve(destRoot, name, file);
+
+			mkdirSync(dirname(dest), { recursive: true });
+			copyFileSync(src, dest);
+			console.log(`  copied: ${name}/${file}`);
+			count++;
+		}
 	}
+
+	console.log(`\n${label} built: ${count} file(s) copied.`);
+	return count;
 }
 
-console.log(`\nRegistry built: ${copied} file(s) copied.`);
+copyDirs(srcRoot, registryRoot, 'Component registry');
+copyDirs(blocksSrcRoot, blocksRoot, 'Block registry');
 
 const skillSrc  = resolve(__dirname, '../../../dafink-ui.skill');
 const skillDest = resolve(__dirname, '../assets/dafink-ui.skill');
