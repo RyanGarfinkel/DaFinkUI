@@ -14,6 +14,36 @@ export interface ChangelogEntry
 
 export const changelog: ChangelogEntry[] = [
 	{
+		'version': 'Unreleased',
+		'date': null,
+		'sections': [
+			{
+				'label': 'Added',
+				'changes': [
+					'Add and enhance library components',
+					'Add blocks system to library, cli, and docs site',
+					'Add accessibility audit command to cli',
+					'Add live code playground to docs site',
+					'Add changelog page to docs site',
+					'Restructure docs site navigation shell'
+				]
+			},
+			{
+				'label': 'Changed',
+				'changes': [
+					'Add codemirror, react-hook-form, and changelog script deps'
+				]
+			},
+			{
+				'label': 'Docs',
+				'changes': [
+					'Add cli package readme',
+					'Update rules and patterns for new components and blocks'
+				]
+			}
+		]
+	},
+	{
 		'version': '0.1.0',
 		'date': '2026-06-18',
 		'sections': [
