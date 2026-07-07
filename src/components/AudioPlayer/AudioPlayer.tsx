@@ -1,12 +1,17 @@
 'use client';
 
 import { useRef, useState, useEffect, HTMLAttributes } from 'react';
+import Slider from '../Slider/Slider';
+import Button from '../Button/Button';
+
+export type AudioPlayerSize = 'default' | 'compact';
 
 export interface AudioPlayerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'>
 {
 	src:       string;
 	title?:    string;
 	subtitle?: string;
+	size?:     AudioPlayerSize;
 }
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] as const;
@@ -19,14 +24,14 @@ const fmt = (s: number): string =>
 	return `${m}:${ss.toString().padStart(2, '0')}`;
 };
 
-const PlayIcon = () => (
-	<svg viewBox='0 0 24 24' fill='currentColor' className='w-5 h-5' aria-hidden='true'>
+const PlayIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+	<svg viewBox='0 0 24 24' fill='currentColor' className={className} aria-hidden='true'>
 		<path d='M8 5v14l11-7L8 5z' />
 	</svg>
 );
 
-const PauseIcon = () => (
-	<svg viewBox='0 0 24 24' fill='currentColor' className='w-5 h-5' aria-hidden='true'>
+const PauseIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
+	<svg viewBox='0 0 24 24' fill='currentColor' className={className} aria-hidden='true'>
 		<path d='M6 19h4V5H6v14zm8-14v14h4V5h-4z' />
 	</svg>
 );
@@ -54,22 +59,29 @@ const VolumeIcon = ({ muted, volume }: { muted: boolean; volume: number }) =>
 	);
 };
 
-const BTN = [
-	'inline-flex items-center justify-center gap-1 rounded-[var(--radius)] transition-colors',
-	'duration-[var(--duration-fast)] focus:outline-none focus-visible:ring-2',
-	'focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
-].join(' ');
+const SkipBackIcon = () => (
+	<svg viewBox='0 0 24 24' fill='currentColor' className='w-4 h-4' aria-hidden='true'>
+		<path d='M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z' />
+	</svg>
+);
 
-const GHOST_BTN = `${BTN} text-text`;
+const SkipForwardIcon = () => (
+	<svg viewBox='0 0 24 24' fill='currentColor' className='w-4 h-4' aria-hidden='true'>
+		<path d='M11.5 8c2.65 0 5.05.99 6.9 2.6L22 7v9h-9l3.62-3.62C15.23 11.22 13.46 10.5 11.5 10.5c-3.54 0-6.55 2.31-7.6 5.5L1.53 15.22C2.92 10.03 6.85 8 11.5 8z' />
+	</svg>
+);
 
 const AudioPlayer = ({
 	src,
 	title,
 	subtitle,
+	size = 'default',
 	className = '',
 	...props
 }: AudioPlayerProps) =>
 {
+	const isCompact = size === 'compact';
+
 	const audioRef = useRef<HTMLAudioElement>(null);
 
 	const [playing,     setPlaying]     = useState(false);
@@ -178,128 +190,131 @@ const AudioPlayer = ({
 		<div
 			role='region'
 			aria-label={title ? `Audio player: ${title}` : 'Audio player'}
-			className={`flex flex-col gap-3 rounded-[var(--radius-lg)] border border-surface-border bg-surface-panel p-4 shadow-[var(--shadow-sm)] ${className}`}
+			className={
+				isCompact
+					? `flex items-center gap-2 ${className}`
+					: `flex flex-col gap-3 p-4 rounded-[var(--radius-lg)] border border-surface-border bg-surface-panel shadow-[var(--shadow-sm)] ${className}`
+			}
 			{...props}
 		>
 			<audio ref={audioRef} src={src} preload='metadata' />
 
-			{(title || subtitle) && (
+			{!isCompact && (title || subtitle) && (
 				<div className='min-w-0'>
 					{title    && <p className='truncate text-sm font-medium text-text'>{title}</p>}
 					{subtitle && <p className='truncate text-xs text-text-muted'>{subtitle}</p>}
 				</div>
 			)}
 
-			<div className='flex items-center gap-2'>
-				<span className='w-10 shrink-0 text-right text-xs tabular-nums text-text-muted' aria-hidden='true'>
-					{fmt(currentTime)}
-				</span>
+			{isCompact ? (
+				<>
+					<Button
+						variant='on-color'
+						size='icon-sm'
+						shape='circle'
+						onClick={togglePlay}
+						aria-label={playing ? 'Pause' : 'Play'}
+						className='shrink-0'
+					>
+						{playing ? <PauseIcon className='w-3.5 h-3.5' /> : <PlayIcon className='w-3.5 h-3.5' />}
+					</Button>
 
-				<div className='relative flex-1 flex items-center h-5'>
-					<div className='absolute inset-x-0 h-1.5 rounded-full bg-surface-active overflow-hidden'>
-						<div
-							className='h-full rounded-full bg-brand motion-safe:transition-[width] motion-safe:duration-[var(--duration-fast)]'
-							style={{ width: `${duration > 0 ? (currentTime / duration) * 100 : 0}%` }}
-						/>
-					</div>
-					<input
-						type='range'
+					<Slider
+						value={currentTime}
+						onValueChange={seek}
 						min={0}
 						max={duration || 0}
 						step={0.1}
-						value={currentTime}
-						onChange={e => seek(Number(e.target.value))}
-						aria-label='Seek'
-						aria-valuemin={0}
-						aria-valuemax={duration || 0}
-						aria-valuenow={Math.round(currentTime)}
-						aria-valuetext={`${fmt(currentTime)} of ${fmt(duration)}`}
-						className='relative w-full h-5 appearance-none bg-transparent cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
-						style={{ accentColor: 'var(--color-brand)' }}
+						size='sm'
+						tone='current'
+						ariaLabel='Seek'
+						ariaValueText={`${fmt(currentTime)} of ${fmt(duration)}`}
+						className='flex-1'
 					/>
-				</div>
 
-				<span className='w-10 shrink-0 text-xs tabular-nums text-text-muted' aria-hidden='true'>
-					{fmt(duration)}
-				</span>
-			</div>
+					<span className='w-8 shrink-0 text-[11px] tabular-nums text-current/70' aria-hidden='true'>
+						{fmt(currentTime)}
+					</span>
+				</>
+			) : (
+				<>
+					<div className='flex items-center gap-2'>
+						<span className='w-10 shrink-0 text-right text-xs tabular-nums text-text-muted' aria-hidden='true'>
+							{fmt(currentTime)}
+						</span>
 
-			<div className='flex items-center gap-2'>
-				<button
-					type='button'
-					onClick={() => skip(-10)}
-					aria-label='Skip back 10 seconds'
-					className={`${GHOST_BTN} h-8 w-8 text-xs hover:bg-surface-hover active:bg-surface-active`}
-				>
-					<svg viewBox='0 0 24 24' fill='currentColor' className='w-4 h-4' aria-hidden='true'>
-						<path d='M12.5 8c-2.65 0-5.05.99-6.9 2.6L2 7v9h9l-3.62-3.62c1.39-1.16 3.16-1.88 5.12-1.88 3.54 0 6.55 2.31 7.6 5.5l2.37-.78C21.08 11.03 17.15 8 12.5 8z' />
-					</svg>
-					<span className='text-[10px] font-semibold leading-none'>10</span>
-				</button>
+						<Slider
+							value={currentTime}
+							onValueChange={seek}
+							min={0}
+							max={duration || 0}
+							step={0.1}
+							ariaLabel='Seek'
+							ariaValueText={`${fmt(currentTime)} of ${fmt(duration)}`}
+							className='flex-1'
+						/>
 
-				<button
-					type='button'
-					onClick={togglePlay}
-					aria-label={playing ? 'Pause' : 'Play'}
-					className={`${BTN} h-8 w-8 rounded-full bg-brand text-[var(--color-brand-fg)] shadow-[var(--shadow-sm)] hover:bg-brand-hover active:bg-brand-active`}
-				>
-					{playing ? <PauseIcon /> : <PlayIcon />}
-				</button>
+						<span className='w-10 shrink-0 text-xs tabular-nums text-text-muted' aria-hidden='true'>
+							{fmt(duration)}
+						</span>
+					</div>
 
-				<button
-					type='button'
-					onClick={() => skip(10)}
-					aria-label='Skip forward 10 seconds'
-					className={`${GHOST_BTN} h-8 w-8 text-xs hover:bg-surface-hover active:bg-surface-active`}
-				>
-					<span className='text-[10px] font-semibold leading-none'>10</span>
-					<svg viewBox='0 0 24 24' fill='currentColor' className='w-4 h-4' aria-hidden='true'>
-						<path d='M11.5 8c2.65 0 5.05.99 6.9 2.6L22 7v9h-9l3.62-3.62C15.23 11.22 13.46 10.5 11.5 10.5c-3.54 0-6.55 2.31-7.6 5.5L1.53 15.22C2.92 10.03 6.85 8 11.5 8z' />
-					</svg>
-				</button>
+					<div className='flex items-center gap-2'>
+						<Button variant='ghost' size='md' onClick={() => skip(-10)} aria-label='Skip back 10 seconds'>
+							<SkipBackIcon />
+							10
+						</Button>
 
-				<div className='flex-1' />
+						<Button
+							variant='primary'
+							size='icon'
+							shape='circle'
+							onClick={togglePlay}
+							aria-label={playing ? 'Pause' : 'Play'}
+						>
+							{playing ? <PauseIcon /> : <PlayIcon />}
+						</Button>
 
-				<div className='flex items-center gap-1.5'>
-					<button
-						type='button'
-						onClick={() => setMuted(m => !m)}
-						aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
-						className={`${GHOST_BTN} h-8 w-8 hover:bg-surface-hover active:bg-surface-active`}
-					>
-						<VolumeIcon muted={muted} volume={volume} />
-					</button>
+						<Button variant='ghost' size='md' onClick={() => skip(10)} aria-label='Skip forward 10 seconds'>
+							10
+							<SkipForwardIcon />
+						</Button>
 
-					<div className='relative flex items-center h-5 w-16'>
-						<div className='absolute inset-x-0 h-1.5 rounded-full bg-surface-active overflow-hidden'>
-							<div
-								className='h-full rounded-full bg-brand motion-safe:transition-[width] motion-safe:duration-[var(--duration-fast)]'
-								style={{ width: `${(muted ? 0 : volume) * 100}%` }}
+						<div className='flex-1' />
+
+						<div className='flex items-center gap-1.5'>
+							<Button
+								variant='ghost'
+								size='icon'
+								onClick={() => setMuted(m => !m)}
+								aria-label={muted || volume === 0 ? 'Unmute' : 'Mute'}
+							>
+								<VolumeIcon muted={muted} volume={volume} />
+							</Button>
+
+							<Slider
+								value={muted ? 0 : volume}
+								onValueChange={changeVolume}
+								min={0}
+								max={1}
+								step={0.05}
+								ariaLabel='Volume'
+								className='w-16'
 							/>
 						</div>
-						<input
-							type='range'
-							min={0}
-							max={1}
-							step={0.05}
-							value={muted ? 0 : volume}
-							onChange={e => changeVolume(Number(e.target.value))}
-							aria-label='Volume'
-							className='relative w-full h-5 appearance-none bg-transparent cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
-							style={{ accentColor: 'var(--color-brand)' }}
-						/>
-					</div>
-				</div>
 
-				<button
-					type='button'
-					onClick={cycleSpeed}
-					aria-label={`Playback speed ${speed}×. Click to change.`}
-					className={`${GHOST_BTN} h-8 w-12 px-2 text-xs font-medium tabular-nums hover:bg-surface-hover active:bg-surface-active`}
-				>
-					{speed}×
-				</button>
-			</div>
+						<Button
+							variant='ghost'
+							size='md'
+							onClick={cycleSpeed}
+							aria-label={`Playback speed ${speed}×. Click to change.`}
+							className='tabular-nums'
+						>
+							{speed}×
+						</Button>
+					</div>
+				</>
+			)}
 		</div>
 	);
 };

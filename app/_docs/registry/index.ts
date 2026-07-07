@@ -3516,13 +3516,19 @@ export default function Example() {
         name: 'title',
         type: 'string',
         default: '—',
-        description: 'Track title displayed above the controls.',
+        description: 'Track title. Displayed above the controls in "default" size only — "compact" never renders it.',
       },
       {
         name: 'subtitle',
         type: 'string',
         default: '—',
-        description: 'Secondary line displayed below the title. Typically artist, episode name, or any short descriptor.',
+        description: 'Secondary line displayed below the title. Typically artist, episode name, or any short descriptor. "default" size only, same as title.',
+      },
+      {
+        name: 'size',
+        type: "'default' | 'compact'",
+        default: "'default'",
+        description: '"compact" strips the player to exactly play/pause, seek slider, and elapsed time in one row, with no card chrome (border/shadow/background/padding) — for embedding inside another container that supplies its own background, like a Message bubble.',
       },
       {
         name: 'className',
@@ -3532,7 +3538,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['button', 'slider'],
     files: ['AudioPlayer/AudioPlayer.tsx'],
   },
   {

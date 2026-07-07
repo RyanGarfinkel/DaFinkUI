@@ -106,4 +106,76 @@ describe('AudioPlayer', () =>
 		render(<AudioPlayer src='/test.mp3' className='my-class' />);
 		expect(screen.getByRole('region').className).toContain('my-class');
 	});
+
+	it('applies a chromeless flex row for size="compact" — no padding, border, or background', () =>
+	{
+		render(<AudioPlayer src='/test.mp3' size='compact' />);
+		const region = screen.getByRole('region');
+		expect(region.className).toContain('items-center');
+		expect(region.className).not.toContain('p-2.5');
+		expect(region.className).not.toContain('bg-surface-panel');
+		expect(region.className).not.toContain('border');
+		expect(screen.getByRole('button', { name: 'Play' }).className).toContain('h-7');
+	});
+
+	it('defaults to the full card chrome for the default size', () =>
+	{
+		render(<AudioPlayer src='/test.mp3' />);
+		const region = screen.getByRole('region');
+		expect(region.className).toContain('p-4');
+		expect(region.className).toContain('bg-surface-panel');
+		expect(screen.getByRole('button', { name: 'Play' }).className).toContain('h-9');
+	});
+
+	it('hides title/subtitle in compact size even when provided', () =>
+	{
+		render(<AudioPlayer src='/test.mp3' size='compact' title='Voice message' subtitle='0:42' />);
+		expect(screen.queryByText('Voice message')).not.toBeInTheDocument();
+		expect(screen.queryByText('0:42')).not.toBeInTheDocument();
+	});
+
+	it('uses the on-color Button variant and current-tone Slider in compact size, so it adapts to a colored parent background', () =>
+	{
+		render(<AudioPlayer src='/test.mp3' size='compact' />);
+		const playButton = screen.getByRole('button', { name: 'Play' });
+		expect(playButton.className).toContain('bg-current/15');
+		expect(playButton.className).not.toContain('bg-brand');
+
+		const seekSlider = screen.getByRole('slider', { name: 'Seek' });
+		expect(seekSlider.style.accentColor).toBe('currentcolor');
+	});
+
+	it('renders only play and seek in compact size, omitting skip/volume/speed', () =>
+	{
+		render(<AudioPlayer src='/test.mp3' size='compact' />);
+		expect(screen.getByRole('button', { name: 'Play' })).toBeInTheDocument();
+		expect(screen.getByRole('slider', { name: 'Seek' })).toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: 'Skip back 10 seconds' })).not.toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: 'Skip forward 10 seconds' })).not.toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: 'Mute' })).not.toBeInTheDocument();
+		expect(screen.queryByRole('slider', { name: 'Volume' })).not.toBeInTheDocument();
+		expect(screen.queryByRole('button', { name: /1×/ })).not.toBeInTheDocument();
+	});
+
+	it('shows all controls in default size', () =>
+	{
+		render(<AudioPlayer src='/test.mp3' />);
+		expect(screen.getByRole('button', { name: 'Skip back 10 seconds' })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Skip forward 10 seconds' })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: 'Mute' })).toBeInTheDocument();
+		expect(screen.getByRole('slider', { name: 'Volume' })).toBeInTheDocument();
+		expect(screen.getByRole('button', { name: /1×/ })).toBeInTheDocument();
+	});
+
+	it('renders the play button as a circular Button (shape=circle)', () =>
+	{
+		render(<AudioPlayer src='/test.mp3' />);
+		expect(screen.getByRole('button', { name: 'Play' }).className).toContain('rounded-full');
+	});
+
+	it('sets aria-valuetext on the seek slider with formatted timestamps', () =>
+	{
+		render(<AudioPlayer src='/test.mp3' />);
+		expect(screen.getByRole('slider', { name: 'Seek' }).getAttribute('aria-valuetext')).toBe('0:00 of 0:00');
+	});
 });
