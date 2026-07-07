@@ -46,6 +46,7 @@ export const REGISTRY: RegistryEntry[] = [
 	{ name: 'Reveal',          slug: 'reveal',           files: ['Reveal/Reveal.tsx'],                                                                         deps: [], registryDependencies: [] },
 	{ name: 'ScrollFade',      slug: 'scroll-fade',      files: ['ScrollFade/ScrollFade.tsx'],                                                                 deps: [], registryDependencies: [] },
 	{ name: 'Select',          slug: 'select',           files: ['Select/Select.tsx'],                                                                         deps: [], registryDependencies: [] },
+	{ name: 'Separator',       slug: 'separator',        files: ['Separator/Separator.tsx'],                                                                   deps: [], registryDependencies: [] },
 	{ name: 'Sidebar',         slug: 'sidebar',          files: ['Sidebar/Sidebar.tsx'],                                                                       deps: [], registryDependencies: ['tooltip', 'scroll-fade'] },
 	{ name: 'SidePanel',       slug: 'side-panel',       files: ['SidePanel/SidePanel.tsx', 'SidePanel/sidePanelStack.ts'],                                    deps: [], registryDependencies: ['card'] },
 	{ name: 'Skeleton',        slug: 'skeleton',         files: ['Skeleton/Skeleton.tsx'],                                                                     deps: [], registryDependencies: [] },

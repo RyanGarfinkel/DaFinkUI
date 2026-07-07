@@ -41,6 +41,7 @@ import { Combobox } from '@/src/components/Combobox/Combobox';
 import { Progress } from '@/src/components/Progress/Progress';
 import { Checkbox } from '@/src/components/Checkbox/Checkbox';
 import { KanbanBoard } from '@/src/components/Kanban/Kanban';
+import Separator from '@/src/components/Separator/Separator';
 import Tree, { TreeItem } from '@/src/components/Tree/Tree';
 import { Spinner } from '@/src/components/Spinner/Spinner';
 import Textarea from '@/src/components/Textarea/Textarea';
@@ -1301,6 +1302,19 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
               max=20
             </div>
           </Tilt>
+        </div>
+      );
+
+    case 'separator':
+      return (
+        <div className='flex flex-col gap-6 w-full max-w-sm'>
+          <Separator />
+          <Separator>OR</Separator>
+          <div className='flex h-16 items-center gap-3'>
+            <span className='text-sm text-text'>Item</span>
+            <Separator orientation='vertical'>OR</Separator>
+            <span className='text-sm text-text'>Item</span>
+          </div>
         </div>
       );
 

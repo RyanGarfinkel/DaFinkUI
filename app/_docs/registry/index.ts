@@ -3601,6 +3601,56 @@ export default function Example() {
     registryDependencies: [],
     files: ['Tilt/Tilt.tsx'],
   },
+  {
+    slug: 'separator',
+    name: 'Separator',
+    category: 'Display',
+    description: 'A thin horizontal or vertical dividing line, optionally broken up by a short text label like "OR".',
+    usage: `import Separator from '@/src/components/Separator/Separator';
+
+export default function Example() {
+  return (
+    <div className="flex flex-col gap-6 w-full max-w-sm">
+      <Separator />
+      <Separator>OR</Separator>
+      <div className="flex h-16 items-center gap-3">
+        <span className="text-sm text-text">Item</span>
+        <Separator orientation="vertical">OR</Separator>
+        <span className="text-sm text-text">Item</span>
+      </div>
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'orientation',
+        type: "'horizontal' | 'vertical'",
+        default: "'horizontal'",
+        description: '"vertical" renders a full-height line for use inside a flex row (e.g. between toolbar buttons).',
+      },
+      {
+        name: 'labelPosition',
+        type: "'start' | 'center' | 'end'",
+        default: "'center'",
+        description: "Where the label sits along the line's own axis — left-to-right when horizontal, top-to-bottom when vertical. Only applies when children is set.",
+      },
+      {
+        name: 'children',
+        type: 'ReactNode',
+        default: '—',
+        description: 'Optional text that breaks up the line, in either orientation (e.g. "OR"). Stays upright — not rotated — when orientation="vertical".',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional classes applied to the root element.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Separator/Separator.tsx'],
+  },
 ];
 
 export const getComponent = (slug: string) => {
