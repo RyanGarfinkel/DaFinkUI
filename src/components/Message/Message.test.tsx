@@ -98,6 +98,52 @@ describe('Message', () =>
 		const { container } = render(<Message className='custom-msg'>Hi</Message>);
 		expect((container.firstElementChild as HTMLElement).className).toContain('custom-msg');
 	});
+
+	it('applies bubble background/padding classes by default', () =>
+	{
+		const { container } = render(
+			<Message>
+				<img src='/photo.png' alt='' />
+			</Message>
+		);
+
+		const img = container.querySelector('img') as HTMLElement;
+		const bubbleDiv = img.parentElement as HTMLElement;
+		expect(bubbleDiv.className).toContain('bg-surface-active');
+		expect(bubbleDiv.className).toContain('px-3.5');
+	});
+
+	it('omits bubble background/padding classes when bubble={false}', () =>
+	{
+		const { container } = render(
+			<Message bubble={false}>
+				<img src='/photo.png' alt='' />
+			</Message>
+		);
+
+		const img = container.querySelector('img') as HTMLElement;
+		const wrapperDiv = img.parentElement as HTMLElement;
+		expect(wrapperDiv.className).not.toContain('bg-surface-active');
+		expect(wrapperDiv.className).not.toContain('px-3.5');
+	});
+
+	it('still positions reactions and applies row alignment when bubble={false}', () =>
+	{
+		const { container } = render(
+			<Message variant='sent' bubble={false}>
+				<img src='/photo.png' alt='' />
+				<MessageReactions>
+					<MessageReaction icon='👍' count={1} onClick={() => {}} />
+				</MessageReactions>
+			</Message>
+		);
+
+		const row = container.firstElementChild as HTMLElement;
+		expect(row.className).toContain('flex-row-reverse');
+
+		const reactionsWrapper = container.querySelector('.absolute.-bottom-3') as HTMLElement;
+		expect(reactionsWrapper.className).toContain('left-3');
+	});
 });
 
 describe('MessageReactions', () =>

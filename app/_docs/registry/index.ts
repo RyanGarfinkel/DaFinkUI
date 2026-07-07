@@ -2848,6 +2848,7 @@ export default function Example() {
     props: [
       { name: 'variant',   type: "'sent' | 'received'", default: "'received'", description: "'sent' right-aligns the bubble in brand fill; 'received' left-aligns it in a neutral surface tint." },
       { name: 'avatar',    type: 'ReactNode', default: '—', description: 'Optional avatar rendered beside the bubble.' },
+      { name: 'bubble',    type: 'boolean',   default: 'true', description: 'Set false to render children without the bubble background/padding, for content that supplies its own chrome (an image, an AudioPlayer) so it isn\'t nested in a second colored box.' },
       { name: 'className', type: 'string',    default: "''", description: 'Additional CSS classes merged onto the root row.' },
       { name: 'children',  type: 'ReactNode', default: '—', description: 'The message content. A MessageReactions child is detected and extracted automatically — it can appear anywhere inside.' },
     ],

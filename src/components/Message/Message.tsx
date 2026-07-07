@@ -8,10 +8,12 @@ export interface MessageProps extends HTMLAttributes<HTMLDivElement>
 {
 	variant?: MessageVariant;
 	avatar?:  ReactNode;
+	/** Set false to render children without the bubble background/padding — for content that supplies its own chrome (an image, an AudioPlayer), so it isn't nested inside a second colored box. Alignment, max-width, and reaction placement are unaffected. */
+	bubble?:  boolean;
 	children: ReactNode;
 }
 
-export const Message = ({ variant = 'received', avatar, className = '', children, ...props }: MessageProps) => {
+export const Message = ({ variant = 'received', avatar, bubble = true, className = '', children, ...props }: MessageProps) => {
 	const isSent = variant === 'sent';
 
 	const childList      = Children.toArray(children);
@@ -27,12 +29,16 @@ export const Message = ({ variant = 'received', avatar, className = '', children
 
 			<div className='relative max-w-[75%]'>
 				<div
-					className={[
-						'break-words rounded-[var(--radius-lg)] px-3.5 py-2 text-sm leading-relaxed',
-						isSent
-							? 'rounded-br-[var(--radius-sm)] bg-brand text-brand-fg'
-							: 'rounded-bl-[var(--radius-sm)] bg-surface-active text-text',
-					].join(' ')}
+					className={
+						bubble
+							? [
+								'break-words rounded-[var(--radius-lg)] px-3.5 py-2 text-sm leading-relaxed',
+								isSent
+									? 'rounded-br-[var(--radius-sm)] bg-brand text-brand-fg'
+									: 'rounded-bl-[var(--radius-sm)] bg-surface-active text-text',
+							].join(' ')
+							: ''
+					}
 				>
 					{bodyChildren}
 				</div>

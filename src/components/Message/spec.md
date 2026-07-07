@@ -18,6 +18,7 @@ A chat-style message bubble (`sent`/`received`) that can carry a cluster of smal
 |------|------|---------|-------------|
 | variant | `'sent' \| 'received'` | `'received'` | `'sent'` right-aligns the bubble in brand fill; `'received'` left-aligns it in a neutral surface tint. |
 | avatar | `ReactNode` | — | Optional avatar rendered beside the bubble (e.g. `<Avatar />`). Sits at the outer edge, bottom-aligned with the bubble via `items-end`. |
+| bubble | `boolean` | `true` | Set `false` to render children without the bubble background/padding — for content that supplies its own chrome (an image, an `AudioPlayer`), so it isn't nested inside a second colored box. Alignment, `max-w-[75%]` cap, and reaction placement are unaffected. |
 | className | `string` | `''` | Additional CSS classes merged onto the root row. |
 | children | `ReactNode` | — | The message content. A `MessageReactions` child is detected and extracted automatically — render it anywhere inside `Message`, it does not need to be last. |
 
@@ -79,7 +80,8 @@ A reaction chip's visible content (emoji, count, or footnote number) is never as
 - `sent`: `bg-brand text-brand-fg`, row is `flex-row-reverse` (bubble + avatar on the right).
 - `received`: `bg-surface-active text-text`, row is `flex-row` (bubble + avatar on the left).
 - Bubble caps at `max-w-[75%]` of its row — a percentage, not a fixed breakpoint, so it stays responsive at any container width without media queries.
-- `MessageReactions`, when it's a child of `Message`, is pulled out of normal flow and rendered in an `absolute -bottom-3` wrapper anchored to the bubble's inner corner (`right-3` for `received`, `left-3` for `sent`) — so it overlaps the bubble's bottom edge like an iOS tapback, without adding height to the bubble or shifting its text content.
+- `MessageReactions`, when it's a child of `Message`, is pulled out of normal flow and rendered in an `absolute -bottom-3` wrapper anchored to the bubble's inner corner (`right-3` for `received`, `left-3` for `sent`) — so it overlaps the bubble's bottom edge like an iOS tapback, without adding height to the bubble or shifting its text content. This positioning is unchanged when `bubble={false}` — reactions still overlap the child content's corner.
+- `bubble={false}` removes the background, padding, and rounded-corner classes from the inner wrapper entirely, leaving a plain div. Use this when the child already renders its own visual container (a rounded `<img>`, a bordered `AudioPlayer`) — otherwise the media ends up nested inside a second colored box, which reads as a bubble wrapping a card rather than a clean attachment. The outer `max-w-[75%]` cap and row alignment (`flex-row`/`flex-row-reverse`) still apply.
 - Each `MessageReaction` chip: `h-6 rounded-full border` pill with `shadow-[var(--shadow-sm)]` so it reads as a floating element above the bubble/page background. `gap-2` between chips in `MessageReactions` satisfies the WCAG 2.5.8 24px-target spacing minimum.
 - `active` chip: `border-brand bg-brand text-brand-fg` (matches the "selected" convention used by `ToggleGroup`) plus a leading checkmark icon — border, fill, and icon all change together, never color alone.
 - Inactive chip: `border-surface-border bg-surface-panel text-text-muted`, with a `hover:` shift to `surface-hover`/`text`.
@@ -115,6 +117,7 @@ All transitions use `motion-safe:transition-[...] motion-safe:duration-[var(--du
 ## When to Use
 
 - `Message` — any chat/DM-style transcript: sent vs. received bubbles, optionally paired with `Avatar`.
+- `bubble={false}` — image or media attachments (a photo, a voice note via a compact `AudioPlayer`) that should read as their own floating element in the transcript rather than content padded inside a colored bubble. Keep `bubble` (the default) for plain text.
 - `MessageReactions` + `MessageReaction` inside `Message` — emoji tapback reactions on a chat bubble (`icon` + `count`, `onClick` to toggle the user's own reaction, `active` to reflect it).
 - `MessageReactions` + `MessageReaction` standalone (no `Message` wrapper) — a row of numbered or named source-citation chips under an LLM response (`label` + `href`, no `count`/`active`).
 - Pass `max` on `MessageReactions` whenever a bubble could accumulate many different reaction kinds (or many sources) — it caps the visible chips and rolls the rest into a "+N" chip, the same tradeoff `AvatarGroup` makes for long people-lists.
