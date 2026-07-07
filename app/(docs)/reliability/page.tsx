@@ -2,7 +2,7 @@ import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-	title: 'Audit',
+	title: 'Reliability',
 	description: 'A static, automated CLI check that scans a consumer project for accessibility and design-token regressions in CI.',
 };
 
@@ -40,7 +40,7 @@ const GITLAB_WORKFLOW_YAML = `dafink-audit:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'`;
 
-const AuditPage = () =>
+const ReliabilityPage = () =>
 {
 	return (
 		<div className='flex flex-col gap-12'>
@@ -48,7 +48,7 @@ const AuditPage = () =>
 			{/* Header */}
 			<section className='flex flex-col gap-5'>
 				<h1 className='text-3xl font-semibold tracking-tight text-text'>
-					Audit
+					Reliability
 				</h1>
 				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
 					A set of static, automated checks the CLI installs into your project
@@ -60,7 +60,7 @@ const AuditPage = () =>
 
 			{/* Install */}
 			<section className='flex flex-col gap-4'>
-				<h2 className='text-xl font-semibold text-text'>Installing the audit</h2>
+				<h2 className='text-xl font-semibold text-text'>Installing the check</h2>
 				<p className='text-sm text-text-muted leading-relaxed'>
 					Via the CLI, in your project root:
 				</p>
@@ -97,6 +97,23 @@ const AuditPage = () =>
 					own <code className='font-mono text-xs'>.tsx</code>/<code className='font-mono text-xs'>.jsx</code> files
 					for three categories of violation. It exits with code 1 if it finds
 					any, so it fails the CI job.
+				</p>
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					This is a static source-code scan, not a runtime audit — it catches
+					what it catches by pattern-matching your files, nothing more. Running
+					a tool like{' '}
+					<a
+						href='https://developer.chrome.com/docs/lighthouse/overview'
+						target='_blank'
+						rel='noopener noreferrer'
+						className='text-brand underline underline-offset-4 hover:text-brand-hover'
+					>
+						Google Lighthouse
+					</a>{' '}
+					against the rendered page is a good complement: it audits the actual
+					DOM in a real browser, so it also catches contrast failures,
+					malformed ARIA, and performance/SEO issues this scan doesn&apos;t look
+					for at all.
 				</p>
 				<div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
 					{CHECKS.map((c) => (
@@ -138,7 +155,7 @@ const AuditPage = () =>
 			<section className='flex flex-col gap-4'>
 				<h2 className='text-xl font-semibold text-text'>CI workflow</h2>
 				<p className='text-sm text-text-muted leading-relaxed'>
-					Either provider&apos;s config runs the audit on every pull/merge request
+					Either provider&apos;s config runs the check on every pull/merge request
 					and on every push to <code className='font-mono text-xs'>main</code>,
 					failing the job if any violation is found.
 				</p>
@@ -156,4 +173,4 @@ const AuditPage = () =>
 	);
 };
 
-export default AuditPage;
+export default ReliabilityPage;

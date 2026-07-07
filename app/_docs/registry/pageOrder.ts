@@ -11,12 +11,15 @@ export interface PageOrderEntry
 export const TOP_NAV_PAGES: PageOrderEntry[] = [
 	{ href: '/',             label: 'Home' },
 	{ href: '/installation', label: 'Installation' },
+	{ href: '/components',   label: 'Components' },
 	{ href: '/theme',        label: 'Theme' },
 	{ href: '/typography',   label: 'Typography' },
 	{ href: '/mcp',          label: 'MCP Server' },
 	{ href: '/skill',        label: 'Design Skill' },
-	{ href: '/audit',        label: 'Audit' },
+	{ href: '/reliability',  label: 'Reliability' },
 	{ href: '/playground',   label: 'Playground' },
+	{ href: '/blocks',       label: 'Blocks' },
+	{ href: '/changelog',    label: 'Changelog' },
 ];
 
 export const getComponentsByCategory = () => CATEGORIES.reduce<Record<string, typeof registry>>((acc, category) =>
@@ -38,9 +41,7 @@ export const getPageOrder = (): PageOrderEntry[] =>
 
 	return [
 		...TOP_NAV_PAGES,
-		{ href: '/components', label: 'All Components' },
 		...componentPages,
-		{ href: '/blocks', label: 'All Blocks' },
 		...blockPages,
 	];
 };

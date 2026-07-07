@@ -154,7 +154,7 @@ export const TopNav = ({ collapsed = false }: TopNavProps) =>
 				<button
 					type='button'
 					onClick={() => setPaletteOpen(true)}
-					aria-label='Search components'
+					aria-label='Search'
 					aria-keyshortcuts='/ Meta+k'
 					className={[
 						'relative flex-1 max-w-sm mx-auto flex items-center gap-2',
@@ -181,7 +181,7 @@ export const TopNav = ({ collapsed = false }: TopNavProps) =>
 						<path d='m21 21-4.35-4.35' />
 					</svg>
 
-					<span className='flex-1'>Search components…</span>
+					<span className='flex-1'>Search…</span>
 
 					<kbd className='hidden sm:inline-flex items-center gap-0.5 rounded border border-surface-border px-1.5 py-0.5 text-[10px] font-mono text-text-subtle'>
 						/
@@ -222,7 +222,7 @@ export const TopNav = ({ collapsed = false }: TopNavProps) =>
 			<CommandPalette
 				open={paletteOpen}
 				onClose={() => setPaletteOpen(false)}
-				placeholder='Search components…'
+				placeholder='Search…'
 			>
 				<CommandGroup label='Pages'>
 					{TOP_NAV_PAGES.map(page => (

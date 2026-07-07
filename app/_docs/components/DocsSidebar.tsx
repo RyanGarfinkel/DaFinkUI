@@ -1,6 +1,6 @@
 'use client';
 
-import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, AuditIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
+import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
 import { Sidebar, SidebarHeader, SidebarFooter, SidebarDivider, useSidebarCollapsed } from '@/src/components/Sidebar/Sidebar';
 import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
 import { blocks } from '@/app/_docs/registry/blocks';
@@ -120,7 +120,7 @@ export const DocsSidebar = ({ collapsed, onCollapsedChange }: DocsSidebarProps) 
 				<DocsSidebarLink href='/typography' icon={<TypographyIcon />}>Typography</DocsSidebarLink>
 				<DocsSidebarLink href='/mcp' icon={<McpIcon />}>MCP Server</DocsSidebarLink>
 				<DocsSidebarLink href='/skill' icon={<SkillIcon />}>Design Skill</DocsSidebarLink>
-				<DocsSidebarLink href='/audit' icon={<AuditIcon />}>Audit</DocsSidebarLink>
+				<DocsSidebarLink href='/reliability' icon={<ReliabilityIcon />}>Reliability</DocsSidebarLink>
 				<DocsSidebarLink href='/playground' icon={<PlaygroundIcon />}>Playground</DocsSidebarLink>
 			</nav>
 

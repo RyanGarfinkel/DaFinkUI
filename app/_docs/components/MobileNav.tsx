@@ -1,5 +1,5 @@
 'use client';
-import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, AuditIcon } from '@/app/_docs/components/NavIcons';
+import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon } from '@/app/_docs/components/NavIcons';
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerClose } from '@/src/components/Drawer/Drawer';
 import { SidebarSection, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
 import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
@@ -70,7 +70,7 @@ export const MobileNav = () =>
 							<DocsSidebarLink href='/typography' icon={<TypographyIcon />} className='py-3'>Typography</DocsSidebarLink>
 							<DocsSidebarLink href='/mcp' icon={<McpIcon />} className='py-3'>MCP Server</DocsSidebarLink>
 							<DocsSidebarLink href='/skill' icon={<SkillIcon />} className='py-3'>Design Skill</DocsSidebarLink>
-							<DocsSidebarLink href='/audit' icon={<AuditIcon />} className='py-3'>Audit</DocsSidebarLink>
+							<DocsSidebarLink href='/reliability' icon={<ReliabilityIcon />} className='py-3'>Reliability</DocsSidebarLink>
 							<DocsSidebarLink href='/playground' icon={<PlaygroundIcon />} className='py-3'>Playground</DocsSidebarLink>
 						</nav>
 
