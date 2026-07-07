@@ -35,7 +35,11 @@ const ChangelogPage = () =>
 					<section key={entry.version} className='flex flex-col gap-5 border-t border-surface-border pt-8 first:border-t-0 first:pt-0'>
 						<div className='flex flex-wrap items-baseline gap-3'>
 							<h2 className='text-2xl font-semibold tracking-tight text-text'>{formatVersion(entry.version)}</h2>
-							{index === 0 && <span className='text-sm font-medium text-brand'>Latest</span>}
+							{entry.version === 'Unreleased'
+								? <span className='text-sm font-medium text-text-subtle'>Unreleased</span>
+								: index === (changelog[0]?.version === 'Unreleased' ? 1 : 0) && (
+									<span className='text-sm font-medium text-brand'>Latest</span>
+								)}
 							{formatDate(entry.date) && (
 								<span className='text-sm text-text-subtle'>{formatDate(entry.date)}</span>
 							)}
