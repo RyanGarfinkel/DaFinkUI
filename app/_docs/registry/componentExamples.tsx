@@ -14,7 +14,10 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/src/components/Table/Table';
+import { MessageMediaDemo } from '@/app/_docs/components/examples/MessageMediaDemo';
+import { ManualFormDemo, FieldTypesFormDemo, ReadOnlyFormDemo } from './FormDemos';
 import { StackedSidePanelDemo } from './StackedSidePanelDemo';
+import Button from '@/src/components/Button/Button';
 
 export interface ComponentExample {
 	id:           string;
@@ -25,6 +28,168 @@ export interface ComponentExample {
 }
 
 export const componentExamples: Record<string, ComponentExample[]> = {
+	button: [
+		{
+			id:          'arrow-buttons',
+			title:       'Arrow buttons',
+			description: 'Use the arrowleft and arrowright variants to build prev/next controls. The arrow is injected automatically — just pass the label as children.',
+			usage: `export default function Example() {
+  return (
+    <div className="flex items-center justify-between w-full max-w-sm mx-auto">
+      <Button variant="arrowleft">Previous</Button>
+      <Button variant="arrowright">Next</Button>
+    </div>
+  );
+}`,
+			preview: (
+				<div className='flex items-center justify-between w-full max-w-sm mx-auto'>
+					<Button variant='arrowleft'>Previous</Button>
+					<Button variant='arrowright'>Next</Button>
+				</div>
+			),
+		},
+	],
+	message: [
+		{
+			id:          'media',
+			title:       'Media messages',
+			description: 'Message renders whatever you pass as children. A compact AudioPlayer drops straight into the default bubble — its controls pick up the bubble\'s own text color automatically, no extra props needed. For content with its own visual chrome, like an image, pass bubble={false} so it isn\'t nested inside a second colored box.',
+			usage: `export default function Example() {
+  return (
+    <div className="flex w-full max-w-sm flex-col gap-3">
+      <Message variant="received" bubble={false}>
+        <img
+          src="https://picsum.photos/seed/dafink-message/320/200"
+          alt="Photo shared in the conversation"
+          className="w-full max-w-[220px] rounded-[var(--radius-lg)] shadow-[var(--shadow-sm)]"
+        />
+      </Message>
+
+      <Message variant="received">Just got back from the trip — here's the view!</Message>
+
+      <Message variant="sent">
+        <AudioPlayer
+          size="compact"
+          src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+          className="w-44"
+        />
+      </Message>
+    </div>
+  );
+}`,
+			preview: <MessageMediaDemo />,
+		},
+	],
+	form: [
+		{
+			id:          'manual',
+			title:       'Manual state, no validation',
+			description: 'useZodForm is optional — the layout primitives work with plain useState just as well, for a one-off field that doesn\'t need a schema.',
+			usage: `export default function Example() {
+  const [team, setTeam] = useState('');
+  const [submitted, setSubmitted] = useState(false);
+
+  const error = submitted && team.trim() === '' ? 'Team name is required.' : undefined;
+
+  return (
+    <Form onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}>
+      <FormField>
+        <FormLabel htmlFor="team" required>Team name</FormLabel>
+        <FormControl>
+          <Input
+            id="team"
+            value={team}
+            onChange={(e) => setTeam(e.target.value)}
+            aria-required="true"
+            aria-invalid={Boolean(error)}
+          />
+        </FormControl>
+        <FormMessage>{error}</FormMessage>
+      </FormField>
+      <Button type="submit">Create team</Button>
+    </Form>
+  );
+}`,
+			preview: <ManualFormDemo />,
+		},
+		{
+			id:          'field-types',
+			title:       'Mixed field types',
+			description: 'Select and Switch already render their own label — wrap them in FormField for spacing and FormSection for grouping. For the optional Textarea, FormLabel adds a muted "(optional)" suffix instead of a hint below the field.',
+			usage: `export default function Example() {
+  const [notifyByEmail, setNotifyByEmail] = useState(true);
+  const [frequency, setFrequency] = useState('daily');
+  const [notes, setNotes] = useState('');
+
+  return (
+    <Form onSubmit={(e) => e.preventDefault()}>
+      <FormSection
+        title="Notification preferences"
+        description="Controls how often we email you about account activity."
+      >
+        <FormField>
+          <Switch
+            checked={notifyByEmail}
+            onCheckedChange={setNotifyByEmail}
+            label="Email notifications"
+          />
+        </FormField>
+        <FormField>
+          <Select
+            label="Frequency"
+            options={[
+              { value: 'realtime', label: 'Real-time' },
+              { value: 'daily',    label: 'Daily digest' },
+              { value: 'weekly',   label: 'Weekly digest' },
+            ]}
+            value={frequency}
+            onChange={setFrequency}
+            disabled={!notifyByEmail}
+          />
+        </FormField>
+        <FormField>
+          <FormLabel htmlFor="notes">
+            Additional notes <span className="font-normal text-text-subtle">(optional)</span>
+          </FormLabel>
+          <FormControl>
+            <Textarea id="notes" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </FormControl>
+        </FormField>
+      </FormSection>
+      <Button type="submit">Save preferences</Button>
+    </Form>
+  );
+}`,
+			preview: <FieldTypesFormDemo />,
+		},
+		{
+			id:          'read-only',
+			title:       'Disabled fields',
+			description: 'FormDescription doubles as an explanation for why a field is locked — pair it with disabled instead of just hiding the reason.',
+			usage: `export default function Example() {
+  return (
+    <Form>
+      <FormSection title="Account">
+        <FormField>
+          <FormLabel htmlFor="plan">Plan</FormLabel>
+          <FormControl>
+            <Input id="plan" value="Team — 12 seats" disabled />
+          </FormControl>
+          <FormDescription>Contact sales to change your plan.</FormDescription>
+        </FormField>
+        <FormField>
+          <FormLabel htmlFor="billing-email">Billing email</FormLabel>
+          <FormControl>
+            <Input id="billing-email" value="billing@acme.co" disabled />
+          </FormControl>
+        </FormField>
+      </FormSection>
+    </Form>
+  );
+}`,
+			preview: <ReadOnlyFormDemo />,
+		},
+	],
 	'side-panel': [
 		{
 			id:    'stacked',
