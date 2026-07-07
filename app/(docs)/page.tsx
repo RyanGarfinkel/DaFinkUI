@@ -16,8 +16,8 @@ const PRINCIPLES = [
 		body: 'Prefer the established pattern. Deviations require justification. A predictable interface lets users focus on their task — not on figuring out how something works.',
 	},
 	{
-		title: 'Functional over decorative',
-		body: 'Color, motion, and emphasis exist to communicate state — not to decorate. Every visual decision should either aid comprehension or signal a change. If it does neither, remove it.',
+		title: 'Functional and decorative',
+		body: 'A detail doesn\'t have to justify itself with a function to earn its place — sometimes it\'s just nice to look at. But most color, motion, and emphasis should be doing double duty: communicating state while also making the interface pleasant to be in.',
 	},
 	{
 		title: 'Motion with purpose',
@@ -64,14 +64,101 @@ const Home = () =>
 				</div>
 			</section>
 
+			{/* Why I built this */}
+			<section className='flex flex-col gap-4'>
+				<h2 className='text-xl font-semibold text-text'>Why I built this</h2>
+				<div className='flex flex-col gap-4 text-sm text-text-muted leading-relaxed'>
+					<p>
+						I built DaFink UI because I wanted frontend development to be
+						easier — for me, and for whatever&apos;s writing the code alongside me.
+						I think AI is only going to take on a bigger share of frontend work
+						from here, and most component libraries weren&apos;t built with that
+						in mind. An agent can&apos;t read a compiled npm package to understand
+						how a component actually behaves, and it definitely can&apos;t explain
+						why a prop exists.
+					</p>
+					<p>
+						So instead of a package, DaFink UI ships as source you copy directly
+						into your project, paired with documentation written so an LLM can
+						use it correctly — not just a human skimming a README. The goal is
+						an ecosystem of components with enough context that an LLM can treat
+						them like Lego blocks: pick the right ones, snap them together, and
+						end up with something accessible and good-looking, not just
+						functional.
+					</p>
+					<p>
+						I built a Claude Skill and an MCP server so an agent gets that
+						context automatically instead of guessing from training data. And
+						because I don&apos;t just want to trust that AI-generated UI is
+						accessible, I also shipped CI/CD scripts — the same ones this project
+						uses on itself — that check the output against real requirements:
+						keyboard navigation, contrast, focus states. Something you can
+						actually verify, not just hope for.
+					</p>
+					<p>
+						The trade-off is the same one it&apos;s always been: you take on the
+						source, I take on making sure it&apos;s clean, accessible, and
+						documented well enough that you — or whatever you&apos;re pairing with —
+						can actually own it.
+					</p>
+				</div>
+			</section>
+
+			{/* AI in the loop */}
+			<section className='flex flex-col gap-4'>
+				<h2 className='text-xl font-semibold text-text'>AI in the loop</h2>
+				<div className='flex flex-col gap-4 text-sm text-text-muted leading-relaxed'>
+					<p>
+						I designed DaFink UI to be AI-native from the ground up, not
+						retrofitted after the fact. Every pattern, naming choice, and file
+						structure is built to hold up to an agent trying to understand and
+						extend it — not just a human reading it. Owned source code beats a
+						compiled dependency here: an agent can read a component and modify
+						it directly instead of guessing at a black box.
+					</p>
+					<p>
+						The{' '}
+						<Link
+							href='/mcp'
+							className='text-text underline underline-offset-4 hover:text-text-muted transition-colors'
+						>
+							MCP server
+						</Link>{' '}
+						and the{' '}
+						<Link
+							href='/skill'
+							className='text-text underline underline-offset-4 hover:text-text-muted transition-colors'
+						>
+							Claude Skill
+						</Link>{' '}
+						close the loop. Connect either to Claude, Cursor, or any
+						MCP-compatible tool and the agent reads your actual component
+						specs before writing any code — not training data from months ago.
+						It gets the real props, the correct variants, and the accessibility
+						requirements for the component it&apos;s about to use, then can run
+						the{' '}
+						<Link
+							href='/reliability'
+							className='text-text underline underline-offset-4 hover:text-text-muted transition-colors'
+						>
+							reliability check
+						</Link>{' '}
+						afterward to check its own work.
+					</p>
+				</div>
+			</section>
+
 			{/* Design philosophy */}
 			<section className='flex flex-col gap-6'>
 				<div className='flex flex-col gap-2'>
 					<h2 className='text-xl font-semibold text-text'>Design philosophy</h2>
 					<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
-						Design should be invisible. The user&apos;s goal is to complete a task —
-						the interface should get out of the way. These principles shape every
-						component: how it looks, how it moves, and how it behaves.
+						I didn&apos;t pull these from a style guide — they&apos;re just what I&apos;ve
+						noticed I like (and don&apos;t like) using other people&apos;s websites. Clean,
+						consistent layouts. Animation that means something instead of just
+						moving. A hover or focus state on anything you can click. These
+						principles shape every component here: how it looks, how it moves,
+						and how it behaves.
 					</p>
 				</div>
 				<div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3'>
@@ -84,32 +171,6 @@ const Home = () =>
 							<p className='text-sm text-text-muted leading-relaxed'>{p.body}</p>
 						</div>
 					))}
-				</div>
-			</section>
-
-			{/* Why DaFink UI */}
-			<section className='flex flex-col gap-4'>
-				<h2 className='text-xl font-semibold text-text'>Why DaFink UI?</h2>
-				<div className='flex flex-col gap-4 text-sm text-text-muted leading-relaxed'>
-					<p>
-						Most component libraries ship as npm packages. You import a
-						component, it works, then one day you need it to behave slightly
-						differently and you hit a wall — the library doesn&apos;t expose the
-						prop you need, the styling system fights your design tokens, or an
-						upgrade breaks something three layers deep.
-					</p>
-					<p>
-						DaFink UI takes the opposite approach: run a single CLI command and
-						the component&apos;s source code is copied directly into your project.
-						You own it. You can read every line, edit any behaviour, and never
-						worry about a breaking upgrade. Components are not a dependency —
-						they&apos;re just code in your repo.
-					</p>
-					<p>
-						The trade-off is intentional: you take on the source, we take on
-						making sure that source is clean, accessible, and well-documented so
-						it&apos;s a pleasure to own.
-					</p>
 				</div>
 			</section>
 
@@ -169,47 +230,25 @@ const Home = () =>
 							>
 								MCP server
 							</Link>{' '}
-							exposes every component spec, token definition, and design pattern
-							as a live resource. Connect it to Claude or any MCP-compatible AI
-							and it will use the actual docs — not hallucinated APIs — when
-							helping you build.
+							and{' '}
+							<Link
+								href='/skill'
+								className='text-text underline underline-offset-4 hover:text-text-muted transition-colors'
+							>
+								Claude Skill
+							</Link>{' '}
+							expose every component spec, token, and design pattern as a live
+							resource, and the{' '}
+							<Link
+								href='/reliability'
+								className='text-text underline underline-offset-4 hover:text-text-muted transition-colors'
+							>
+								reliability check
+							</Link>{' '}
+							checks whatever gets built against real accessibility
+							requirements — not just hallucinated APIs and good intentions.
 						</p>
 					</div>
-				</div>
-			</section>
-
-			{/* AI in the loop */}
-			<section className='flex flex-col gap-4'>
-				<h2 className='text-xl font-semibold text-text'>AI in the loop</h2>
-				<div className='flex flex-col gap-4 text-sm text-text-muted leading-relaxed'>
-					<p>
-						AI coding agents are writing a significant and growing share of
-						production UI code. DaFink UI was built with that reality from the
-						start — not adapted to it after the fact. Claude wrote large portions
-						of this library. That matters because it means the patterns, naming,
-						and structure were tested by an agent trying to understand and extend
-						them, not just a human reading them.
-					</p>
-					<p>
-						When AI writes your UI, owned source code beats an npm dependency.
-						An agent can read a component, understand exactly what it does, and
-						modify it directly. It can&apos;t do that with a compiled package. Copy-paste
-						architecture and AI-assisted coding were made for each other.
-					</p>
-					<p>
-						The{' '}
-						<Link
-							href='/mcp'
-							className='text-text underline underline-offset-4 hover:text-text-muted transition-colors'
-						>
-							MCP server
-						</Link>{' '}
-						closes the loop. Connect it to Claude, Cursor, or any MCP-compatible
-						tool and the agent reads your actual component specs before writing
-						any code — not training data from months ago. It gets the real props,
-						the correct variants, and the accessibility requirements for the
-						component it&apos;s about to use.
-					</p>
 				</div>
 			</section>
 
