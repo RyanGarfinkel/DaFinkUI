@@ -2491,6 +2491,30 @@ export default function Example() {
         description: 'Shows the current numeric value next to the label.',
       },
       {
+        name: 'size',
+        type: "'default' | 'sm'",
+        default: "'default'",
+        description: '"sm" renders a shorter row and thinner track for dense layouts.',
+      },
+      {
+        name: 'tone',
+        type: "'brand' | 'current'",
+        default: "'brand'",
+        description: '"current" derives track/fill/thumb color from currentColor instead of the brand token, for sliders placed on an arbitrary colored surface (e.g. inside a colored chat bubble).',
+      },
+      {
+        name: 'ariaLabel',
+        type: 'string',
+        default: '—',
+        description: 'Sets aria-label on the input directly — use when there is no visible label.',
+      },
+      {
+        name: 'ariaValueText',
+        type: 'string',
+        default: '—',
+        description: 'Overrides the announced value with a custom string, e.g. a formatted timestamp.',
+      },
+      {
         name: 'className',
         type: 'string',
         default: '""',

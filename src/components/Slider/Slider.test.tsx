@@ -166,4 +166,55 @@ describe('Slider', () =>
 
 		expect(fill?.className).toContain('motion-safe:transition-all');
 	});
+
+	it('sets aria-label when ariaLabel is provided', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} ariaLabel='Seek' />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		expect(input.getAttribute('aria-label')).toBe('Seek');
+	});
+
+	it('sets aria-valuetext when ariaValueText is provided', () =>
+	{
+		const { container } = render(
+			<Slider value={50} onValueChange={() => {}} ariaValueText='1:32 of 6:12' />
+		);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		expect(input.getAttribute('aria-valuetext')).toBe('1:32 of 6:12');
+	});
+
+	it('renders default size row/track heights', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		expect(input.className).toContain('h-5');
+	});
+
+	it('renders sm size with smaller row/track heights', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} size='sm' />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		expect(input.className).toContain('h-4');
+	});
+
+	it('uses bg-brand fill by default', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		const fill  = input.previousElementSibling?.querySelector('div');
+		expect(fill?.className).toContain('bg-brand');
+	});
+
+	it('uses currentColor-derived fill when tone="current"', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} tone='current' />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		const track = input.previousElementSibling as HTMLElement;
+		const fill  = track.querySelector('div');
+
+		expect(track.className).toContain('bg-current/20');
+		expect(fill?.className).toContain('bg-current');
+		expect(fill?.className).not.toContain('bg-brand');
+		expect(input.style.accentColor).toBe('currentcolor');
+	});
 });

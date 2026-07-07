@@ -15,6 +15,10 @@ A styled range input for selecting a numeric value within a defined range. Built
 | label           | string                       | —       | Visible label above the track; links to input via id.  |
 | hint            | string                       | —       | Helper text below the track.                           |
 | showValue       | boolean                      | false   | Shows the current numeric value next to the label.     |
+| size            | 'default' \| 'sm'            | 'default' | 'sm' renders a shorter row (h-4) and thinner track (h-1) for dense layouts. |
+| tone            | 'brand' \| 'current'         | 'brand' | 'current' derives the track/fill/thumb color from `currentColor` instead of the brand token — use when the slider sits on an arbitrary colored surface (e.g. inside a colored chat bubble) rather than the page background. |
+| ariaLabel       | string                       | —       | Sets `aria-label` on the input directly — use when there is no visible `label` (e.g. an icon-only context). |
+| ariaValueText   | string                       | —       | Sets `aria-valuetext`, overriding the spoken value with a custom string (e.g. a formatted timestamp). |
 | className       | string                       | ""      | Additional classes merged onto the root wrapper.       |
 
 ## Interactive States
@@ -26,10 +30,14 @@ A styled range input for selecting a numeric value within a defined range. Built
 
 ## Visual Structure
 
-- **Track**: A relative container `h-1.5 rounded-full bg-surface-active`. An absolutely-positioned inner `div` (`bg-brand`) expands from left to the current percentage to show the filled portion.
-- **Thumb**: Styled via `accent-color: var(--color-brand)` inline on the native input, so it picks up the brand token. The input sits full-width over the track for hit testing.
+- **Track**: A relative container `h-1.5 rounded-full bg-surface-active` (`tone="current"`: `bg-current/20`). An absolutely-positioned inner `div` (`bg-brand`, or `bg-current` for `tone="current"`) expands from left to the current percentage to show the filled portion.
+- **Thumb**: Styled via `accent-color: var(--color-brand)` inline on the native input (`accent-color: currentColor` for `tone="current"`), so it picks up the right color in either mode. The input sits full-width over the track for hit testing.
 - **Label row**: Flexbox row with the label on the left and the current value (when `showValue` is true) on the right.
 - **Hint**: `text-sm text-text-muted` below the track; associated to the input via `aria-describedby`.
+
+## Tone
+
+`tone="current"` swaps every brand-token color reference (track empty-state, fill, thumb accent, focus ring) for a `currentColor`-derived equivalent, so the slider inherits whatever text color its parent sets rather than always rendering brand blue. This mirrors `Button`'s `variant="on-color"` and exists for the same reason: a control that needs to sit legibly on top of an arbitrary colored surface (e.g. `AudioPlayer`'s compact seek bar inside a `Message` bubble) instead of the page background, where `tone="brand"` (the default) is the right, predictable choice.
 
 ## Drag Behavior
 
@@ -43,6 +51,8 @@ The `motion-safe:transition-all` classes are re-applied as soon as the drag ends
 - `aria-valuemin`, `aria-valuemax`, and `aria-valuenow` are set explicitly.
 - `label` and `input` are linked via `htmlFor`/`id`.
 - `hint` is linked via `aria-describedby`.
+- `ariaLabel` provides an accessible name when no visible `label` is rendered.
+- `ariaValueText`, when provided, overrides the announced value with a custom string (e.g. `"1:32 of 6:12"` for a time-based slider).
 - Focus-visible ring is always present for keyboard users.
 - Animations respect `prefers-reduced-motion` via `motion-safe:` variant.
 
