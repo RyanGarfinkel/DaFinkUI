@@ -29,7 +29,7 @@ export const registry: ComponentEntry[] = [
     slug: 'button',
     name: 'Button',
     category: 'Inputs',
-    description: 'A clickable control that triggers an action, supporting six visual variants and three sizes.',
+    description: 'A clickable control that triggers an action, supporting nine visual variants and five sizes.',
     usage: `import Button from '@/src/components/Button/Button';
 
 export default function Example() {
@@ -60,21 +60,33 @@ export default function Example() {
     props: [
       {
         name: 'variant',
-        type: '"primary" | "secondary" | "outlined" | "ghost" | "link" | "destructive"',
+        type: '"primary" | "secondary" | "outlined" | "ghost" | "link" | "destructive" | "arrowleft" | "arrowright" | "on-color"',
         default: '"primary"',
-        description: 'Visual style of the button.',
+        description: 'Visual style of the button. "arrowleft"/"arrowright" prepend or append a sliding arrow, for prev/next controls. "on-color" uses currentColor instead of a fixed brand color, for controls embedded inside colored content.',
       },
       {
         name: 'size',
-        type: '"sm" | "md" | "lg" | "icon"',
+        type: '"sm" | "md" | "lg" | "icon" | "icon-sm"',
         default: '"md"',
-        description: 'Height and padding. "icon" renders a square with no horizontal padding — requires aria-label when there is no visible text.',
+        description: 'Height and padding. "icon"/"icon-sm" render a square (36px/28px) with no horizontal padding — requires aria-label when there is no visible text.',
+      },
+      {
+        name: 'shape',
+        type: '"default" | "circle"',
+        default: '"default"',
+        description: '"circle" renders rounded-full instead of the default corner radius. Pair with an icon size for a true circle.',
       },
       {
         name: 'loading',
         type: 'boolean',
         default: 'false',
         description: 'Shows a spinner, disables the button, and sets aria-busy="true". Children are hidden while loading.',
+      },
+      {
+        name: 'href',
+        type: 'string',
+        default: '—',
+        description: 'Renders as a Next.js Link instead of a button. All variants and sizes work the same; loading and disabled are ignored in this mode.',
       },
       {
         name: 'disabled',

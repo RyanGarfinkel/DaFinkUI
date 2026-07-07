@@ -126,3 +126,43 @@ describe('Button — size="icon"', () =>
 		expect(screen.getByRole('button').className).not.toContain('px-');
 	});
 });
+
+describe('Button — size="icon-sm"', () =>
+{
+	it('renders as a smaller square', () =>
+	{
+		render(<Button size='icon-sm' aria-label='Close'><span /></Button>);
+		const btn = screen.getByRole('button');
+		expect(btn.className).toContain('w-7');
+		expect(btn.className).toContain('h-7');
+	});
+});
+
+describe('Button — shape', () =>
+{
+	it('applies rounded-[var(--radius)] by default', () =>
+	{
+		render(<Button>Save</Button>);
+		expect(screen.getByRole('button').className).toContain('rounded-[var(--radius)]');
+	});
+
+	it('applies rounded-full when shape="circle"', () =>
+	{
+		render(<Button shape='circle' size='icon' aria-label='Play'><span /></Button>);
+		const btn = screen.getByRole('button');
+		expect(btn.className).toContain('rounded-full');
+		expect(btn.className).not.toContain('rounded-[var(--radius)]');
+	});
+});
+
+describe('Button — variant="on-color"', () =>
+{
+	it('uses currentColor-derived classes instead of a fixed brand color', () =>
+	{
+		render(<Button variant='on-color' size='icon-sm' shape='circle' aria-label='Play'><span /></Button>);
+		const btn = screen.getByRole('button');
+		expect(btn.className).toContain('bg-current/15');
+		expect(btn.className).toContain('text-current');
+		expect(btn.className).not.toContain('bg-brand');
+	});
+});
