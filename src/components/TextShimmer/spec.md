@@ -40,7 +40,7 @@ Extends all native `<span>` HTML attributes.
 ## Installation
 
 ```bash
-npx @dafink/ui add text-shimmer
+npx dafink-ui add text-shimmer
 ```
 
 npm dependencies: none

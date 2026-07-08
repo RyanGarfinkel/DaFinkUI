@@ -121,7 +121,7 @@ All three are peer dependencies — install them if not already present.
 ## Installation
 
 ```bash
-npx @dafink/ui add mosaic
+npx dafink-ui add mosaic
 ```
 
 npm dependencies: `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`

@@ -5,7 +5,7 @@ A drag-and-drop graph editor for building typed workflows. Users connect nodes v
 ## Installation
 
 ```bash
-npx @dafink/ui add workflow-builder
+npx dafink-ui add workflow-builder
 ```
 
 **npm dependency:** `@xyflow/react`

@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
 	title: 'Changelog',
-	description: 'Version history for the @dafink/ui package.',
+	description: 'Version history for the dafink-ui package.',
 };
 
 const formatDate = (date: string | null) =>
@@ -26,7 +26,7 @@ const ChangelogPage = () =>
 			<div className='flex flex-col gap-2'>
 				<h1 className='text-3xl font-semibold tracking-tight text-text'>Changelog</h1>
 				<p className='text-base text-text-muted leading-relaxed'>
-					Version history for the <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>@dafink/ui</code> package, generated from commit history.
+					Version history for the <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>dafink-ui</code> package, generated from commit history.
 				</p>
 			</div>
 

@@ -264,11 +264,11 @@ const Home = () =>
 				<div className='flex flex-col gap-2'>
 					<div className='bg-surface-active rounded-lg px-4 py-3 font-mono text-sm text-text flex items-center gap-2'>
 						<span className='text-text-subtle select-none'>$</span>
-						<span>npx @dafink/ui add button</span>
+						<span>npx dafink-ui add button</span>
 					</div>
 					<div className='bg-surface-active rounded-lg px-4 py-3 font-mono text-sm text-text flex items-center gap-2'>
 						<span className='text-text-subtle select-none'>$</span>
-						<span>npx @dafink/ui add modal</span>
+						<span>npx dafink-ui add modal</span>
 						<span className='ml-auto text-xs text-text-subtle font-sans'>installs Button too</span>
 					</div>
 				</div>

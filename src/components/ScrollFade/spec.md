@@ -59,7 +59,7 @@ Always set `fadeFrom` to match the actual background color token behind the scro
 ## Installation
 
 ```bash
-npx @dafink/ui add scroll-fade
+npx dafink-ui add scroll-fade
 ```
 
 No additional npm dependencies. No registry dependencies.

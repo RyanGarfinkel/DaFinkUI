@@ -143,7 +143,7 @@ All transitions use `motion-safe:transition-[...] motion-safe:duration-[var(--du
 ## Installation
 
 ```bash
-npx @dafink/ui add message
+npx dafink-ui add message
 ```
 
 No additional npm dependencies. No registry dependencies (composes with `Avatar` by prop, not by import — pass any `ReactNode` as `avatar`).

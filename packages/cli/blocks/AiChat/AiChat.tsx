@@ -21,7 +21,7 @@ interface ChatMessage
 const INITIAL_MESSAGES: ChatMessage[] = [
 	{ id: 1, sender: 'ai',   text: 'Hi! I’m the DaFink UI assistant — ask me anything about installing or using components.' },
 	{ id: 2, sender: 'user', text: 'How do I install a component?' },
-	{ id: 3, sender: 'ai',   text: 'Run npx @dafink/ui add button in your project root — it copies the component source straight into your repo.' },
+	{ id: 3, sender: 'ai',   text: 'Run npx dafink-ui add button in your project root — it copies the component source straight into your repo.' },
 	{ id: 4, sender: 'user', text: 'Does it work with dark mode out of the box?' },
 	{ id: 5, sender: 'ai',   text: 'Yes — every component is built on design tokens, so it adapts automatically to your theme’s light and dark palettes.' },
 ];

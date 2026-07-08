@@ -86,7 +86,7 @@ Hover, active, focus-visible, and disabled states on every button and slider com
 ## Installation
 
 ```bash
-npx @dafink/ui add audioplayer
+npx dafink-ui add audioplayer
 ```
 
 Also installs: Button, Slider. No npm dependencies.

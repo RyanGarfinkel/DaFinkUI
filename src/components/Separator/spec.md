@@ -51,7 +51,7 @@ Extends all native attributes of the rendered root element (`<hr>` for the plain
 ## Installation
 
 ```bash
-npx @dafink/ui add separator
+npx dafink-ui add separator
 ```
 
 No npm dependencies. No registry dependencies.

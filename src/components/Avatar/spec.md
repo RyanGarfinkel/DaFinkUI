@@ -70,7 +70,7 @@ Extends all native `<div>` HTML attributes.
 ## Installation
 
 ```bash
-npx @dafink/ui add avatar
+npx dafink-ui add avatar
 ```
 
 npm dependencies: none

@@ -187,7 +187,7 @@ The spec is the source of truth for the MCP server. It must include:
 - Accessibility notes: ARIA roles, keyboard behavior, focus management (for overlay components: full popup checklist)
 - "When to use" guidance
 - Tokens used
-- Installation: the `npx @dafink/ui add {slug}` command, any npm dependencies, and any registry dependencies (other components installed alongside it)
+- Installation: the `npx dafink-ui add {slug}` command, any npm dependencies, and any registry dependencies (other components installed alongside it)
 
 For overlay components, the Accessibility section of `spec.md` must explicitly document: focus entry behavior, whether focus is trapped, Escape behavior, Tab behavior, arrow key navigation (if applicable), and ARIA roles used.
 

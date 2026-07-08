@@ -65,7 +65,7 @@ Use for email confirmation codes, SMS verification, two-factor authentication, a
 ## Installation
 
 ```
-npx @dafink/ui add otp-input
+npx dafink-ui add otp-input
 ```
 
 No npm dependencies. No registry dependencies.

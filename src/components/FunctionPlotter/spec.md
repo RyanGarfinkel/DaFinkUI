@@ -7,7 +7,7 @@ An interactive 2D mathematical function plotter. Users enter one or more single-
 ## Installation
 
 ```bash
-npx @dafink/ui add function-plotter
+npx dafink-ui add function-plotter
 ```
 
 No npm dependencies. No registry dependencies.

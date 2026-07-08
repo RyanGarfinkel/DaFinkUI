@@ -92,7 +92,7 @@ All color/background transitions use `transition-colors duration-[var(--duration
 ## Installation
 
 ```bash
-npx @dafink/ui add attachment
+npx dafink-ui add attachment
 ```
 
 No additional npm dependencies. No registry dependencies.

@@ -73,7 +73,7 @@ Pair with `Sidebar` for a full dashboard shell (fixed sidebar + fixed top bar), 
 ## Installation
 
 ```bash
-npx @dafink/ui add top-nav
+npx dafink-ui add top-nav
 ```
 
 No additional npm dependencies. No registry dependencies.

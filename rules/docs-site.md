@@ -86,7 +86,7 @@ export interface PropRow {
 
 ### How Dependencies Work
 
-The `dependencies` and `registryDependencies` fields power the CLI installer. When a user runs `npx @dafink/ui add modal`:
+The `dependencies` and `registryDependencies` fields power the CLI installer. When a user runs `npx dafink-ui add modal`:
 
 1. The CLI reads the `modal` registry entry
 2. It installs any `dependencies` as npm packages (`npm install date-fns` etc.)
@@ -100,7 +100,7 @@ This means a component author must correctly declare all dependencies at registr
 Each page (`app/(docs)/components/[slug]/page.tsx`) renders these sections, in this order:
 
 1. **Header** — component name (`text-3xl font-semibold tracking-tight text-text`) + description (`text-base text-text-muted leading-relaxed`)
-2. **Installation** — `npx @dafink/ui add {slug}` in a `CodeBlock`; if the component has `registryDependencies`, list them as "Also installs: Button, Icon" below the command; if it has npm `dependencies`, list them as "Requires: …" in inline `font-mono text-xs` code
+2. **Installation** — `npx dafink-ui add {slug}` in a `CodeBlock`; if the component has `registryDependencies`, list them as "Also installs: Button, Icon" below the command; if it has npm `dependencies`, list them as "Requires: …" in inline `font-mono text-xs` code
 3. **Demo / Demos** — one `<h2>` heading, always rendered (never "Preview" as its own heading, never "Examples" as its own heading, and there is no separate "Usage" heading — those three concepts were merged into this single section). It is a list with **at least one element**: the primary live render, wrapped in `CodeBlock variant='example'` with `code={entry.usage}` — so the primary item's own Preview↔Code toggle is what shows its usage code; nothing else duplicates it. If the slug has entries in `componentExamples`, they render underneath, separated by a top border, each with its own title/description/`CodeBlock variant='example'` Preview↔Code toggle — see Examples Guidelines below. **Heading text**: singular **"Demo"** when the list has exactly one item (no `componentExamples` entries for this slug), plural **"Demos"** when it has more than one. **Rule**: no page may have a bare "Preview", "Examples", or "Usage" `<h2>` — always "Demo"/"Demos". The Preview/Code toggle *inside* a `CodeBlock variant='example'` keeps the word "Preview" as its tab label — that is a different, unrelated piece of UI text and is not renamed by this rule.
 4. **Composition (optional, per component)** — only rendered for compound components with a registered `composition`
 5. **Extra sections (optional, per component)** — variant demos and interactive examples that aren't a simple list of named examples (e.g. Timeline "Horizontal variant" / "Interactive example", Workflow Builder "Examples")
@@ -153,7 +153,7 @@ Three registry files in `app/_docs/registry/` drive the blocks pages, mirroring 
 - **`blocks.ts`** — `BlockEntry[]`: `slug, name, category, description, usage, dependencies, registryDependencies, files`. No `props` field — blocks aren't parameterized.
 - **`blockPreviews.tsx`** — `Record<slug, React.ReactNode>`, importing directly from `src/blocks/*` and rendering with no props. Because this renders the real installable file directly, the preview can never drift from what installing the block actually gives the user — unlike the component registry, where `usage` and `ComponentLivePreview.tsx` must still be kept in sync by hand.
 
-`registryDependencies` on a block lists the *component* slugs it depends on (e.g. Dashboard depends on `card`, `data-table`, `charts`, …) — the CLI resolves these transitively when installing the block, so `npx @dafink/ui add dashboard` also pulls in every component it uses.
+`registryDependencies` on a block lists the *component* slugs it depends on (e.g. Dashboard depends on `card`, `data-table`, `charts`, …) — the CLI resolves these transitively when installing the block, so `npx dafink-ui add dashboard` also pulls in every component it uses.
 
 ## Block Detail Page
 
@@ -235,13 +235,13 @@ This rule exists because users copy from the usage code block and expect it to r
 
 ## What Not to Build
 
-- No per-component versioning — components don't carry individual version numbers. The one exception is the package-level `/changelog` page (see below), which tracks releases of `@dafink/ui` as a whole
+- No per-component versioning — components don't carry individual version numbers. The one exception is the package-level `/changelog` page (see below), which tracks releases of `dafink-ui` as a whole
 - No syntax highlighting library — plain `<pre><code>` only
 - No MDX — all content is in the registry TypeScript file
 
 ## Changelog Page
 
-`app/(docs)/changelog/page.tsx` renders release history for the `@dafink/ui` package, sourced from `app/_docs/registry/changelog.ts`.
+`app/(docs)/changelog/page.tsx` renders release history for the `dafink-ui` package, sourced from `app/_docs/registry/changelog.ts`.
 
 - `changelog.ts` is **generated, not hand-written** — run `npm run build-changelog` (`scripts/build-changelog.mjs`) to regenerate it. The script reads git tags and conventional-commit messages (`feat`/`fix`/`refactor`/`perf`/`style`/`chore`/`docs`) between each tag and groups them into `Added` / `Fixed` / `Changed` / `Docs` sections; commits after the latest tag are grouped under an `Unreleased` entry. Re-run it whenever a new tag is cut
 - Never hand-edit `changelog.ts` directly — edit commit messages/tags and regenerate instead, or the file will drift from git history

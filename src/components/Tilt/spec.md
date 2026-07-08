@@ -39,7 +39,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 ## Installation
 
 ```bash
-npx @dafink/ui add tilt
+npx dafink-ui add tilt
 ```
 
 No npm dependencies. No registry dependencies.

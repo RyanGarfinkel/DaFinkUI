@@ -352,8 +352,7 @@ Use `SkeletonCard` in place of each dashboard card while data loads on mount.
 ### Kanban and Timeline
 
 - `Kanban` — drag-and-drop column/card board. Uses dnd-kit; install with
-  `npx @dafink/ui add kanban`. Ships as a separate entry point (`@dafink/ui/dnd`)
-  to avoid pulling the dnd-kit bundle into projects that don't need it.
+  `npx dafink-ui add kanban` (also install `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`).
 - `Timeline` — vertical event sequence. Use for activity logs, order history,
   deployment pipelines, onboarding progress.
 

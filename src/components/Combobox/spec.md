@@ -5,7 +5,7 @@ A searchable dropdown that filters options as the user types. Supports single-se
 ## Installation
 
 ```bash
-npx @dafink/ui add combobox
+npx dafink-ui add combobox
 ```
 
 No npm dependencies. No registry dependencies.

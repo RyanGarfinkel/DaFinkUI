@@ -5,7 +5,7 @@ A CodeMirror 6-backed JSX/JavaScript code editor with syntax highlighting, dark/
 ## Installation
 
 ```bash
-npx @dafink/ui add code-editor
+npx dafink-ui add code-editor
 ```
 
 **Registry dependencies:** none

@@ -7,7 +7,7 @@ A non-modal overlay panel that slides in from an edge of the screen but floats w
 ## Installation
 
 ```bash
-npx @dafink/ui add side-panel
+npx dafink-ui add side-panel
 ```
 
 No additional npm packages required.

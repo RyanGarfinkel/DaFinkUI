@@ -86,7 +86,7 @@ toast({ title: 'Saved', variant: 'success', duration: 4000 });
 ## Installation
 
 ```bash
-npx @dafink/ui add toast
+npx dafink-ui add toast
 ```
 
 npm dependencies: none

@@ -7,7 +7,7 @@ A full-featured, column-definition driven data table with client-side sorting, r
 ## Installation
 
 ```bash
-npx @dafink/ui add data-table
+npx dafink-ui add data-table
 ```
 
 No additional npm dependencies. Requires no other registry components.

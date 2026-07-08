@@ -47,7 +47,7 @@ Extends all native `<input type="checkbox">` HTML attributes (except `type`). Ac
 ## Installation
 
 ```bash
-npx @dafink/ui add checkbox
+npx dafink-ui add checkbox
 ```
 
 npm dependencies: none

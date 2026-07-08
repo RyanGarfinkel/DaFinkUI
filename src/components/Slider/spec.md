@@ -72,7 +72,7 @@ Use Slider when the user needs to select a value along a continuous or stepped r
 ## Installation
 
 ```
-npx @dafink/ui add slider
+npx dafink-ui add slider
 ```
 
 No npm dependencies. No registry dependencies.

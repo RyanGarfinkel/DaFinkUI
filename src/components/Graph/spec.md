@@ -5,7 +5,7 @@ A force-directed node/edge graph rendered in SVG with draggable nodes, pan/zoom,
 ## Installation
 
 ```bash
-npx @dafink/ui add graph
+npx dafink-ui add graph
 ```
 
 npm dependency: `d3-force`. No registry dependencies.

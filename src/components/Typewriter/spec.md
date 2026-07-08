@@ -106,7 +106,7 @@ None — the cursor inherits `currentColor`.
 ## Installation
 
 ```bash
-npx @dafink/ui add typewriter
+npx dafink-ui add typewriter
 ```
 
 npm dependencies: none  

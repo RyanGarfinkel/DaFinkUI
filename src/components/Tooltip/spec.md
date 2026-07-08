@@ -5,7 +5,7 @@ A small floating text label that appears next to its trigger on hover or keyboar
 ## Installation
 
 ```bash
-npx @dafink/ui add tooltip
+npx dafink-ui add tooltip
 ```
 
 No npm dependencies. No registry dependencies.

@@ -130,7 +130,7 @@ For breadcrumb-style hierarchical location indicators, use `Breadcrumb` instead.
 ## Installation
 
 ```bash
-npx @dafink/ui add sidebar
+npx dafink-ui add sidebar
 ```
 
 No additional npm dependencies. Registry dependencies: `Tooltip` (used to label icon-only links when collapsed) and `ScrollFade` (wraps the scrollable middle region so it fades at whichever edge still has more content).

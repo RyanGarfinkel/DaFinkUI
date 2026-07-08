@@ -69,7 +69,7 @@ const SkillPage = () =>
         <p className='text-sm text-text-muted leading-relaxed'>
           Via the CLI, in your project root:
         </p>
-        <CodeBlock code='npx @dafink/ui skill' />
+        <CodeBlock code='npx dafink-ui skill' />
         <p className='text-sm text-text-muted leading-relaxed'>
           Or download the file above and drop it into your skills directory —{' '}
           <code className='font-mono text-xs'>.claude/skills/</code> for

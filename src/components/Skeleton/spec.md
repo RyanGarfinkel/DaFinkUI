@@ -88,7 +88,7 @@ Extends all native `<div>` HTML attributes.
 ## Installation
 
 ```bash
-npx @dafink/ui add skeleton
+npx dafink-ui add skeleton
 ```
 
 npm dependencies: none

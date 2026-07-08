@@ -1038,7 +1038,7 @@ export default function Example() {
         <AccordionItem value="item-2">
           <AccordionTrigger>How do I install it?</AccordionTrigger>
           <AccordionContent>
-            Run npx @dafink/ui add [component] to copy any component into your project.
+            Run npx dafink-ui add [component] to copy any component into your project.
           </AccordionContent>
         </AccordionItem>
         <AccordionItem value="item-3">
@@ -1951,10 +1951,10 @@ export default function Example() {
   return (
     <Timeline>
       <TimelineItem title="Install the CLI">
-        Run <code>npx @dafink/ui init</code> in your project root.
+        Run <code>npx dafink-ui init</code> in your project root.
       </TimelineItem>
       <TimelineItem title="Add components">
-        Use <code>npx @dafink/ui add button input</code> to copy components into your project.
+        Use <code>npx dafink-ui add button input</code> to copy components into your project.
       </TimelineItem>
       <TimelineItem title="Import and use">
         Import from <code>@/components/ui</code> and start building.

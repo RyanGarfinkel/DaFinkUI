@@ -232,7 +232,7 @@ Use `Form` layout primitives when you need:
 ## Installation
 
 ```bash
-npx @dafink/ui add form
+npx dafink-ui add form
 ```
 
 npm dependencies: none for the layout primitives (`Form`, `FormSection`, `FormField`, `FormLabel`, `FormControl`, `FormDescription`, `FormMessage`). Using `useZodForm` requires `zod`, `react-hook-form`, and `@hookform/resolvers` — installed automatically by the CLI, or via `npm install zod react-hook-form @hookform/resolvers` if adding validation to a project that already has the layout primitives.

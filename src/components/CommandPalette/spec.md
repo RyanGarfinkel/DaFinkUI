@@ -7,7 +7,7 @@ A global command palette overlay for quick navigation and action execution. Open
 ## Installation
 
 ```bash
-npx @dafink/ui add command-palette
+npx dafink-ui add command-palette
 ```
 
 No additional npm packages required. Registry dependency: `ScrollFade` (wraps the results listbox so it fades at whichever edge still has more matches).

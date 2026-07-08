@@ -49,7 +49,7 @@ Extends all native `<div>` HTML attributes.
 ## Installation
 
 ```bash
-npx @dafink/ui add progress
+npx dafink-ui add progress
 ```
 
 npm dependencies: none

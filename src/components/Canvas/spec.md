@@ -7,7 +7,7 @@ This component is a **docs showcase pattern** — it ships as a complete, copy-p
 ## Installation
 
 ```bash
-npx @dafink/ui add canvas
+npx dafink-ui add canvas
 ```
 
 No npm dependencies beyond React.

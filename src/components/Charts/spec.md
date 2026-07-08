@@ -1,11 +1,11 @@
 # Charts
 
-Recharts-based chart primitives: `LineChart`, `BarChart`, `AreaChart`, `DonutChart`, and `RadarChart`. Shipped as a separate entry point (`@dafink/ui/charts`) so the Recharts dependency is not pulled into projects that only use primitives.
+Recharts-based chart primitives: `LineChart`, `BarChart`, `AreaChart`, `DonutChart`, and `RadarChart`. Requires Recharts as an npm dependency — install it alongside the component.
 
 ## Installation
 
 ```bash
-npx @dafink/ui add charts
+npx dafink-ui add charts
 ```
 
 npm dependency: `recharts`

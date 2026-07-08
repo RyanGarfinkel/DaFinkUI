@@ -312,7 +312,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
             <AccordionItem value='item-2'>
               <AccordionTrigger>How do I install a component?</AccordionTrigger>
               <AccordionContent>
-                Run <code className='font-mono text-xs'>npx @dafink/ui add button</code> and the component is copied into your project.
+                Run <code className='font-mono text-xs'>npx dafink-ui add button</code> and the component is copied into your project.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value='item-3'>
@@ -657,10 +657,10 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         <div className='w-full max-w-sm'>
           <Timeline>
             <TimelineItem title='Install the CLI'>
-              Run <code className='font-mono text-xs'>npx @dafink/ui init</code> in your project root.
+              Run <code className='font-mono text-xs'>npx dafink-ui init</code> in your project root.
             </TimelineItem>
             <TimelineItem title='Add components'>
-              Use <code className='font-mono text-xs'>npx @dafink/ui add button</code> to copy components into your project.
+              Use <code className='font-mono text-xs'>npx dafink-ui add button</code> to copy components into your project.
             </TimelineItem>
             <TimelineItem title='Import and use'>
               Import from <code className='font-mono text-xs'>@/components/ui</code> and start building.

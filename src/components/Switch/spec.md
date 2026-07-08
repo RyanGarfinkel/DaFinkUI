@@ -49,7 +49,7 @@ A toggle switch for boolean values, rendered as an accessible button with `role=
 ## Installation
 
 ```bash
-npx @dafink/ui add switch
+npx dafink-ui add switch
 ```
 
 npm dependencies: none

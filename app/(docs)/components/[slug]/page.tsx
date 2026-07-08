@@ -40,7 +40,7 @@ const ComponentPage = async (
 
   if (!entry) notFound();
 
-  const installCommand = `npx @dafink/ui add ${entry.slug}`;
+  const installCommand = `npx dafink-ui add ${entry.slug}`;
   const extraDemos = componentExamples[slug] ?? [];
   const demosHeading = extraDemos.length === 0 ? 'Demo' : 'Demos';
 

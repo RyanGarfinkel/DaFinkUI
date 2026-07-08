@@ -5,7 +5,7 @@ A click-triggered, non-modal floating panel anchored to its trigger button. Focu
 ## Installation
 
 ```bash
-npx @dafink/ui add popover
+npx dafink-ui add popover
 ```
 
 No npm dependencies. No registry dependencies.
