@@ -94,7 +94,7 @@ function checkUnreachableInteractive(text)
 
 		violations.push({
 			line: lineNumberAt(text, match.index),
-			message: `<${tag}> has onClick but is missing role and/or tabIndex — not reachable by keyboard`,
+			message: `<${tag}> has onClick but is missing role and/or tabIndex, not reachable by keyboard`,
 		});
 	}
 

@@ -15,11 +15,12 @@ import { AreaChart, BarChart, DonutChart, LineChart, RadarChart } from '@/src/co
 import { Message, MessageReactions, MessageReaction } from '@/src/components/Message/Message';
 import Mosaic, { MosaicTile, type MosaicTileLayout } from '@/src/components/Mosaic/Mosaic';
 import { Skeleton, SkeletonCard, SkeletonImage } from '@/src/components/Skeleton/Skeleton';
+import { MenuBar, MenuBarBrand, MenuBarActions } from '@/src/components/MenuBar/MenuBar';
 import ToggleGroup, { ToggleGroupItem } from '@/src/components/ToggleGroup/ToggleGroup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/Tabs/Tabs';
 import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
 import { Attachment, AttachmentGroup } from '@/src/components/Attachment/Attachment';
-import { TopNav, TopNavBrand, TopNavActions } from '@/src/components/TopNav/TopNav';
+import TableOfContents from '@/src/components/TableOfContents/TableOfContents';
 import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
 import WorkflowBuilder from '@/src/components/WorkflowBuilder/WorkflowBuilder';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
@@ -32,6 +33,7 @@ import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
 import { ScrollFade } from '@/src/components/ScrollFade/ScrollFade';
 import { DatePicker } from '@/src/components/DatePicker/DatePicker';
 import TextShimmer from '@/src/components/TextShimmer/TextShimmer';
+import ThemeToggle from '@/src/components/ThemeToggle/ThemeToggle';
 import AudioPlayer from '@/src/components/AudioPlayer/AudioPlayer';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
 import Typewriter from '@/src/components/Typewriter/Typewriter';
@@ -80,6 +82,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
   const [pickerDate, setPickerDate] = useState<Date | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [editorCode, setEditorCode] = useState('<Button>Click me</Button>');
+  const [sidebarFavorites, setSidebarFavorites] = useState<Record<string, boolean>>({});
 
   switch (slug) {
     case 'button':
@@ -160,6 +163,9 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
           <Switch checked={false} onCheckedChange={() => {}} label='Analytics' disabled />
         </div>
       );
+
+    case 'theme-toggle':
+      return <ThemeToggle />;
 
     case 'slider':
       return (
@@ -293,7 +299,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
             <CollapsibleTrigger>Project details</CollapsibleTrigger>
             <CollapsibleContent>
               This project uses React 18, Tailwind v4, and Next.js 15. Components are
-              copied directly into your repo — no runtime dependency required.
+              copied directly into your repo, no runtime dependency required.
             </CollapsibleContent>
           </Collapsible>
         </div>
@@ -306,7 +312,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
             <AccordionItem value='item-1'>
               <AccordionTrigger>What is DaFink UI?</AccordionTrigger>
               <AccordionContent>
-                A copy-paste design system for React — install only what you need.
+                A React component library you install source into, not a runtime package.
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value='item-2'>
@@ -318,7 +324,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
             <AccordionItem value='item-3'>
               <AccordionTrigger>Do I need to install all components at once?</AccordionTrigger>
               <AccordionContent>
-                No — each component is installed individually. Install only what your project needs.
+                No, each component is installed individually. Install only what your project needs.
               </AccordionContent>
             </AccordionItem>
           </Accordion>
@@ -353,6 +359,14 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
           <path d={d} />
         </svg>
       );
+      const StarIcon = ({ filled }: { filled: boolean }) => (
+        <svg width='14' height='14' viewBox='0 0 24 24' fill={filled ? 'currentColor' : 'none'} stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+          <path d='m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z' />
+        </svg>
+      );
+      const favorited = sidebarFavorites;
+      const toggleFavorite = (name: string) => setSidebarFavorites(prev => ({ ...prev, [name]: !prev[name] }));
+
       return (
         <div className='h-96 w-56 border border-surface-border rounded-lg overflow-hidden'>
           <Sidebar width='w-full' collapsible>
@@ -366,8 +380,40 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
             </SidebarSection>
             <SidebarDivider />
             <SidebarSection label='Components'>
-              <SidebarLink href='#' icon={<NavIcon d='M9 9h6v6H9zM4 4h16v16H4z' />}>Button</SidebarLink>
-              <SidebarLink href='#' icon={<NavIcon d='M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2' />}>Input</SidebarLink>
+              <SidebarLink
+                href='#'
+                icon={<NavIcon d='M9 9h6v6H9zM4 4h16v16H4z' />}
+                action={
+                  <Button
+                    variant='ghost'
+                    size='icon-sm'
+                    aria-label={favorited.Button ? 'Remove Button from favorites' : 'Add Button to favorites'}
+                    aria-pressed={Boolean(favorited.Button)}
+                    onClick={() => toggleFavorite('Button')}
+                  >
+                    <StarIcon filled={Boolean(favorited.Button)} />
+                  </Button>
+                }
+              >
+                Button
+              </SidebarLink>
+              <SidebarLink
+                href='#'
+                icon={<NavIcon d='M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2' />}
+                action={
+                  <Button
+                    variant='ghost'
+                    size='icon-sm'
+                    aria-label={favorited.Input ? 'Remove Input from favorites' : 'Add Input to favorites'}
+                    aria-pressed={Boolean(favorited.Input)}
+                    onClick={() => toggleFavorite('Input')}
+                  >
+                    <StarIcon filled={Boolean(favorited.Input)} />
+                  </Button>
+                }
+              >
+                Input
+              </SidebarLink>
             </SidebarSection>
             <SidebarFooter>
               <SidebarLink href='#' icon={<NavIcon d='M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z' />}>Settings</SidebarLink>
@@ -377,20 +423,35 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
     }
 
-    case 'top-nav':
+    case 'menu-bar':
       return (
         <div className='w-full max-w-xl overflow-hidden rounded-lg border border-surface-border'>
-          <TopNav className='relative'>
-            <TopNavBrand>
+          <MenuBar className='relative'>
+            <MenuBarBrand>
               <span className='font-semibold text-text'>Acme</span>
-            </TopNavBrand>
-            <TopNavActions>
+            </MenuBarBrand>
+            <MenuBarActions>
               <Button variant='ghost' size='icon' aria-label='Search'>
                 <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>
               </Button>
               <Button size='sm'>Sign in</Button>
-            </TopNavActions>
-          </TopNav>
+            </MenuBarActions>
+          </MenuBar>
+        </div>
+      );
+
+    case 'table-of-contents':
+      return (
+        <div className='flex gap-8 items-start'>
+          <div id='toc-demo-content' className='flex flex-col gap-6 max-w-sm'>
+            <h2 id='overview'>Overview</h2>
+            <p className='text-sm text-text-muted'>A short introduction to the section.</p>
+            <h3 id='getting-started'>Getting started</h3>
+            <p className='text-sm text-text-muted'>Steps to get up and running.</p>
+            <h2 id='advanced-usage'>Advanced usage</h2>
+            <p className='text-sm text-text-muted'>Additional configuration options.</p>
+          </div>
+          <TableOfContents containerId='toc-demo-content' />
         </div>
       );
 
@@ -1309,6 +1370,8 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       return (
         <div className='flex flex-col gap-6 w-full max-w-sm'>
           <Separator />
+          <Separator variant='dashed' />
+          <Separator variant='dotted' />
           <Separator>OR</Separator>
           <div className='flex h-16 items-center gap-3'>
             <span className='text-sm text-text'>Item</span>

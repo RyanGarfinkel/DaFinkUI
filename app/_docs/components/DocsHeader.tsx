@@ -1,6 +1,7 @@
 'use client';
 import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
-import { DarkModeToggle } from '@/app/_docs/components/DarkModeToggle';
+import { MenuBar, MenuBarActions } from '@/src/components/MenuBar/MenuBar';
+import ThemeToggle from '@/src/components/ThemeToggle/ThemeToggle';
 import { themes, getThemeByName, type Theme } from '@/src/themes';
 import { styles, getStyleByName, type Style } from '@/src/styles';
 import { ArrowRightIcon } from '@/app/_docs/components/NavIcons';
@@ -13,12 +14,12 @@ import { registry } from '@/app/_docs/registry';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-interface TopNavProps
+interface DocsHeaderProps
 {
 	collapsed?: boolean;
 }
 
-export const TopNav = ({ collapsed = false }: TopNavProps) =>
+export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
 {
 	const [paletteOpen, setPaletteOpen] = useState(false);
 	const [activeTheme, setActiveTheme] = useState<Theme>(themes[0]);
@@ -125,9 +126,8 @@ export const TopNav = ({ collapsed = false }: TopNavProps) =>
 
 	return (
 		<>
-			<header
+			<MenuBar
 				className={[
-					'fixed top-0 left-0 right-0 z-50 h-14 border-b border-surface-border bg-surface/95 backdrop-blur-md flex items-center px-3 gap-2 sm:px-6 sm:gap-3',
 					'motion-safe:transition-[margin-left] motion-safe:duration-200 motion-safe:ease-[var(--ease-standard)]',
 					collapsed ? 'md:ml-16' : 'md:ml-56',
 				].join(' ')}
@@ -135,7 +135,7 @@ export const TopNav = ({ collapsed = false }: TopNavProps) =>
 				{/* Mobile nav drawer trigger */}
 				<MobileNav />
 
-				{/* Brand — hidden at md: and up, where the sidebar header shows it instead */}
+				{/* Brand: hidden at md: and up, where the sidebar header shows it instead */}
 				<Link
 					href='/'
 					className='hidden sm:flex md:hidden items-center gap-2 shrink-0 text-text rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
@@ -189,8 +189,8 @@ export const TopNav = ({ collapsed = false }: TopNavProps) =>
 				</button>
 
 				{/* Right controls */}
-				<div className='flex items-center gap-1.5'>
-					{/* Surface style — orthogonal to the color palette */}
+				<MenuBarActions>
+					{/* Surface style: orthogonal to the color palette */}
 					<div className='hidden sm:block'>
 						<Select
 							options={styles.map((s) => ({ value: s.name, label: s.label }))}
@@ -214,9 +214,9 @@ export const TopNav = ({ collapsed = false }: TopNavProps) =>
 
 					<div className='hidden sm:block h-4 w-px bg-surface-border mx-0.5' aria-hidden='true' />
 
-					<DarkModeToggle />
-				</div>
-			</header>
+					<ThemeToggle />
+				</MenuBarActions>
+			</MenuBar>
 
 			{/* Command palette */}
 			<CommandPalette

@@ -36,7 +36,7 @@ A fixed horizontal navigation bar for the top of an application shell, composed 
 
 By default `MenuBar` is `fixed top-0 left-0 right-0` so it stays pinned to the viewport. If `className` already includes a position keyword (`static`, `fixed`, `absolute`, `sticky`, or `relative`), that override is used instead and the default `fixed` positioning is omitted; this is how the component's own live preview renders it as a contained, in-flow bar (`className="relative"`) instead of covering the whole page.
 
-When paired with a `Sidebar` that has `collapsible`, apply a dynamic `md:ml-56`/`md:ml-16` (matching the sidebar's expanded/collapsed width) via `className` so `MenuBar` starts where the sidebar ends rather than underlapping it; see the docs site's own `TopNav` usage (`app/_docs/components/TopNav.tsx`, a separate site-specific header) for a worked example.
+When paired with a `Sidebar` that has `collapsible`, apply a dynamic `md:ml-56`/`md:ml-16` (matching the sidebar's expanded/collapsed width) via `className` so `MenuBar` starts where the sidebar ends rather than underlapping it; see the docs site's own `DocsHeader` usage (`app/_docs/components/DocsHeader.tsx`, a separate site-specific header) for a worked example.
 
 ---
 

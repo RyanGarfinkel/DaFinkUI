@@ -14,7 +14,7 @@ program
 
 program
 	.command('init')
-	.description('Interactive setup wizard — writes dafink.config.json and token CSS')
+	.description('Interactive setup wizard, writes dafink.config.json and token CSS')
 	.action(async () =>
 	{
 		await runInit(process.cwd());
@@ -24,7 +24,8 @@ program
 	.command('add [components...]')
 	.description('Copy component files into your project')
 	.option('--all', 'Copy every component')
-	.action(async (components: string[], options: { all?: boolean }) =>
+	.option('--with-tests', 'Also copy each component\'s .test.tsx file', false)
+	.action(async (components: string[], options: { all?: boolean; withTests?: boolean }) =>
 	{
 		await runAdd(components, options, process.cwd());
 	});

@@ -1,10 +1,10 @@
 'use client';
 
-import { TableOfContents } from '@/app/_docs/components/TableOfContents';
+import TableOfContents from '@/src/components/TableOfContents/TableOfContents';
 import { DocsSidebar } from '@/app/_docs/components/DocsSidebar';
+import { DocsHeader } from '@/app/_docs/components/DocsHeader';
 import { PageNav } from '@/app/_docs/components/PageNav';
 import { Footer } from '@/app/_docs/components/Footer';
-import { TopNav } from '@/app/_docs/components/TopNav';
 import { useState } from 'react';
 
 interface DocsShellProps
@@ -17,7 +17,7 @@ export const DocsShell = ({ children }: DocsShellProps) => {
 
 	return (
 		<>
-			<TopNav collapsed={collapsed} />
+			<DocsHeader collapsed={collapsed} />
 			<DocsSidebar collapsed={collapsed} onCollapsedChange={setCollapsed} />
 			<div
 				className={[

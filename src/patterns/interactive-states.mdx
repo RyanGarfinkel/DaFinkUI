@@ -4,14 +4,14 @@ title: Patterns/Interactive States
 
 # Interactive States
 
-Every interactive element must implement three distinct states: **hover**, **focus**, and **focus-visible**. These are not interchangeable — each serves a different purpose and a different user.
+Every interactive element must implement three distinct states: **hover**, **focus**, and **focus-visible**. These are not interchangeable: each serves a different purpose and a different user.
 
 ## The Three States
 
 ### Hover
 Signals that an element is interactive. Triggered when a pointer device moves over the element.
 
-- Use a subtle background or color shift — enough to communicate affordance, not enough to distract
+- Use a subtle background or color shift, enough to communicate affordance, not enough to distract
 - Never rely on hover alone to convey information (touch devices have no hover)
 
 ### Focus
@@ -23,14 +23,14 @@ The element has received focus, by any means (click, tap, keyboard, script). Thi
 ### Focus Visible
 The element has received focus via **keyboard navigation**. This is the accessibility-critical state.
 
-- Must have a clearly visible ring or outline — do not suppress this
+- Must have a clearly visible ring or outline, do not suppress this
 - Use `focus-visible:ring-2 focus-visible:ring-offset-2` as the baseline
 - Ring color should match the component's intent (primary → blue, destructive → red)
 - Never remove focus-visible styles without providing an equivalent replacement
 
 ## Why the Distinction Matters
 
-Mouse users clicking a button don't need a focus ring — the click itself is unambiguous. Keyboard users navigating a page have no visual position reference without one. The `:focus-visible` pseudo-class lets us serve both groups correctly without compromise.
+Mouse users clicking a button don't need a focus ring: the click itself is unambiguous. Keyboard users navigating a page have no visual position reference without one. The `:focus-visible` pseudo-class lets us serve both groups correctly without compromise.
 
 ## Implementation Rules
 
@@ -48,16 +48,16 @@ These two utilities target different CSS pseudo-classes with very different sema
 | `focus:` | `:focus` | Any focus: click, tap, keyboard, script | Suppressing browser defaults (`focus:outline-none`) |
 | `focus-visible:` | `:focus-visible` | Keyboard navigation only (browser decides) | All visible focus indicators |
 
-**The pattern — always write both:**
+**The pattern: always write both:**
 
 ```tsx
 // ✅ Correct
 className="focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring"
 
-// ❌ Wrong — ring shows on mouse click too (annoying for mouse users)
+// ❌ Wrong, ring shows on mouse click too (annoying for mouse users)
 className="focus:ring-2 focus:ring-offset-2 focus:ring-brand-ring"
 
-// ❌ Wrong — no suppression; browser default outline flashes on click
+// ❌ Wrong, no suppression; browser default outline flashes on click
 className="focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring"
 ```
 
@@ -69,7 +69,7 @@ className="focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-b
 | Destructive | `ring-danger` |
 | Success | `ring-success` |
 
-**offset-2 is required for legibility.** The ring sits inside the element border by default — `ring-offset-2` pushes it outside so it's never obscured by the element's own background.
+**offset-2 is required for legibility.** The ring sits inside the element border by default; `ring-offset-2` pushes it outside so it's never obscured by the element's own background.
 
 **Never use `focus:outline-none` alone.** It removes the browser default without replacing it. A keyboard user reaching that element sees nothing. Always follow it with `focus-visible:ring-*` on the same element.
 
@@ -101,7 +101,7 @@ useEffect(() => {
 }, [isOpen]);
 ```
 
-If the overlay has no focusable children (e.g. an informational tooltip container), focus the overlay container itself — give it `tabIndex={-1}` and call `.focus()`.
+If the overlay has no focusable children (e.g. an informational tooltip container), focus the overlay container itself: give it `tabIndex={-1}` and call `.focus()`.
 
 ### Focus Trap (blocking overlays)
 Modals, dialogs, and drawers block the page behind them and must trap focus. Tab and Shift+Tab must cycle only through focusable elements within the overlay. See `src/patterns/accessibility.md` for the full trap implementation.

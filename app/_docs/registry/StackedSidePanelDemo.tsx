@@ -41,7 +41,7 @@ export const StackedSidePanelDemo = () => {
 					<SidePanelTitle>Filters</SidePanelTitle>
 				</SidePanelHeader>
 				<SidePanelContent>
-					A trigger inside this panel opens a second one on the same side —
+					A trigger inside this panel opens a second one on the same side;
 					watch this panel automatically shift toward the center, and its own
 					close controls disable until Advanced filters closes.
 				</SidePanelContent>
@@ -57,7 +57,7 @@ export const StackedSidePanelDemo = () => {
 					<SidePanelTitle>Advanced filters</SidePanelTitle>
 				</SidePanelHeader>
 				<SidePanelContent>
-					Independent panel — closing this one returns the Filters panel to
+					Independent panel: closing this one returns the Filters panel to
 					its original position. Both panels stay interactive the whole time.
 				</SidePanelContent>
 				<SidePanelFooter>

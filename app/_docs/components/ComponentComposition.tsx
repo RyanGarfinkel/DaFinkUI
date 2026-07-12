@@ -27,7 +27,7 @@ const renderClosingTag = (name: string) => (
 	/>
 );
 
-// Returns [opening, closing] as siblings — not [opening[closing as a child]] —
+// Returns [opening, closing] as siblings (not [opening[closing as a child]])
 // so a branch's closing tag sits at the same depth as its own opening tag,
 // the way a real closing tag lines up under its opener rather than its children.
 const renderNode = (node: CompositionNode): ReactElement[] => {

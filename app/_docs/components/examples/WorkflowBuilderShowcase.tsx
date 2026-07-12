@@ -30,7 +30,7 @@ export const WorkflowBuilderShowcase = () =>
 	return (
 		<div className='flex flex-col gap-6'>
 
-			{/* Default — demo graph */}
+			{/* Default: demo graph */}
 			<section className='flex flex-col gap-1'>
 				<h3 className='text-sm font-semibold text-text font-mono'>WorkflowBuilder</h3>
 				<p className='text-sm text-text-muted mb-3'>

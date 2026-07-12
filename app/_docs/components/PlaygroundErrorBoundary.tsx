@@ -17,7 +17,7 @@ interface PlaygroundErrorBoundaryState
 
 /** Catches errors thrown while React actually renders the evaluated playground element (as
  * opposed to errors thrown while transpiling/invoking the code, which the caller already
- * catches) — a real component in the scope can still throw mid-render on a bad prop combination,
+ * catches); a real component in the scope can still throw mid-render on a bad prop combination,
  * and without this boundary that would crash the whole Playground page instead of just the
  * preview. */
 export class PlaygroundErrorBoundary extends Component<PlaygroundErrorBoundaryProps, PlaygroundErrorBoundaryState>

@@ -37,7 +37,7 @@ function copyTemplate(templateName: string, destPath: string): void
 }
 
 /** GitLab keeps all CI config in a single root `.gitlab-ci.yml`, unlike GitHub's
- * one-file-per-workflow directory — so an existing file must be appended to,
+ * one-file-per-workflow directory, so an existing file must be appended to,
  * never overwritten, or a consumer's other jobs would be destroyed. */
 function writeGitlabWorkflow(cwd: string): 'created' | 'appended' | 'skipped'
 {
@@ -84,7 +84,7 @@ export async function runAudit(options: { workflow: boolean; provider: string },
 {
 	if(options.provider !== 'github' && options.provider !== 'gitlab')
 	{
-		log.error(`Unknown provider "${options.provider}" — expected "github" or "gitlab".`);
+		log.error(`Unknown provider "${options.provider}": expected "github" or "gitlab".`);
 		process.exit(1);
 	}
 
@@ -119,7 +119,7 @@ export async function runAudit(options: { workflow: boolean; provider: string },
 			}
 			else
 			{
-				log.info(`${pc.bold('.gitlab-ci.yml')} already has a ${pc.bold('dafink-audit')} job — left it untouched.`);
+				log.info(`${pc.bold('.gitlab-ci.yml')} already has a ${pc.bold('dafink-audit')} job, left it untouched.`);
 			}
 		}
 	}

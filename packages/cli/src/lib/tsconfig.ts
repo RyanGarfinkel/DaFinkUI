@@ -30,7 +30,7 @@ export function addComponentsAlias(cwd: string, componentsDir: string): AliasRes
 	const configFile = CONFIG_CANDIDATES.find(name => existsSync(resolve(cwd, name)));
 
 	if(!configFile)
-		return { updated: false, configFile: null, reason: 'No tsconfig.json found — skipping @components alias setup, you can add components normally' };
+		return { updated: false, configFile: null, reason: 'No tsconfig.json found, skipping @components alias setup, you can add components normally' };
 
 	const configPath = resolve(cwd, configFile);
 	const raw = readFileSync(configPath, 'utf8');
@@ -43,7 +43,7 @@ export function addComponentsAlias(cwd: string, componentsDir: string): AliasRes
 	}
 	catch
 	{
-		return { updated: false, configFile, reason: `Could not parse ${configFile} — skipping @components alias setup` };
+		return { updated: false, configFile, reason: `Could not parse ${configFile}, skipping @components alias setup` };
 	}
 
 	parsed.compilerOptions ??= {};

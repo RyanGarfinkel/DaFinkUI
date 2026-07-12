@@ -22,7 +22,7 @@ Project-specific rules are in `rules/`. Read the relevant file before starting a
 
 ## Pattern Files
 
-Design and accessibility patterns are in `src/patterns/`. These are served via MCP and are the canonical source of truth — do not duplicate their content elsewhere.
+Design and accessibility patterns are in `src/patterns/`. These are served via MCP and are the canonical source of truth; do not duplicate their content elsewhere.
 
 | Pattern file                              | What it covers                                               |
 |-------------------------------------------|--------------------------------------------------------------|
@@ -32,7 +32,18 @@ Design and accessibility patterns are in `src/patterns/`. These are served via M
 
 ---
 
-## Accessibility — Non-Negotiable
+## Known Footguns: Read Before Touching These Areas
+
+**Dead Tailwind utility classes (tokens/CSS).** Tailwind v4 only generates a named utility (`bg-foo`, `text-foo`, ...) from a `--color-foo` custom property declared inside `@theme { }`. A token declared only in `:root`/`.dark` is invisible to the utility generator, so the class silently compiles to nothing and the element renders with no background/text/border, letting whatever's behind it show through. No build error, no lint error. This has happened twice: `--color-surface-panel` was added to `:root` only (missed `@theme`), and `bg-input` was used in `DropdownMenu.tsx`/`Popover.tsx` with no `--color-input` token ever defined anywhere. Before using or adding a color utility class:
+- Confirm the matching `--color-*` token actually exists inside an `@theme { }` block in `app/globals.css`; grep for it, don't assume.
+- `packages/cli/src/lib/css.ts` (`generateCss()`) is a **second, independent copy** of the token system, shipped to consumers via `npx dafink-ui init`. Any token that needs `@theme` registration in `app/globals.css` needs the same dual `:root`/`@theme` treatment there too; check both files, not just one.
+- `app/globals.css` also defines standalone utility classes consumed by vendored components (currently `.scrollbar-hover`, used by `Sidebar.tsx`). If a vendored component references a custom class, `packages/cli/src/lib/css.ts` must emit that class's CSS too, or it silently degrades for every consumer.
+
+**`build-changelog.mjs` and shallow clones.** The script's try/catch only guards against `git` *throwing*. On Vercel's default shallow clone, `git tag` returns success with zero tags instead of throwing, which used to dump the entire commit history into one "Unreleased" bucket and overwrite the correct committed changelog on every deploy. The script now explicitly throws when `tags.length === 0` so the catch block's "fall back to the committed file" path actually triggers. Don't remove that check, and apply the same "did this git command silently return something degenerate, not just fail" scrutiny to any future prebuild step that shells out to `git`.
+
+---
+
+## Accessibility: Non-Negotiable
 
 These five rules apply to every component, no exceptions:
 
@@ -40,7 +51,7 @@ These five rules apply to every component, no exceptions:
 2. **Every interactive element has a visible focus indicator.** `focus-visible:ring-2 focus-visible:ring-offset-2` is the baseline. Never suppress focus-visible without a direct replacement.
 3. **Color contrast.** Body text: 4.5:1 minimum. Large text and UI components: 3:1 minimum. Design tokens are contrast-checked by the CI gate at `scripts/check-contrast.ts`. Run it after any token change. Never substitute a hardcoded color without a contrast check.
 4. **Color is not the only signal.** Any state communicated by color (error, success, disabled) must also be communicated by a label, icon, or border change.
-5. **All animation respects `prefers-reduced-motion`.** `globals.css` now contains the following rule — do not bypass it:
+5. **All animation respects `prefers-reduced-motion`.** `globals.css` now contains the following rule; do not bypass it:
    ```css
    @media (prefers-reduced-motion: reduce) {
      *, ::before, ::after {
@@ -53,14 +64,14 @@ These five rules apply to every component, no exceptions:
 
 ---
 
-## Popup and Overlay Components — Required Behavior
+## Popup and Overlay Components: Required Behavior
 
 Any component that opens a floating layer (Modal, Dialog, Drawer, Dropdown, Menu, Combobox, Popover, Tooltip) must implement all of the following. Full implementation guide: `src/patterns/accessibility.md`. Checklist and animation patterns: `rules/new-component.md`.
 
 | Behavior | Modal / Dialog / Drawer | Menu / Dropdown / Popover |
 |---|---|---|
 | Focus on open | Move to first focusable element inside | Move to first focusable element inside |
-| Focus trap | **Required** — Tab/Shift+Tab cycle within | Not trapped |
+| Focus trap | **Required**: Tab/Shift+Tab cycle within | Not trapped |
 | Escape | Close, return focus to trigger | Close, return focus to trigger |
 | Tab | Wraps within overlay | Closes overlay, moves to next page element |
 | Arrow keys | N/A | ArrowDown/Up navigate items; Home/End jump to ends; wraps |
@@ -71,12 +82,12 @@ Any component that opens a floating layer (Modal, Dialog, Drawer, Dropdown, Menu
 | `aria-modal` | `"true"` | Omit |
 | Animation | Fade + scale 0.95→1.0 in, reverse out | Same |
 
-Return focus to the trigger element on close — always, regardless of how it was closed.
+Return focus to the trigger element on close, always, regardless of how it was closed.
 
 ---
 
 ## Memory & Design Learning
 
-**Aggressive note-taking.** Capture new patterns, preferences, and decisions as they emerge — don't wait to be asked. When a new design convention is validated, a visual approach is confirmed, or a pattern is ruled out, save it to memory immediately.
+**Aggressive note-taking.** Capture new patterns, preferences, and decisions as they emerge; don't wait to be asked. When a new design convention is validated, a visual approach is confirmed, or a pattern is ruled out, save it to memory immediately.
 
 **Evolving design philosophy.** The files in `src/patterns/` and `rules/` are living documents. When new visual or interaction principles emerge from working sessions, update them. Design thinking in this project should be current, not frozen.

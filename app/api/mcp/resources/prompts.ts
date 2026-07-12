@@ -5,7 +5,7 @@ export const registerPrompts = (server: McpServer): void =>
 {
 	server.prompt(
 		'use-component',
-		'Get full guidance for using a specific DaFink UI component — spec, props, usage example, and accessibility notes',
+		'Get full guidance for using a specific DaFink UI component: spec, props, usage example, and accessibility notes',
 		{ component: z.string().describe('Component name, e.g. "Button" or "Modal"') },
 		({ component }) => ({
 			messages: [

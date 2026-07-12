@@ -25,9 +25,9 @@ export async function runSkill(targetPath: string | undefined, cwd: string): Pro
 	log.info(
 		pc.bold('Next steps:') + '\n\n' +
 		'  Claude Code: drop the file into ' + pc.cyan('.claude/skills/') + ' in your home or\n' +
-		'  project directory — it picks up the bundled ' + pc.cyan('SKILL.md') + ' automatically.\n\n' +
+		'  project directory, it picks up the bundled ' + pc.cyan('SKILL.md') + ' automatically.\n\n' +
 		'  Cowork: upload ' + pc.cyan(SKILL_FILENAME) + ' from the Skills settings page.\n\n' +
-		'  This skill covers design judgment — style, palette, layout, and motion choices.\n' +
+		'  This skill covers design judgment: style, palette, layout, and motion choices.\n' +
 		'  Pair it with the MCP server at ' + pc.cyan('https://ui.ryangarfinkel.dev/api/mcp') + ' for\n' +
 		'  live component specs and prop tables.'
 	);

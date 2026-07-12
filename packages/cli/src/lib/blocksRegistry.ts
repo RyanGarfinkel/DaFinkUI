@@ -19,6 +19,16 @@ export const BLOCKS_REGISTRY: BlockRegistryEntry[] = [
 	{ name: 'NotificationsPanel',  slug: 'notifications-panel',   files: ['NotificationsPanel/NotificationsPanel.tsx'],   deps: [],           registryDependencies: ['card', 'scroll-fade', 'avatar', 'button'] },
 	{ name: 'TeamGrid',            slug: 'team-grid',             files: ['TeamGrid/TeamGrid.tsx'],                       deps: [],           registryDependencies: ['badge', 'card', 'avatar'] },
 	{ name: 'TeamManagement',      slug: 'team-management',       files: ['TeamManagement/TeamManagement.tsx'],           deps: [],           registryDependencies: ['modal', 'card', 'select', 'badge', 'avatar', 'button', 'input'] },
+
+	// Block example variants: not listed on the docs /blocks gallery (see
+	// blocks.ts `hidden: true`), but installable on their own since each has
+	// a real, standalone file in src/blocks/.
+	{ name: 'AuthFormSocial',               slug: 'auth-form-social',               files: ['AuthFormSocial/AuthFormSocial.tsx'],                             deps: [], registryDependencies: ['card', 'form', 'button', 'badge', 'input'] },
+	{ name: 'AuthFormMagicLink',            slug: 'auth-form-magic-link',           files: ['AuthFormMagicLink/AuthFormMagicLink.tsx'],                       deps: [], registryDependencies: ['card', 'form', 'button', 'input'] },
+	{ name: 'ChartCardRadar',               slug: 'chart-card-radar',               files: ['ChartCardRadar/ChartCardRadar.tsx'],                             deps: [], registryDependencies: ['card', 'charts', 'count-up', 'badge'] },
+	{ name: 'ChartCardBar',                 slug: 'chart-card-bar',                 files: ['ChartCardBar/ChartCardBar.tsx'],                                 deps: [], registryDependencies: ['card', 'charts', 'count-up', 'badge'] },
+	{ name: 'PricingSectionUsage',          slug: 'pricing-section-usage',          files: ['PricingSectionUsage/PricingSectionUsage.tsx'],                   deps: [], registryDependencies: ['card', 'slider', 'button', 'badge'] },
+	{ name: 'NotificationsPanelActionable', slug: 'notifications-panel-actionable', files: ['NotificationsPanelActionable/NotificationsPanelActionable.tsx'], deps: [], registryDependencies: ['tabs', 'card', 'scroll-fade', 'button', 'badge'] },
 ];
 
 export function findBlockBySlug(slug: string): BlockRegistryEntry | undefined

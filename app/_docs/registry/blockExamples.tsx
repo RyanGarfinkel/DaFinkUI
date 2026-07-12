@@ -11,6 +11,7 @@ export interface BlockExample {
 	description?: string;
 	usage:        string;
 	preview:      React.ReactNode;
+	slug:         string; // Matching hidden entry in blocks.ts, so this variant can be shown its own CLI install command
 }
 
 export const blockExamples: Record<string, BlockExample[]> = {
@@ -21,11 +22,7 @@ export const blockExamples: Record<string, BlockExample[]> = {
 			description: 'Sign in with Google or GitHub, or fall back to a standard email and password form.',
 			usage: `'use client';
 
-import { Card, CardContent, CardFooter, CardHeader } from '@/src/components/Card/Card';
-import { FormField, FormLabel } from '@/src/components/Form/Form';
-import Button from '@/src/components/Button/Button';
-import Badge from '@/src/components/Badge/Badge';
-import Input from '@/src/components/Input/Input';
+import { Card, CardContent, CardFooter, CardHeader, FormField, FormLabel, Button, Badge, Input } from '@components';
 import { useState } from 'react';
 
 const GoogleIcon = () => (
@@ -47,7 +44,7 @@ const CheckIcon = () => (
   </svg>
 );
 
-export default function AuthFormSocial() {
+export default function AuthFormSocialExample() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -143,17 +140,15 @@ export default function AuthFormSocial() {
   );
 }`,
 			preview: <AuthFormSocial />,
+			slug:    'auth-form-social',
 		},
 		{
 			id:    'magic-link',
 			title: 'Magic link',
-			description: 'Passwordless sign-in — email a one-time link instead of asking for a password.',
+			description: 'Passwordless sign-in: email a one-time link instead of asking for a password.',
 			usage: `'use client';
 
-import { Card, CardContent, CardFooter, CardHeader } from '@/src/components/Card/Card';
-import { FormField, FormLabel } from '@/src/components/Form/Form';
-import Button from '@/src/components/Button/Button';
-import Input from '@/src/components/Input/Input';
+import { Card, CardContent, CardFooter, CardHeader, FormField, FormLabel, Button, Input } from '@components';
 import { useEffect, useState } from 'react';
 
 const RESEND_COOLDOWN = 30;
@@ -165,7 +160,7 @@ const MailIcon = () => (
   </svg>
 );
 
-export default function AuthFormMagicLink() {
+export default function AuthFormMagicLinkExample() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -201,7 +196,7 @@ export default function AuthFormMagicLink() {
       <CardHeader className="flex flex-col gap-1">
         <h3 className="text-xl font-semibold text-text">{sent ? 'Check your inbox' : 'Sign in'}</h3>
         <p className="text-sm text-text-muted">
-          {sent ? 'We sent a magic link to your email.' : "Enter your email and we'll send you a link to sign in — no password needed."}
+          {sent ? 'We sent a magic link to your email.' : "Enter your email and we'll send you a link to sign in; no password needed."}
         </p>
       </CardHeader>
       <CardContent>
@@ -243,19 +238,17 @@ export default function AuthFormMagicLink() {
   );
 }`,
 			preview: <AuthFormMagicLink />,
+			slug:    'auth-form-magic-link',
 		},
 	],
 	'chart-card': [
 		{
 			id:    'radar',
 			title: 'Team skill radar',
-			description: 'Same card shell, a RadarChart instead — comparing team scores against target benchmarks across skill areas.',
+			description: 'Same card shell, a RadarChart instead: comparing team scores against target benchmarks across skill areas.',
 			usage: `'use client';
 
-import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
-import { RadarChart } from '@/src/components/Charts/Charts';
-import CountUp from '@/src/components/CountUp/CountUp';
-import Badge from '@/src/components/Badge/Badge';
+import { Card, CardContent, CardHeader, RadarChart, CountUp, Badge } from '@components';
 
 const SKILL_DATA = [
   { skill: 'Frontend', team: 88, target: 80 },
@@ -271,7 +264,7 @@ const SKILL_SERIES = [
   { key: 'target', label: 'Target' },
 ];
 
-export default function ChartCardRadar() {
+export default function ChartCardRadarExample() {
   return (
     <Card className="max-w-sm w-full">
       <CardHeader>
@@ -290,17 +283,15 @@ export default function ChartCardRadar() {
   );
 }`,
 			preview: <ChartCardRadar />,
+			slug:    'chart-card-radar',
 		},
 		{
 			id:    'bar',
 			title: 'Top products',
-			description: 'A ranking variant of the same card shell — a BarChart totaling revenue across a product lineup.',
+			description: 'A ranking variant of the same card shell: a BarChart totaling revenue across a product lineup.',
 			usage: `'use client';
 
-import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
-import { BarChart } from '@/src/components/Charts/Charts';
-import CountUp from '@/src/components/CountUp/CountUp';
-import Badge from '@/src/components/Badge/Badge';
+import { Card, CardContent, CardHeader, BarChart, CountUp, Badge } from '@components';
 
 const PRODUCT_DATA = [
   { product: 'Core', revenue: 42500 },
@@ -312,7 +303,7 @@ const PRODUCT_DATA = [
 
 const TOTAL_REVENUE = PRODUCT_DATA.reduce((sum, p) => sum + p.revenue, 0);
 
-export default function ChartCardBar() {
+export default function ChartCardBarExample() {
   return (
     <Card className="max-w-sm w-full">
       <CardHeader>
@@ -337,26 +328,24 @@ export default function ChartCardBar() {
   );
 }`,
 			preview: <ChartCardBar />,
+			slug:    'chart-card-bar',
 		},
 	],
 	'pricing-section': [
 		{
 			id:    'usage',
 			title: 'Usage-based pricing',
-			description: 'A metered pricing card — drag the slider to estimate a monthly bill from a base fee plus a per-unit rate.',
+			description: 'A metered pricing card: drag the slider to estimate a monthly bill from a base fee plus a per-unit rate.',
 			usage: `'use client';
 
-import { Card, CardContent, CardFooter, CardHeader } from '@/src/components/Card/Card';
-import Slider from '@/src/components/Slider/Slider';
-import Button from '@/src/components/Button/Button';
-import Badge from '@/src/components/Badge/Badge';
+import { Card, CardContent, CardFooter, CardHeader, Slider, Button, Badge } from '@components';
 import { useState } from 'react';
 
 const BASE_FEE = 19;
 const INCLUDED_CALLS = 10;
 const RATE_PER_1K = 0.4;
 
-export default function PricingSectionUsage() {
+export default function Example() {
   const [calls, setCalls] = useState(50);
 
   const billableCalls = Math.max(0, calls - INCLUDED_CALLS);
@@ -366,7 +355,7 @@ export default function PricingSectionUsage() {
     <Card variant="elevated" className="w-full max-w-md">
       <CardHeader className="flex flex-col gap-1">
         <h3 className="text-xl font-semibold text-text">Usage-based pricing</h3>
-        <p className="text-sm text-text-muted">Pay only for the API calls you make — no seats, no tiers.</p>
+        <p className="text-sm text-text-muted">Pay only for the API calls you make; no seats, no tiers.</p>
       </CardHeader>
       <CardContent className="flex flex-col gap-6">
         <div className="flex items-end justify-between">
@@ -384,7 +373,7 @@ export default function PricingSectionUsage() {
           min={10}
           max={500}
           step={10}
-          hint={\`\${(calls * 1000).toLocaleString()} calls per month — first \${(INCLUDED_CALLS * 1000).toLocaleString()} are always free\`}
+          hint={\`\${(calls * 1000).toLocaleString()} calls per month, first \${(INCLUDED_CALLS * 1000).toLocaleString()} are always free\`}
         />
 
         <p className="text-xs text-text-muted">
@@ -399,6 +388,7 @@ export default function PricingSectionUsage() {
   );
 }`,
 			preview: <PricingSectionUsage />,
+			slug:    'pricing-section-usage',
 		},
 	],
 	'notifications-panel': [
@@ -408,11 +398,7 @@ export default function PricingSectionUsage() {
 			description: 'An All/Unread filter plus per-notification mark-as-read and dismiss actions, with type icons and an empty state.',
 			usage: `'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/Tabs/Tabs';
-import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
-import ScrollFade from '@/src/components/ScrollFade/ScrollFade';
-import Button from '@/src/components/Button/Button';
-import Badge from '@/src/components/Badge/Badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger, Card, CardContent, CardHeader, ScrollFade, Button, Badge } from '@components';
 import { useState } from 'react';
 
 const INITIAL_NOTIFICATIONS = [
@@ -476,7 +462,7 @@ const TYPE_STYLE = {
   system: 'bg-warning-bg text-warning',
 };
 
-export default function NotificationsPanelActionable() {
+export default function Example() {
   const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
   const [filter, setFilter] = useState('all');
 
@@ -551,6 +537,7 @@ export default function NotificationsPanelActionable() {
   );
 }`,
 			preview: <NotificationsPanelActionable />,
+			slug:    'notifications-panel-actionable',
 		},
 	],
 };

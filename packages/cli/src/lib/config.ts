@@ -5,6 +5,7 @@ export interface DaFinkConfig
 {
 	style: 'minimal' | 'neumorph' | 'brutalist';
 	palette: 'zinc' | 'ocean' | 'ember' | 'forest' | 'noir' | 'plum';
+	framework: 'next' | 'react';
 	componentsDir: string;
 	blocksDir: string;
 	cssFile: string;
@@ -21,7 +22,7 @@ export function readConfig(cwd: string): DaFinkConfig
 
 	const parsed = JSON.parse(readFileSync(configPath, 'utf8')) as Partial<DaFinkConfig>;
 
-	return { blocksDir: 'src/blocks', ...parsed } as DaFinkConfig;
+	return { blocksDir: 'src/blocks', framework: 'next', ...parsed } as DaFinkConfig;
 }
 
 export function writeConfig(cwd: string, config: DaFinkConfig): void

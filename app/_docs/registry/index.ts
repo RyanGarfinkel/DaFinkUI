@@ -30,7 +30,7 @@ export const registry: ComponentEntry[] = [
     name: 'Button',
     category: 'Inputs',
     description: 'A clickable control that triggers an action, supporting nine visual variants and five sizes.',
-    usage: `import Button from '@/src/components/Button/Button';
+    usage: `import { Button } from '@components';
 
 export default function Example() {
   return (
@@ -68,7 +68,7 @@ export default function Example() {
         name: 'size',
         type: '"sm" | "md" | "lg" | "icon" | "icon-sm"',
         default: '"md"',
-        description: 'Height and padding. "icon"/"icon-sm" render a square (36px/28px) with no horizontal padding — requires aria-label when there is no visible text.',
+        description: 'Height and padding. "icon"/"icon-sm" render a square (36px/28px) with no horizontal padding. Requires aria-label when there is no visible text.',
       },
       {
         name: 'shape',
@@ -85,7 +85,7 @@ export default function Example() {
       {
         name: 'href',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Renders as a Next.js Link instead of a button. All variants and sizes work the same; loading and disabled are ignored in this mode.',
       },
       {
@@ -110,7 +110,7 @@ export default function Example() {
     name: 'Input',
     category: 'Inputs',
     description: 'A single-line text input with optional label, hint, and error messaging. Supports a floating label variant where the label animates inside the field.',
-    usage: `import Input from '@/src/components/Input/Input';
+    usage: `import { Input } from '@components';
 
 export default function Example() {
   return (
@@ -126,25 +126,25 @@ export default function Example() {
       {
         name: 'label',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Visible label rendered above the input (default) or animated inside it (floating); also used to derive the input id.',
       },
       {
         name: 'placeholder',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Placeholder text shown when the input is empty (default variant only).',
       },
       {
         name: 'hint',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Helper text rendered below the input when there is no error.',
       },
       {
         name: 'error',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Error message; switches the input to error state and sets aria-invalid.',
       },
       {
@@ -172,7 +172,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import OTPInput from '@/src/components/OTPInput/OTPInput';
+import { OTPInput } from '@components';
 
 export default function Example() {
   const [code, setCode] = useState('');
@@ -200,25 +200,25 @@ export default function Example() {
       {
         name: 'onChange',
         type: '(value: string) => void',
-        default: '—',
+        default: '-',
         description: 'Called with the full updated string on any change.',
       },
       {
         name: 'label',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Visible label above the cells.',
       },
       {
         name: 'error',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Error message; all cells enter the error state.',
       },
       {
         name: 'hint',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Helper text shown below the cells.',
       },
       {
@@ -237,7 +237,7 @@ export default function Example() {
     name: 'Textarea',
     category: 'Inputs',
     description: 'A multi-line text input with optional label, hint, and error messaging.',
-    usage: `import Textarea from '@/src/components/Textarea/Textarea';
+    usage: `import { Textarea } from '@components';
 
 export default function Example() {
   return (
@@ -251,25 +251,25 @@ export default function Example() {
       {
         name: 'label',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Visible label rendered above the textarea.',
       },
       {
         name: 'placeholder',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Placeholder text shown when the textarea is empty.',
       },
       {
         name: 'hint',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Helper text rendered below the textarea when there is no error.',
       },
       {
         name: 'error',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Error message; switches the textarea to error state.',
       },
       {
@@ -297,7 +297,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
+import { RadioGroup, RadioItem } from '@components';
 
 export default function Example() {
   const [plan, setPlan] = useState('pro');
@@ -314,19 +314,19 @@ export default function Example() {
       {
         name: 'name',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Shared name attribute applied to all radio inputs in the group.',
       },
       {
         name: 'value',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Currently selected value (controlled).',
       },
       {
         name: 'onValueChange',
         type: '(v: string) => void',
-        default: '—',
+        default: '-',
         description: 'Callback fired when the user selects a new option.',
       },
       {
@@ -354,7 +354,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import Switch from '@/src/components/Switch/Switch';
+import { Switch } from '@components';
 
 export default function Example() {
   const [enabled, setEnabled] = useState(false);
@@ -376,25 +376,25 @@ export default function Example() {
       {
         name: 'checked',
         type: 'boolean',
-        default: '—',
+        default: '-',
         description: 'Controlled checked state.',
       },
       {
         name: 'onCheckedChange',
         type: '(checked: boolean) => void',
-        default: '—',
+        default: '-',
         description: 'Callback fired when the switch is toggled.',
       },
       {
         name: 'label',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Visible label rendered beside the switch.',
       },
       {
         name: 'hint',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Helper text rendered below the label.',
       },
       {
@@ -422,13 +422,13 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { ToggleGroup, ToggleGroupItem } from '@/src/components/ToggleGroup/ToggleGroup';
+import { ToggleGroup, ToggleGroupItem } from '@components';
 
 export default function Example() {
   const [align, setAlign] = useState('left');
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 items-center">
       <ToggleGroup type="single" value={align} onValueChange={setAlign}>
         <ToggleGroupItem value="left">Left</ToggleGroupItem>
         <ToggleGroupItem value="center">Center</ToggleGroupItem>
@@ -441,19 +441,19 @@ export default function Example() {
       {
         name: 'type',
         type: '"single" | "multiple"',
-        default: '—',
+        default: '-',
         description: 'Controls whether one or many items can be active at once.',
       },
       {
         name: 'value',
         type: 'string | string[]',
-        default: '—',
+        default: '-',
         description: 'Controlled value. String for single mode, string[] for multiple.',
       },
       {
         name: 'onValueChange',
         type: '(value: string | string[]) => void',
-        default: '—',
+        default: '-',
         description: 'Called with the new value when selection changes.',
       },
       {
@@ -484,13 +484,19 @@ export default function Example() {
     name: 'Badge',
     category: 'Display',
     description: 'Inline label for status, category, or count.',
-    usage: `import { Badge } from '@/src/components/Badge/Badge';
+    usage: `import { Badge } from '@components';
 
-<Badge>Default</Badge>
-<Badge variant="success">Success</Badge>
-<Badge variant="warning">Warning</Badge>
-<Badge variant="danger">Danger</Badge>
-<Badge variant="outline">Outline</Badge>`,
+export default function Example() {
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      <Badge>Default</Badge>
+      <Badge variant="success">Success</Badge>
+      <Badge variant="warning">Warning</Badge>
+      <Badge variant="danger">Danger</Badge>
+      <Badge variant="outline">Outline</Badge>
+    </div>
+  );
+}`,
     props: [
       { name: 'variant',   type: "'default' | 'success' | 'warning' | 'danger' | 'outline'", default: "'default'", description: 'Visual style of the badge.' },
       { name: 'className', type: 'string', default: "''", description: 'Additional CSS classes.' },
@@ -504,17 +510,25 @@ export default function Example() {
     name: 'ScrollFade',
     category: 'Effects',
     description: 'A scroll container that fades whichever edge still has more content to reveal, instead of cutting content off abruptly.',
-    usage: `import { ScrollFade } from '@/src/components/ScrollFade/ScrollFade';
+    usage: `import { ScrollFade } from '@components';
 
-<ScrollFade className="h-48 rounded-[var(--radius-lg)] border border-surface-border bg-surface p-4">
-  <p>Long content that overflows vertically…</p>
-</ScrollFade>`,
+export default function Example() {
+  return (
+    <ScrollFade className="h-48 w-full max-w-sm rounded-[var(--radius-lg)] border border-surface-border bg-surface p-4">
+      <ul className="flex flex-col gap-3 text-sm text-text">
+        {Array.from({ length: 12 }, (_, i) => (
+          <li key={i}>Item {i + 1}</li>
+        ))}
+      </ul>
+    </ScrollFade>
+  );
+}`,
     props: [
       { name: 'direction', type: "'vertical' | 'horizontal'", default: "'vertical'", description: 'Which axis scrolls. Vertical fades top/bottom; horizontal fades left/right.' },
       { name: 'fadeSize',  type: 'string', default: "'h-10' / 'w-10'", description: 'Tailwind size class for how deep the fade extends from the edge.' },
       { name: 'fadeFrom',  type: 'string', default: "'from-surface'", description: "Tailwind gradient-from color class. Match the scrolling content's actual background or the fade won't blend." },
       { name: 'className', type: 'string', default: "''", description: 'Additional CSS classes merged onto the scrollable element.' },
-      { name: 'wrapperClassName', type: 'string', default: "''", description: 'Additional CSS classes merged onto the outer wrapper — use for flex-sizing (e.g. flex-1 min-h-0) when ScrollFade must grow inside a flex-col parent.' },
+      { name: 'wrapperClassName', type: 'string', default: "''", description: 'Additional CSS classes merged onto the outer wrapper; use for flex-sizing (e.g. flex-1 min-h-0) when ScrollFade must grow inside a flex-col parent.' },
       { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'The scrollable content.' },
     ],
     dependencies:         [],
@@ -526,8 +540,7 @@ export default function Example() {
     name: 'Card',
     category: 'Display',
     description: 'A flexible container component for grouping related content into a distinct visual surface, composed with CardHeader, CardContent, and CardFooter.',
-    usage: `import { Card, CardHeader, CardContent, CardFooter } from '@/src/components/Card/Card';
-import Button from '@/src/components/Button/Button';
+    usage: `import { Card, CardHeader, CardContent, CardFooter, Button } from '@components';
 
 export default function Example() {
   return (
@@ -547,12 +560,12 @@ export default function Example() {
       </Card>
       <Card variant="elevated">
         <CardContent>
-          <p className="text-sm text-text">Elevated — floats above the page surface.</p>
+          <p className="text-sm text-text">Elevated: floats above the page surface.</p>
         </CardContent>
       </Card>
       <Card variant="outline">
         <CardContent>
-          <p className="text-sm text-text">Outline — transparent background with a strong border.</p>
+          <p className="text-sm text-text">Outline: transparent background with a strong border.</p>
         </CardContent>
       </Card>
     </div>
@@ -592,7 +605,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { Select } from '@/src/components/Select/Select';
+import { Select } from '@components';
 
 const FRAMEWORKS = [
   { value: 'next',    label: 'Next.js'  },
@@ -616,7 +629,7 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'options',     type: 'SelectOption[]',             default: '—',          description: 'Array of { value, label } objects.' },
+      { name: 'options',     type: 'SelectOption[]',             default: '-',          description: 'Array of { value, label } objects.' },
       { name: 'value',       type: 'string',                     default: 'undefined',  description: 'Controlled selected value.' },
       { name: 'onChange',    type: '(value: string) => void',    default: 'undefined',  description: 'Called when a selection is made.' },
       { name: 'placeholder', type: 'string',                     default: "'Select…'",  description: 'Shown when no value is selected.' },
@@ -636,11 +649,17 @@ export default function Example() {
     name: 'Checkbox',
     category: 'Inputs',
     description: 'Controlled or uncontrolled checkbox with optional label.',
-    usage: `import { Checkbox } from '@/src/components/Checkbox/Checkbox';
+    usage: `import { Checkbox } from '@components';
 
-<Checkbox label="Accept terms" />
-<Checkbox label="Checked" defaultChecked />
-<Checkbox label="Disabled" disabled />`,
+export default function Example() {
+  return (
+    <div className="flex flex-col gap-3">
+      <Checkbox id="cb1" label="Accept terms" />
+      <Checkbox id="cb2" label="Checked" defaultChecked />
+      <Checkbox id="cb3" label="Disabled" disabled />
+    </div>
+  );
+}`,
     props: [
       { name: 'label',    type: 'string',  default: 'undefined', description: 'Text label rendered next to the checkbox.' },
       { name: 'id',       type: 'string',  default: 'undefined', description: 'HTML id, links label to input.' },
@@ -664,7 +683,7 @@ export default function Example() {
   TableRow,
   TableHeader,
   TableCell,
-} from '@/src/components/Table/Table';
+} from '@components';
 
 export default function Example() {
   return (
@@ -748,7 +767,7 @@ export default function Example() {
   SkeletonImage,
   SkeletonInput,
   SkeletonTableRow,
-} from '@/src/components/Skeleton/Skeleton';
+} from '@components';
 
 export default function Example() {
   return (
@@ -784,13 +803,13 @@ export default function Example() {
       {
         name: 'width',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'CSS width applied inline on the base Skeleton block.',
       },
       {
         name: 'height',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'CSS height applied inline on the base Skeleton block.',
       },
       {
@@ -803,31 +822,31 @@ export default function Example() {
         name: 'lines',
         type: 'number',
         default: '3',
-        description: 'SkeletonCard — number of body text lines to render.',
+        description: 'SkeletonCard: number of body text lines to render.',
       },
       {
         name: 'label',
         type: 'boolean',
         default: 'false',
-        description: 'SkeletonInput — whether to show a label placeholder above the input.',
+        description: 'SkeletonInput: whether to show a label placeholder above the input.',
       },
       {
         name: 'fields',
         type: 'number',
         default: '3',
-        description: 'SkeletonForm — number of labelled input fields to render.',
+        description: 'SkeletonForm: number of labelled input fields to render.',
       },
       {
         name: 'columns',
         type: 'number',
         default: '4',
-        description: 'SkeletonTableRow — number of equal-width column blocks per row.',
+        description: 'SkeletonTableRow: number of equal-width column blocks per row.',
       },
       {
         name: 'aspectRatio',
         type: 'string',
         default: '"16/9"',
-        description: 'SkeletonImage — CSS aspect-ratio value controlling height relative to width.',
+        description: 'SkeletonImage: CSS aspect-ratio value controlling height relative to width.',
       },
     ],
     dependencies: [],
@@ -838,10 +857,8 @@ export default function Example() {
     slug: 'form',
     name: 'Form',
     category: 'Forms',
-    description: 'A set of composable layout primitives for building forms — handling spacing, labeling, error display, and section grouping. Optionally pair with the useZodForm hook for Zod schema validation powered by react-hook-form.',
-    usage: `import { Form, FormField, FormLabel, FormControl, FormDescription, FormMessage, useZodForm } from '@/src/components/Form/Form';
-import Input from '@/src/components/Input/Input';
-import Button from '@/src/components/Button/Button';
+    description: 'A set of composable layout primitives for building forms: handling spacing, labeling, error display, and section grouping. Optionally pair with the useZodForm hook for Zod schema validation powered by react-hook-form.',
+    usage: `import { Form, FormField, FormLabel, FormControl, FormDescription, FormMessage, useZodForm, Input, Button } from '@components';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -889,14 +906,14 @@ export default function Example() {
       {
         name: 'schema',
         type: 'z.ZodType',
-        default: '—',
-        description: 'useZodForm(schema, options) — a Zod schema describing the form shape. Passed to zodResolver internally so validation runs on submit (and on change/blur if configured via options.mode).',
+        default: '-',
+        description: 'useZodForm(schema, options): a Zod schema describing the form shape. Passed to zodResolver internally so validation runs on submit (and on change/blur if configured via options.mode).',
       },
       {
         name: 'options',
         type: "Omit<UseFormProps<z.infer<TSchema>>, 'resolver'>",
         default: 'undefined',
-        description: 'useZodForm(schema, options) — any react-hook-form useForm option (defaultValues, mode, etc.) except resolver, which useZodForm sets for you.',
+        description: 'useZodForm(schema, options): any react-hook-form useForm option (defaultValues, mode, etc.) except resolver, which useZodForm sets for you.',
       },
     ],
     dependencies: ['zod', 'react-hook-form', '@hookform/resolvers'],
@@ -927,12 +944,18 @@ export default function Example() {
     name: 'Alert',
     category: 'Feedback',
     description: 'Contextual feedback banner for success, warning, danger, or info.',
-    usage: `import { Alert } from '@/src/components/Alert/Alert';
+    usage: `import { Alert } from '@components';
 
-<Alert title="Heads up">This is a default alert.</Alert>
-<Alert variant="success" title="Success">Your changes were saved.</Alert>
-<Alert variant="warning" title="Warning">Review before continuing.</Alert>
-<Alert variant="danger" title="Error">Something went wrong.</Alert>`,
+export default function Example() {
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-md">
+      <Alert title="Heads up">This is a default alert.</Alert>
+      <Alert variant="success" title="Success">Your changes were saved.</Alert>
+      <Alert variant="warning" title="Warning">Review before continuing.</Alert>
+      <Alert variant="danger" title="Error">Something went wrong.</Alert>
+    </div>
+  );
+}`,
     props: [
       { name: 'variant',   type: "'default' | 'success' | 'warning' | 'danger'", default: "'default'", description: 'Alert color and icon.' },
       { name: 'title',     type: 'string',    default: 'undefined', description: 'Bold heading text.' },
@@ -947,7 +970,7 @@ export default function Example() {
     slug: 'collapsible',
     name: 'Collapsible',
     category: 'Disclosure',
-    description: 'A single-item show/hide component. Simpler than Accordion — use it for one expandable section like a filter panel, "show more" block, or settings group.',
+    description: 'A single-item show/hide component. Simpler than Accordion; use it for one expandable section like a filter panel, "show more" block, or settings group.',
     usage: `'use client';
 
 import { useState } from 'react';
@@ -965,7 +988,7 @@ export default function Example() {
         <CollapsibleTrigger>Project details</CollapsibleTrigger>
         <CollapsibleContent>
           This project uses React 18, Tailwind v4, and Next.js 15. Components are
-          copied directly into your repo — no runtime dependency required.
+          copied directly into your repo. No runtime dependency required.
         </CollapsibleContent>
       </Collapsible>
     </div>
@@ -975,7 +998,7 @@ export default function Example() {
       {
         name: 'open',
         type: 'boolean',
-        default: '—',
+        default: '-',
         description: 'Controlled open state. When provided the component is controlled.',
       },
       {
@@ -987,7 +1010,7 @@ export default function Example() {
       {
         name: 'onOpenChange',
         type: '(open: boolean) => void',
-        default: '—',
+        default: '-',
         description: 'Called when the open state changes. Receives the new boolean value.',
       },
       {
@@ -1019,11 +1042,12 @@ export default function Example() {
     name: 'Accordion',
     category: 'Disclosure',
     description: 'A compound component for showing and hiding sections of content, supporting single-item and multi-item expansion modes.',
-    usage: `import Accordion, {
+    usage: `import {
+  Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '@/src/components/Accordion/Accordion';
+} from '@components';
 
 export default function Example() {
   return (
@@ -1044,7 +1068,7 @@ export default function Example() {
         <AccordionItem value="item-3">
           <AccordionTrigger>Does it support dark mode?</AccordionTrigger>
           <AccordionContent>
-            Yes — all components use semantic tokens that respond to the .dark class on the root element.
+            Yes, all components use semantic tokens that respond to the .dark class on the root element.
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -1061,7 +1085,7 @@ export default function Example() {
       {
         name: 'defaultValue',
         type: 'string | string[]',
-        default: '—',
+        default: '-',
         description: 'Item value(s) open on initial render.',
       },
       {
@@ -1101,7 +1125,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/src/components/Tabs/Tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components';
 
 export default function Example() {
   const [tab, setTab] = useState('overview');
@@ -1129,13 +1153,13 @@ export default function Example() {
       {
         name: 'value',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'The currently active tab value (controlled).',
       },
       {
         name: 'onValueChange',
         type: '(v: string) => void',
-        default: '—',
+        default: '-',
         description: 'Called when the user activates a different tab.',
       },
       {
@@ -1166,26 +1190,84 @@ export default function Example() {
     name: 'Sidebar',
     category: 'Navigation',
     description: 'Vertical navigation sidebar with a header, footer, sections, links, dividers, and an optional collapse toggle.',
-    usage: `import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
+    usage: `import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider, Button } from '@components';
+import { useState } from 'react';
 
-<Sidebar collapsible>
-  <SidebarHeader>
-    <span className="font-semibold text-text">Acme</span>
-  </SidebarHeader>
-  <SidebarSection>
-    <SidebarLink href="/" icon={<HomeIcon />} isActive>Home</SidebarLink>
-    <SidebarLink href="/docs" icon={<DocsIcon />}>Documentation</SidebarLink>
-    <SidebarLink href="/examples" icon={<ExamplesIcon />}>Examples</SidebarLink>
-  </SidebarSection>
-  <SidebarDivider />
-  <SidebarSection label="Components">
-    <SidebarLink href="/components/button">Button</SidebarLink>
-    <SidebarLink href="/components/input">Input</SidebarLink>
-  </SidebarSection>
-  <SidebarFooter>
-    <SidebarLink href="/settings" icon={<SettingsIcon />}>Settings</SidebarLink>
-  </SidebarFooter>
-</Sidebar>`,
+function NavIcon({ d }: { d: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={d} />
+    </svg>
+  );
+}
+
+function StarIcon({ filled }: { filled: boolean }) {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z" />
+    </svg>
+  );
+}
+
+export default function Example() {
+  const [favorited, setFavorited] = useState<Record<string, boolean>>({});
+  const toggleFavorite = (name: string) => setFavorited((prev) => ({ ...prev, [name]: !prev[name] }));
+
+  return (
+    <div className="h-96 w-56 border border-surface-border rounded-lg overflow-hidden">
+      <Sidebar width="w-full" collapsible>
+        <SidebarHeader>
+          <span className="font-semibold text-text">Acme</span>
+        </SidebarHeader>
+        <SidebarSection>
+          <SidebarLink href="#" isActive icon={<NavIcon d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />}>Home</SidebarLink>
+          <SidebarLink href="#" icon={<NavIcon d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z" />}>Documentation</SidebarLink>
+          <SidebarLink href="#" icon={<NavIcon d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />}>Examples</SidebarLink>
+        </SidebarSection>
+        <SidebarDivider />
+        <SidebarSection label="Components">
+          <SidebarLink
+            href="#"
+            icon={<NavIcon d="M9 9h6v6H9zM4 4h16v16H4z" />}
+            action={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={favorited.Button ? 'Remove Button from favorites' : 'Add Button to favorites'}
+                aria-pressed={Boolean(favorited.Button)}
+                onClick={() => toggleFavorite('Button')}
+              >
+                <StarIcon filled={Boolean(favorited.Button)} />
+              </Button>
+            }
+          >
+            Button
+          </SidebarLink>
+          <SidebarLink
+            href="#"
+            icon={<NavIcon d="M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2" />}
+            action={
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                aria-label={favorited.Input ? 'Remove Input from favorites' : 'Add Input to favorites'}
+                aria-pressed={Boolean(favorited.Input)}
+                onClick={() => toggleFavorite('Input')}
+              >
+                <StarIcon filled={Boolean(favorited.Input)} />
+              </Button>
+            }
+          >
+            Input
+          </SidebarLink>
+        </SidebarSection>
+        <SidebarFooter>
+          <SidebarLink href="#" icon={<NavIcon d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z" />}>Settings</SidebarLink>
+        </SidebarFooter>
+      </Sidebar>
+    </div>
+  );
+}`,
     props: [
       { name: 'width',             type: 'string',                       default: "'w-56'",    description: 'Tailwind width class used when expanded.' },
       { name: 'collapsedWidth',    type: 'string',                       default: "'w-16'",    description: 'Tailwind width class used when collapsed.' },
@@ -1225,7 +1307,7 @@ export default function Example() {
     name: 'Breadcrumb',
     category: 'Navigation',
     description: 'A navigational landmark that shows the user\'s current location within a site hierarchy.',
-    usage: `import Breadcrumb from '@/src/components/Breadcrumb/Breadcrumb';
+    usage: `import { Breadcrumb } from '@components';
 
 export default function Example() {
   return (
@@ -1242,7 +1324,7 @@ export default function Example() {
       {
         name: 'items',
         type: 'Array<{ label: string; href?: string }>',
-        default: '—',
+        default: '-',
         description: 'Ordered list of crumbs. The last item is the current page and should have no href.',
       },
       {
@@ -1263,39 +1345,75 @@ export default function Example() {
     files: ['Breadcrumb/Breadcrumb.tsx'],
   },
   {
-    slug: 'top-nav',
-    name: 'TopNav',
+    slug: 'menu-bar',
+    name: 'MenuBar',
     category: 'Navigation',
     description: 'A fixed horizontal top bar composed of a brand slot and a right-aligned actions slot.',
-    usage: `import { TopNav, TopNavBrand, TopNavActions } from '@/src/components/TopNav/TopNav';
-import Button from '@/src/components/Button/Button';
+    usage: `import { MenuBar, MenuBarBrand, MenuBarActions, Button } from '@components';
 
-<TopNav>
-  <TopNavBrand>
-    <span className="font-semibold text-text">Acme</span>
-  </TopNavBrand>
-  <TopNavActions>
-    <Button variant="ghost" size="icon" aria-label="Search">
-      <SearchIcon />
-    </Button>
-    <Button size="sm">Sign in</Button>
-  </TopNavActions>
-</TopNav>`,
+export default function Example() {
+  return (
+    <MenuBar>
+      <MenuBarBrand>
+        <span className="font-semibold text-text">Acme</span>
+      </MenuBarBrand>
+      <MenuBarActions>
+        <Button variant="ghost" size="icon" aria-label="Search">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </Button>
+        <Button size="sm">Sign in</Button>
+      </MenuBarActions>
+    </MenuBar>
+  );
+}`,
     props: [
       { name: 'height',    type: 'string',    default: "'h-14'",    description: 'Tailwind height class for the bar.' },
       { name: 'className', type: 'string',    default: "''",        description: 'Additional CSS classes.' },
-      { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'TopNav content (brand, search, actions).' },
+      { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'MenuBar content (brand, search, actions).' },
     ],
     dependencies:         [],
     registryDependencies: [],
-    files:                ['TopNav/TopNav.tsx'],
+    files:                ['MenuBar/MenuBar.tsx'],
     composition: {
-      name: 'TopNav',
+      name: 'MenuBar',
       children: [
-        { name: 'TopNavBrand' },
-        { name: 'TopNavActions' },
+        { name: 'MenuBarBrand' },
+        { name: 'MenuBarActions' },
       ],
     },
+  },
+  {
+    slug: 'table-of-contents',
+    name: 'TableOfContents',
+    category: 'Navigation',
+    description: 'A scroll-spy navigation sidebar that scans a content container for h2/h3 headings and links to each one, bolding whichever section is currently in view.',
+    usage: `'use client';
+
+import { TableOfContents } from '@components';
+
+export default function Example() {
+  return (
+    <div className="flex gap-8 items-start">
+      <div id="toc-demo-content" className="flex flex-col gap-6 max-w-sm">
+        <h2 id="overview">Overview</h2>
+        <p className="text-sm text-text-muted">A short introduction to the section.</p>
+        <h3 id="getting-started">Getting started</h3>
+        <p className="text-sm text-text-muted">Steps to get up and running.</p>
+        <h2 id="advanced-usage">Advanced usage</h2>
+        <p className="text-sm text-text-muted">Additional configuration options.</p>
+      </div>
+      <TableOfContents containerId="toc-demo-content" />
+    </div>
+  );
+}`,
+    props: [
+      { name: 'containerId', type: 'string', default: "'docs-content'", description: 'The id of the element to scan for h2/h3 headings.' },
+      { name: 'label',       type: 'string', default: '"What\'s on this page?"', description: 'Heading text rendered above the list of links.' },
+      { name: 'className',   type: 'string', default: "''", description: 'Additional classes applied to the wrapping nav element.' },
+    ],
+    dependencies:         [],
+    registryDependencies: [],
+    files:                ['TableOfContents/TableOfContents.tsx'],
   },
 
   // ─── Charts ──────────────────────────────────────────────────────────────
@@ -1304,7 +1422,7 @@ import Button from '@/src/components/Button/Button';
     name: 'LineChart',
     category: 'Charts',
     description: 'A line chart for visualising trends over time, supporting multiple series.',
-    usage: `import { LineChart } from '@/src/components/Charts/Charts';
+    usage: `import { LineChart } from '@components';
 
 const data = [
   { month: 'Jan', revenue: 4000, expenses: 2400 },
@@ -1328,9 +1446,9 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'data', type: 'ChartDataPoint[]', default: '—', description: 'Array of data objects.' },
-      { name: 'xKey', type: 'string', default: '—', description: 'Key in each data object to use as the x-axis label.' },
-      { name: 'series', type: 'ChartSeries[]', default: '—', description: 'Lines to render. Each entry has key, label, and optional color.' },
+      { name: 'data', type: 'ChartDataPoint[]', default: '-', description: 'Array of data objects.' },
+      { name: 'xKey', type: 'string', default: '-', description: 'Key in each data object to use as the x-axis label.' },
+      { name: 'series', type: 'ChartSeries[]', default: '-', description: 'Lines to render. Each entry has key, label, and optional color.' },
       { name: 'height', type: 'number', default: '240', description: 'Chart height in px.' },
       { name: 'showLegend', type: 'boolean', default: 'true', description: 'Whether to show the legend.' },
       { name: 'showGrid', type: 'boolean', default: 'true', description: 'Whether to show the background grid.' },
@@ -1345,7 +1463,7 @@ export default function Example() {
     name: 'BarChart',
     category: 'Charts',
     description: 'A vertical bar chart for comparing values across categories, with optional stacking.',
-    usage: `import { BarChart } from '@/src/components/Charts/Charts';
+    usage: `import { BarChart } from '@components';
 
 const data = [
   { quarter: 'Q1', sales: 4000, returns: 400 },
@@ -1367,9 +1485,9 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'data', type: 'ChartDataPoint[]', default: '—', description: 'Array of data objects.' },
-      { name: 'xKey', type: 'string', default: '—', description: 'Key to use as the x-axis label.' },
-      { name: 'series', type: 'ChartSeries[]', default: '—', description: 'Bar groups to render.' },
+      { name: 'data', type: 'ChartDataPoint[]', default: '-', description: 'Array of data objects.' },
+      { name: 'xKey', type: 'string', default: '-', description: 'Key to use as the x-axis label.' },
+      { name: 'series', type: 'ChartSeries[]', default: '-', description: 'Bar groups to render.' },
       { name: 'stacked', type: 'boolean', default: 'false', description: 'Stack series on top of each other.' },
       { name: 'height', type: 'number', default: '240', description: 'Chart height in px.' },
       { name: 'showLegend', type: 'boolean', default: 'true', description: 'Whether to show the legend.' },
@@ -1385,7 +1503,7 @@ export default function Example() {
     name: 'AreaChart',
     category: 'Charts',
     description: 'A filled area chart for emphasising volume and cumulative values over time.',
-    usage: `import { AreaChart } from '@/src/components/Charts/Charts';
+    usage: `import { AreaChart } from '@components';
 
 const data = [
   { month: 'Jan', users: 800, sessions: 1200 },
@@ -1409,9 +1527,9 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'data', type: 'ChartDataPoint[]', default: '—', description: 'Array of data objects.' },
-      { name: 'xKey', type: 'string', default: '—', description: 'Key to use as the x-axis label.' },
-      { name: 'series', type: 'ChartSeries[]', default: '—', description: 'Areas to render.' },
+      { name: 'data', type: 'ChartDataPoint[]', default: '-', description: 'Array of data objects.' },
+      { name: 'xKey', type: 'string', default: '-', description: 'Key to use as the x-axis label.' },
+      { name: 'series', type: 'ChartSeries[]', default: '-', description: 'Areas to render.' },
       { name: 'stacked', type: 'boolean', default: 'false', description: 'Stack areas on top of each other.' },
       { name: 'height', type: 'number', default: '240', description: 'Chart height in px.' },
       { name: 'showLegend', type: 'boolean', default: 'true', description: 'Whether to show the legend.' },
@@ -1427,7 +1545,7 @@ export default function Example() {
     name: 'DonutChart',
     category: 'Charts',
     description: 'A donut (or pie) chart for part-to-whole proportions across named slices.',
-    usage: `import { DonutChart } from '@/src/components/Charts/Charts';
+    usage: `import { DonutChart } from '@components';
 
 export default function Example() {
   return (
@@ -1442,7 +1560,7 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'data', type: 'DonutSlice[]', default: '—', description: 'Array of { label, value, color? } slices.' },
+      { name: 'data', type: 'DonutSlice[]', default: '-', description: 'Array of { label, value, color? } slices.' },
       { name: 'innerRadius', type: 'number', default: '0.65', description: 'Inner radius as a fraction of outer. 0 = pie chart.' },
       { name: 'height', type: 'number', default: '240', description: 'Chart height in px.' },
       { name: 'showLegend', type: 'boolean', default: 'true', description: 'Whether to show the legend.' },
@@ -1457,7 +1575,7 @@ export default function Example() {
     name: 'RadarChart',
     category: 'Charts',
     description: 'A radar chart for comparing multiple entries across several shared dimensions.',
-    usage: `import { RadarChart } from '@/src/components/Charts/Charts';
+    usage: `import { RadarChart } from '@components';
 
 const data = [
   { metric: 'Speed', modelX: 90, modelY: 70 },
@@ -1481,9 +1599,9 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'data', type: 'ChartDataPoint[]', default: '—', description: 'Array of data objects.' },
-      { name: 'xKey', type: 'string', default: '—', description: 'Key in each data object used as the category label around the radar.' },
-      { name: 'series', type: 'ChartSeries[]', default: '—', description: 'Polygons to render. Each entry has key, label, and optional color.' },
+      { name: 'data', type: 'ChartDataPoint[]', default: '-', description: 'Array of data objects.' },
+      { name: 'xKey', type: 'string', default: '-', description: 'Key in each data object used as the category label around the radar.' },
+      { name: 'series', type: 'ChartSeries[]', default: '-', description: 'Polygons to render. Each entry has key, label, and optional color.' },
       { name: 'height', type: 'number', default: '240', description: 'Chart height in px.' },
       { name: 'showLegend', type: 'boolean', default: 'true', description: 'Whether to show the legend.' },
       { name: 'showGrid', type: 'boolean', default: 'true', description: 'Whether to show the background grid.' },
@@ -1579,13 +1697,13 @@ export default function Example() {
       {
         name: 'layout',
         type: 'MosaicTileLayout[]',
-        default: '—',
+        default: '-',
         description: 'Required. Array of tile layout entries. Each entry has id, col, row, colSpan, and rowSpan. col and row are 1-based grid positions.',
       },
       {
         name: 'onLayoutChange',
         type: '(layout: MosaicTileLayout[]) => void',
-        default: '—',
+        default: '-',
         description: 'Required. Called when tiles are reordered or resized.',
       },
       {
@@ -1646,7 +1764,7 @@ export default function Example() {
     name: 'KanbanBoard',
     category: 'Drag & Drop',
     description: 'A drag-and-drop Kanban board with keyboard support. Cards can be dragged between columns and reordered within columns.',
-    usage: `import { KanbanBoard } from '@/src/components/Kanban/Kanban';
+    usage: `import { KanbanBoard } from '@components';
 
 const initialColumns = [
   {
@@ -1677,7 +1795,7 @@ export default function Example() {
   return <KanbanBoard initialColumns={initialColumns} />;
 }`,
     props: [
-      { name: 'initialColumns', type: 'KanbanColumnData[]', default: '—', description: 'Initial column and card data. Column and card state is managed internally.' },
+      { name: 'initialColumns', type: 'KanbanColumnData[]', default: '-', description: 'Initial column and card data. Column and card state is managed internally.' },
       { name: 'className', type: 'string', default: '""', description: 'Extra classes on the board container.' },
     ],
     dependencies: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
@@ -1701,8 +1819,8 @@ export default function Example() {
     name:        'WorkflowBuilder',
     category:    'Drag & Drop',
     description: 'Drag-and-drop graph editor for building typed workflows. Connects trigger, condition, action, transform, and output nodes. Outputs a serializable WorkflowGraph via onChange.',
-    usage: `import WorkflowBuilder from '@/src/components/WorkflowBuilder/WorkflowBuilder';
-import type { WorkflowGraph } from '@/src/components/WorkflowBuilder/WorkflowBuilder';
+    usage: `import { WorkflowBuilder } from '@components';
+import type { WorkflowGraph } from '@components';
 import { useState } from 'react';
 
 export default function Example() {
@@ -1716,8 +1834,8 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'defaultGraph', type: 'WorkflowGraph',                   default: '—',     description: 'Pre-populated graph loaded on first render. Not reactive after mount — state is managed internally.' },
-      { name: 'onChange',     type: '(graph: WorkflowGraph) => void',  default: '—',     description: 'Fired after every change: node move, edge connection, label edit, or node add/delete.' },
+      { name: 'defaultGraph', type: 'WorkflowGraph',                   default: '-',     description: 'Pre-populated graph loaded on first render. Not reactive after mount; state is managed internally.' },
+      { name: 'onChange',     type: '(graph: WorkflowGraph) => void',  default: '-',     description: 'Fired after every change: node move, edge connection, label edit, or node add/delete.' },
       { name: 'height',       type: 'number',                          default: '500',   description: 'Canvas height in pixels.' },
       { name: 'className',    type: 'string',                          default: '""',    description: 'Additional classes on the root container.' },
     ],
@@ -1730,13 +1848,19 @@ export default function Example() {
     name: 'Progress',
     category: 'Feedback',
     description: 'Horizontal bar indicating task completion.',
-    usage: `import { Progress } from '@/src/components/Progress/Progress';
+    usage: `import { Progress } from '@components';
 
-<Progress value={40} />
-<Progress value={70} showLabel />
-<Progress value={90} size="lg" showLabel />`,
+export default function Example() {
+  return (
+    <div className="flex flex-col gap-4 w-full max-w-sm">
+      <Progress value={40} />
+      <Progress value={70} showLabel />
+      <Progress value={90} size="lg" showLabel />
+    </div>
+  );
+}`,
     props: [
-      { name: 'value',     type: 'number',              default: '—',    description: 'Current value (0–max).' },
+      { name: 'value',     type: 'number',              default: '-',    description: 'Current value (0–max).' },
       { name: 'max',       type: 'number',              default: '100',  description: 'Maximum value.' },
       { name: 'showLabel', type: 'boolean',             default: 'false', description: 'Show "Progress X%" label row.' },
       { name: 'size',      type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Track height.' },
@@ -1751,11 +1875,17 @@ export default function Example() {
     name: 'Spinner',
     category: 'Feedback',
     description: 'Animated loading indicator.',
-    usage: `import { Spinner } from '@/src/components/Spinner/Spinner';
+    usage: `import { Spinner } from '@components';
 
-<Spinner />
-<Spinner size="sm" />
-<Spinner size="lg" label="Saving…" />`,
+export default function Example() {
+  return (
+    <div className="flex items-center gap-6">
+      <Spinner size="sm" />
+      <Spinner />
+      <Spinner size="lg" />
+    </div>
+  );
+}`,
     props: [
       { name: 'size',      type: "'sm' | 'md' | 'lg'", default: "'md'",      description: 'Size of the spinner.' },
       { name: 'label',     type: 'string',              default: "'Loading…'", description: 'Screen reader label.' },
@@ -1770,10 +1900,10 @@ export default function Example() {
     name:        'Toast',
     category:    'Feedback',
     description: 'Ephemeral notification toasts with auto-dismiss, variants, and optional actions.',
-    usage: `import { ToastProvider, useToast } from '@/src/components/Toast/Toast';
+    usage: `import { ToastProvider, useToast } from '@components';
 
 // 1. Wrap your app (or layout) with ToastProvider
-export default function Layout({ children }) {
+export default function Example({ children }) {
   return (
     <ToastProvider position="bottom-right">
       {children}
@@ -1815,7 +1945,7 @@ function MyComponent() {
     name: 'Canvas',
     category: 'Canvas',
     description: 'A freehand drawing surface with pen and eraser tools, color palette, variable stroke widths, undo/redo, and PNG download.',
-    usage: `import { Canvas } from '@/src/components/Canvas/Canvas';
+    usage: `import { Canvas } from '@components';
 
 export default function Example() {
   return (
@@ -1842,8 +1972,8 @@ export default function Example() {
     slug: 'tree',
     name: 'Tree',
     category: 'Display',
-    description: 'A collapsible, keyboard-navigable tree view for hierarchical data — file trees, org charts, and nested navigation.',
-    usage: `import Tree, { TreeItem } from '@/src/components/Tree/Tree';
+    description: 'A collapsible, keyboard-navigable tree view for hierarchical data: file trees, org charts, and nested navigation.',
+    usage: `import { Tree, TreeItem } from '@components';
 
 export default function Example() {
   return (
@@ -1867,13 +1997,13 @@ export default function Example() {
       {
         name: 'label',
         type: 'ReactNode',
-        default: '—',
+        default: '-',
         description: 'The text or content displayed for the node. (TreeItem)',
       },
       {
         name: 'children',
         type: 'ReactNode',
-        default: '—',
+        default: '-',
         description: 'Nested TreeItem elements. Presence makes this a branch node. (TreeItem)',
       },
       {
@@ -1886,12 +2016,12 @@ export default function Example() {
         name: 'collapsible',
         type: 'boolean',
         default: 'true',
-        description: 'When false, the branch is always expanded with no toggle affordance — no chevron, not focusable, no hover/focus state. For read-only structural diagrams. (TreeItem)',
+        description: 'When false, the branch is always expanded with no toggle affordance: no chevron, not focusable, no hover/focus state. For read-only structural diagrams. (TreeItem)',
       },
       {
         name: 'icon',
         type: 'ReactNode',
-        default: '—',
+        default: '-',
         description: 'Custom icon for this item, overriding the tree-level terminalIcon/nonTerminalIcon and (for collapsible branches) the default chevron. (TreeItem)',
       },
       {
@@ -1909,13 +2039,13 @@ export default function Example() {
       {
         name: 'terminalIcon',
         type: 'ReactNode',
-        default: '—',
+        default: '-',
         description: 'Default icon shown for leaf items (no children) that don’t set their own icon. No icon renders if unset. (Tree)',
       },
       {
         name: 'nonTerminalIcon',
         type: 'ReactNode',
-        default: '—',
+        default: '-',
         description: 'Default icon shown for non-collapsible branch items that don’t set their own icon. Collapsible branches keep the chevron instead. No icon renders if unset. (Tree)',
       },
       {
@@ -1945,7 +2075,7 @@ export default function Example() {
     name: 'Timeline',
     category: 'Display',
     description: 'A vertical step list with numbered indicators and connector lines, for ordered sequences like setup guides, onboarding flows, and activity feeds.',
-    usage: `import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
+    usage: `import { Timeline, TimelineItem } from '@components';
 
 export default function Example() {
   return (
@@ -1967,7 +2097,7 @@ export default function Example() {
         name: 'animate',
         type: '"stagger" | "none"',
         default: '"stagger"',
-        description: 'Mount animation. stagger fades and slides each item in with a cascading delay — the container holds its full size from the start so there is no layout shift. Use none when adding items dynamically over time and animating them yourself.',
+        description: 'Mount animation. stagger fades and slides each item in with a cascading delay; the container holds its full size from the start so there is no layout shift. Use none when adding items dynamically over time and animating them yourself.',
       },
       {
         name: 'direction',
@@ -1990,7 +2120,7 @@ export default function Example() {
       {
         name: 'children',
         type: 'React.ReactNode',
-        default: '—',
+        default: '-',
         description: 'One or more TimelineItem elements.',
       },
     ],
@@ -2013,7 +2143,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
+import { CommandPalette, CommandGroup, CommandItem } from '@components';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
@@ -2035,10 +2165,10 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'open',        type: 'boolean',          default: '—',                   description: 'Whether the palette is visible.' },
-      { name: 'onClose',     type: '() => void',        default: '—',                   description: 'Called when the user presses Escape, clicks the backdrop, or activates an item.' },
+      { name: 'open',        type: 'boolean',          default: '-',                   description: 'Whether the palette is visible.' },
+      { name: 'onClose',     type: '() => void',        default: '-',                   description: 'Called when the user presses Escape, clicks the backdrop, or activates an item.' },
       { name: 'placeholder', type: 'string',            default: "'Search commands…'",  description: 'Placeholder text in the search input.' },
-      { name: 'children',    type: 'ReactNode',         default: '—',                   description: 'CommandGroup and CommandItem elements.' },
+      { name: 'children',    type: 'ReactNode',         default: '-',                   description: 'CommandGroup and CommandItem elements.' },
     ],
     dependencies: [],
     registryDependencies: ['scroll-fade'],
@@ -2060,7 +2190,7 @@ export default function Example() {
     name: 'Tooltip',
     category: 'Overlay',
     description: 'A small floating text label that appears next to its trigger on hover or keyboard focus. Never contains interactive content.',
-    usage: `import Tooltip from '@/src/components/Tooltip/Tooltip';
+    usage: `import { Tooltip } from '@components';
 
 const InfoIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -2092,8 +2222,8 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'content',   type: 'ReactNode',                          default: '—',      description: 'The tooltip text. Must be non-interactive content only.' },
-      { name: 'children',  type: 'ReactElement',                       default: '—',      description: 'A single trigger element; receives hover/focus handlers and aria-describedby automatically.' },
+      { name: 'content',   type: 'ReactNode',                          default: '-',      description: 'The tooltip text. Must be non-interactive content only.' },
+      { name: 'children',  type: 'ReactElement',                       default: '-',      description: 'A single trigger element; receives hover/focus handlers and aria-describedby automatically.' },
       { name: 'side',      type: "'top' | 'right' | 'bottom' | 'left'", default: "'top'", description: 'Which side of the trigger the tooltip appears on.' },
       { name: 'delay',     type: 'number',                             default: '300',    description: 'Open delay in milliseconds for hover. Keyboard focus shows the tooltip immediately.' },
       { name: 'className', type: 'string',                             default: "''",     description: 'Additional classes on the wrapper span.' },
@@ -2107,7 +2237,7 @@ export default function Example() {
     name: 'Popover',
     category: 'Overlay',
     description: 'A click-triggered, non-modal floating panel anchored to its trigger. Focus moves in on open but is never trapped; Escape and outside clicks close it.',
-    usage: `import Popover from '@/src/components/Popover/Popover';
+    usage: `import { Popover } from '@components';
 
 export default function Example() {
   return (
@@ -2123,8 +2253,8 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'trigger',          type: 'ReactNode',                           default: '—',          description: 'Content of the built-in trigger button.' },
-      { name: 'children',         type: 'ReactNode',                           default: '—',          description: 'Panel content. May contain interactive elements.' },
+      { name: 'trigger',          type: 'ReactNode',                           default: '-',          description: 'Content of the built-in trigger button.' },
+      { name: 'children',         type: 'ReactNode',                           default: '-',          description: 'Panel content. May contain interactive elements.' },
       { name: 'side',             type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'",   description: 'Which side of the trigger the panel appears on.' },
       { name: 'align',            type: "'start' | 'center' | 'end'",          default: "'center'",   description: 'Alignment along the chosen side.' },
       { name: 'label',            type: 'string',                              default: 'undefined',  description: 'Accessible name for the panel (aria-label).' },
@@ -2142,7 +2272,7 @@ export default function Example() {
     name: 'DropdownMenu',
     category: 'Overlay',
     description: 'A trigger button that opens a floating menu of actions with arrow-key navigation, typeahead, separators, and disabled items.',
-    usage: `import DropdownMenu from '@/src/components/DropdownMenu/DropdownMenu';
+    usage: `import { DropdownMenu } from '@components';
 
 export default function Example() {
   return (
@@ -2159,8 +2289,8 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'items',            type: 'DropdownMenuEntry[]',                 default: '—',          description: 'Array of items ({ label, onSelect?, disabled? }) and separators ({ separator: true }).' },
-      { name: 'trigger',          type: 'ReactNode',                           default: '—',          description: 'Content of the built-in trigger button.' },
+      { name: 'items',            type: 'DropdownMenuEntry[]',                 default: '-',          description: 'Array of items ({ label, onSelect?, disabled? }) and separators ({ separator: true }).' },
+      { name: 'trigger',          type: 'ReactNode',                           default: '-',          description: 'Content of the built-in trigger button.' },
       { name: 'side',             type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'",   description: 'Which side of the trigger the menu appears on.' },
       { name: 'align',            type: "'start' | 'center' | 'end'",          default: "'start'",    description: 'Alignment along the chosen side.' },
       { name: 'onSelect',         type: '(item: DropdownMenuItem) => void',    default: 'undefined',  description: "Called with the activated item, in addition to the item's own onSelect." },
@@ -2180,7 +2310,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { Combobox } from '@/src/components/Combobox/Combobox';
+import { Combobox } from '@components';
 
 const LANGUAGES = [
   { value: 'ts',  label: 'TypeScript' },
@@ -2215,7 +2345,7 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'options',     type: 'ComboboxOption[]',               default: '—',         description: 'Array of { value, label, disabled? } objects.' },
+      { name: 'options',     type: 'ComboboxOption[]',               default: '-',         description: 'Array of { value, label, disabled? } objects.' },
       { name: 'value',       type: 'string | string[]',              default: 'undefined', description: 'Controlled selected value.' },
       { name: 'onChange',    type: '(value: string | string[]) => void', default: 'undefined', description: 'Called when selection changes.' },
       { name: 'multiple',    type: 'boolean',                        default: 'false',     description: 'Enables multi-select mode with pill chips.' },
@@ -2239,7 +2369,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { DatePicker } from '@/src/components/DatePicker/DatePicker';
+import { DatePicker } from '@components';
 
 export default function Example() {
   const [date, setDate] = useState<Date | null>(null);
@@ -2286,7 +2416,8 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import DataTable, { type ColumnDef } from '@/src/components/DataTable/DataTable';
+import { DataTable } from '@components';
+import type { ColumnDef } from '@components';
 
 interface Person { id: number; name: string; role: string; status: string; }
 
@@ -2316,9 +2447,9 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'data',              type: 'T[]',                    default: '—',       description: 'Array of data objects to display.' },
-      { name: 'columns',           type: 'ColumnDef<T>[]',         default: '—',       description: 'Column definitions controlling headers, keys, sorting, and cell rendering.' },
-      { name: 'keyField',          type: 'keyof T & string',       default: '—',       description: 'Property key used as a unique row identifier.' },
+      { name: 'data',              type: 'T[]',                    default: '-',       description: 'Array of data objects to display.' },
+      { name: 'columns',           type: 'ColumnDef<T>[]',         default: '-',       description: 'Column definitions controlling headers, keys, sorting, and cell rendering.' },
+      { name: 'keyField',          type: 'keyof T & string',       default: '-',       description: 'Property key used as a unique row identifier.' },
       { name: 'selectable',        type: 'boolean',                default: 'false',   description: 'Prepends a checkbox column for row selection.' },
       { name: 'onSelectionChange', type: '(selected: T[]) => void', default: 'undefined', description: 'Called with selected rows whenever selection changes.' },
       { name: 'pageSize',          type: 'number',                 default: '10',      description: 'Rows per page. Set to 0 to show all rows.' },
@@ -2334,7 +2465,7 @@ export default function Example() {
     name: 'FunctionPlotter',
     category: 'Display',
     description: 'An interactive 2D function plotter with pan, zoom, and support for multiple equations. Enter expressions like x^2 or 2*x+1 and see them graphed in real time.',
-    usage: `import { FunctionPlotter } from '@/src/components/FunctionPlotter/FunctionPlotter';
+    usage: `import { FunctionPlotter } from '@components';
 
 export default function Example() {
   return (
@@ -2364,7 +2495,7 @@ export default function Example() {
   CarouselPrevious,
   CarouselNext,
   CarouselDots,
-} from '@/src/components/Carousel/Carousel';
+} from '@components';
 
 const slides = [1, 2, 3, 4, 5];
 
@@ -2417,7 +2548,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import Slider from '@/src/components/Slider/Slider';
+import { Slider } from '@components';
 
 export default function Example() {
   const [volume, setVolume] = useState(40);
@@ -2439,13 +2570,13 @@ export default function Example() {
       {
         name: 'value',
         type: 'number',
-        default: '—',
+        default: '-',
         description: 'Controlled current value.',
       },
       {
         name: 'onValueChange',
         type: '(value: number) => void',
-        default: '—',
+        default: '-',
         description: 'Called with the new numeric value on change.',
       },
       {
@@ -2475,13 +2606,13 @@ export default function Example() {
       {
         name: 'label',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Visible label above the track; links to the input via id.',
       },
       {
         name: 'hint',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Helper text below the track.',
       },
       {
@@ -2505,13 +2636,13 @@ export default function Example() {
       {
         name: 'ariaLabel',
         type: 'string',
-        default: '—',
-        description: 'Sets aria-label on the input directly — use when there is no visible label.',
+        default: '-',
+        description: 'Sets aria-label on the input directly; use when there is no visible label.',
       },
       {
         name: 'ariaValueText',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Overrides the announced value with a custom string, e.g. a formatted timestamp.',
       },
       {
@@ -2533,9 +2664,9 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
+import { CodeBlock } from '@components';
 
-const SNIPPET = \`import Button from '@/src/components/Button/Button';
+const SNIPPET = \`import { Button } from '@components';
 
 export default function Example() {
   return <Button>Click me</Button>;
@@ -2565,7 +2696,7 @@ export default function Example() {
       {
         name: 'code',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Required. The raw source code rendered in the code panel.',
       },
       {
@@ -2577,7 +2708,7 @@ export default function Example() {
       {
         name: 'children',
         type: 'React.ReactNode',
-        default: '—',
+        default: '-',
         description: 'Required when variant="example". Rendered in the Preview tab.',
       },
       {
@@ -2617,7 +2748,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import CodeEditor from '@/src/components/CodeEditor/CodeEditor';
+import { CodeEditor } from '@components';
 
 export default function Example() {
   const [code, setCode] = useState('<Button>Click me</Button>');
@@ -2635,25 +2766,25 @@ export default function Example() {
       {
         name: 'value',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Required. The current code string.',
       },
       {
         name: 'onChange',
         type: '(value: string) => void',
-        default: '—',
+        default: '-',
         description: 'Required. Fires with the updated value on every edit.',
       },
       {
         name: 'extensions',
         type: 'Extension[]',
         default: '[]',
-        description: 'Extra CodeMirror extensions layered on top of the built-ins — e.g. a project-specific autocompletion({ override: [...] }) call.',
+        description: 'Extra CodeMirror extensions layered on top of the built-ins, e.g. a project-specific autocompletion({ override: [...] }) call.',
       },
       {
         name: 'aria-label',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Accessible name for the editor region.',
       },
       {
@@ -2665,7 +2796,7 @@ export default function Example() {
       {
         name: 'minHeight',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'CSS min-height for the editor surface (e.g. "200px"). Keeps the editor from collapsing to a single line on short content.',
       },
     ],
@@ -2678,7 +2809,7 @@ export default function Example() {
     name: 'Avatar',
     category: 'Display',
     description: 'User or entity image with graceful fallback to initials, plus an overlapping AvatarGroup with a +N overflow indicator.',
-    usage: `import Avatar, { AvatarGroup } from '@/src/components/Avatar/Avatar';
+    usage: `import { Avatar, AvatarGroup } from '@components';
 
 export default function Example() {
   return (
@@ -2703,25 +2834,25 @@ export default function Example() {
       {
         name: 'src',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Image URL. When set, alt is required (enforced by the prop types).',
       },
       {
         name: 'alt',
         type: 'string',
-        default: '—',
-        description: 'Accessible description of the person — required with src, optional otherwise.',
+        default: '-',
+        description: 'Accessible description of the person; required with src, optional otherwise.',
       },
       {
         name: 'name',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Full name used to derive fallback initials ("Ada Lovelace" → "AL") and the fallback accessible label.',
       },
       {
         name: 'fallback',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Explicit fallback text; overrides initials derived from name.',
       },
       {
@@ -2739,7 +2870,7 @@ export default function Example() {
       {
         name: 'max (AvatarGroup)',
         type: 'number',
-        default: '—',
+        default: '-',
         description: 'Maximum avatars shown before collapsing the rest into a "+N" indicator.',
       },
       {
@@ -2763,8 +2894,8 @@ export default function Example() {
     slug: 'attachment',
     name: 'Attachment',
     category: 'Display',
-    description: 'A compact chip for a linked file — icon, filename, and optional size/type — with an automatic image/PDF thumbnail, plus AttachmentGroup for a wrapped row of files.',
-    usage: `import { Attachment, AttachmentGroup } from '@/src/components/Attachment/Attachment';
+    description: 'A compact chip for a linked file (icon, filename, and optional size/type) with an automatic image/PDF thumbnail, plus AttachmentGroup for a wrapped row of files.',
+    usage: `import { Attachment, AttachmentGroup } from '@components';
 
 export default function Example() {
   return (
@@ -2794,13 +2925,13 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'name',      type: 'string',  default: '—',              description: 'The filename shown in the chip. Also used to infer the file-type icon and as the fallback title (full name on hover/truncation).' },
-      { name: 'href',      type: 'string',  default: '—',              description: 'Link target for the file. When set, the primary control renders as a real <a>; otherwise a real <button type="button">.' },
-      { name: 'size',      type: 'string',  default: '—',              description: 'Pre-formatted file size (e.g. "2.4 MB"), shown as secondary muted text.' },
-      { name: 'type',      type: 'string',  default: '—',              description: 'Pre-formatted file type label (e.g. "PDF"), shown alongside size ("PDF · 2.4 MB").' },
+      { name: 'name',      type: 'string',  default: '-',              description: 'The filename shown in the chip. Also used to infer the file-type icon and as the fallback title (full name on hover/truncation).' },
+      { name: 'href',      type: 'string',  default: '-',              description: 'Link target for the file. When set, the primary control renders as a real <a>; otherwise a real <button type="button">.' },
+      { name: 'size',      type: 'string',  default: '-',              description: 'Pre-formatted file size (e.g. "2.4 MB"), shown as secondary muted text.' },
+      { name: 'type',      type: 'string',  default: '-',              description: 'Pre-formatted file type label (e.g. "PDF"), shown alongside size ("PDF · 2.4 MB").' },
       { name: 'icon',      type: "'file' | 'image' | 'video' | 'audio' | 'archive' | 'code'", default: 'inferred from name', description: 'Overrides the automatically inferred icon.' },
-      { name: 'thumbnail', type: 'string',  default: '—', description: 'Image URL shown instead of the icon glyph. Defaults to href automatically for image-type attachments; pass explicitly for anything else (e.g. a PDF cover preview).' },
-      { name: 'onClick',   type: '(event: MouseEvent) => void', default: '—', description: 'Fires when the primary control (link or button) is activated.' },
+      { name: 'thumbnail', type: 'string',  default: '-', description: 'Image URL shown instead of the icon glyph. Defaults to href automatically for image-type attachments; pass explicitly for anything else (e.g. a PDF cover preview).' },
+      { name: 'onClick',   type: '(event: MouseEvent) => void', default: '-', description: 'Fires when the primary control (link or button) is activated.' },
       { name: 'className', type: 'string',  default: "''",             description: 'Additional classes merged onto the root chip wrapper.' },
     ],
     dependencies:         [],
@@ -2818,7 +2949,7 @@ export default function Example() {
     name: 'Message',
     category: 'Display',
     description: 'A chat-style message bubble with sent/received variants and iOS-tapback-style reactions overlapping the bubble corner, a MessageReactions max/+N overflow stack like AvatarGroup, plus a source-citation use case for LLM responses.',
-    usage: `import { Message, MessageReactions, MessageReaction } from '@/src/components/Message/Message';
+    usage: `import { Message, MessageReactions, MessageReaction } from '@components';
 
 export default function Example() {
   return (
@@ -2847,10 +2978,10 @@ export default function Example() {
 }`,
     props: [
       { name: 'variant',   type: "'sent' | 'received'", default: "'received'", description: "'sent' right-aligns the bubble in brand fill; 'received' left-aligns it in a neutral surface tint." },
-      { name: 'avatar',    type: 'ReactNode', default: '—', description: 'Optional avatar rendered beside the bubble.' },
+      { name: 'avatar',    type: 'ReactNode', default: '-', description: 'Optional avatar rendered beside the bubble.' },
       { name: 'bubble',    type: 'boolean',   default: 'true', description: 'Set false to render children without the bubble background/padding, for content that supplies its own chrome (an image, an AudioPlayer) so it isn\'t nested in a second colored box.' },
       { name: 'className', type: 'string',    default: "''", description: 'Additional CSS classes merged onto the root row.' },
-      { name: 'children',  type: 'ReactNode', default: '—', description: 'The message content. A MessageReactions child is detected and extracted automatically — it can appear anywhere inside.' },
+      { name: 'children',  type: 'ReactNode', default: '-', description: 'The message content. A MessageReactions child is detected and extracted automatically; it can appear anywhere inside.' },
     ],
     dependencies:         [],
     registryDependencies: [],
@@ -2873,7 +3004,7 @@ export default function Example() {
     name: 'Reveal',
     category: 'Effects',
     description: 'Scroll-triggered entrance animation driven by IntersectionObserver, with a RevealGroup for staggered cascades. Content stays visible without JS and under reduced motion.',
-    usage: `import Reveal, { RevealGroup } from '@/src/components/Reveal/Reveal';
+    usage: `import { Reveal, RevealGroup } from '@components';
 
 export default function Example() {
   return (
@@ -2943,7 +3074,7 @@ export default function Example() {
     name: 'CountUp',
     category: 'Effects',
     description: 'Animates a number from a start value to its final value when scrolled into view. Screen readers always get the real value; reduced motion renders it immediately.',
-    usage: `import CountUp from '@/src/components/CountUp/CountUp';
+    usage: `import { CountUp } from '@components';
 
 export default function Example() {
   return (
@@ -2967,7 +3098,7 @@ export default function Example() {
       {
         name: 'value',
         type: 'number',
-        default: '—',
+        default: '-',
         description: 'Required. Final value to count up to.',
       },
       {
@@ -3022,7 +3153,7 @@ export default function Example() {
     name: 'TextShimmer',
     category: 'Effects',
     description: 'Text with a looping gradient shimmer sweeping across it via background-clip: text. Token-driven colors keep AA contrast; reduced motion renders static text.',
-    usage: `import TextShimmer from '@/src/components/TextShimmer/TextShimmer';
+    usage: `import { TextShimmer } from '@components';
 
 export default function Example() {
   return (
@@ -3042,7 +3173,7 @@ export default function Example() {
       {
         name: 'children',
         type: 'ReactNode',
-        default: '—',
+        default: '-',
         description: 'Required. The text to shimmer.',
       },
       {
@@ -3060,18 +3191,19 @@ export default function Example() {
     slug: 'modal',
     name: 'Modal',
     category: 'Overlay',
-    description: 'A blocking overlay dialog with focus trap, scroll lock, Escape-to-close, backdrop dismissal, and focus return — composed from Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter, and ModalClose.',
+    description: 'A blocking overlay dialog with focus trap, scroll lock, Escape-to-close, backdrop dismissal, and focus return; composed from Modal, ModalHeader, ModalTitle, ModalContent, ModalFooter, and ModalClose.',
     usage: `'use client';
 
 import { useState } from 'react';
-import Modal, {
+import {
+  Modal,
   ModalHeader,
   ModalTitle,
   ModalContent,
   ModalFooter,
   ModalClose,
-} from '@/src/components/Modal/Modal';
-import Button from '@/src/components/Button/Button';
+  Button,
+} from '@components';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
@@ -3101,13 +3233,13 @@ export default function Example() {
       {
         name: 'open',
         type: 'boolean',
-        default: '—',
+        default: '-',
         description: 'Controls whether the modal is rendered and visible (controlled).',
       },
       {
         name: 'onOpenChange',
         type: '(open: boolean) => void',
-        default: '—',
+        default: '-',
         description: 'Called with false when the user dismisses via Escape, backdrop click, or ModalClose.',
       },
       {
@@ -3119,7 +3251,7 @@ export default function Example() {
       {
         name: 'children',
         type: 'ReactNode',
-        default: '—',
+        default: '-',
         description: 'Modal subcomponents (ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose) and arbitrary content.',
       },
     ],
@@ -3145,19 +3277,20 @@ export default function Example() {
     slug: 'drawer',
     name: 'Drawer',
     category: 'Overlay',
-    description: 'A blocking side-panel overlay that slides in from an edge of the screen, with the full modal accessibility contract — focus trap, scroll lock, Escape-to-close, backdrop dismissal, and focus return.',
+    description: 'A blocking side-panel overlay that slides in from an edge of the screen, with the full modal accessibility contract: focus trap, scroll lock, Escape-to-close, backdrop dismissal, and focus return.',
     usage: `'use client';
 
 import { useState } from 'react';
-import Drawer, {
+import {
+  Drawer,
   DrawerHeader,
   DrawerTitle,
   DrawerContent,
   DrawerFooter,
   DrawerClose,
-  type DrawerSide,
-} from '@/src/components/Drawer/Drawer';
-import Button from '@/src/components/Button/Button';
+  Button,
+} from '@components';
+import type { DrawerSide } from '@components';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
@@ -3194,13 +3327,13 @@ export default function Example() {
       {
         name: 'open',
         type: 'boolean',
-        default: '—',
+        default: '-',
         description: 'Controls whether the drawer is rendered and visible (controlled).',
       },
       {
         name: 'onOpenChange',
         type: '(open: boolean) => void',
-        default: '—',
+        default: '-',
         description: 'Called with false when the user dismisses via Escape, backdrop click, or DrawerClose.',
       },
       {
@@ -3218,7 +3351,7 @@ export default function Example() {
       {
         name: 'children',
         type: 'ReactNode',
-        default: '—',
+        default: '-',
         description: 'Drawer subcomponents (DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose) and arbitrary content.',
       },
     ],
@@ -3244,19 +3377,20 @@ export default function Example() {
     slug: 'side-panel',
     name: 'SidePanel',
     category: 'Overlay',
-    description: 'A non-modal overlay panel that slides in from an edge of the screen but floats with margin on every side — a rounded, elevated Card rather than an edge-to-edge sheet. No backdrop, no scroll lock, and no focus trap — the rest of the page stays fully visible, clickable, and interactive. Panels on the same side stack automatically: opening a second one shifts earlier ones toward the center.',
+    description: 'A non-modal overlay panel that slides in from an edge of the screen but floats with margin on every side: a rounded, elevated Card rather than an edge-to-edge sheet. No backdrop, no scroll lock, and no focus trap; the rest of the page stays fully visible, clickable, and interactive. Panels on the same side stack automatically: opening a second one shifts earlier ones toward the center.',
     usage: `'use client';
 
 import { useState } from 'react';
-import SidePanel, {
+import {
+  SidePanel,
   SidePanelHeader,
   SidePanelTitle,
   SidePanelContent,
   SidePanelFooter,
   SidePanelClose,
-  type SidePanelSide,
-} from '@/src/components/SidePanel/SidePanel';
-import Button from '@/src/components/Button/Button';
+  Button,
+} from '@components';
+import type { SidePanelSide } from '@components';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
@@ -3293,13 +3427,13 @@ export default function Example() {
       {
         name: 'open',
         type: 'boolean',
-        default: '—',
+        default: '-',
         description: 'Controls whether the panel is rendered and visible (controlled).',
       },
       {
         name: 'onOpenChange',
         type: '(open: boolean) => void',
-        default: '—',
+        default: '-',
         description: 'Called with false when the user dismisses via Escape or SidePanelClose. Ignored while another panel opened after this one on the same side is still open.',
       },
       {
@@ -3317,7 +3451,7 @@ export default function Example() {
       {
         name: 'children',
         type: 'ReactNode',
-        default: '—',
+        default: '-',
         description: 'SidePanel subcomponents (SidePanelHeader, SidePanelTitle, SidePanelContent, SidePanelFooter, SidePanelClose) and arbitrary content.',
       },
     ],
@@ -3344,7 +3478,7 @@ export default function Example() {
     name: 'Typewriter',
     category: 'Effects',
     description: 'Reveals text character by character, like a terminal being typed in real time. Screen readers receive the full string immediately; reduced motion renders it statically.',
-    usage: `import Typewriter from '@/src/components/Typewriter/Typewriter';
+    usage: `import { Typewriter } from '@components';
 
 export default function Example() {
   return (
@@ -3367,7 +3501,7 @@ export default function Example() {
       {
         name: 'text',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Required. The full text to type out.',
       },
       {
@@ -3397,7 +3531,7 @@ export default function Example() {
       {
         name: 'onComplete',
         type: '() => void',
-        default: '—',
+        default: '-',
         description: 'Called when all characters have been revealed.',
       },
       {
@@ -3418,7 +3552,8 @@ export default function Example() {
     description: 'Force-directed node/edge graph with draggable nodes, pan/zoom, hover-highlighting, and keyboard navigation.',
     usage: `'use client';
 
-import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
+import { Graph } from '@components';
+import type { GraphNode, GraphEdge } from '@components';
 
 const NODES: GraphNode[] = [
   { id: 'react',      label: 'React'      },
@@ -3450,13 +3585,13 @@ export default function Example() {
       {
         name: 'nodes',
         type: 'GraphNode[]',
-        default: '—',
+        default: '-',
         description: 'Required. Array of { id, label, group? } objects.',
       },
       {
         name: 'edges',
         type: 'GraphEdge[]',
-        default: '—',
+        default: '-',
         description: 'Required. Array of { source, target } objects referencing node ids.',
       },
       {
@@ -3480,7 +3615,7 @@ export default function Example() {
       {
         name: 'onNodeSelect',
         type: '(node: GraphNode) => void',
-        default: '—',
+        default: '-',
         description: 'Called when a node is selected via click or keyboard Enter/Space.',
       },
     ],
@@ -3493,7 +3628,7 @@ export default function Example() {
     name: 'AudioPlayer',
     category: 'Display',
     description: 'A full-featured audio playback bar with play/pause, seeking, skip, volume, and speed controls.',
-    usage: `import AudioPlayer from '@/src/components/AudioPlayer/AudioPlayer';
+    usage: `import { AudioPlayer } from '@components';
 
 export default function Example() {
   return (
@@ -3510,26 +3645,26 @@ export default function Example() {
       {
         name: 'src',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'URL of the audio file to play. Required.',
       },
       {
         name: 'title',
         type: 'string',
-        default: '—',
-        description: 'Track title. Displayed above the controls in "default" size only — "compact" never renders it.',
+        default: '-',
+        description: 'Track title. Displayed above the controls in "default" size only; "compact" never renders it.',
       },
       {
         name: 'subtitle',
         type: 'string',
-        default: '—',
+        default: '-',
         description: 'Secondary line displayed below the title. Typically artist, episode name, or any short descriptor. "default" size only, same as title.',
       },
       {
         name: 'size',
         type: "'default' | 'compact'",
         default: "'default'",
-        description: '"compact" strips the player to exactly play/pause, seek slider, and elapsed time in one row, with no card chrome (border/shadow/background/padding) — for embedding inside another container that supplies its own background, like a Message bubble.',
+        description: '"compact" strips the player to exactly play/pause, seek slider, and elapsed time in one row, with no card chrome (border/shadow/background/padding), for embedding inside another container that supplies its own background, like a Message bubble.',
       },
       {
         name: 'className',
@@ -3547,7 +3682,7 @@ export default function Example() {
     name: 'Tilt',
     category: 'Display',
     description: 'A wrapper that applies a mouse-tracking CSS 3D perspective tilt to any child element.',
-    usage: `import Tilt from '@/src/components/Tilt/Tilt';
+    usage: `import { Tilt } from '@components';
 
 export default function Example() {
   return (
@@ -3569,8 +3704,8 @@ export default function Example() {
       {
         name: 'children',
         type: 'ReactNode',
-        default: '—',
-        description: 'Content to tilt. Can be any element — card, image, hero block.',
+        default: '-',
+        description: 'Content to tilt. Can be any element: card, image, hero block.',
       },
       {
         name: 'max',
@@ -3606,12 +3741,14 @@ export default function Example() {
     name: 'Separator',
     category: 'Display',
     description: 'A thin horizontal or vertical dividing line, optionally broken up by a short text label like "OR".',
-    usage: `import Separator from '@/src/components/Separator/Separator';
+    usage: `import { Separator } from '@components';
 
 export default function Example() {
   return (
     <div className="flex flex-col gap-6 w-full max-w-sm">
       <Separator />
+      <Separator variant="dashed" />
+      <Separator variant="dotted" />
       <Separator>OR</Separator>
       <div className="flex h-16 items-center gap-3">
         <span className="text-sm text-text">Item</span>
@@ -3632,13 +3769,19 @@ export default function Example() {
         name: 'labelPosition',
         type: "'start' | 'center' | 'end'",
         default: "'center'",
-        description: "Where the label sits along the line's own axis — left-to-right when horizontal, top-to-bottom when vertical. Only applies when children is set.",
+        description: "Where the label sits along the line's own axis: left-to-right when horizontal, top-to-bottom when vertical. Only applies when children is set.",
+      },
+      {
+        name: 'variant',
+        type: "'solid' | 'dashed' | 'dotted'",
+        default: "'solid'",
+        description: 'Border style of the line. Applies to every line segment, including both sides of a labeled separator.',
       },
       {
         name: 'children',
         type: 'ReactNode',
-        default: '—',
-        description: 'Optional text that breaks up the line, in either orientation (e.g. "OR"). Stays upright — not rotated — when orientation="vertical".',
+        default: '-',
+        description: 'Optional text that breaks up the line, in either orientation (e.g. "OR"). Stays upright (not rotated) when orientation="vertical".',
       },
       {
         name: 'className',
@@ -3650,6 +3793,28 @@ export default function Example() {
     dependencies: [],
     registryDependencies: [],
     files: ['Separator/Separator.tsx'],
+  },
+  {
+    slug: 'theme-toggle',
+    name: 'ThemeToggle',
+    category: 'Actions',
+    description: 'A button that switches the site between light and dark mode, persisting the choice to localStorage and a cookie.',
+    usage: `import { ThemeToggle } from '@components';
+
+export default function Example() {
+  return <ThemeToggle />;
+}`,
+    props: [
+      {
+        name: 'className',
+        type: 'string',
+        default: "''",
+        description: 'Additional classes on the root button.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['ThemeToggle/ThemeToggle.tsx'],
   },
 ];
 

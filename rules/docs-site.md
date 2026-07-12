@@ -44,7 +44,7 @@ Dark mode is class-based (`.dark` on `<html>`). The active mode is stored in bot
 
 **Flash prevention**: the root layout (`app/layout.tsx`) is an `async` Server Component that reads the `theme` cookie via `next/headers` `cookies()` and conditionally adds `dark` to the `<html>` `className` before the first paint; no inline bootstrap `<script>` is needed because the server already knows the mode.
 
-`ThemeToggle` (`src/components/ThemeToggle/ThemeToggle.tsx`) is the single source of truth for toggling: on mount it reconciles `localStorage`/system preference with the DOM class and writes the cookie so the next SSR render matches; on click it flips the `.dark` class, `localStorage`, and the cookie together, plus adds a temporary `theme-transition` class to `<html>` so the color swap cross-fades instead of snapping. It must be a `'use client'` component. No ThemeProvider or context: direct DOM manipulation only. It is a real library component in the CLI registry (`npx dafink-ui add theme-toggle`), not a docs-only component: it is rendered in `TopNav` (always visible) and again on the Theme page as a live demo, both the same real component, not a reimplementation.
+`ThemeToggle` (`src/components/ThemeToggle/ThemeToggle.tsx`) is the single source of truth for toggling: on mount it reconciles `localStorage`/system preference with the DOM class and writes the cookie so the next SSR render matches; on click it flips the `.dark` class, `localStorage`, and the cookie together, plus adds a temporary `theme-transition` class to `<html>` so the color swap cross-fades instead of snapping. It must be a `'use client'` component. No ThemeProvider or context: direct DOM manipulation only. It is a real library component in the CLI registry (`npx dafink-ui add theme-toggle`), not a docs-only component: it is rendered in `DocsHeader` (always visible) and again on the Theme page as a live demo, both the same real component, not a reimplementation.
 
 ## Sidebar
 
@@ -55,7 +55,7 @@ Dark mode is class-based (`.dark` on `<html>`). The active mode is stored in bot
   - On `/components` or `/components/*`: the full category tree renders under "All Components" (`CATEGORIES` from `app/_docs/registry/categories.ts`, one `SidebarSection` per category, matching registry `category` fields exactly).
   - On `/blocks` or `/blocks/*`: a flat list of every block renders under "All Blocks", no category grouping (only the `/blocks` gallery page itself groups by category; the sidebar list intentionally doesn't, since the block count doesn't warrant it).
   - On every other route, both links show with nothing expanded beneath them.
-- Sidebar is `collapsible` (`togglePosition="top"`) and full viewport height (`h-screen`, `top-0`) on desktop (`md:` and up), hidden below `md:`. `DocsShell` lifts the collapsed state so `TopNav` and the main content margin shift in sync. On mobile, navigation lives in `MobileNav`, a hamburger button in the `TopNav` that opens the library's `Drawer` (side `left`) with the same links and the same always-visible-link/conditional-list behavior. The drawer closes on route change and follows the standard overlay accessibility contract
+- Sidebar is `collapsible` (`togglePosition="top"`) and full viewport height (`h-screen`, `top-0`) on desktop (`md:` and up), hidden below `md:`. `DocsShell` lifts the collapsed state so `DocsHeader` and the main content margin shift in sync. On mobile, navigation lives in `MobileNav`, a hamburger button in the `DocsHeader` that opens the library's `Drawer` (side `left`) with the same links and the same always-visible-link/conditional-list behavior. The drawer closes on route change and follows the standard overlay accessibility contract
 
 ## Component Registry
 
@@ -174,7 +174,7 @@ The docs site supports multiple built-in themes (color palette) and styles (surf
 
 Theme definitions live in `src/themes/`, one file per theme, each satisfying the `Theme` interface (`src/themes/types.ts`): `name`, `label`, `accent` (swatch hex), and `light`/`dark` token maps. Style definitions live in `src/styles/` and mirror this shape via the `Style` interface (`src/styles/types.ts`), covering the `SURFACE_TOKENS` contract (radius, border, shadow, blur, alpha) rather than color.
 
-`TopNav` holds the active theme and style in state and applies each via a global `<style>` element injected into `<head>` (`#theme-override` / `#style-override`), writing both the `:root` and `.dark` variants so the override still respects the current dark/light mode:
+`DocsHeader` holds the active theme and style in state and applies each via a global `<style>` element injected into `<head>` (`#theme-override` / `#style-override`), writing both the `:root` and `.dark` variants so the override still respects the current dark/light mode:
 
 ```ts
 styleEl.textContent = `:root {\n${lightVars}\n}\n.dark {\n${darkVars}\n}`;
@@ -184,7 +184,7 @@ Because components use token classes (`bg-brand`, `rounded-[var(--radius)]`, etc
 
 ### Theme and Style Storage
 
-The active theme is stored in `localStorage` under `design-system`; the active style under `design-style`. Both are applied in a `useEffect` on `TopNav` mount, reading the saved value and re-running the same apply function used on selection.
+The active theme is stored in `localStorage` under `design-system`; the active style under `design-style`. Both are applied in a `useEffect` on `DocsHeader` mount, reading the saved value and re-running the same apply function used on selection.
 
 ### Theme Page
 
@@ -196,7 +196,7 @@ These live in `app/_docs/components/`:
 
 | Component             | Type   | Purpose                                                             |
 |-----------------------|--------|---------------------------------------------------------------------|
-| `DocsShell`           | Client | Owns sidebar collapsed state; renders `TopNav`, `DocsSidebar`, main content, and `Footer` in sync |
+| `DocsShell`           | Client | Owns sidebar collapsed state; renders `DocsHeader`, `DocsSidebar`, main content, and `Footer` in sync |
 | `DocsSidebar`         | Client | Sidebar shell: brand header, top-level links, route-conditional Components/Blocks lists, footer (Changelog, GitHub, npm) |
 | `DocsSidebarLink`     | Client | Single sidebar link with active state via `usePathname()` and optional `icon`   |
 | `CodeBlock`           | Server | `<pre><code>` with token background and horizontal scroll           |

@@ -140,7 +140,7 @@ const buildThemeTs = (name, varName, lightTokens, darkTokens, meta) =>
 	const label  = meta?.label  ?? name.charAt(0).toUpperCase() + name.slice(1);
 	const accent = meta?.accent ?? '#000000';
 
-	return `// AUTO-GENERATED — edit tokens/${name}.{light,dark}.json then run \`npm run tokens\`
+	return `// AUTO-GENERATED, edit tokens/${name}.{light,dark}.json then run \`npm run tokens\`
 import type { Theme } from './types';
 
 export const ${varName}: Theme =
@@ -205,7 +205,7 @@ const buildColorsTs = (lightTokens, darkTokens) =>
 		return `\t${group}:\n\t{\n${lightLines}\n\t\tdark:\n\t\t{\n${darkLines}\n\t\t},\n\t},`;
 	}).filter(Boolean);
 
-	return `// AUTO-GENERATED — edit tokens/zinc.{light,dark}.json then run \`npm run tokens\`
+	return `// AUTO-GENERATED, edit tokens/zinc.{light,dark}.json then run \`npm run tokens\`
 export const colors =
 {
 ${groupBlocks.join('\n')}

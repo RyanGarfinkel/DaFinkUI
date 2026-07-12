@@ -19,9 +19,7 @@ function copyDirs(root, destRoot, label)
 	for(const name of dirs)
 	{
 		const dir = resolve(root, name);
-		const files = readdirSync(dir).filter(f =>
-			extname(f) === '.tsx' && !f.endsWith('.test.tsx')
-		);
+		const files = readdirSync(dir).filter(f => extname(f) === '.tsx');
 
 		for(const file of files)
 		{

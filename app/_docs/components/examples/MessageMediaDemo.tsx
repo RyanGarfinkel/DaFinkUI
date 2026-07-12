@@ -14,7 +14,7 @@ export const MessageMediaDemo = () => {
 				/>
 			</Message>
 
-			<Message variant='received'>Just got back from the trip — here&apos;s the view!</Message>
+			<Message variant='received'>Just got back from the trip. Here&apos;s the view!</Message>
 
 			<Message variant='sent'>
 				<AudioPlayer

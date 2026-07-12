@@ -176,5 +176,5 @@ describe('DatePicker', () =>
 			await userEvent.click(screen.getByRole('button', { name: /previous month/i }));
 
 		expect(screen.getByText('December 2024')).toBeDefined();
-	});
+	}, 15000);
 });

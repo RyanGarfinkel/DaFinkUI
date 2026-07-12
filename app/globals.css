@@ -59,7 +59,7 @@
 	--color-success-border: #bbf7d0;
 
 	/* Warning */
-	--color-warning:        #d97706;
+	--color-warning:        #92400e;
 	--color-warning-bg:     #fffbeb;
 	--color-warning-border: #fde68a;
 
@@ -78,14 +78,14 @@
 	/* Text */
 	--color-text:          #18181b;
 	--color-text-muted:    #52525b;
-	--color-text-subtle:   #a1a1aa;
+	--color-text-subtle:   #737380;
 	--color-text-inverted: #ffffff;
 
 	/* Input */
 	--color-input-border:        #d4d4d8;
 	--color-input-border-hover:  #a1a1aa;
 	--color-input-ring:          #18181b;
-	--color-input-placeholder:   #a1a1aa;
+	--color-input-placeholder:   #737380;
 	--color-input-disabled-bg:   #f4f4f5;
 	--color-input-disabled-text: #a1a1aa;
 	--color-input-error:         #dc2626;
@@ -119,12 +119,12 @@
 	--color-surface-border-hover: #3e3e43;
 	--color-text:                 #e8e8ea;
 	--color-text-muted:           #8e8e9a;
-	--color-text-subtle:          #54545e;
+	--color-text-subtle:          #7d7d8b;
 	--color-text-inverted:        #111113;
 	--color-input-border:         #2e2e32;
 	--color-input-border-hover:   #3e3e43;
 	--color-input-ring:           #e8e8ea;
-	--color-input-placeholder:    #54545e;
+	--color-input-placeholder:    #7d7d8b;
 	--color-input-disabled-bg:    #1c1c1f;
 	--color-input-disabled-text:  #2e2e32;
 	--color-input-error:          #f87171;
@@ -292,6 +292,21 @@ p {
 @keyframes wf-dash-fill {
 	from { stroke-dashoffset: 1; }
 	to   { stroke-dashoffset: 0; }
+}
+
+/* ─── Theme cross-fade ───────────────────────────────── */
+/* Wrapped in prefers-reduced-motion: no-preference rather than relying on
+   !important vs. !important specificity to fight the global reduced-motion
+   rule below — a class selector like .theme-transition * is more specific
+   than the bare "*" it would need to lose to, so gating on the media query
+   itself is what guarantees this collapses to a no-op instead. */
+@media (prefers-reduced-motion: no-preference) {
+	.theme-transition,
+	.theme-transition *,
+	.theme-transition *::before,
+	.theme-transition *::after {
+		transition: background-color var(--duration-slow) var(--ease-standard), border-color var(--duration-slow) var(--ease-standard), color var(--duration-slow) var(--ease-standard), fill var(--duration-slow) var(--ease-standard), stroke var(--duration-slow) var(--ease-standard) !important;
+	}
 }
 
 @media (prefers-reduced-motion: reduce) {

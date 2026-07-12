@@ -162,7 +162,7 @@ for(const entry of entries)
 	const region = entryRegions[entry.slug];
 	if(!region)
 	{
-		warn(`Could not locate entry region for '${entry.slug}' — skipping JSX check`);
+		warn(`Could not locate entry region for '${entry.slug}', skipping JSX check`);
 		continue;
 	}
 
@@ -180,7 +180,7 @@ for(const entry of entries)
 	if(!block) continue; // already caught in check 4
 
 	if(!block.includes(`<${entry.name}`))
-		fail(`ComponentLivePreview case '${entry.slug}' missing <${entry.name} — preview and usage are out of sync`);
+		fail(`ComponentLivePreview case '${entry.slug}' missing <${entry.name}: preview and usage are out of sync`);
 }
 
 // ─── Check 7: Every component directory has a CLI registry entry ──────────────

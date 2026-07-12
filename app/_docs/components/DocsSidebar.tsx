@@ -3,6 +3,7 @@
 import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
 import { Sidebar, SidebarHeader, SidebarFooter, SidebarDivider, useSidebarCollapsed } from '@/src/components/Sidebar/Sidebar';
 import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
+import Tooltip from '@/src/components/Tooltip/Tooltip';
 import { blocks } from '@/app/_docs/registry/blocks';
 import { registry } from '@/app/_docs/registry';
 import { usePathname } from 'next/navigation';
@@ -47,7 +48,7 @@ interface ExternalFooterLinkProps
 const ExternalFooterLink = ({ href, icon, children }: ExternalFooterLinkProps) => {
 	const collapsed = useSidebarCollapsed();
 
-	return (
+	const link = (
 		<a
 			href={href}
 			target='_blank'
@@ -61,6 +62,8 @@ const ExternalFooterLink = ({ href, icon, children }: ExternalFooterLinkProps) =
 			<span className={collapsed ? 'sr-only' : ''}>{children}</span>
 		</a>
 	);
+
+	return collapsed ? <Tooltip content={children} side='right' className='w-full'>{link}</Tooltip> : link;
 };
 
 interface FooterLinkProps
@@ -75,7 +78,7 @@ const FooterLink = ({ href, icon, children }: FooterLinkProps) => {
 	const pathname = usePathname();
 	const isActive = pathname === href;
 
-	return (
+	const link = (
 		<Link
 			href={href}
 			aria-current={isActive ? 'page' : undefined}
@@ -89,6 +92,8 @@ const FooterLink = ({ href, icon, children }: FooterLinkProps) => {
 			<span className={collapsed ? 'sr-only' : ''}>{children}</span>
 		</Link>
 	);
+
+	return collapsed ? <Tooltip content={children} side='right' className='w-full'>{link}</Tooltip> : link;
 };
 
 export const DocsSidebar = ({ collapsed, onCollapsedChange }: DocsSidebarProps) => {
@@ -139,7 +144,7 @@ export const DocsSidebar = ({ collapsed, onCollapsedChange }: DocsSidebarProps) 
 					</DocsSidebarLink>
 				))}
 
-				{showBlocks && blocks.map((entry) => (
+				{showBlocks && blocks.filter((entry) => !entry.hidden).map((entry) => (
 					<DocsSidebarLink
 						key={entry.slug}
 						href={`/blocks/${entry.slug}`}

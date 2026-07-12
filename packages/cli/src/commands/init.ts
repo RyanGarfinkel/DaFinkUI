@@ -9,6 +9,20 @@ import pc from 'picocolors';
 
 const CSS_CANDIDATES = ['app/globals.css', 'src/app/globals.css', 'src/index.css'];
 
+function detectFramework(cwd: string): 'next' | 'react'
+{
+	try
+	{
+		const pkg = JSON.parse(readFileSync(resolve(cwd, 'package.json'), 'utf8')) as Record<string, unknown>;
+		const deps = { ...(pkg.dependencies as object), ...(pkg.devDependencies as object) };
+		return 'next' in deps ? 'next' : 'react';
+	}
+	catch
+	{
+		return 'next';
+	}
+}
+
 function detectCssFile(cwd: string): string | null
 {
 	for(const candidate of CSS_CANDIDATES)
@@ -31,7 +45,7 @@ function prependImport(cssPath: string, importLine: string): void
 
 export async function runInit(cwd: string): Promise<void>
 {
-	intro(pc.bold('DaFink UI — Setup wizard'));
+	intro(pc.bold('DaFink UI: Setup wizard'));
 
 	const style = await select({
 		message: 'Which style?',
@@ -61,6 +75,23 @@ export async function runInit(cwd: string): Promise<void>
 	});
 
 	if(isCancel(palette))
+	{
+		cancel('Setup cancelled.');
+		process.exit(0);
+	}
+
+	const detectedFramework = detectFramework(cwd);
+
+	const framework = await select({
+		message: 'Which framework?',
+		options: [
+			{ value: 'next',  label: 'Next.js', hint: detectedFramework === 'next' ? 'detected' : undefined },
+			{ value: 'react', label: 'React',   hint: detectedFramework === 'react' ? 'detected' : undefined },
+		],
+		initialValue: detectedFramework,
+	});
+
+	if(isCancel(framework))
 	{
 		cancel('Setup cancelled.');
 		process.exit(0);
@@ -102,10 +133,11 @@ export async function runInit(cwd: string): Promise<void>
 	}
 
 	const config: DaFinkConfig = {
-		style: style as DaFinkConfig['style'],
-		palette: palette as DaFinkConfig['palette'],
+		style:         style as DaFinkConfig['style'],
+		palette:       palette as DaFinkConfig['palette'],
+		framework:     framework as DaFinkConfig['framework'],
 		componentsDir: (componentsDir as string) || 'src/components/ui',
-		blocksDir: 'src/blocks',
+		blocksDir:     'src/blocks',
 		cssFile,
 	};
 
