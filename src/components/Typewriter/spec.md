@@ -8,12 +8,12 @@ Reveals text character by character, like a terminal being typed in real time. A
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| text | `string` | — | Required. The full text to type out. |
+| text | `string` | - | Required. The full text to type out. |
 | speed | `number` | `50` | Milliseconds between each character. |
 | delay | `number` | `0` | Milliseconds to wait before typing begins. |
 | cursor | `boolean` | `true` | Show a blinking `|` cursor while typing. |
 | cursorPersist | `boolean` | `false` | Keep the cursor visible after typing completes. |
-| onComplete | `() => void` | — | Called when all characters have been revealed. |
+| onComplete | `() => void` | - | Called when all characters have been revealed. |
 | className | `string` | `''` | Additional CSS classes on the root `<span>`. |
 
 Extends all native `<span>` HTML attributes.
@@ -31,7 +31,7 @@ Extends all native `<span>` HTML attributes.
 
 ## Cursor
 
-The cursor is a 2px-wide block element with `background: currentColor`, so it inherits the text color of its context without any extra styling. It blinks via `dafink-cursor-blink` — a step-start CSS keyframe. The CSS is injected inline via a `<style>` block, matching the pattern used by `TextShimmer`.
+The cursor is a 2px-wide block element with `background: currentColor`, so it inherits the text color of its context without any extra styling. It blinks via `dafink-cursor-blink`, a step-start CSS keyframe. The CSS is injected inline via a `<style>` block, matching the pattern used by `TextShimmer`.
 
 Show cursor when: `cursor` is `true` AND (still typing OR `cursorPersist` is `true`).
 
@@ -54,7 +54,7 @@ Screen readers receive the complete text immediately via `aria-label` on the roo
 
 ## Reduced Motion
 
-On mount, `window.matchMedia('(prefers-reduced-motion: reduce)').matches` is checked. If true, `displayedChars` is immediately set to `text.length` — the full text renders statically with no animation and no interval is started. The cursor CSS keyframe is also suppressed via `@media (prefers-reduced-motion: reduce)`.
+On mount, `window.matchMedia('(prefers-reduced-motion: reduce)').matches` is checked. If true, `displayedChars` is immediately set to `text.length`: the full text renders statically with no animation and no interval is started. The cursor CSS keyframe is also suppressed via `@media (prefers-reduced-motion: reduce)`.
 
 ---
 
@@ -65,7 +65,7 @@ On mount, `window.matchMedia('(prefers-reduced-motion: reduce)').matches` is che
 - Step-by-step onboarding prompts revealed one at a time.
 - AI "response streaming" simulations where the answer appears character by character.
 
-Do not use for body copy that users need to read quickly — animated reveal adds latency. Use `cursorPersist` sparingly; a blinking cursor on static text draws persistent attention.
+Do not use for body copy that users need to read quickly; animated reveal adds latency. Use `cursorPersist` sparingly; a blinking cursor on static text draws persistent attention.
 
 ---
 
@@ -99,7 +99,7 @@ import Typewriter from '@/src/components/Typewriter/Typewriter';
 
 ## Tokens Used
 
-None — the cursor inherits `currentColor`.
+None: the cursor inherits `currentColor`.
 
 ---
 

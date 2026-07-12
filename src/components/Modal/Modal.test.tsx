@@ -145,7 +145,7 @@ describe('Modal', () =>
 		});
 	});
 
-	it('traps focus — Tab from the last element wraps to the first', async () =>
+	it('traps focus: Tab from the last element wraps to the first', async () =>
 	{
 		renderControlled(true);
 		await waitForFocusInside();
@@ -158,7 +158,7 @@ describe('Modal', () =>
 		expect(document.activeElement).toBe(screen.getByLabelText('Close'));
 	});
 
-	it('traps focus — Shift+Tab from the first element wraps to the last', async () =>
+	it('traps focus: Shift+Tab from the first element wraps to the last', async () =>
 	{
 		renderControlled(true);
 		await waitForFocusInside();

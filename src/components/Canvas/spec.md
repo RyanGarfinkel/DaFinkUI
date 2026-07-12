@@ -2,7 +2,7 @@
 
 A freehand drawing surface built on the HTML5 Canvas API. Supports pen and eraser tools, a color palette, variable stroke widths, undo/redo, and PNG download. Pointer events handle mouse, stylus, and touch.
 
-This component is a **docs showcase pattern** — it ships as a complete, copy-paste-owned component rather than a primitive you compose. Treat it as a starting point and extend it for your use case.
+This component is a **docs showcase pattern**: it ships as a complete, source-owned component rather than a primitive you compose. Treat it as a starting point and extend it for your use case.
 
 ## Installation
 
@@ -27,12 +27,12 @@ No npm dependencies beyond React.
 
 The built-in toolbar includes:
 
-- **Tool selector** — Pen and Eraser toggle buttons
-- **Color palette** — 9 preset colors (black, white, red, orange, yellow, green, blue, violet, pink)
-- **Stroke width** — 4 sizes (2, 4, 8, 14 px)
-- **Undo / Redo** — per-stroke history
-- **Clear** — removes all strokes
-- **Download** — saves the canvas as a PNG file
+- **Tool selector**: Pen and Eraser toggle buttons
+- **Color palette**: 9 preset colors (black, white, red, orange, yellow, green, blue, violet, pink)
+- **Stroke width**: 4 sizes (2, 4, 8, 14 px)
+- **Undo / Redo**: per-stroke history
+- **Clear**: removes all strokes
+- **Download**: saves the canvas as a PNG file
 
 ## Accessibility notes
 

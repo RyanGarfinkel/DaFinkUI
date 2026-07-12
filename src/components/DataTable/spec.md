@@ -21,7 +21,7 @@ No additional npm dependencies. Requires no other registry components.
 - When you need pagination for large datasets
 - When you need bulk-selection of rows (e.g. bulk delete, export)
 
-Do not use DataTable for simple read-only tables with a handful of rows — use the static `Table` component instead.
+Do not use DataTable for simple read-only tables with a handful of rows; use the static `Table` component instead.
 
 ---
 
@@ -31,9 +31,9 @@ Do not use DataTable for simple read-only tables with a handful of rows — use 
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `data` | `T[]` | — | Array of data objects to display. |
-| `columns` | `ColumnDef<T>[]` | — | Column definitions. Controls headers, keys, sorting, and custom rendering. |
-| `keyField` | `keyof T & string` | — | The key in each row object used as a unique identifier. Must be unique per row. |
+| `data` | `T[]` | None | Array of data objects to display. |
+| `columns` | `ColumnDef<T>[]` | None | Column definitions. Controls headers, keys, sorting, and custom rendering. |
+| `keyField` | `keyof T & string` | None | The key in each row object used as a unique identifier. Must be unique per row. |
 | `selectable` | `boolean` | `false` | When true, prepends a checkbox column. Enables row selection. |
 | `onSelectionChange` | `(selected: T[]) => void` | `undefined` | Called whenever the set of selected rows changes. Receives the full row objects. |
 | `pageSize` | `number` | `10` | Rows per page. Set to `0` to disable pagination and show all rows. |
@@ -44,8 +44,8 @@ Do not use DataTable for simple read-only tables with a handful of rows — use 
 
 | Prop | Type | Default | Description |
 |---|---|---|---|
-| `key` | `keyof T & string` | — | The property key in each row object to read for this column. |
-| `header` | `string` | — | Column header text. |
+| `key` | `keyof T & string` | None | The property key in each row object to read for this column. |
+| `header` | `string` | None | Column header text. |
 | `sortable` | `boolean` | `false` | When true, the header renders as a button and clicking it sorts by this column. |
 | `width` | `string` | `undefined` | CSS width value (e.g. `"8rem"`, `"120px"`) applied to the column. |
 | `render` | `(value: T[keyof T], row: T) => ReactNode` | `undefined` | Custom cell renderer. If omitted, `String(value)` is used. |
@@ -58,7 +58,7 @@ Do not use DataTable for simple read-only tables with a handful of rows — use 
 - Clicking the same header again sorts descending.
 - Clicking a third time clears the sort and restores original order.
 - Only one column can be sorted at a time. Clicking a different sortable column resets any previous sort.
-- Sorting is entirely client-side — the `data` array is sorted in memory.
+- Sorting is entirely client-side; the `data` array is sorted in memory.
 - Changing the sort direction resets pagination back to page 1.
 - The active sort column's header button shows an up-chevron (↑) for ascending, down-chevron (↓) for descending. Unsorted sortable headers show a neutral double-chevron (⇅) at reduced opacity.
 
@@ -129,7 +129,7 @@ focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visibl
 
 ### Structure
 
-- Uses semantic `<table>`, `<thead>`, `<tbody>`, `<th>`, `<td>` — no ARIA role overrides needed.
+- Uses semantic `<table>`, `<thead>`, `<tbody>`, `<th>`, `<td>`; no ARIA role overrides needed.
 - Sort buttons are real `<button type="button">` elements inside `<th>`, not `<th role="button">`.
 
 ---
@@ -143,7 +143,7 @@ The DataTable root wrapper carries `@container`, establishing a container contex
 | Below `@sm` | < 24rem (384px) | The pagination footer stacks vertically: the "Showing X–Y of Z" range label appears above the Prev/Next controls. |
 | `@sm` and above | ≥ 24rem (384px) | The pagination footer is a single horizontal row with the range label on the left and pagination controls on the right. |
 
-The `overflow-x-auto` on the root wrapper handles column overflow at any container width — horizontal scrolling kicks in before columns collapse.
+The `overflow-x-auto` on the root wrapper handles column overflow at any container width; horizontal scrolling kicks in before columns collapse.
 
 ---
 

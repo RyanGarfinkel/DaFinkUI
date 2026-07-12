@@ -83,7 +83,7 @@ const Modal = (
 		{
 			setVisible(false);
 
-			// Return focus to the trigger — always, regardless of how the modal closed
+			// Return focus to the trigger: always, regardless of how the modal closed
 			triggerRef.current?.focus();
 			triggerRef.current = null;
 

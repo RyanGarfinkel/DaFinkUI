@@ -104,7 +104,7 @@ const DataTable = <T extends Record<string, any>>(
 	const [selected, setSelected] = useState<Set<string>>(new Set());
 	const [page, setPage]         = useState(0);
 
-	// In server-side mode data is already the current page — skip client sorting/slicing
+	// In server-side mode data is already the current page: skip client sorting/slicing
 	const isServerSide = totalRows != null;
 
 	const sorted = useMemo(

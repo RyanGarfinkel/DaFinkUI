@@ -347,6 +347,49 @@ describe('SidebarLink', () =>
 		);
 		expect(screen.getByRole('link', { name: 'Home' })).toBeTruthy();
 	});
+
+	it('renders the action as a sibling of the link, never a descendant', () =>
+	{
+		render(
+			<SidebarLink href='/home' action={<button aria-label='Favorite'>star</button>}>
+				Home
+			</SidebarLink>
+		);
+		const link   = screen.getByRole('link', { name: 'Home' });
+		const action = screen.getByRole('button', { name: 'Favorite' });
+
+		expect(link.contains(action)).toBe(false);
+		expect(action.closest('a')).toBeNull();
+	});
+
+	it('does not navigate the link when the action is clicked', async () =>
+	{
+		const user       = userEvent.setup();
+		const onAction    = vi.fn();
+		const onLinkClick = vi.fn();
+		render(
+			<SidebarLink href='/home' onClick={onLinkClick} action={<button onClick={onAction}>star</button>}>
+				Home
+			</SidebarLink>
+		);
+
+		await user.click(screen.getByRole('button', { name: 'star' }));
+
+		expect(onAction).toHaveBeenCalledTimes(1);
+		expect(onLinkClick).not.toHaveBeenCalled();
+	});
+
+	it('does not render the action when the parent Sidebar is collapsed', () =>
+	{
+		render(
+			<Sidebar collapsed>
+				<SidebarLink href='/home' icon={<svg data-testid='icon' />} action={<button>star</button>}>
+					Home
+				</SidebarLink>
+			</Sidebar>
+		);
+		expect(screen.queryByRole('button', { name: 'star' })).toBeNull();
+	});
 });
 
 describe('SidebarDivider', () =>

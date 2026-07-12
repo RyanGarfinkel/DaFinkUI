@@ -33,7 +33,7 @@ A single column with a title, card count badge, and a sortable list of cards.
 
 ### KanbanCard
 
-An individual draggable card. Rendered by KanbanColumn — use directly for custom layouts.
+An individual draggable card. Rendered by KanbanColumn; use directly for custom layouts.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|

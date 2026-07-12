@@ -2,6 +2,7 @@
 
 import { ToggleGroup, ToggleGroupItem } from '../ToggleGroup/ToggleGroup';
 import { useState, useEffect, useRef } from 'react';
+import Tooltip from '../Tooltip/Tooltip';
 
 export type CodeBlockVariant = 'code' | 'example';
 
@@ -73,7 +74,7 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 		}
 		catch
 		{
-			// clipboard unavailable — silently ignore
+			// clipboard unavailable, silently ignore
 		}
 	};
 
@@ -125,22 +126,23 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 					<code>{code}</code>
 				</pre>
 			)}
-			<button
-				type='button'
-				onClick={handleCopy}
-				aria-label={copied ? 'Copied' : 'Copy to clipboard'}
-				className='
-					absolute right-3 top-3
-					inline-flex items-center gap-1.5 rounded-[var(--radius)] px-2 py-1.5
-					text-xs text-text-muted
-					bg-surface border-[length:var(--border-width)] border-surface-border
-					transition-colors duration-[var(--duration-fast)]
-					hover:bg-surface-hover hover:text-text
-					focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring
-				'
-			>
-				{copied ? <CheckIcon /> : <CopyIcon />}
-			</button>
+			<Tooltip content={copied ? 'Copied' : 'Copy'} side='left' className='absolute right-3 top-3'>
+				<button
+					type='button'
+					onClick={handleCopy}
+					aria-label={copied ? 'Copied' : 'Copy to clipboard'}
+					className='
+						inline-flex items-center gap-1.5 rounded-[var(--radius)] px-2 py-1.5
+						text-xs text-text-muted
+						bg-surface border-[length:var(--border-width)] border-surface-border
+						transition-colors duration-[var(--duration-fast)]
+						hover:bg-surface-hover hover:text-text
+						focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring
+					'
+				>
+					{copied ? <CheckIcon /> : <CopyIcon />}
+				</button>
+			</Tooltip>
 		</div>
 	);
 };

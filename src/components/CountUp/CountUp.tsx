@@ -94,7 +94,7 @@ export const CountUp = (
 
 	useEffect(() => {
 		if (typeof IntersectionObserver === 'undefined') {
-			// No observer available — skip the animation and show the real value.
+			// No observer available: skip the animation and show the real value.
 			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setDisplay(value);
 			return;
@@ -111,7 +111,7 @@ export const CountUp = (
 		const node = rootRef.current;
 		if (!node) return;
 
-		// Animation is available — rewind to the start value until visible.
+		// Animation is available: rewind to the start value until visible.
 		setDisplay(start);
 
 		const animate = () => {

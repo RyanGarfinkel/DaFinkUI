@@ -1,6 +1,6 @@
 # Charts
 
-Recharts-based chart primitives: `LineChart`, `BarChart`, `AreaChart`, `DonutChart`, and `RadarChart`. Requires Recharts as an npm dependency — install it alongside the component.
+Recharts-based chart primitives: `LineChart`, `BarChart`, `AreaChart`, `DonutChart`, and `RadarChart`. Requires Recharts as an npm dependency; install it alongside the component.
 
 ## Installation
 
@@ -92,11 +92,11 @@ interface DonutSlice   { label: string; value: number; color?: string }
 
 ## When to use
 
-- **LineChart** — trends over time; multiple metrics on the same axis
-- **BarChart** — comparisons across categories; use `stacked` for part-to-whole
-- **AreaChart** — cumulative values or emphasising volume beneath a trend line
-- **DonutChart** — part-to-whole proportions (5 slices or fewer for readability)
-- **RadarChart** — comparing multiple entities across several shared metrics or dimensions at once (e.g. comparing products, teams, or skill sets across 3+ axes). Avoid it for more than ~8 categories (the polygon gets unreadable) and avoid it for trends over time — use `LineChart` or `AreaChart` instead
+- **LineChart**: trends over time; multiple metrics on the same axis
+- **BarChart**: comparisons across categories; use `stacked` for part-to-whole
+- **AreaChart**: cumulative values or emphasising volume beneath a trend line
+- **DonutChart**: part-to-whole proportions (5 slices or fewer for readability)
+- **RadarChart**: comparing multiple entities across several shared metrics or dimensions at once (e.g. comparing products, teams, or skill sets across 3+ axes). Avoid it for more than ~8 categories (the polygon gets unreadable) and avoid it for trends over time; use `LineChart` or `AreaChart` instead
 
 ## Theming
 
@@ -106,4 +106,4 @@ All chart elements use CSS custom properties (`var(--color-brand)`, `var(--color
 
 - Charts are decorative by nature. Always pair a chart with a data table or text summary for screen-reader users.
 - Tooltips are keyboard-accessible via Recharts' built-in implementation.
-- Color is not the only differentiator — series also differ by label and position.
+- Color is not the only differentiator; series also differ by label and position.

@@ -86,7 +86,7 @@ describe('SidePanel', () =>
 		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
 	});
 
-	it('does not set aria-modal — SidePanel never inerts the rest of the page', async () =>
+	it('does not set aria-modal: SidePanel never inerts the rest of the page', async () =>
 	{
 		renderControlled(true);
 		await waitFor(() =>
@@ -121,7 +121,7 @@ describe('SidePanel', () =>
 			expect(panel.className).toContain('right-4');
 			expect(panel.className).toContain('inset-y-4');
 			// The visual surface (rounded corners, shadow, background) comes from the
-			// real Card component nested inside — not duplicated on the position div.
+			// real Card component nested inside: not duplicated on the position div.
 			expect(getPanelCard().className).toContain('rounded-[var(--radius)]');
 			expect(getPanelCard().className).toContain('shadow-[var(--shadow-lg)]');
 		});
@@ -204,7 +204,7 @@ describe('SidePanel', () =>
 		});
 	});
 
-	it('does not trap focus — Tab from the last element moves focus out of the panel', async () =>
+	it('does not trap focus: Tab from the last element moves focus out of the panel', async () =>
 	{
 		render(<SidePanelHarness />);
 		await userEvent.click(screen.getByText('Open panel'));
@@ -228,7 +228,7 @@ describe('SidePanel', () =>
 		expect(onOpenChange).toHaveBeenCalledWith(false);
 	});
 
-	it('does not close when clicking outside the panel — panels stay open independently', async () =>
+	it('does not close when clicking outside the panel: panels stay open independently', async () =>
 	{
 		const { onOpenChange } = renderControlled(true);
 		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
@@ -345,7 +345,7 @@ describe('SidePanel', () =>
 		spy.mockRestore();
 	});
 
-	it('does not lock body scroll — the rest of the page stays interactive', async () =>
+	it('does not lock body scroll: the rest of the page stays interactive', async () =>
 	{
 		document.body.style.overflow = '';
 
@@ -410,7 +410,7 @@ describe('SidePanel', () =>
 		await waitFor(() => expect(firstPanel.style.transform).toContain('translateX'));
 	});
 
-	it('does not shift panels on opposite sides — stacking is per-side', async () =>
+	it('does not shift panels on opposite sides: stacking is per-side', async () =>
 	{
 		render(
 			<>

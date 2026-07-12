@@ -87,6 +87,9 @@ export type { InputProps } from './components/Input/Input';
 export { KanbanBoard, KanbanCard, KanbanColumn } from './components/Kanban/Kanban';
 export type { KanbanCardProps, KanbanColumnProps } from './components/Kanban/Kanban';
 
+export { MenuBar, MenuBarBrand, MenuBarActions } from './components/MenuBar/MenuBar';
+export type { MenuBarProps } from './components/MenuBar/MenuBar';
+
 export { default as Message, MessageReactions, MessageReaction } from './components/Message/Message';
 export type { MessageProps, MessageVariant, MessageReactionsProps, MessageReactionProps } from './components/Message/Message';
 
@@ -153,9 +156,6 @@ export type { ToggleGroupType, ToggleGroupSize } from './components/ToggleGroup/
 
 export { default as Tooltip } from './components/Tooltip/Tooltip';
 export type { TooltipProps, TooltipSide } from './components/Tooltip/Tooltip';
-
-export { TopNav, TopNavBrand, TopNavActions } from './components/TopNav/TopNav';
-export type { TopNavProps } from './components/TopNav/TopNav';
 
 export { default as Tree, TreeItem } from './components/Tree/Tree';
 export type { TreeProps } from './components/Tree/Tree';

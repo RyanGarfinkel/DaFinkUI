@@ -42,6 +42,34 @@ describe('Timeline', () =>
 		expect(screen.getByText('★')).toBeDefined();
 	});
 
+	it('widens the indicator dot to a pill for long custom content while staying min-w-7/h-7', () =>
+	{
+		const { container } = render(
+			<Timeline animate='none'>
+				<TimelineItem title='Founded' indicator='2026' />
+			</Timeline>
+		);
+		expect(screen.getByText('2026')).toBeDefined();
+		const dot = container.querySelector('.rounded-full');
+		const classes = dot?.className.split(' ') ?? [];
+		expect(classes).toContain('min-w-7');
+		expect(classes).toContain('h-7');
+		expect(classes).not.toContain('w-7');
+	});
+
+	it('applies the same min-w-7/h-7 dot classes to a default short indicator', () =>
+	{
+		const { container } = render(
+			<Timeline animate='none'>
+				<TimelineItem title='Step' />
+			</Timeline>
+		);
+		expect(screen.getByText('1')).toBeDefined();
+		const dot = container.querySelector('.rounded-full');
+		expect(dot?.className).toContain('min-w-7');
+		expect(dot?.className).toContain('h-7');
+	});
+
 	it('renders children content inside each item', () =>
 	{
 		render(
@@ -161,7 +189,7 @@ describe('Timeline', () =>
 		expect(container.querySelector('style')).toBeNull();
 	});
 
-	it('applies an animation inline style to items when animate="stagger"', () =>
+	it('applies an animation inline style to item content when animate="stagger"', () =>
 	{
 		const { container } = render(
 			<Timeline animate='stagger'>
@@ -169,8 +197,11 @@ describe('Timeline', () =>
 				<TimelineItem title='Second' />
 			</Timeline>
 		);
-		// Both item wrappers should have an animation style
-		const items = container.querySelectorAll<HTMLElement>('.flex.gap-4');
+		// The connector line must stay fully opaque at all times (it's a low-contrast
+		// 1px hairline that would otherwise fade to invisible faster than the bolder
+		// dot/text at the same opacity), so the animation lives on the content block,
+		// not the row wrapper.
+		const items = container.querySelectorAll<HTMLElement>('.flex-1.min-w-0');
 		expect(items.length).toBe(2);
 		items.forEach((el) =>
 		{
@@ -187,7 +218,7 @@ describe('Timeline', () =>
 				<TimelineItem title='C' />
 			</Timeline>
 		);
-		const items = container.querySelectorAll<HTMLElement>('.flex.gap-4');
+		const items = container.querySelectorAll<HTMLElement>('.flex-1.min-w-0');
 		expect(items[0].style.animation).toContain('0ms');
 		expect(items[1].style.animation).toContain('90ms');
 		expect(items[2].style.animation).toContain('180ms');

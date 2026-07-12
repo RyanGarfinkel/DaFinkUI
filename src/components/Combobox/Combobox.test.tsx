@@ -12,7 +12,7 @@ const OPTIONS = [
 
 // ─── Rendering ────────────────────────────────────────────────────────────────
 
-describe('Combobox — rendering', () =>
+describe('Combobox: rendering', () =>
 {
 	it('renders the input with placeholder', () =>
 	{
@@ -49,7 +49,7 @@ describe('Combobox — rendering', () =>
 
 // ─── Dropdown open / close ────────────────────────────────────────────────────
 
-describe('Combobox — dropdown open/close', () =>
+describe('Combobox: dropdown open/close', () =>
 {
 	it('opens the listbox when input receives focus', () =>
 	{
@@ -80,7 +80,7 @@ describe('Combobox — dropdown open/close', () =>
 
 // ─── Filtering ────────────────────────────────────────────────────────────────
 
-describe('Combobox — filtering', () =>
+describe('Combobox: filtering', () =>
 {
 	it('filters options by typed query (case-insensitive substring)', () =>
 	{
@@ -106,7 +106,7 @@ describe('Combobox — filtering', () =>
 
 // ─── Single select ────────────────────────────────────────────────────────────
 
-describe('Combobox — single select', () =>
+describe('Combobox: single select', () =>
 {
 	it('calls onChange with the selected value when an option is clicked', () =>
 	{
@@ -136,7 +136,7 @@ describe('Combobox — single select', () =>
 
 // ─── Multi select ─────────────────────────────────────────────────────────────
 
-describe('Combobox — multi select', () =>
+describe('Combobox: multi select', () =>
 {
 	it('renders pills for each selected value', () =>
 	{
@@ -220,7 +220,7 @@ describe('Combobox — multi select', () =>
 
 // ─── Keyboard navigation ──────────────────────────────────────────────────────
 
-describe('Combobox — keyboard navigation', () =>
+describe('Combobox: keyboard navigation', () =>
 {
 	it('ArrowDown moves active option to the next enabled option', () =>
 	{
@@ -283,7 +283,7 @@ describe('Combobox — keyboard navigation', () =>
 
 // ─── Disabled options ─────────────────────────────────────────────────────────
 
-describe('Combobox — disabled options', () =>
+describe('Combobox: disabled options', () =>
 {
 	it('renders disabled options with aria-disabled=true', () =>
 	{
@@ -305,7 +305,7 @@ describe('Combobox — disabled options', () =>
 
 // ─── Disabled component ───────────────────────────────────────────────────────
 
-describe('Combobox — disabled component', () =>
+describe('Combobox: disabled component', () =>
 {
 	it('does not open when disabled', () =>
 	{
@@ -323,7 +323,7 @@ describe('Combobox — disabled component', () =>
 
 // ─── ARIA ─────────────────────────────────────────────────────────────────────
 
-describe('Combobox — ARIA', () =>
+describe('Combobox: ARIA', () =>
 {
 	it('input has role="combobox"', () =>
 	{

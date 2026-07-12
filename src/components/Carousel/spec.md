@@ -62,14 +62,14 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 
 | Prop        | Type              | Default | Description                              |
 |-------------|-------------------|---------|------------------------------------------|
-| `children`  | `React.ReactNode` | —       | `CarouselItem` elements.                 |
+| `children`  | `React.ReactNode` | None    | `CarouselItem` elements.                 |
 | `className` | `string`          | `""`    | Additional classes on the overflow wrapper. |
 
 ### CarouselItem
 
 | Prop        | Type              | Default | Description                              |
 |-------------|-------------------|---------|------------------------------------------|
-| `children`  | `React.ReactNode` | —       | Slide content.                           |
+| `children`  | `React.ReactNode` | None    | Slide content.                           |
 | `className` | `string`          | `""`    | Additional classes on the slide element. |
 
 Extends `HTMLAttributes<HTMLDivElement>`.
@@ -98,7 +98,7 @@ Renders nothing when there is only one slide. Each dot is a `role="tab"` button;
 |---------------|-------------------------------------------------------------------------|
 | hover         | Previous/Next buttons: `bg-surface-hover`, dot indicators darken border |
 | focus-visible | `ring-2 ring-offset-2 ring-brand-ring` on Previous/Next and dots        |
-| disabled      | Previous at index 0 (no loop), Next at last index — opacity 40%, no pointer events |
+| disabled      | Previous at index 0 (no loop), Next at last index: opacity 40%, no pointer events |
 | active dot    | Expands from `w-1.5` to `w-4` with `bg-brand`; inactive dots use `bg-surface-border` |
 
 ---
@@ -122,15 +122,15 @@ Renders nothing when there is only one slide. Each dot is a `role="tab"` button;
 
 ### Drag / Swipe
 
-`CarouselContent`'s track supports pointer-based drag-to-navigate as an enhancement on top of the button and keyboard controls — it does not replace either.
+`CarouselContent`'s track supports pointer-based drag-to-navigate as an enhancement on top of the button and keyboard controls; it does not replace either.
 
 - Implemented with native Pointer Events (`onPointerDown` / `onPointerMove` / `onPointerUp` / `onPointerCancel`) so mouse, touch, and pen input are handled uniformly.
 - A gesture is only treated as a drag once the pointer moves more than 5px from its start position. Below that threshold, clicks on interactive content inside a `CarouselItem` (e.g. a button) fire normally.
 - While dragging past the activation threshold, the track follows the pointer 1:1 via `transform: translateX(...)` with no transition, then calls `setPointerCapture` so the drag continues even if the pointer leaves the track.
-- On release, if the drag distance exceeds 20% of the track's width (falls back to a fixed 50px when the track has no measured width, e.g. in a non-layout environment), the carousel advances to the next slide (dragged left) or previous slide (dragged right) via the same `scrollNext`/`scrollPrev` logic the buttons use — so `loop` and boundary clamping behave identically. Below the threshold, the track snaps back to the current slide.
+- On release, if the drag distance exceeds 20% of the track's width (falls back to a fixed 50px when the track has no measured width, e.g. in a non-layout environment), the carousel advances to the next slide (dragged left) or previous slide (dragged right) via the same `scrollNext`/`scrollPrev` logic the buttons use, so `loop` and boundary clamping behave identically. Below the threshold, the track snaps back to the current slide.
 - The snap/settle animation reuses the existing `motion-safe:transition-transform motion-safe:duration-300` class (removed only while actively dragging), so it automatically respects `prefers-reduced-motion` the same way index-driven transitions already do.
 - `CarouselDots` reads the same `currentIndex` from context, so dragging to a new slide keeps the active dot in sync automatically.
-- The track uses `touch-action: pan-y` (`touch-pan-y`) so vertical page scrolling on touch devices is unaffected — only horizontal panning is captured for the swipe gesture.
+- The track uses `touch-action: pan-y` (`touch-pan-y`) so vertical page scrolling on touch devices is unaffected; only horizontal panning is captured for the swipe gesture.
 
 ---
 
@@ -146,5 +146,5 @@ Renders nothing when there is only one slide. Each dot is a `role="tab"` button;
 ## When to use
 
 - Image galleries, product photo viewers, feature highlights, testimonials.
-- Prefer a scrollable list for more than ~8 items — carousels hide content and should be used sparingly.
+- Prefer a scrollable list for more than ~8 items: carousels hide content and should be used sparingly.
 - Always provide meaningful slide content and ensure the carousel label describes what is being cycled through.

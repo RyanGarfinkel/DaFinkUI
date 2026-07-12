@@ -170,7 +170,7 @@ export const Popover = (
 				aria-controls={mounted ? panelId : undefined}
 				onClick={() => (mounted ? closePopover() : openPopover())}
 				className={[
-					'inline-flex items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-input-border bg-input px-3 py-2 text-sm text-text',
+					'inline-flex items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-input-border bg-surface px-3 py-2 text-sm text-text',
 					'transition-colors duration-[var(--duration-fast)]',
 					'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 					disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:border-brand',

@@ -14,7 +14,7 @@ No npm dependencies. No registry dependencies.
 
 | Prop          | Type                                             | Default       | Description                                                             |
 |---------------|--------------------------------------------------|---------------|-------------------------------------------------------------------------|
-| `options`     | `ComboboxOption[]`                               | —             | Array of `{ value, label, disabled? }` objects.                         |
+| `options`     | `ComboboxOption[]`                               | None          | Array of `{ value, label, disabled? }` objects.                         |
 | `value`       | `string` (single) \| `string[]` (multi)          | `undefined`   | Controlled selected value(s).                                           |
 | `onChange`    | `(value: string) => void` \| `(value: string[]) => void` | `undefined` | Called when selection changes.                                   |
 | `multiple`    | `boolean`                                        | `false`       | Enables multi-select mode. Changes `value` and `onChange` signatures.   |
@@ -71,7 +71,7 @@ Disabled options are skipped during ArrowDown/Up/Home/End navigation.
 
 ### Focus Behavior
 
-- **On open**: The dropdown appears but focus remains in the input. Active option is communicated via `aria-activedescendant` — the input retains focus throughout.
+- **On open**: The dropdown appears but focus remains in the input. Active option is communicated via `aria-activedescendant`: the input retains focus throughout.
 - **Focus trap**: Not trapped. Tab closes the dropdown and moves focus to the next page element naturally.
 - **Escape**: Closes the dropdown; focus stays in the input.
 - **Tab**: Closes without returning focus to the input; lets Tab land on the next element.
@@ -88,15 +88,15 @@ Disabled options are skipped during ArrowDown/Up/Home/End navigation.
 
 ### Popup Checklist
 
-- [x] Focus on open — focus stays in input; `aria-activedescendant` tracks focused option
-- [x] Focus trap — not required (non-modal dropdown)
-- [x] Escape closes — returns focus to input
-- [x] Tab closes — moves focus naturally, no trap
-- [x] Arrow key navigation — ArrowDown/Up cycle enabled options; Home/End jump to ends
-- [x] Disabled option skip — disabled options are not selectable and are skipped by keyboard nav
-- [x] Enter confirms — selects the aria-activedescendant option
-- [x] Backdrop click — clicking outside closes the dropdown
-- [x] ARIA roles — `combobox`, `listbox`, `option` with correct attributes throughout
+- [x] Focus on open: focus stays in input; `aria-activedescendant` tracks focused option
+- [x] Focus trap: not required (non-modal dropdown)
+- [x] Escape closes: returns focus to input
+- [x] Tab closes: moves focus naturally, no trap
+- [x] Arrow key navigation: ArrowDown/Up cycle enabled options; Home/End jump to ends
+- [x] Disabled option skip: disabled options are not selectable and are skipped by keyboard nav
+- [x] Enter confirms: selects the aria-activedescendant option
+- [x] Backdrop click: clicking outside closes the dropdown
+- [x] ARIA roles: `combobox`, `listbox`, `option` with correct attributes throughout
 
 ## Interactive States
 
@@ -105,8 +105,8 @@ Disabled options are skipped during ArrowDown/Up/Home/End navigation.
 | Default       | `border-input-border bg-surface`                                | `text-text-muted`                          |
 | Hover         | `hover:border-input-border-hover`                               | `hover:bg-surface-hover hover:text-text`   |
 | Focus-visible | `focus-visible:ring-2 focus-visible:ring-brand-ring`            | N/A (keyboard via `aria-activedescendant`) |
-| Active (kbd)  | —                                                               | `bg-surface-active text-text`              |
-| Error         | `border-danger`                                                 | —                                          |
+| Active (kbd)  | None                                                             | `bg-surface-active text-text`              |
+| Error         | `border-danger`                                                 | None                                        |
 | Disabled      | `opacity-50 cursor-not-allowed bg-input-disabled-bg`            | `opacity-50 cursor-not-allowed`            |
 
 ## Animation

@@ -2,38 +2,51 @@ import { HTMLAttributes, ReactNode } from 'react';
 
 export type SeparatorOrientation = 'horizontal' | 'vertical';
 export type SeparatorLabelPosition = 'start' | 'center' | 'end';
+export type SeparatorVariant = 'solid' | 'dashed' | 'dotted';
 
 export interface SeparatorProps extends Omit<HTMLAttributes<HTMLElement>, 'children'>
 {
 	orientation?:   SeparatorOrientation;
 	/** Position of the label along the line: start/center/end of the line's own axis (top-to-bottom when vertical). Only applies when children is set. */
 	labelPosition?: SeparatorLabelPosition;
-	/** Optional text that breaks up the line (e.g. "OR"). Supported in both orientations — stays upright (not rotated) when orientation is 'vertical'. */
+	/** Line style: 'solid' (default), 'dashed', or 'dotted'. */
+	variant?:       SeparatorVariant;
+	/** Optional text that breaks up the line (e.g. "OR"). Supported in both orientations: stays upright (not rotated) when orientation is 'vertical'. */
 	children?:      ReactNode;
 }
 
-const LINE_HORIZONTAL = 'border-t-[length:var(--border-width)] border-surface-border';
-const LINE_VERTICAL   = 'border-l-[length:var(--border-width)] border-surface-border';
+const VARIANT_STYLE_CLASSES: Record<SeparatorVariant, string> = {
+	solid:  'border-solid',
+	dashed: 'border-dashed',
+	dotted: 'border-dotted',
+};
+
+const lineClasses = (variant: SeparatorVariant, isVertical: boolean) => {
+	const axisClass = isVertical ? 'border-l-[length:var(--border-width)]' : 'border-t-[length:var(--border-width)]';
+	return `${axisClass} ${VARIANT_STYLE_CLASSES[variant]} border-surface-border`;
+};
 
 const Separator = ({
 	orientation = 'horizontal',
 	labelPosition = 'center',
+	variant = 'solid',
 	className = '',
 	children,
 	...props
 }: SeparatorProps) => {
 	const isVertical = orientation === 'vertical';
+	const lineBase   = lineClasses(variant, isVertical);
 
 	if(!children)
 	{
 		return isVertical
-			? <div role='separator' aria-orientation='vertical' className={`shrink-0 self-stretch ${LINE_VERTICAL} ${className}`} {...props} />
-			: <hr className={`w-full ${LINE_HORIZONTAL} ${className}`} {...props} />;
+			? <div role='separator' aria-orientation='vertical' className={`shrink-0 self-stretch ${lineBase} ${className}`} {...props} />
+			: <hr className={`w-full ${lineBase} ${className}`} {...props} />;
 	}
 
 	const showLeading  = labelPosition === 'center' || labelPosition === 'end';
 	const showTrailing = labelPosition === 'center' || labelPosition === 'start';
-	const lineClass     = isVertical ? `w-0 flex-1 ${LINE_VERTICAL}` : `h-0 flex-1 ${LINE_HORIZONTAL}`;
+	const lineClass     = isVertical ? `w-0 flex-1 ${lineBase}` : `h-0 flex-1 ${lineBase}`;
 	const rootClass     = isVertical ? 'flex flex-col items-center gap-3 self-stretch shrink-0' : 'flex items-center gap-3';
 
 	return (

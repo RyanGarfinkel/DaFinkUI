@@ -113,4 +113,38 @@ describe('Separator', () =>
 		render(<Separator data-testid='sep' />);
 		expect(screen.getByTestId('sep')).toBeInTheDocument();
 	});
+
+	it('applies border-solid to the hr by default', () =>
+	{
+		const { container } = render(<Separator />);
+		expect((container.querySelector('hr') as HTMLElement).className).toContain('border-solid');
+	});
+
+	it('applies border-dashed classes for variant="dashed"', () =>
+	{
+		const { container } = render(<Separator variant='dashed' />);
+		const hr = container.querySelector('hr') as HTMLElement;
+		expect(hr.className).toContain('border-dashed');
+		expect(hr.className).toContain('border-t-[length:var(--border-width)]');
+	});
+
+	it('applies border-dotted classes for variant="dotted"', () =>
+	{
+		const { container } = render(<Separator variant='dotted' />);
+		const hr = container.querySelector('hr') as HTMLElement;
+		expect(hr.className).toContain('border-dotted');
+	});
+
+	it('applies the variant to a vertical separator', () =>
+	{
+		render(<Separator orientation='vertical' variant='dashed' />);
+		expect(screen.getByRole('separator').className).toContain('border-dashed');
+	});
+
+	it('applies the variant to line segments in a labeled separator', () =>
+	{
+		const { container } = render(<Separator variant='dotted'>OR</Separator>);
+		const lines = container.querySelectorAll('[aria-hidden="true"]');
+		lines.forEach(line => expect(line.className).toContain('border-dotted'));
+	});
 });

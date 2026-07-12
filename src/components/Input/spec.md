@@ -6,10 +6,10 @@ A single-line text input with optional label, hint, and error messaging. Support
 
 | Prop        | Type                      | Default      | Description                                        |
 |-------------|---------------------------|--------------|----------------------------------------------------|
-| label       | string                    | —            | Visible label; also used to derive the input `id`  |
-| placeholder | string                    | —            | Placeholder text (default variant only)            |
-| hint        | string                    | —            | Helper text shown below the input                  |
-| error       | string                    | —            | Error message; switches input to error state       |
+| label       | string                    | n/a          | Visible label; also used to derive the input `id`  |
+| placeholder | string                    | n/a          | Placeholder text (default variant only)            |
+| hint        | string                    | n/a          | Helper text shown below the input                  |
+| error       | string                    | n/a          | Error message; switches input to error state       |
 | variant     | `'default' \| 'floating'` | `'default'`  | `'floating'` animates the label inside the input   |
 | disabled    | boolean                   | false        | Disables the input                                 |
 
@@ -26,7 +26,7 @@ Extends all native `<input>` HTML attributes. Accepts a `ref`.
 
 - **hover**: border shifts to `input-border-hover`
 - **focus**: outline suppressed (`outline-none`)
-- **focus-visible**: 2px ring with 1px offset — `input-ring` default, `input-error-ring` in error state
+- **focus-visible**: 2px ring with 1px offset: `input-ring` default, `input-error-ring` in error state
 - **disabled**: muted background, text, and border; no hover or focus-visible styles
 
 ## Error State
@@ -42,7 +42,7 @@ Set the `error` prop to a non-empty string to enter the error state:
 
 When `type="password"` is passed, the input automatically renders an eye icon button inside the right edge of the field. Clicking it toggles between `type="password"` (hidden) and `type="text"` (visible). The button updates its `aria-label` between `"Show password"` and `"Hide password"`.
 
-The button is part of the normal tab order — `Tab` from the input reaches the toggle. The input gets `pr-10` to prevent text from overlapping the button. When `disabled` is set, the toggle button is also disabled.
+The button is part of the normal tab order: `Tab` from the input reaches the toggle. The input gets `pr-10` to prevent text from overlapping the button. When `disabled` is set, the toggle button is also disabled.
 
 ## Floating Label Animation
 
@@ -50,7 +50,7 @@ In the `floating` variant:
 - The label is absolutely positioned inside the input
 - **Resting**: `top-1/2 -translate-y-1/2 text-sm text-text-subtle` (center of input)
 - **Floated** (focused, has value, or error): `top-1.5 text-xs` (upper-left of input)
-- Transition uses `--duration-fast` (150ms) — respects `prefers-reduced-motion`
+- Transition uses `--duration-fast` (150ms) and respects `prefers-reduced-motion`
 - Focus and blur state are tracked via React state; value presence is derived from controlled or uncontrolled input state
 
 ## Animated Feedback
@@ -62,13 +62,13 @@ Both variants animate the error/hint message in and out using a CSS grid height 
 - `label` and `id` are linked via `htmlFor` / `id`
 - Error and hint messages are associated via `aria-describedby`
 - Error state sets `aria-invalid="true"`
-- In floating variant, the label element is still a proper `<label>` linked to the input — screen readers announce it correctly
+- In floating variant, the label element is still a proper `<label>` linked to the input, so screen readers announce it correctly
 
 ## When to Use
 
 Use **default** for most forms where labels and inputs should be visually distinct.
 
-Use **floating** for compact layouts (login forms, inline search fields) where you want a single-element look. Do not use floating when the form has many fields in a tight grid — the label motion can become distracting.
+Use **floating** for compact layouts (login forms, inline search fields) where you want a single-element look. Do not use floating when the form has many fields in a tight grid: the label motion can become distracting.
 
 ## Tokens Used
 

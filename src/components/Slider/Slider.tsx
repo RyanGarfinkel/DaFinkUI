@@ -17,7 +17,7 @@ export interface SliderProps
 	hint?: string;
 	showValue?: boolean;
 	size?: SliderSize;
-	/** 'current' derives the track/fill/thumb color from currentColor instead of the brand token — use when the slider sits on an arbitrary colored surface (e.g. inside a colored chat bubble) rather than the page background. */
+	/** 'current' derives the track/fill/thumb color from currentColor instead of the brand token: use when the slider sits on an arbitrary colored surface (e.g. inside a colored chat bubble) rather than the page background. */
 	tone?: SliderTone;
 	ariaLabel?: string;
 	ariaValueText?: string;

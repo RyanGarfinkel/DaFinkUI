@@ -26,8 +26,8 @@ import '@xyflow/react/dist/style.css';
 
 | Prop           | Type                          | Default | Description                                                         |
 |----------------|-------------------------------|---------|---------------------------------------------------------------------|
-| `defaultGraph` | `WorkflowGraph`               | —       | Pre-populated graph. Nodes and edges are loaded on first render only. Not reactive — subsequent changes are managed internally. |
-| `onChange`     | `(graph: WorkflowGraph) => void` | —    | Fired after every change: node move, edge connect, label edit, node add/delete. |
+| `defaultGraph` | `WorkflowGraph`               | -       | Pre-populated graph. Nodes and edges are loaded on first render only. Not reactive: subsequent changes are managed internally. |
+| `onChange`     | `(graph: WorkflowGraph) => void` | -    | Fired after every change: node move, edge connect, label edit, node add/delete. |
 | `height`       | `number`                      | `500`   | Canvas height in pixels.                                            |
 | `className`    | `string`                      | `""`    | Additional classes on the root container.                           |
 
@@ -57,11 +57,11 @@ Each type has a distinct shape and accent color so they are instantly recognisab
 
 | Type        | Icon | Shape                              | Accent color | Purpose                                              | Default label             |
 |-------------|------|------------------------------------|--------------|------------------------------------------------------|---------------------------|
-| `trigger`   | ⚡   | Pill (border-radius: 9999px)       | Brand        | Entry point — something that starts the workflow     | "When this happens"       |
-| `condition` | ◇    | Diamond (80×80 square, rotate 45°, inside a 120×120 container) | Warning | Branching logic — a decision point in the flow | "If condition is met" |
-| `action`    | ▶    | Standard card (border-radius: var(--radius)) | Success | Side effect — sends email, writes to DB, calls API | "Do something"         |
-| `transform` | ⇄    | Sharp left, rounded right (4px 12px 12px 4px) | Text-muted | Data mutation — formats, maps, or filters a value | "Transform data"      |
-| `output`    | ◼    | Flat top, curved bottom (4px 4px 14px 14px)  | Danger     | Terminal node — the final result or response      | "Return result"        |
+| `trigger`   | ⚡   | Pill (border-radius: 9999px)       | Brand        | Entry point: something that starts the workflow     | "When this happens"       |
+| `condition` | ◇    | Diamond (80×80 square, rotate 45°, inside a 120×120 container) | Warning | Branching logic: a decision point in the flow | "If condition is met" |
+| `action`    | ▶    | Standard card (border-radius: var(--radius)) | Success | Side effect: sends email, writes to DB, calls API | "Do something"         |
+| `transform` | ⇄    | Sharp left, rounded right (4px 12px 12px 4px) | Text-muted | Data mutation: formats, maps, or filters a value | "Transform data"      |
+| `output`    | ◼    | Flat top, curved bottom (4px 4px 14px 14px)  | Danger     | Terminal node: the final result or response      | "Return result"        |
 
 The condition node occupies a 120×120 bounding box (vs 176px wide for the others) so the diamond fits without overflow. Its connection handles sit at the left and right midpoints of the bounding box, which coincide with the visual diamond tips.
 
@@ -105,9 +105,9 @@ Click **▶ Run** in the toolbar to visualise workflow execution. A BFS traversa
 
 An SVG `<circle r={5}>` travels along the bezier path using `<animateMotion>`. Each edge in the current wave animates simultaneously (branching condition nodes fire both outgoing edges in parallel).
 
-**Reduced motion** — when `prefers-reduced-motion: reduce` is set, all delays collapse to near-zero and the traveling dot is never rendered; the graph snaps through states and resets after 600 ms.
+**Reduced motion**: when `prefers-reduced-motion: reduce` is set, all delays collapse to near-zero and the traveling dot is never rendered; the graph snaps through states and resets after 600 ms.
 
-**Stop / reset** — the button becomes **◼ Stop** while running. Clicking it (or pressing Stop from outside) increments an internal generation counter that cancels any in-flight async steps and immediately resets all visual states.
+**Stop / reset**: the button becomes **◼ Stop** while running. Clicking it (or pressing Stop from outside) increments an internal generation counter that cancels any in-flight async steps and immediately resets all visual states.
 
 **Add-node buttons** are disabled (opacity 40 %, pointer-events off) while the animation is running.
 
@@ -115,7 +115,7 @@ An SVG `<circle r={5}>` travels along the bezier path using `<animateMotion>`. E
 
 - The "Add node" toolbar is a `role="toolbar"`, with each button having a descriptive `aria-label`.
 - Each node renders with `aria-label` stating its type and current label.
-- Node label paragraphs have `role="button"` and `tabIndex={0}` — keyboard users can reach and activate them with Enter or Space.
+- Node label paragraphs have `role="button"` and `tabIndex={0}`; keyboard users can reach and activate them with Enter or Space.
 - The label input supports Escape to cancel and Enter to confirm.
 - Canvas pan/zoom interactions are handled by `@xyflow/react`'s built-in keyboard support (arrow keys pan, +/- zoom).
 - React Flow's Controls panel provides focus-accessible zoom/fit buttons.
@@ -149,4 +149,4 @@ An SVG `<circle r={5}>` travels along the bezier path using `<animateMotion>`. E
 - Anywhere the user needs to define a sequence of typed operations by connecting them visually
 - Configuration UIs where the structure (not just the values) is user-defined
 
-Not a substitute for a read-only force-directed graph (`Graph`) or a static diagram — use WorkflowBuilder when editing is the primary goal.
+Not a substitute for a read-only force-directed graph (`Graph`) or a static diagram: use WorkflowBuilder when editing is the primary goal.

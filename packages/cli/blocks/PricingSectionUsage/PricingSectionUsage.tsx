@@ -20,7 +20,7 @@ export const PricingSectionUsage = () => {
 		<Card variant='elevated' className='w-full max-w-md'>
 			<CardHeader className='flex flex-col gap-1'>
 				<h3 className='text-xl font-semibold text-text'>Usage-based pricing</h3>
-				<p className='text-sm text-text-muted'>Pay only for the API calls you make — no seats, no tiers.</p>
+				<p className='text-sm text-text-muted'>Pay only for the API calls you make, no seats, no tiers.</p>
 			</CardHeader>
 			<CardContent className='flex flex-col gap-6'>
 				<div className='flex items-end justify-between'>
@@ -38,7 +38,7 @@ export const PricingSectionUsage = () => {
 					min={10}
 					max={500}
 					step={10}
-					hint={`${(calls * 1000).toLocaleString()} calls per month — first ${(INCLUDED_CALLS * 1000).toLocaleString()} are always free`}
+					hint={`${(calls * 1000).toLocaleString()} calls per month, first ${(INCLUDED_CALLS * 1000).toLocaleString()} are always free`}
 				/>
 
 				<p className='text-xs text-text-muted'>

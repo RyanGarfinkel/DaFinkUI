@@ -24,16 +24,16 @@ Extends all native `<span>` HTML attributes.
 
 ## Visual Design
 
-- Rendered as two nested `<span>` elements — the outer wrapper holds the role and label; the inner span is the visible ring
-- The ring uses `rounded-full border-surface-active border-t-brand animate-spin` — a gray full border with a single brand-colored segment at the top that spins to create the arc effect
+- Rendered as two nested `<span>` elements: the outer wrapper holds the role and label; the inner span is the visible ring
+- The ring uses `rounded-full border-surface-active border-t-brand animate-spin`: a gray full border with a single brand-colored segment at the top that spins to create the arc effect
 - `animate-spin` uses the Tailwind default 1-turn/1s linear spin; respects `prefers-reduced-motion` via the global CSS rule
 
 ## Accessibility
 
-- Outer element has `role="status"` and `aria-label` set to the `label` prop — screen readers announce it when it mounts
+- Outer element has `role="status"` and `aria-label` set to the `label` prop; screen readers announce it when it mounts
 - The visual ring is `aria-hidden="true"` to avoid double-announcement
 - A visually hidden `<span className="sr-only">` inside the wrapper provides fallback text for assistive technologies that do not read `aria-label` on non-interactive elements
-- `label` defaults to `'Loading…'` — override it with context-specific text when the Spinner is associated with a named action (e.g. `'Saving changes…'`)
+- `label` defaults to `'Loading…'`; override it with context-specific text when the Spinner is associated with a named action (e.g. `'Saving changes…'`)
 
 ## When to Use
 

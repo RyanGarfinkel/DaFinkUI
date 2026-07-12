@@ -164,7 +164,7 @@ const AnimatedEdge = ({
 				<>
 					{/* Sweep fill: a bright stroke that draws itself from source to target.
 					    pathLength="1" normalises the path so dasharray/dashoffset values
-					    are 0-1 fractions — no need to measure actual path length. */}
+					    are 0-1 fractions: no need to measure actual path length. */}
 					<path
 						d={edgePath}
 						fill='none'

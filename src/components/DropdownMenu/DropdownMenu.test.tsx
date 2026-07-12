@@ -130,7 +130,7 @@ describe('DropdownMenu', () =>
 		openMenu();
 		const menu = screen.getByRole('menu');
 
-		fireEvent.keyDown(menu, { key: 'a' }); // Archive is disabled — no match
+		fireEvent.keyDown(menu, { key: 'a' }); // Archive is disabled: no match
 		expect(activeId()).toBe(itemId('Edit'));
 	});
 
@@ -186,7 +186,7 @@ describe('DropdownMenu', () =>
 		openMenu();
 
 		const event = fireEvent.keyDown(screen.getByRole('menu'), { key: 'Tab' });
-		expect(event).toBe(true); // default not prevented — focus moves on
+		expect(event).toBe(true); // default not prevented: focus moves on
 
 		act(() => { vi.advanceTimersByTime(150); });
 		expect(screen.queryByRole('menu')).not.toBeInTheDocument();

@@ -7,7 +7,7 @@ import { createPortal } from 'react-dom';
 
 // ─── Focusable-element selector ───────────────────────────────────────────────
 // SidePanel is non-modal (see below), so this is only used to focus the first
-// element on open — there is no Tab-trap, unlike Drawer/Modal.
+// element on open; there is no Tab-trap, unlike Drawer/Modal.
 
 const FOCUSABLE_SELECTOR = [
 	'a[href]',
@@ -41,7 +41,7 @@ const SIDE_HIDDEN_CLASSES: Record<SidePanelSide, string> = {
 };
 
 // Tailwind v4's translate-x-full/etc. above compile to the standalone CSS
-// `translate` property, not `transform` — so this stack-offset transform
+// `translate` property, not `transform`, so this stack-offset transform
 // layers on top of them independently, without fighting for the same property.
 const STACK_OFFSET_TRANSFORM: Record<SidePanelSide, (px: number) => string> = {
 	right:  (px) => `translateX(-${px}px)`,
@@ -69,14 +69,14 @@ const useSidePanelContext = () =>
 };
 
 /** Whether this panel currently has another panel open in front of it on the
- * same side — if so, it can't be closed until that one closes first. Use this
+ * same side; if so, it can't be closed until that one closes first. Use this
  * to disable any custom close controls you build outside of `SidePanelClose`. */
 export const useSidePanelBlocked = (): boolean => useSidePanelContext().isBlocked;
 
 // ─── SidePanel ────────────────────────────────────────────────────────────────
 // Deliberately non-modal: unlike Modal/Dialog/Drawer, SidePanel never inerts the
 // rest of the page (no native <dialog>.showModal(), no focus trap, no backdrop).
-// It behaves like a docked panel — it stays open until Escape or an explicit
+// It behaves like a docked panel: it stays open until Escape or an explicit
 // close action, so multiple independent SidePanels can be open at once, each
 // with its own trigger elsewhere on the page.
 
@@ -141,7 +141,7 @@ const SidePanel = (
 		{
 			setVisible(false);
 
-			// Return focus to the trigger — always, regardless of how the panel closed
+			// Return focus to the trigger: always, regardless of how the panel closed
 			triggerRef.current?.focus();
 			triggerRef.current = null;
 

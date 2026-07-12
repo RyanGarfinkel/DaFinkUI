@@ -12,13 +12,13 @@ The container component. Manages selection state and distributes it to child ite
 
 | Prop            | Type                              | Default    | Description                                                         |
 |-----------------|-----------------------------------|------------|---------------------------------------------------------------------|
-| `type`          | `'single' \| 'multiple'`          | —          | Required. Controls whether one or many items can be active at once. |
-| `value`         | `string \| string[]`              | —          | Required. Controlled value. String for single, string[] for multiple.|
-| `onValueChange` | `(value: string \| string[]) => void` | —      | Required. Called with the new value when selection changes.         |
+| `type`          | `'single' \| 'multiple'`          | -          | Required. Controls whether one or many items can be active at once. |
+| `value`         | `string \| string[]`              | -          | Required. Controlled value. String for single, string[] for multiple.|
+| `onValueChange` | `(value: string \| string[]) => void` | -      | Required. Called with the new value when selection changes.         |
 | `size`          | `'sm' \| 'md' \| 'lg'`           | `'md'`     | Controls the height and padding of all items in the group.          |
 | `disabled`      | `boolean`                         | `false`    | Disables all items in the group.                                    |
 | `className`     | `string`                          | `''`       | Additional classes merged onto the container element.               |
-| `children`      | `React.ReactNode`                 | —          | Required. Should be `ToggleGroupItem` elements.                     |
+| `children`      | `React.ReactNode`                 | -          | Required. Should be `ToggleGroupItem` elements.                     |
 
 ---
 
@@ -26,13 +26,13 @@ The container component. Manages selection state and distributes it to child ite
 
 An individual toggle button within the group. Must be a direct or indirect child of `ToggleGroup`.
 
-Extends `ButtonHTMLAttributes<HTMLButtonElement>` — all native button attributes are forwarded.
+Extends `ButtonHTMLAttributes<HTMLButtonElement>`: all native button attributes are forwarded.
 
 | Prop        | Type                  | Default | Description                                                  |
 |-------------|-----------------------|---------|--------------------------------------------------------------|
-| `value`     | `string`              | —       | Required. The value this item represents.                    |
+| `value`     | `string`              | -       | Required. The value this item represents.                    |
 | `disabled`  | `boolean`             | `false` | Disables this specific item independently of the group.      |
-| `children`  | `React.ReactNode`     | —       | Required. Content of the button — text, icon, or both.       |
+| `children`  | `React.ReactNode`     | -       | Required. Content of the button: text, icon, or both.       |
 | `className` | `string`              | `''`    | Additional classes merged onto the button element.           |
 
 ---
@@ -51,11 +51,11 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>` — all native button attribut
 
 | State         | Behavior                                                                                           |
 |---------------|----------------------------------------------------------------------------------------------------|
-| Default       | `bg-surface text-text` — neutral surface background with primary text color.                       |
-| Active        | `bg-brand text-brand-fg` — brand-colored background indicating the item is selected.               |
-| Hover         | `hover:bg-surface-hover` — subtle background shift. Not applied when item is active or disabled.   |
-| Focus-visible | `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring` — keyboard focus ring using brand ring token. Suppressed on disabled items via `disabled:pointer-events-none`. |
-| Disabled      | `disabled:opacity-40 disabled:pointer-events-none` — reduced opacity, no pointer events, no hover or focus-visible styles. Applied when `disabled` is set on the item or its parent group. |
+| Default       | `bg-surface text-text` (neutral surface background with primary text color).                       |
+| Active        | `bg-brand text-brand-fg` (brand-colored background indicating the item is selected).               |
+| Hover         | `hover:bg-surface-hover` (subtle background shift). Not applied when item is active or disabled.   |
+| Focus-visible | `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring` (keyboard focus ring using brand ring token). Suppressed on disabled items via `disabled:pointer-events-none`. |
+| Disabled      | `disabled:opacity-40 disabled:pointer-events-none` (reduced opacity, no pointer events, no hover or focus-visible styles). Applied when `disabled` is set on the item or its parent group. |
 
 ---
 
@@ -72,8 +72,8 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>` — all native button attribut
 
 ## When to Use
 
-- **Single mode**: use when exactly one option must be selected at a time — e.g., text alignment (left / center / right), view mode (grid / list).
-- **Multiple mode**: use when any combination of options can be active simultaneously — e.g., text formatting (bold / italic / underline), filter tags.
+- **Single mode**: use when exactly one option must be selected at a time, e.g., text alignment (left / center / right), view mode (grid / list).
+- **Multiple mode**: use when any combination of options can be active simultaneously, e.g., text formatting (bold / italic / underline), filter tags.
 - Prefer ToggleGroup over a row of checkboxes or radio buttons when the options are visually cohesive and the control should feel like a single segmented unit.
 - Use `disabled` on the group when the entire control is unavailable in the current context. Use `disabled` on an individual item when only that option is temporarily unavailable.
 

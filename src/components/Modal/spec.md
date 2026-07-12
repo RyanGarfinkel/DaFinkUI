@@ -1,6 +1,6 @@
 # Modal
 
-A blocking overlay dialog with focus trap, Escape-to-close, and backdrop dismissal. Uses the native `<dialog>` element with `showModal()` for top-layer rendering — no z-index required, not clippable by ancestor overflow or transform. Composed of `Modal`, `ModalHeader`, `ModalTitle`, `ModalContent`, `ModalFooter`, and `ModalClose`.
+A blocking overlay dialog with focus trap, Escape-to-close, and backdrop dismissal. Uses the native `<dialog>` element with `showModal()` for top-layer rendering, so no z-index is required and it is not clippable by ancestor overflow or transform. Composed of `Modal`, `ModalHeader`, `ModalTitle`, `ModalContent`, `ModalFooter`, and `ModalClose`.
 
 ---
 
@@ -18,7 +18,7 @@ No additional npm packages required. No registry dependencies.
 
 | Export         | Type      | Description                                              |
 |----------------|-----------|----------------------------------------------------------|
-| `Modal`        | Component | The dialog root — default export. Renders backdrop + panel and owns all focus / keyboard behavior. |
+| `Modal`        | Component | The dialog root, default export. Renders backdrop + panel and owns all focus / keyboard behavior. |
 | `ModalHeader`  | Component | Layout wrapper for the title area.                       |
 | `ModalTitle`   | Component | Heading element automatically wired to `aria-labelledby`.|
 | `ModalContent` | Component | Body content area.                                       |
@@ -33,26 +33,26 @@ No additional npm packages required. No registry dependencies.
 
 | Prop           | Type                      | Default | Description                                              |
 |----------------|---------------------------|---------|----------------------------------------------------------|
-| `open`         | `boolean`                 | —       | Controls whether the modal is rendered and visible (controlled). |
-| `onOpenChange` | `(open: boolean) => void` | —       | Called with `false` when the user dismisses via Escape, backdrop click, or `ModalClose`. |
+| `open`         | `boolean`                 | required | Controls whether the modal is rendered and visible (controlled). |
+| `onOpenChange` | `(open: boolean) => void` | required | Called with `false` when the user dismisses via Escape, backdrop click, or `ModalClose`. |
 | `className`    | `string`                  | `''`    | Additional classes merged onto the panel element.        |
-| `children`     | `ReactNode`               | —       | Modal subcomponents and arbitrary content.               |
+| `children`     | `ReactNode`               | required | Modal subcomponents and arbitrary content.              |
 
-`Modal` extends `DialogHTMLAttributes<HTMLDialogElement>` — all native dialog props are spread onto the `<dialog>` element.
+`Modal` extends `DialogHTMLAttributes<HTMLDialogElement>`: all native dialog props are spread onto the `<dialog>` element.
 
 ### ModalHeader / ModalContent / ModalFooter
 
 | Prop        | Type        | Default | Description                              |
 |-------------|-------------|---------|------------------------------------------|
 | `className` | `string`    | `''`    | Additional classes on the wrapper div.   |
-| `children`  | `ReactNode` | —       | Content.                                 |
+| `children`  | `ReactNode` | required | Content.                                |
 
 ### ModalTitle
 
 | Prop        | Type        | Default | Description                                                       |
 |-------------|-------------|---------|-------------------------------------------------------------------|
 | `className` | `string`    | `''`    | Additional classes on the `<h2>` element.                         |
-| `children`  | `ReactNode` | —       | The dialog title. Its id is referenced by the panel's `aria-labelledby`. |
+| `children`  | `ReactNode` | required | The dialog title. Its id is referenced by the panel's `aria-labelledby`. |
 
 ### ModalClose
 
@@ -70,7 +70,7 @@ No additional npm packages required. No registry dependencies.
 | `ModalClose`  | hover         | `bg-surface-hover`, text shifts from `text-text-muted` to `text-text` |
 | `ModalClose`  | focus         | Browser outline suppressed (`focus:outline-none`)                     |
 | `ModalClose`  | focus-visible | `ring-2 ring-offset-2 ring-brand-ring`                                |
-| Panel         | focus         | `focus:outline-none` — the panel itself only receives focus as a fallback when there are no focusable children |
+| Panel         | focus         | `focus:outline-none`: the panel itself only receives focus as a fallback when there are no focusable children |
 
 ---
 
@@ -78,7 +78,7 @@ No additional npm packages required. No registry dependencies.
 
 | Key         | Behavior                                                                       |
 |-------------|--------------------------------------------------------------------------------|
-| `Escape`    | Closes the modal — calls `onOpenChange(false)`. Focus returns to the trigger.  |
+| `Escape`    | Closes the modal: calls `onOpenChange(false)`. Focus returns to the trigger.  |
 | `Tab`       | Cycles focus forward within the modal (focus trap). Wraps from last to first.  |
 | `Shift+Tab` | Cycles focus backward within the modal. Wraps from first to last.              |
 | `Enter/Space` | Activates the focused button (native behavior).                              |
@@ -102,15 +102,15 @@ No additional npm packages required. No registry dependencies.
 - **Focus trap:** Tab and Shift+Tab cycle within the panel; focusable elements are re-queried on every Tab press, so dynamic content is handled. Focus never escapes to the page behind.
 - **Escape:** closes the modal and stops propagation so nested overlays are not dismissed simultaneously.
 - **Backdrop click:** treated identically to Escape.
-- **Focus return:** the element focused at open time is saved and re-focused whenever the modal closes — regardless of whether it closed via Escape, backdrop, `ModalClose`, a footer action, or unmounting.
+- **Focus return:** the element focused at open time is saved and re-focused whenever the modal closes, regardless of whether it closed via Escape, backdrop, `ModalClose`, a footer action, or unmounting.
 
 ### Scroll Lock
 
-Handled natively by `showModal()` — no manual `document.body.style.overflow` manipulation required.
+Handled natively by `showModal()`: no manual `document.body.style.overflow` manipulation required.
 
 ### Reduced Motion
 
-All transitions use the `motion-safe:` Tailwind variant — the modal appears and disappears instantly when `prefers-reduced-motion: reduce` is set. Do not add per-component overrides.
+All transitions use the `motion-safe:` Tailwind variant, so the modal appears and disappears instantly when `prefers-reduced-motion: reduce` is set. Do not add per-component overrides.
 
 ---
 
@@ -118,8 +118,8 @@ All transitions use the `motion-safe:` Tailwind variant — the modal appears an
 
 Uses the `mounted` + `visible` two-phase pattern (same as `CommandPalette`):
 
-1. `mounted` — controls DOM presence. Set on open; cleared via `setTimeout(150)` after the exit transition.
-2. `visible` — controls CSS classes, toggled via `requestAnimationFrame` so the initial state paints first.
+1. `mounted`: controls DOM presence. Set on open; cleared via `setTimeout(150)` after the exit transition.
+2. `visible`: controls CSS classes, toggled via `requestAnimationFrame` so the initial state paints first.
 
 **Backdrop:** `opacity-0` → `opacity-100` at `--duration-base` / `--ease-enter`; reverse at `--duration-fast` / `--ease-exit`.
 **Panel:** `opacity-0 scale-95` → `opacity-100 scale-100` at `--duration-base` / `--ease-enter` on enter; reverse at `--duration-fast` / `--ease-exit` on exit.
@@ -146,9 +146,9 @@ The panel exposes `data-state="open" | "closed"` for style extension.
 
 ## When to Use
 
-- Use a modal for a focused task or decision that blocks the rest of the page — confirmations, short forms, destructive-action warnings.
+- Use a modal for a focused task or decision that blocks the rest of the page: confirmations, short forms, destructive-action warnings.
 - Keep modal content short. If the content needs scrolling or houses a multi-step flow, use a dedicated page or a `Drawer`.
-- Always include a `ModalTitle` — the dialog's accessible name depends on it.
+- Always include a `ModalTitle`: the dialog's accessible name depends on it.
 - Do not nest modals.
 
 ---

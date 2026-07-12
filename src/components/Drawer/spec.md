@@ -1,6 +1,6 @@
 # Drawer
 
-A blocking side-panel overlay that slides in from an edge of the screen. Uses the native `<dialog>` element with `showModal()` for top-layer rendering — no z-index required, not clippable by ancestor overflow or transform. Shares the full modal accessibility contract — focus trap, Escape-to-close, backdrop dismissal, focus return — but uses a translate animation instead of fade + scale. Composed of `Drawer`, `DrawerHeader`, `DrawerTitle`, `DrawerContent`, `DrawerFooter`, and `DrawerClose`.
+A blocking side-panel overlay that slides in from an edge of the screen. Uses the native `<dialog>` element with `showModal()` for top-layer rendering, so no z-index is required and it is not clippable by ancestor overflow or transform. Shares the full modal accessibility contract (focus trap, Escape-to-close, backdrop dismissal, focus return) but uses a translate animation instead of fade + scale. Composed of `Drawer`, `DrawerHeader`, `DrawerTitle`, `DrawerContent`, `DrawerFooter`, and `DrawerClose`.
 
 ---
 
@@ -18,7 +18,7 @@ No additional npm packages required. No registry dependencies.
 
 | Export          | Type      | Description                                              |
 |-----------------|-----------|----------------------------------------------------------|
-| `Drawer`        | Component | The drawer root — default export. Renders backdrop + panel and owns all focus / keyboard behavior. |
+| `Drawer`        | Component | The drawer root, default export. Renders backdrop + panel and owns all focus / keyboard behavior. |
 | `DrawerHeader`  | Component | Layout wrapper for the title area.                       |
 | `DrawerTitle`   | Component | Heading element automatically wired to `aria-labelledby`.|
 | `DrawerContent` | Component | Scrollable body content area (`flex-1 overflow-y-auto`). |
@@ -34,27 +34,27 @@ No additional npm packages required. No registry dependencies.
 
 | Prop           | Type                                     | Default   | Description                                              |
 |----------------|------------------------------------------|-----------|----------------------------------------------------------|
-| `open`         | `boolean`                                | —         | Controls whether the drawer is rendered and visible (controlled). |
-| `onOpenChange` | `(open: boolean) => void`                | —         | Called with `false` when the user dismisses via Escape, backdrop click, or `DrawerClose`. |
+| `open`         | `boolean`                                | required  | Controls whether the drawer is rendered and visible (controlled). |
+| `onOpenChange` | `(open: boolean) => void`                | required  | Called with `false` when the user dismisses via Escape, backdrop click, or `DrawerClose`. |
 | `side`         | `'left' \| 'right' \| 'top' \| 'bottom'` | `'right'` | Which edge of the screen the drawer slides in from.      |
 | `className`    | `string`                                 | `''`      | Additional classes merged onto the panel element.        |
-| `children`     | `ReactNode`                              | —         | Drawer subcomponents and arbitrary content.              |
+| `children`     | `ReactNode`                              | required  | Drawer subcomponents and arbitrary content.              |
 
-`Drawer` extends `DialogHTMLAttributes<HTMLDialogElement>` — all native dialog props are spread onto the `<dialog>` element.
+`Drawer` extends `DialogHTMLAttributes<HTMLDialogElement>`: all native dialog props are spread onto the `<dialog>` element.
 
 ### DrawerHeader / DrawerContent / DrawerFooter
 
 | Prop        | Type        | Default | Description                              |
 |-------------|-------------|---------|------------------------------------------|
 | `className` | `string`    | `''`    | Additional classes on the wrapper div.   |
-| `children`  | `ReactNode` | —       | Content.                                 |
+| `children`  | `ReactNode` | required | Content.                                |
 
 ### DrawerTitle
 
 | Prop        | Type        | Default | Description                                                       |
 |-------------|-------------|---------|-------------------------------------------------------------------|
 | `className` | `string`    | `''`    | Additional classes on the `<h2>` element.                         |
-| `children`  | `ReactNode` | —       | The drawer title. Its id is referenced by the panel's `aria-labelledby`. |
+| `children`  | `ReactNode` | required | The drawer title. Its id is referenced by the panel's `aria-labelledby`. |
 
 ### DrawerClose
 
@@ -85,7 +85,7 @@ The panel exposes `data-side` and `data-state="open" | "closed"` for style exten
 | `DrawerClose`  | hover         | `bg-surface-hover`, text shifts from `text-text-muted` to `text-text` |
 | `DrawerClose`  | focus         | Browser outline suppressed (`focus:outline-none`)                     |
 | `DrawerClose`  | focus-visible | `ring-2 ring-offset-2 ring-brand-ring`                                |
-| Panel          | focus         | `focus:outline-none` — the panel itself only receives focus as a fallback when there are no focusable children |
+| Panel          | focus         | `focus:outline-none`: the panel itself only receives focus as a fallback when there are no focusable children |
 
 ---
 
@@ -93,7 +93,7 @@ The panel exposes `data-side` and `data-state="open" | "closed"` for style exten
 
 | Key         | Behavior                                                                        |
 |-------------|----------------------------------------------------------------------------------|
-| `Escape`    | Closes the drawer — calls `onOpenChange(false)`. Focus returns to the trigger.   |
+| `Escape`    | Closes the drawer: calls `onOpenChange(false)`. Focus returns to the trigger.   |
 | `Tab`       | Cycles focus forward within the drawer (focus trap). Wraps from last to first.   |
 | `Shift+Tab` | Cycles focus backward within the drawer. Wraps from first to last.               |
 | `Enter/Space` | Activates the focused button (native behavior).                                |
@@ -117,15 +117,15 @@ The panel exposes `data-side` and `data-state="open" | "closed"` for style exten
 - **Focus trap:** Tab and Shift+Tab cycle within the panel; focusable elements are re-queried on every Tab press, so dynamic content is handled. Focus never escapes to the page behind.
 - **Escape:** closes the drawer and stops propagation so nested overlays are not dismissed simultaneously.
 - **Backdrop click:** treated identically to Escape.
-- **Focus return:** the element focused at open time is saved and re-focused whenever the drawer closes — regardless of whether it closed via Escape, backdrop, `DrawerClose`, a footer action, or unmounting.
+- **Focus return:** the element focused at open time is saved and re-focused whenever the drawer closes, regardless of whether it closed via Escape, backdrop, `DrawerClose`, a footer action, or unmounting.
 
 ### Scroll Lock
 
-Handled natively by `showModal()` — no manual `document.body.style.overflow` manipulation required.
+Handled natively by `showModal()`: no manual `document.body.style.overflow` manipulation required.
 
 ### Reduced Motion
 
-All transitions use the `motion-safe:` Tailwind variant — the drawer appears and disappears instantly when `prefers-reduced-motion: reduce` is set. Do not add per-component overrides.
+All transitions use the `motion-safe:` Tailwind variant, so the drawer appears and disappears instantly when `prefers-reduced-motion: reduce` is set. Do not add per-component overrides.
 
 ---
 
@@ -133,8 +133,8 @@ All transitions use the `motion-safe:` Tailwind variant — the drawer appears a
 
 Uses the `mounted` + `visible` two-phase pattern (same as `Modal` and `CommandPalette`):
 
-1. `mounted` — controls DOM presence. Set on open; cleared via `setTimeout(150)` after the exit transition.
-2. `visible` — controls CSS classes, toggled via `requestAnimationFrame` so the initial state paints first.
+1. `mounted`: controls DOM presence. Set on open; cleared via `setTimeout(150)` after the exit transition.
+2. `visible`: controls CSS classes, toggled via `requestAnimationFrame` so the initial state paints first.
 
 **Backdrop:** `opacity-0` → `opacity-100` at `--duration-base` / `--ease-enter`; reverse at `--duration-fast` / `--ease-exit`.
 **Panel:** off-screen translate (per `side`) → `translate-0` at `--duration-base` / `--ease-enter` on enter; reverse at `--duration-fast` / `--ease-exit` on exit.
@@ -159,10 +159,10 @@ Uses the `mounted` + `visible` two-phase pattern (same as `Modal` and `CommandPa
 
 ## When to Use
 
-- Use a drawer for supplementary content or tasks that benefit from staying anchored to the page context — filter panels, detail views, settings, carts, notification lists.
+- Use a drawer for supplementary content or tasks that benefit from staying anchored to the page context: filter panels, detail views, settings, carts, notification lists.
 - Use `side="right"` (default) for detail/inspection panes, `side="left"` for navigation, `side="bottom"` for mobile-style sheets.
 - Prefer a `Modal` for short, focused decisions (confirmations); prefer a drawer when the content is longer or list-like.
-- Always include a `DrawerTitle` — the dialog's accessible name depends on it.
+- Always include a `DrawerTitle`: the dialog's accessible name depends on it.
 
 ---
 

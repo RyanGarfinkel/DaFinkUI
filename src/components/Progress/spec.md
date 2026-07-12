@@ -8,7 +8,7 @@ Horizontal bar indicating task completion.
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| value | `number` | — | Current value (0 – max). Required. |
+| value | `number` | required | Current value (0 – max). Required. |
 | max | `number` | `100` | Maximum value. |
 | showLabel | `boolean` | `false` | Show a "Progress X%" label row above the track. |
 | size | `'sm' \| 'md' \| 'lg'` | `'md'` | Track height. |
@@ -27,8 +27,8 @@ Extends all native `<div>` HTML attributes.
 ## Visual Design
 
 - Full-width by default (`w-full`)
-- Track uses `bg-surface-active rounded-full overflow-hidden` — rounded pill container
-- Fill uses `bg-brand rounded-full` — brand color, clamped to `0–100%`
+- Track uses `bg-surface-active rounded-full overflow-hidden`: rounded pill container
+- Fill uses `bg-brand rounded-full`: brand color, clamped to `0–100%`
 - Fill width animates with `transition-all duration-[var(--duration-normal)] ease-out` when value changes
 - When `showLabel` is true, a small `text-xs text-text-muted` row appears above the track showing `"Progress"` on the left and `"X%"` on the right
 
@@ -41,7 +41,7 @@ Extends all native `<div>` HTML attributes.
 ## When to Use
 
 - Use `sm` inside compact components like table rows or notification banners.
-- Use `md` (default) for standard page-level progress — file uploads, multi-step forms.
+- Use `md` (default) for standard page-level progress: file uploads, multi-step forms.
 - Use `lg` for prominent hero-level tasks like onboarding flows.
 - Use `showLabel` when the numeric value adds clarity and space permits.
 - For indeterminate loading where the duration is unknown, use Spinner instead.

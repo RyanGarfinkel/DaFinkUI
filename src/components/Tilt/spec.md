@@ -6,7 +6,7 @@ A wrapper div that tracks mouse position and applies a CSS 3D perspective tilt t
 
 | Prop        | Type              | Default | Description                                           |
 |-------------|-------------------|---------|-------------------------------------------------------|
-| children    | `React.ReactNode` | —       | Content to render inside the tilt wrapper             |
+| children    | `React.ReactNode` | -       | Content to render inside the tilt wrapper             |
 | max         | `number`          | `15`    | Maximum tilt angle in degrees                         |
 | scale       | `number`          | `1.05`  | Scale factor applied while hovering                   |
 | perspective | `number`          | `1000`  | CSS perspective distance in pixels                    |
@@ -22,7 +22,7 @@ Do not apply Tilt to elements that already have complex hover transforms, or to 
 
 ## Accessibility
 
-Tilt's transform is driven by mouse position, which means it has no effect on keyboard or touch users — this is acceptable because the effect is purely cosmetic and does not convey information.
+Tilt's transform is driven by mouse position, which means it has no effect on keyboard or touch users; this is acceptable because the effect is purely cosmetic and does not convey information.
 
 **`prefers-reduced-motion`:** The component does not internally suppress motion. Callers that want to respect the user's motion preference should either:
 - Conditionally render the children without the `<Tilt>` wrapper when `prefers-reduced-motion` is active, or

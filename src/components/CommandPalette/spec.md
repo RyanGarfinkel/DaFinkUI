@@ -18,7 +18,7 @@ No additional npm packages required. Registry dependency: `ScrollFade` (wraps th
 
 | Export           | Type      | Description                                      |
 |------------------|-----------|--------------------------------------------------|
-| `CommandPalette` | Component | The modal overlay — default and named export     |
+| `CommandPalette` | Component | The modal overlay: default and named export      |
 | `CommandGroup`   | Component | Groups items with an optional heading label      |
 | `CommandItem`    | Component | A single actionable item within a group          |
 
@@ -30,35 +30,35 @@ No additional npm packages required. Registry dependency: `ScrollFade` (wraps th
 
 | Prop          | Type          | Default             | Description                                                    |
 |---------------|---------------|---------------------|----------------------------------------------------------------|
-| `open`        | `boolean`     | —                   | Controls whether the palette is rendered and visible.          |
-| `onClose`     | `() => void`  | —                   | Called when the user dismisses via Escape, backdrop, or select.|
+| `open`        | `boolean`     | None                | Controls whether the palette is rendered and visible.          |
+| `onClose`     | `() => void`  | None                | Called when the user dismisses via Escape, backdrop, or select.|
 | `placeholder` | `string`      | `"Search commands…"`| Placeholder text for the search input.                         |
-| `children`    | `ReactNode`   | —                   | `CommandGroup` and/or `CommandItem` elements.                  |
+| `children`    | `ReactNode`   | None                | `CommandGroup` and/or `CommandItem` elements.                  |
 
 ### CommandGroup
 
 | Prop       | Type        | Default | Description                                             |
 |------------|-------------|---------|---------------------------------------------------------|
-| `label`    | `string`    | —       | Optional heading label rendered above the group items.  |
-| `children` | `ReactNode` | —       | One or more `CommandItem` elements.                     |
+| `label`    | `string`    | None    | Optional heading label rendered above the group items.  |
+| `children` | `ReactNode` | None    | One or more `CommandItem` elements.                     |
 
 ### CommandItem
 
 | Prop       | Type          | Default | Description                                                                |
 |------------|---------------|---------|----------------------------------------------------------------------------|
-| `onSelect` | `() => void`  | —       | Called when the item is activated by click, pointer, or Enter key.         |
-| `value`    | `string`      | —       | The string used for search filtering (case-insensitive substring match).   |
+| `onSelect` | `() => void`  | None    | Called when the item is activated by click, pointer, or Enter key.         |
+| `value`    | `string`      | None    | The string used for search filtering (case-insensitive substring match).   |
 | `disabled` | `boolean`     | `false` | When true, item is shown dimmed, is skipped in keyboard nav, and is not clickable. |
-| `icon`     | `ReactNode`   | —       | Optional icon rendered left of the label.                                  |
-| `shortcut` | `string`      | —       | Optional keyboard shortcut string shown right-aligned (e.g. `"⌘K"`).       |
-| `children` | `ReactNode`   | —       | The display label. String children have matched substrings highlighted.    |
+| `icon`     | `ReactNode`   | None    | Optional icon rendered left of the label.                                  |
+| `shortcut` | `string`      | None    | Optional keyboard shortcut string shown right-aligned (e.g. `"⌘K"`).       |
+| `children` | `ReactNode`   | None    | The display label. String children have matched substrings highlighted.    |
 
 ---
 
 ## Search Filtering
 
 - Filtering is case-insensitive substring matching against each item's `value` prop.
-- Items whose `value` does not contain the current query are hidden (`display: none` equivalent — they return `null` from render).
+- Items whose `value` does not contain the current query are hidden (`display: none` equivalent: they return `null` from render).
 - `CommandGroup` components hide themselves entirely when all their child items are filtered out.
 - When the query is non-empty and zero items match, an empty state message is shown: `No results for "{query}"`.
 - Matched substring in string `children` is wrapped in `<mark>` with `text-brand font-semibold`.
@@ -73,8 +73,8 @@ No additional npm packages required. Registry dependency: `ScrollFade` (wraps th
 | `ArrowUp`      | Move focus to previous visible, enabled item. Wraps from first to last.       |
 | `Home`         | Jump focus to the first visible, enabled item.                                |
 | `End`          | Jump focus to the last visible, enabled item.                                 |
-| `Enter`        | Activate the currently focused item — calls `onSelect`, then `onClose`.       |
-| `Escape`       | Close the palette — calls `onClose`. Focus returns to the trigger element.    |
+| `Enter`        | Activate the currently focused item: calls `onSelect`, then `onClose`.       |
+| `Escape`       | Close the palette: calls `onClose`. Focus returns to the trigger element.    |
 | `Tab`          | Cycles focus within the overlay (focus trap). Does not escape to the page.    |
 | `Shift+Tab`    | Cycles focus backward within the overlay (focus trap).                        |
 
@@ -98,7 +98,7 @@ Disabled items are completely skipped during keyboard navigation.
 
 - On open: focus moves to the search input immediately via `requestAnimationFrame`.
 - Focus trap: Tab and Shift+Tab cycle through all focusable elements within the dialog (search input and any other interactive content). Focus never escapes to the page behind the overlay.
-- On close: the caller is responsible for returning focus to the trigger element. `onClose` is called without side effects — store a `ref` to the trigger and call `.focus()` in the `onClose` handler.
+- On close: the caller is responsible for returning focus to the trigger element. `onClose` is called without side effects: store a `ref` to the trigger and call `.focus()` in the `onClose` handler.
 - Escape: calls `onClose` and stops event propagation to prevent nested overlays from being dismissed simultaneously.
 
 ### Scroll Lock
@@ -117,8 +117,8 @@ All transitions use the `motion-safe:` Tailwind variant. The palette does not an
 
 Uses the `mounted` + `visible` two-phase pattern (same as `Select`):
 
-1. `mounted` — controls DOM presence. Set to `true` when `open` becomes `true`. Set to `false` via `setTimeout(150)` after `visible` becomes `false` (exit transition must complete before unmounting).
-2. `visible` — controls CSS classes. Set to `true` via `requestAnimationFrame` after `mounted` to ensure the initial `opacity-0 scale-95` state is painted before the transition begins.
+1. `mounted`: controls DOM presence. Set to `true` when `open` becomes `true`. Set to `false` via `setTimeout(150)` after `visible` becomes `false` (exit transition must complete before unmounting).
+2. `visible`: controls CSS classes. Set to `true` via `requestAnimationFrame` after `mounted` to ensure the initial `opacity-0 scale-95` state is painted before the transition begins.
 
 **Backdrop:** `opacity-0` → `opacity-100` at `--duration-base`.
 **Panel:** `opacity-0 scale-95` → `opacity-100 scale-100` at `--duration-base` on enter; reverse at `--duration-base` on exit.
@@ -149,7 +149,7 @@ Use a command palette when:
 - Power users benefit from keyboard-first access to any action in the app.
 - You want a unified search-and-execute surface (Linear, Vercel, GitHub all use this pattern).
 
-Do not use a command palette as a replacement for well-organized navigation. It complements navigation — it does not replace it.
+Do not use a command palette as a replacement for well-organized navigation. It complements navigation; it does not replace it.
 
 ---
 

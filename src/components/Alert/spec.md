@@ -9,8 +9,8 @@ Contextual feedback banner for success, warning, danger, or info.
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | variant | `'default' \| 'success' \| 'warning' \| 'danger'` | `'default'` | Alert color and icon. |
-| title | `string` | — | Bold heading text rendered above children. |
-| children | `ReactNode` | — | Body content rendered below the title. |
+| title | `string` | None | Bold heading text rendered above children. |
+| children | `ReactNode` | None | Body content rendered below the title. |
 | className | `string` | `''` | Additional CSS classes merged onto the root element. |
 
 Extends all native `<div>` HTML attributes.
@@ -24,11 +24,11 @@ Extends all native `<div>` HTML attributes.
 | `warning` | Non-blocking issue the user should be aware of |
 | `danger` | Error state or a destructive consequence requiring attention |
 
-Each variant applies a matching background, border, text color, and icon. The icon is decorative (`aria-hidden`) — the `role="alert"` on the wrapper ensures screen readers announce the content.
+Each variant applies a matching background, border, text color, and icon. The icon is decorative (`aria-hidden`); the `role="alert"` on the wrapper ensures screen readers announce the content.
 
 ## Visual Design
 
-- `rounded-lg border p-4` — contained, padded block with visible boundary
+- `rounded-lg border p-4`: contained, padded block with visible boundary
 - Icon is 16px and aligned to `mt-0.5` so it tracks with the first line of text
 - Title uses `text-sm font-semibold leading-snug`
 - Body uses `text-sm leading-relaxed opacity-90`
@@ -37,7 +37,7 @@ Each variant applies a matching background, border, text color, and icon. The ic
 ## Accessibility
 
 - Root element has `role="alert"`, which causes screen readers to announce the content immediately when it is added to the DOM.
-- The icon is `aria-hidden="true"` — variant state is communicated by the text content, not the icon alone.
+- The icon is `aria-hidden="true"`: variant state is communicated by the text content, not the icon alone.
 - Color is not the only signal: each variant renders a semantically different icon path in addition to the color change.
 
 ## When to Use

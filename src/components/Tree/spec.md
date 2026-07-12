@@ -1,6 +1,6 @@
 # Tree
 
-A collapsible, keyboard-navigable tree view for hierarchical data — file trees, org charts, nested navigation, and similar structures.
+A collapsible, keyboard-navigable tree view for hierarchical data: file trees, org charts, nested navigation, and similar structures.
 
 ## Installation
 
@@ -18,9 +18,9 @@ No additional npm dependencies. No registry dependencies.
 
 | Prop              | Type        | Default     | Description                                                              |
 |-------------------|-------------|-------------|---------------------------------------------------------------------------|
-| `children`        | `ReactNode` | —           | One or more `TreeItem` elements.                                          |
+| `children`        | `ReactNode` | -           | One or more `TreeItem` elements.                                          |
 | `className`       | `string`    | `""`        | Additional classes on the root `div[role=tree]`.                         |
-| `terminalIcon`    | `ReactNode` | `undefined` | Default icon for leaf items (no children) that don't set their own `icon`. No icon renders if omitted — there is no built-in default. |
+| `terminalIcon`    | `ReactNode` | `undefined` | Default icon for leaf items (no children) that don't set their own `icon`. No icon renders if omitted: there is no built-in default. |
 | `nonTerminalIcon` | `ReactNode` | `undefined` | Default icon for `collapsible={false}` branch items that don't set their own `icon`. No icon renders if omitted. Collapsible branches always show the chevron instead, since that icon is functional (the expand/collapse toggle), not decorative. |
 | `selectable`      | `boolean`   | `false`     | Allows text selection/copy inside the tree (`select-text` instead of `select-none`). Off by default since a normal interactive tree treats click as select/toggle, not text selection. Turn on for read-only, fully non-collapsible trees (e.g. a structural diagram). |
 
@@ -28,11 +28,11 @@ No additional npm dependencies. No registry dependencies.
 
 | Prop          | Type        | Default | Description                                                              |
 |---------------|-------------|---------|--------------------------------------------------------------------------|
-| `label`       | `ReactNode` | —       | The text or content displayed for this node.                             |
-| `children`    | `ReactNode` | —       | Nested `TreeItem` elements. Presence makes this a branch node.           |
+| `label`       | `ReactNode` | -       | The text or content displayed for this node.                             |
+| `children`    | `ReactNode` | -       | Nested `TreeItem` elements. Presence makes this a branch node.           |
 | `defaultOpen` | `boolean`   | `false` | Whether a branch starts expanded on initial render. Ignored when `collapsible` is `false` (the branch is always open). |
-| `collapsible` | `boolean`   | `true`  | When `false`, the item is fully non-interactive: no chevron toggle, no hover/focus-visible/active styling, `tabIndex={-1}` (excluded from the Tab order and from arrow-key roving focus entirely — never registered with the tree, so `ArrowDown`/`ArrowUp`/`Home`/`End` skip over it), and no `onClick`/`onKeyDown`/`onFocus` handlers. A branch also becomes permanently expanded and `aria-expanded` always reports `true`. Applies equally to leaf items — a `collapsible={false}` leaf is just as inert. Use for read-only structural diagrams where nothing should look or behave like a control. |
-| `icon`        | `ReactNode` | —       | Custom icon for this specific item, overriding the chevron (collapsible branch), `Tree`'s `nonTerminalIcon` (non-collapsible branch), or `Tree`'s `terminalIcon` (leaf). Always rendered even when `collapsible` is `false`. |
+| `collapsible` | `boolean`   | `true`  | When `false`, the item is fully non-interactive: no chevron toggle, no hover/focus-visible/active styling, `tabIndex={-1}` (excluded from the Tab order and from arrow-key roving focus entirely; never registered with the tree, so `ArrowDown`/`ArrowUp`/`Home`/`End` skip over it), and no `onClick`/`onKeyDown`/`onFocus` handlers. A branch also becomes permanently expanded and `aria-expanded` always reports `true`. Applies equally to leaf items: a `collapsible={false}` leaf is just as inert. Use for read-only structural diagrams where nothing should look or behave like a control. |
+| `icon`        | `ReactNode` | -       | Custom icon for this specific item, overriding the chevron (collapsible branch), `Tree`'s `nonTerminalIcon` (non-collapsible branch), or `Tree`'s `terminalIcon` (leaf). Always rendered even when `collapsible` is `false`. |
 | `disabled`    | `boolean`   | `false` | Disables interaction. Item is visible but not clickable or focusable.    |
 | `className`   | `string`    | `""`    | Additional classes on the item row element.                              |
 
@@ -70,11 +70,11 @@ export default function Example() {
 | State         | Implementation                                                              |
 |---------------|-----------------------------------------------------------------------------|
 | Default        | `text-text` on transparent background.                                     |
-| Hover          | `bg-surface-hover` — 150ms ease transition.                                |
+| Hover          | `bg-surface-hover`, 150ms ease transition.                                |
 | Active/pressed | `bg-surface-active` on mousedown.                                          |
 | Focus-visible  | `ring-2 ring-offset-2 ring-brand-ring` via `:focus-visible`.               |
 | Disabled       | `opacity-40`, `cursor-not-allowed`, `pointer-events-none`. No hover/focus. |
-| Non-collapsible (`collapsible={false}`) | Plain `cursor-default`. No hover, focus-visible, or active styling — the row never looks like a control. |
+| Non-collapsible (`collapsible={false}`) | Plain `cursor-default`. No hover, focus-visible, or active styling: the row never looks like a control. |
 
 ---
 
@@ -104,8 +104,8 @@ Focus management is context-driven: a single `onKeyDown` handler on the tree con
 - `role="group"` on each children container.
 - `aria-expanded` set to `true`/`false` on branch nodes only; absent on leaf nodes. Always `true` on a `collapsible={false}` branch, since it can never close.
 - `aria-disabled="true"` on disabled items.
-- The icon span is always `aria-hidden="true"`, whatever it renders (chevron, `terminalIcon`, `nonTerminalIcon`, a per-item `icon`, or nothing at all). No chevron is rendered for a `collapsible={false}` branch — there is no affordance implying it can be closed. There is no built-in default icon of any kind: leaves and non-collapsible branches render no icon unless `Tree` is given `terminalIcon`/`nonTerminalIcon`, or the item is given its own `icon`.
-- A `collapsible={false}` item has no hover, focus-visible, or active styling and is excluded from the Tab order and arrow-key roving focus — it presents as static content, not a control.
+- The icon span is always `aria-hidden="true"`, whatever it renders (chevron, `terminalIcon`, `nonTerminalIcon`, a per-item `icon`, or nothing at all). No chevron is rendered for a `collapsible={false}` branch: there is no affordance implying it can be closed. There is no built-in default icon of any kind: leaves and non-collapsible branches render no icon unless `Tree` is given `terminalIcon`/`nonTerminalIcon`, or the item is given its own `icon`.
+- A `collapsible={false}` item has no hover, focus-visible, or active styling and is excluded from the Tab order and arrow-key roving focus; it presents as static content, not a control.
 - All animation respects `prefers-reduced-motion` via the `motion-safe:` Tailwind prefix.
 
 ---
@@ -147,4 +147,4 @@ The chevron icon rotates 90° when a branch opens using `motion-safe:transition-
 - Org charts or hierarchical data displays
 - Settings panels with grouped sections
 - Any structure where items belong to groups and groups can be collapsed
-- Read-only structural diagrams where the full hierarchy must always be visible and nothing should look interactive — set `collapsible={false}` on every `TreeItem` (e.g. a compound component's composition diagram)
+- Read-only structural diagrams where the full hierarchy must always be visible and nothing should look interactive: set `collapsible={false}` on every `TreeItem` (e.g. a compound component's composition diagram)

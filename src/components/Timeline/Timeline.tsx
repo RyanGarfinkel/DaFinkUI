@@ -13,9 +13,9 @@ export interface TimelineProps extends HTMLAttributes<HTMLDivElement> {
 	direction?: TimelineDirection;
 	/**
 	 * Controls mount animation when items are already present at render time.
-	 * - `"stagger"` (default) — each item fades + slides in with a cascading delay.
+	 * - `"stagger"` (default): each item fades + slides in with a cascading delay.
 	 *   The container size is fixed from the start; only opacity/transform animate.
-	 * - `"none"` — items appear instantly. Use this when you're adding items
+	 * - `"none"`: items appear instantly. Use this when you're adding items
 	 *   dynamically over time and handling animation yourself via className.
 	 */
 	animate?:   TimelineAnimate;
@@ -28,15 +28,15 @@ export interface TimelineItemProps extends HTMLAttributes<HTMLDivElement> {
 	indicator?:   React.ReactNode;
 	children?:    React.ReactNode;
 	className?:   string;
-	/** Injected by <Timeline> — do not set manually. */
+	/** Injected by <Timeline>: do not set manually. */
 	_index?:      number;
-	/** Injected by <Timeline> — do not set manually. */
+	/** Injected by <Timeline>: do not set manually. */
 	_isLast?:     boolean;
-	/** Injected by <Timeline> — do not set manually. */
+	/** Injected by <Timeline>: do not set manually. */
 	_variant?:    TimelineVariant;
-	/** Injected by <Timeline> — do not set manually. */
+	/** Injected by <Timeline>: do not set manually. */
 	_direction?:  TimelineDirection;
-	/** Injected by <Timeline> — do not set manually. */
+	/** Injected by <Timeline>: do not set manually. */
 	_animate?:    TimelineAnimate;
 }
 
@@ -67,25 +67,31 @@ export const TimelineItem = (
 		? 'bg-brand text-brand-fg'
 		: 'bg-surface-active text-text-muted border-[length:var(--border-width)] border-surface-border';
 
+	// The stagger animation is applied to the dot and content individually rather
+	// than to the shared row wrapper. A 1px connector line fades to invisible long
+	// before a low-opacity dot/text does (low-contrast hairline vs. bold fill), so
+	// animating it in lockstep with its siblings made the rail look broken mid-mount
+	// — a solid dot pointing at nothing while the line itself had faded out. Keeping
+	// the line (and its wrapper) permanently at full opacity keeps the spine reading
+	// as stable while only the dot and text cascade in on top of it.
 	const staggerStyle: React.CSSProperties = _animate === 'stagger'
 		? { animation: `tl-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${_index * 90}ms both` }
 		: {};
-
-	const mergedStyle = { ...staggerStyle, ...style };
 
 	if (_direction === 'horizontal') {
 		return (
 			<div
 				{...props}
-				style={mergedStyle}
+				style={style}
 				className={['flex flex-col flex-1 min-w-0', className].join(' ')}
 			>
 				{/* Top rail: dot + connector */}
 				<div className='flex items-center w-full'>
 					<div
 						aria-hidden='true'
+						style={staggerStyle}
 						className={[
-							'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
+							'flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-1.5',
 							dotColor,
 						].join(' ')}
 					>
@@ -94,13 +100,13 @@ export const TimelineItem = (
 					{!_isLast && (
 						<div
 							aria-hidden='true'
-							className='ml-2 h-px flex-1 bg-surface-border'
+							className='h-px flex-1 bg-surface-border'
 						/>
 					)}
 				</div>
 
 				{/* Content */}
-				<div className='pt-3 pr-4 min-w-0'>
+				<div style={staggerStyle} className='pt-3 pr-4 min-w-0'>
 					<p className='text-sm font-semibold text-text mb-1'>{title}</p>
 					{children && (
 						<div className='text-sm text-text-muted'>{children}</div>
@@ -115,15 +121,16 @@ export const TimelineItem = (
 	return (
 		<div
 			{...props}
-			style={mergedStyle}
+			style={style}
 			className={['flex gap-4', className].join(' ')}
 		>
 			{/* Left rail */}
 			<div className='flex flex-col items-center'>
 				<div
 					aria-hidden='true'
+					style={staggerStyle}
 					className={[
-						'flex h-7 w-7 shrink-0 items-center justify-center rounded-full',
+						'flex h-7 min-w-7 shrink-0 items-center justify-center rounded-full px-1.5',
 						dotColor,
 					].join(' ')}
 				>
@@ -132,13 +139,13 @@ export const TimelineItem = (
 				{!_isLast && (
 					<div
 						aria-hidden='true'
-						className='mt-2 w-px flex-1 bg-surface-border'
+						className='w-px flex-1 bg-surface-border'
 					/>
 				)}
 			</div>
 
 			{/* Content */}
-			<div className={['flex-1 min-w-0', _isLast ? 'pb-0' : 'pb-8'].join(' ')}>
+			<div style={staggerStyle} className={['flex-1 min-w-0', _isLast ? 'pb-0' : 'pb-8'].join(' ')}>
 				<p className='text-sm font-semibold text-text leading-7 mb-2'>{title}</p>
 				{children && (
 					<div className='text-sm text-text-muted'>{children}</div>

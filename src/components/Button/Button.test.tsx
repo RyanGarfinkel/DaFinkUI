@@ -74,7 +74,7 @@ describe('Button', () =>
 	});
 });
 
-describe('Button — loading state', () =>
+describe('Button: loading state', () =>
 {
 	it('renders a spinner and hides children when loading', () =>
 	{
@@ -110,7 +110,7 @@ describe('Button — loading state', () =>
 	});
 });
 
-describe('Button — size="icon"', () =>
+describe('Button: size="icon"', () =>
 {
 	it('renders as a square', () =>
 	{
@@ -127,7 +127,7 @@ describe('Button — size="icon"', () =>
 	});
 });
 
-describe('Button — size="icon-sm"', () =>
+describe('Button: size="icon-sm"', () =>
 {
 	it('renders as a smaller square', () =>
 	{
@@ -138,7 +138,7 @@ describe('Button — size="icon-sm"', () =>
 	});
 });
 
-describe('Button — shape', () =>
+describe('Button: shape', () =>
 {
 	it('applies rounded-[var(--radius)] by default', () =>
 	{
@@ -155,7 +155,7 @@ describe('Button — shape', () =>
 	});
 });
 
-describe('Button — variant="on-color"', () =>
+describe('Button: variant="on-color"', () =>
 {
 	it('uses currentColor-derived classes instead of a fixed brand color', () =>
 	{

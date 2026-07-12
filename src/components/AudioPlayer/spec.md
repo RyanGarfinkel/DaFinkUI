@@ -6,10 +6,10 @@ An audio playback bar with controls for play/pause, seeking, skip, volume, and s
 
 | Prop       | Type     | Default | Description                                      |
 |------------|----------|---------|--------------------------------------------------|
-| `src`      | `string` | —       | URL of the audio file to play. Required.         |
-| `title`    | `string` | —       | Track title. Displayed above the controls in `'default'` size only — `'compact'` never renders it (still used in the region's `aria-label`). |
-| `subtitle` | `string` | —       | Secondary line below the title — artist, episode, or any short descriptor. `'default'` size only, same as `title`. |
-| `size`     | `'default' \| 'compact'` | `'default'` | `'default'` is a self-contained card with the full control set. `'compact'` strips it to exactly three elements in one row — play/pause, seek slider, elapsed time — with no card chrome (no border/shadow/background/padding) and no title/subtitle, for embedding inside another container that supplies its own background (e.g. a `Message` bubble). |
+| `src`      | `string` | None    | URL of the audio file to play. Required.         |
+| `title`    | `string` | None    | Track title. Displayed above the controls in `'default'` size only; `'compact'` never renders it (still used in the region's `aria-label`). |
+| `subtitle` | `string` | None    | Secondary line below the title: artist, episode, or any short descriptor. `'default'` size only, same as `title`. |
+| `size`     | `'default' \| 'compact'` | `'default'` | `'default'` is a self-contained card with the full control set. `'compact'` strips it to exactly three elements in one row (play/pause, seek slider, elapsed time) with no card chrome (no border/shadow/background/padding) and no title/subtitle, for embedding inside another container that supplies its own background (e.g. a `Message` bubble). |
 | `className`| `string` | `""`    | Additional classes applied to the container.     |
 
 All other `HTMLDivElement` attributes (e.g. `data-*`, `id`) are forwarded to the container.
@@ -23,8 +23,8 @@ All other `HTMLDivElement` attributes (e.g. `data-*`, `id`) are forwarded to the
 - Clicking the speaker icon mutes or unmutes without changing the stored volume level.
 - The speed button cycles through: 0.5×, 0.75×, 1×, 1.25×, 1.5×, 1.75×, 2×.
 - When `src` changes, playback stops and state resets.
-- `size="compact"` reduces the component to a single row: play/pause button (left) — seek slider (center) — elapsed time (right). Skip, volume, mute, speed, and title/subtitle are not available in this size; use `'default'` when those are needed. All interactive targets remain at least 24×24 CSS px.
-- `size="compact"` renders no card chrome of its own (no border, shadow, background, or padding) — it's meant to sit inside a container that already supplies a background, most commonly a `Message` bubble (`<Message><AudioPlayer size="compact" .../></Message>`, keeping `Message`'s default `bubble={true}`). The play button (`variant="on-color"`) and seek slider (`tone="current"`) both derive their color from `currentColor` instead of the brand token, so they automatically pick up whatever text color the parent bubble sets (`text-brand-fg` for `sent`, `text-text` for `received`) and stay legible against either background without any extra wiring.
+- `size="compact"` reduces the component to a single row: play/pause button (left), seek slider (center), elapsed time (right). Skip, volume, mute, speed, and title/subtitle are not available in this size; use `'default'` when those are needed. All interactive targets remain at least 24×24 CSS px.
+- `size="compact"` renders no card chrome of its own (no border, shadow, background, or padding); it's meant to sit inside a container that already supplies a background, most commonly a `Message` bubble (`<Message><AudioPlayer size="compact" .../></Message>`, keeping `Message`'s default `bubble={true}`). The play button (`variant="on-color"`) and seek slider (`tone="current"`) both derive their color from `currentColor` instead of the brand token, so they automatically pick up whatever text color the parent bubble sets (`text-brand-fg` for `sent`, `text-text` for `received`) and stay legible against either background without any extra wiring.
 
 ## Keyboard Interaction
 
@@ -49,18 +49,18 @@ All other `HTMLDivElement` attributes (e.g. `data-*`, `id`) are forwarded to the
 ## Composition
 
 - **Play/pause**: `Button` with `shape="circle"`. Default size: `variant="primary"` `size="icon"` (brand-filled, for a standalone card). Compact size: `variant="on-color"` `size="icon-sm"` (currentColor-derived, for embedding inside a colored bubble).
-- **Skip back/forward, mute, speed**: `Button` with `variant="ghost"`, `size="md"` — default size only, omitted entirely in compact.
+- **Skip back/forward, mute, speed**: `Button` with `variant="ghost"`, `size="md"`, default size only, omitted entirely in compact.
 - **Seek**: `Slider`, `tone="brand"` `size="default"` in the default layout; `tone="current"` `size="sm"` in compact.
-- **Volume**: `Slider`, `tone="brand"` `size="default"` — default size only, omitted in compact.
+- **Volume**: `Slider`, `tone="brand"` `size="default"`, default size only, omitted in compact.
 
 ## Interactive States
 
-Hover, active, focus-visible, and disabled states on every button and slider come from `Button` and `Slider` themselves — see their specs for the full state table. AudioPlayer only adds:
+Hover, active, focus-visible, and disabled states on every button and slider come from `Button` and `Slider` themselves. See their specs for the full state table. AudioPlayer only adds:
 
 | State   | Appearance                                              |
 |---------|---------------------------------------------------------|
 | Default (`'default'` size) | Surface panel background, border, subtle shadow |
-| Default (`'compact'` size) | No background/border/shadow of its own — transparent, inherits the parent's |
+| Default (`'compact'` size) | No background/border/shadow of its own; transparent, inherits the parent's |
 | Playing | Seek slider fill advances; play button shows pause icon |
 | Muted   | Volume slider fill collapses to 0; mute icon switches to X |
 
@@ -76,7 +76,7 @@ Hover, active, focus-visible, and disabled states on every button and slider com
 | `text-current`      | Elapsed time display in `'compact'` size, at 70% opacity (`text-current/70`) |
 | `--radius-lg`       | Container corner radius (`'default'` size only) |
 
-`Button` and `Slider` own their own token usage (brand fill vs. `currentColor`, focus ring, track colors) — see their specs.
+`Button` and `Slider` own their own token usage (brand fill vs. `currentColor`, focus ring, track colors). See their specs.
 
 ## When to Use
 

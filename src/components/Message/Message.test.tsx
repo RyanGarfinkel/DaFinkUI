@@ -288,7 +288,7 @@ describe('MessageReaction', () =>
 		expect(screen.getByRole('button').getAttribute('aria-label')).toBe('Custom label');
 	});
 
-	it('communicates the active/"yours" state with more than color — a checkmark and border change', () =>
+	it('communicates the active/"yours" state with more than color: a checkmark and border change', () =>
 	{
 		const { container, rerender } = render(<MessageReaction icon='👍' count={2} onClick={() => {}} />);
 		const inactiveButton = screen.getByRole('button');

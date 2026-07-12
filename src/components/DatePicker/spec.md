@@ -1,6 +1,6 @@
 # DatePicker
 
-A trigger button that opens a calendar popup for selecting a single date. No external date libraries — all date math is implemented in plain JavaScript.
+A trigger button that opens a calendar popup for selecting a single date. No external date libraries: all date math is implemented in plain JavaScript.
 
 ---
 
@@ -38,10 +38,10 @@ No npm dependencies. No registry dependencies.
 | State        | Visual                                                                    |
 |--------------|---------------------------------------------------------------------------|
 | Default      | `border-input-border bg-surface text-text`                                |
-| Hover        | `hover:border-brand` — border shifts to brand color                       |
-| Focus        | `focus:outline-none` — browser default suppressed                         |
+| Hover        | `hover:border-brand`: border shifts to brand color                        |
+| Focus        | `focus:outline-none`: browser default suppressed                          |
 | Focus-visible| `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring` |
-| Disabled     | `opacity-50 cursor-not-allowed pointer-events-none` — no hover or focus   |
+| Disabled     | `opacity-50 cursor-not-allowed pointer-events-none`: no hover or focus    |
 | Error        | `border-danger` instead of `border-input-border`                          |
 | Open         | Popup mounts; `aria-expanded="true"` on trigger                           |
 
@@ -50,10 +50,10 @@ No npm dependencies. No registry dependencies.
 | State          | Visual                                                                              |
 |----------------|-------------------------------------------------------------------------------------|
 | Default        | `text-text hover:bg-surface-hover`                                                  |
-| Today          | `ring-2 ring-brand-ring ring-offset-1` — brand ring, not filled                    |
-| Selected       | `bg-brand text-brand-fg font-medium` — filled brand background                     |
-| Outside month  | `opacity-30` — still navigable via arrow keys                                       |
-| Disabled       | `opacity-30 cursor-not-allowed pointer-events-none` — not clickable                 |
+| Today          | `ring-2 ring-brand-ring ring-offset-1`: brand ring, not filled                     |
+| Selected       | `bg-brand text-brand-fg font-medium`: filled brand background                      |
+| Outside month  | `opacity-30`: still navigable via arrow keys                                        |
+| Disabled       | `opacity-30 cursor-not-allowed pointer-events-none`: not clickable                  |
 | Focus-visible  | `focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring`    |
 
 ---
@@ -61,7 +61,7 @@ No npm dependencies. No registry dependencies.
 ## Calendar Popup Behavior
 
 - Opens below the trigger button; positioned `top-full mt-1 left-0` relative to the trigger wrapper.
-- Popup is **not** a modal — focus is **not** trapped. Tab closes the popup and moves to the next focusable element in the document.
+- Popup is **not** a modal, so focus is **not** trapped. Tab closes the popup and moves to the next focusable element in the document.
 - Arrow navigation updates the focused day across month boundaries (automatically advances `viewMonth` / `viewYear`).
 - Prev/next month chevron buttons navigate the month view without closing the popup.
 - Clicking a day selects it and closes the popup.
@@ -94,7 +94,7 @@ No npm dependencies. No registry dependencies.
 | Element            | Role / Attribute                                                              |
 |--------------------|-------------------------------------------------------------------------------|
 | Trigger button     | `role="button"`, `aria-haspopup="dialog"`, `aria-expanded`, `aria-controls`  |
-| Popup container    | `role="dialog"`, `aria-label="Date picker"` — **no** `aria-modal`            |
+| Popup container    | `role="dialog"`, `aria-label="Date picker"` (**no** `aria-modal`)            |
 | Grid container     | `role="grid"`, `aria-label="Month YYYY"`, `tabIndex={0}`                     |
 | Column headers     | `role="columnheader"`, `<abbr>` with full day name as `title`                |
 | Grid rows          | `role="row"` on each week row                                                 |
@@ -104,7 +104,7 @@ No npm dependencies. No registry dependencies.
 ### Focus Management
 
 - On open: focus moves to the `role="grid"` container immediately via `requestAnimationFrame`.
-- Focus is **not** trapped — this is a non-modal overlay.
+- Focus is **not** trapped: this is a non-modal overlay.
 - On close (any method): focus returns to the trigger button.
 - Focused day within the grid uses a single roving `tabIndex={0}` button; all other day buttons have `tabIndex={-1}`.
 - Arrow keys move the roving focus through the grid; month boundaries are crossed transparently.
@@ -119,8 +119,8 @@ All transitions use the `motion-safe:` Tailwind prefix. The global `prefers-redu
 
 Follows the mounted/visible two-step pattern from `Select`:
 
-1. `setMounted(true)` — adds the popup to the DOM.
-2. `requestAnimationFrame(() => setVisible(true))` — triggers the CSS transition on the next paint.
+1. `setMounted(true)`: adds the popup to the DOM.
+2. `requestAnimationFrame(() => setVisible(true))`: triggers the CSS transition on the next paint.
 3. On close: `setVisible(false)` immediately; `setTimeout(() => setMounted(false), 150)` removes DOM after transition completes.
 
 CSS classes: `opacity-0 scale-95` → `opacity-100 scale-100` with `motion-safe:transition-[opacity,transform] motion-safe:duration-[var(--duration-fast)]`.
@@ -155,5 +155,5 @@ Use `DatePicker` when:
 - A plain text input with date formatting is insufficient and you want a spatial calendar view.
 
 Do **not** use when:
-- The user needs to select a date range — this component is single-date only.
-- The date is typed, not picked — use a plain `Input` with `type="date"` instead.
+- The user needs to select a date range. This component is single-date only.
+- The date is typed, not picked: use a plain `Input` with `type="date"` instead.

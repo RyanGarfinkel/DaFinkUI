@@ -195,7 +195,7 @@ export const CommandPalette = (
 		if(!open) return;
 		// No scrollbar-width compensation needed: `html` permanently reserves its
 		// scrollbar gutter (see globals.css), so toggling overflow here never
-		// changes the page's rendered width — nothing to compensate for.
+		// changes the page's rendered width. Nothing to compensate for.
 		const prevOverflow = document.body.style.overflow;
 		document.body.style.overflow = 'hidden';
 

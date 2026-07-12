@@ -103,7 +103,7 @@ const Drawer = (
 		{
 			setVisible(false);
 
-			// Return focus to the trigger — always, regardless of how the drawer closed
+			// Return focus to the trigger: always, regardless of how the drawer closed
 			triggerRef.current?.focus();
 			triggerRef.current = null;
 

@@ -3,7 +3,7 @@ import type { SidePanelSide } from './SidePanel';
 // ─── Cross-instance panel stack ────────────────────────────────────────────────
 // Lets independently-triggered SidePanels on the same side auto-offset each
 // other: opening a second panel pushes earlier ones on that side further
-// toward the center, purely by position — no dimming, no scaling, no
+// toward the center, purely by position: no dimming, no scaling, no
 // inertness. Module-level singleton (not React context) so it works across
 // the whole app without requiring a shared provider ancestor.
 
@@ -67,7 +67,7 @@ export const reportStackEntrySize = (side: SidePanelSide, id: string, size: numb
 };
 
 /** How far `id` must shift toward the center to stay clear of every panel
- * opened after it on the same side — the sum of their sizes plus a gap. */
+ * opened after it on the same side: the sum of their sizes plus a gap. */
 export const computeStackOffset = (entries: StackEntry[], id: string): number =>
 {
 	const index = entries.findIndex(entry => entry.id === id);
@@ -77,7 +77,7 @@ export const computeStackOffset = (entries: StackEntry[], id: string): number =>
 };
 
 /** A panel with another panel open in front of it on the same side can't be
- * closed until that one closes — otherwise the front panel would be left
+ * closed until that one closes; otherwise the front panel would be left
  * pointing at nothing. */
 export const isBlockedInStack = (entries: StackEntry[], id: string): boolean =>
 {

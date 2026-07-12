@@ -1,6 +1,6 @@
 # Form
 
-A set of composable layout primitives for building forms. This is a structural and visual system — it handles spacing, labeling, error display, and section grouping. It does not own form state or validation by default, but ships an optional `useZodForm` hook (react-hook-form + Zod) for consumers who want schema-based validation without wiring it up by hand.
+A set of composable layout primitives for building forms. This is a structural and visual system: it handles spacing, labeling, error display, and section grouping. It does not own form state or validation by default, but ships an optional `useZodForm` hook (react-hook-form + Zod) for consumers who want schema-based validation without wiring it up by hand.
 
 ---
 
@@ -13,7 +13,7 @@ Wraps a native `<form>` element. Provides consistent vertical spacing between fi
 | Prop        | Type                              | Default | Description                                       |
 |-------------|-----------------------------------|---------|---------------------------------------------------|
 | `className` | `string`                          | `''`    | Additional classes merged onto the form element   |
-| `...props`  | `FormHTMLAttributes<HTMLFormElement>` | —   | All native form attributes (method, action, etc.) |
+| `...props`  | `FormHTMLAttributes<HTMLFormElement>` | n/a | All native form attributes (method, action, etc.) |
 
 **Layout:** `space-y-6` between direct children.
 
@@ -25,10 +25,10 @@ An optional grouping wrapper rendered as a `<fieldset>`. Use to visually and sem
 
 | Prop          | Type        | Default | Description                                      |
 |---------------|-------------|---------|--------------------------------------------------|
-| `title`       | `string`    | —       | Rendered as a `<legend>` inside the fieldset     |
-| `description` | `string`    | —       | Rendered below the title in muted text           |
+| `title`       | `string`    | n/a     | Rendered as a `<legend>` inside the fieldset     |
+| `description` | `string`    | n/a     | Rendered below the title in muted text           |
 | `className`   | `string`    | `''`    | Additional classes merged onto the fieldset      |
-| `children`    | `ReactNode` | —       | Form fields or other content                     |
+| `children`    | `ReactNode` | required | Form fields or other content                    |
 
 **Layout:** `space-y-4` between children. Title: `text-base font-semibold text-text`. Description: `text-sm text-text-muted`.
 
@@ -36,12 +36,12 @@ An optional grouping wrapper rendered as a `<fieldset>`. Use to visually and sem
 
 ### `FormField`
 
-Wraps a single field — label, control, description, and message — in a flex column with consistent gap.
+Wraps a single field (label, control, description, and message) in a flex column with consistent gap.
 
 | Prop        | Type        | Default | Description                                       |
 |-------------|-------------|---------|---------------------------------------------------|
 | `className` | `string`    | `''`    | Additional classes merged onto the wrapper div    |
-| `children`  | `ReactNode` | —       | Typically `FormLabel`, `FormControl`, `FormDescription`, and/or `FormMessage` |
+| `children`  | `ReactNode` | required | Typically `FormLabel`, `FormControl`, `FormDescription`, and/or `FormMessage` |
 
 **Layout:** `flex flex-col gap-1.5`.
 
@@ -54,22 +54,22 @@ A styled `<label>` element. Accepts all native label attributes.
 | Prop        | Type        | Default | Description                                                        |
 |-------------|-------------|---------|--------------------------------------------------------------------|
 | `required`  | `boolean`   | `false` | When true, appends a ` *` indicator in `text-input-error` color    |
-| `htmlFor`   | `string`    | —       | Native `for` attribute — links label to its input                  |
+| `htmlFor`   | `string`    | n/a     | Native `for` attribute: links label to its input                   |
 | `className` | `string`    | `''`    | Additional classes merged onto the label                           |
-| `...props`  | `LabelHTMLAttributes<HTMLLabelElement>` | — | All native label attributes             |
+| `...props`  | `LabelHTMLAttributes<HTMLLabelElement>` | n/a | All native label attributes         |
 
-**Styles:** `text-sm font-medium text-text`. The `*` indicator is `aria-hidden="true"` — required state must also be communicated via `aria-required` on the input itself.
+**Styles:** `text-sm font-medium text-text`. The `*` indicator is `aria-hidden="true"`; required state must also be communicated via `aria-required` on the input itself.
 
 ---
 
 ### `FormControl`
 
-A thin `<div>` wrapper around the actual input element. Exists for layout extension — use it to add relative positioning or group an input with an inline adornment.
+A thin `<div>` wrapper around the actual input element. Exists for layout extension: use it to add relative positioning or group an input with an inline adornment.
 
 | Prop        | Type        | Default | Description                                    |
 |-------------|-------------|---------|------------------------------------------------|
 | `className` | `string`    | `''`    | Additional classes merged onto the wrapper div |
-| `children`  | `ReactNode` | —       | The input or control element                   |
+| `children`  | `ReactNode` | required | The input or control element                  |
 
 ---
 
@@ -80,7 +80,7 @@ Hint or helper text displayed below a field. Renders always (unlike `FormMessage
 | Prop        | Type        | Default | Description                              |
 |-------------|-------------|---------|------------------------------------------|
 | `className` | `string`    | `''`    | Additional classes merged onto the `<p>` |
-| `children`  | `ReactNode` | —       | Hint text                                |
+| `children`  | `ReactNode` | required | Hint text                               |
 
 **Styles:** `text-sm text-text-muted`.
 
@@ -88,12 +88,12 @@ Hint or helper text displayed below a field. Renders always (unlike `FormMessage
 
 ### `FormMessage`
 
-Validation or error message. **Renders nothing when `children` is falsy** — use this as a safe slot that disappears when there is no error.
+Validation or error message. **Renders nothing when `children` is falsy**: use this as a safe slot that disappears when there is no error.
 
 | Prop        | Type        | Default | Description                              |
 |-------------|-------------|---------|------------------------------------------|
 | `className` | `string`    | `''`    | Additional classes merged onto the `<p>` |
-| `children`  | `ReactNode` | —       | Error or validation text                 |
+| `children`  | `ReactNode` | n/a     | Error or validation text                 |
 
 **Styles:** `text-sm text-input-error`. Has `role="alert"` so screen readers announce it when it appears.
 
@@ -101,7 +101,7 @@ Validation or error message. **Renders nothing when `children` is falsy** — us
 
 ## `useZodForm` (optional)
 
-A thin wrapper around react-hook-form's `useForm` that wires up `zodResolver` for you. Purely additive — the manual-composition API above works exactly as it always has if you don't use this hook.
+A thin wrapper around react-hook-form's `useForm` that wires up `zodResolver` for you. Purely additive: the manual-composition API above works exactly as it always has if you don't use this hook.
 
 ```ts
 function useZodForm<TSchema extends z.ZodType>(
@@ -112,10 +112,10 @@ function useZodForm<TSchema extends z.ZodType>(
 
 | Param      | Type                                              | Default | Description                                                                 |
 |------------|----------------------------------------------------|---------|-------------------------------------------------------------------------------|
-| `schema`   | `z.ZodType`                                        | —       | A Zod schema describing the form's shape. Validation errors surface via `form.formState.errors`, keyed by field name, with `.message` set to the schema's error string. |
+| `schema`   | `z.ZodType`                                        | required | A Zod schema describing the form's shape. Validation errors surface via `form.formState.errors`, keyed by field name, with `.message` set to the schema's error string. |
 | `options`  | `Omit<UseFormProps<z.infer<TSchema>>, 'resolver'>` | `undefined` | Any react-hook-form `useForm` option (`defaultValues`, `mode`, etc.) except `resolver`, which `useZodForm` sets for you. |
 
-Returns the same `UseFormReturn<z.infer<TSchema>>` object `useForm` would — `register`, `handleSubmit`, `formState`, `watch`, `reset`, etc. — typed against the schema's inferred output.
+Returns the same `UseFormReturn<z.infer<TSchema>>` object `useForm` would (`register`, `handleSubmit`, `formState`, `watch`, `reset`, etc.), typed against the schema's inferred output.
 
 **When to use:** reach for `useZodForm` when a form has real validation rules (required fields, email/format checks, min/max length, cross-field rules) and you want the schema to be the single source of truth for both the TypeScript type and the runtime validation. Wire each input with `form.register('fieldName')` and render its error with `<FormMessage>{form.formState.errors.fieldName?.message}</FormMessage>`.
 
@@ -167,7 +167,7 @@ Use `Form` layout primitives when you need:
 - Semantic fieldset grouping for related fields (e.g., "Billing address")
 - A uniform way to attach labels, hints, and errors to any input type
 
-**vs. using Input directly:** The `Input` component is self-contained — it has its own label, hint, and error built in. Use `Form` primitives when you need to compose with non-Input controls (e.g., `Select`, `Checkbox`, `Switch`, `Textarea`, custom pickers), or when you want explicit control over the label-input-message layout without coupling it to one component.
+**vs. using Input directly:** The `Input` component is self-contained: it has its own label, hint, and error built in. Use `Form` primitives when you need to compose with non-Input controls (e.g., `Select`, `Checkbox`, `Switch`, `Textarea`, custom pickers), or when you want explicit control over the label-input-message layout without coupling it to one component.
 
 ---
 
@@ -211,10 +211,10 @@ Use `Form` layout primitives when you need:
 
 ## Accessibility
 
-- `FormSection` renders a `<fieldset>` with a `<legend>` — this is the correct semantic pattern for grouping related controls. Screen readers announce the legend text when entering the group.
-- `FormLabel` renders a `<label>` — always provide `htmlFor` matching the input's `id` to ensure programmatic association.
+- `FormSection` renders a `<fieldset>` with a `<legend>`: this is the correct semantic pattern for grouping related controls. Screen readers announce the legend text when entering the group.
+- `FormLabel` renders a `<label>`; always provide `htmlFor` matching the input's `id` to ensure programmatic association.
 - `FormLabel required` appends a visual `*` that is `aria-hidden="true"`. To communicate required state to assistive technology, add `aria-required="true"` (or `required`) directly on the input.
-- `FormMessage` uses `role="alert"`, which causes screen readers to announce the message when it mounts. Only render `FormMessage` when there is an actual error — conditional rendering via falsy children handles this automatically.
+- `FormMessage` uses `role="alert"`, which causes screen readers to announce the message when it mounts. Only render `FormMessage` when there is an actual error: conditional rendering via falsy children handles this automatically.
 - `FormDescription` should be linked to its input via `aria-describedby` for assistive technology to surface the hint: `<Input aria-describedby="username-hint" />` with `<FormDescription id="username-hint">...</FormDescription>`.
 
 ---
@@ -235,5 +235,5 @@ Use `Form` layout primitives when you need:
 npx dafink-ui add form
 ```
 
-npm dependencies: none for the layout primitives (`Form`, `FormSection`, `FormField`, `FormLabel`, `FormControl`, `FormDescription`, `FormMessage`). Using `useZodForm` requires `zod`, `react-hook-form`, and `@hookform/resolvers` — installed automatically by the CLI, or via `npm install zod react-hook-form @hookform/resolvers` if adding validation to a project that already has the layout primitives.
+npm dependencies: none for the layout primitives (`Form`, `FormSection`, `FormField`, `FormLabel`, `FormControl`, `FormDescription`, `FormMessage`). Using `useZodForm` requires `zod`, `react-hook-form`, and `@hookform/resolvers`, installed automatically by the CLI, or via `npm install zod react-hook-form @hookform/resolvers` if adding validation to a project that already has the layout primitives.
 No registry dependencies.

@@ -1,6 +1,6 @@
 # Graph
 
-A force-directed node/edge graph rendered in SVG with draggable nodes, pan/zoom, hover-highlighting of connected edges, and full keyboard accessibility. Uses d3-force for physics simulation (run to completion synchronously — no animation).
+A force-directed node/edge graph rendered in SVG with draggable nodes, pan/zoom, hover-highlighting of connected edges, and full keyboard accessibility. Uses d3-force for physics simulation (run to completion synchronously, with no animation).
 
 ## Installation
 
@@ -16,12 +16,12 @@ npm dependency: `d3-force`. No registry dependencies.
 
 | Prop           | Type                          | Default | Description                                                              |
 |----------------|-------------------------------|---------|--------------------------------------------------------------------------|
-| `nodes`        | `GraphNode[]`                 | —       | Required. Array of `{ id, label, group? }` objects.                      |
-| `edges`        | `GraphEdge[]`                 | —       | Required. Array of `{ source, target }` objects referencing node ids.    |
+| `nodes`        | `GraphNode[]`                 | required | Required. Array of `{ id, label, group? }` objects.                    |
+| `edges`        | `GraphEdge[]`                 | required | Required. Array of `{ source, target }` objects referencing node ids.  |
 | `width`        | `number`                      | `600`   | SVG width in pixels.                                                     |
 | `height`       | `number`                      | `400`   | SVG height in pixels.                                                    |
 | `className`    | `string`                      | `""`    | Additional classes on the root wrapper div.                              |
-| `onNodeSelect` | `(node: GraphNode) => void`   | —       | Called when a node is selected via click or keyboard Enter/Space.        |
+| `onNodeSelect` | `(node: GraphNode) => void`   | n/a     | Called when a node is selected via click or keyboard Enter/Space.        |
 
 ### GraphNode
 
@@ -42,12 +42,12 @@ npm dependency: `d3-force`. No registry dependencies.
 
 ## Behavior
 
-- **Simulation** — d3-force runs synchronously at mount (300 ticks). Positions are stored in React state; d3 is never used for DOM manipulation.
-- **Dragging** — pointer-capture drag on individual nodes updates their position in state. The simulation is not re-run after drag.
-- **Pan** — pointer-down on the SVG background starts a pan; moving the pointer shifts the viewport transform.
-- **Zoom** — mouse wheel zooms (clamped 0.2–4×). Keyboard `+`/`=` zooms in, `-` zooms out, `0` resets.
-- **Hover highlight** — hovering a node highlights its connected edges in brand color and dims all other edges.
-- **Labels** — 11px text labels are shown below each node when the graph has ≤50 nodes.
+- **Simulation**: d3-force runs synchronously at mount (300 ticks). Positions are stored in React state; d3 is never used for DOM manipulation.
+- **Dragging**: pointer-capture drag on individual nodes updates their position in state. The simulation is not re-run after drag.
+- **Pan**: pointer-down on the SVG background starts a pan; moving the pointer shifts the viewport transform.
+- **Zoom**: mouse wheel zooms (clamped 0.2–4×). Keyboard `+`/`=` zooms in, `-` zooms out, `0` resets.
+- **Hover highlight**: hovering a node highlights its connected edges in brand color and dims all other edges.
+- **Labels**: 11px text labels are shown below each node when the graph has ≤50 nodes.
 
 ---
 
@@ -73,7 +73,7 @@ npm dependency: `d3-force`. No registry dependencies.
 | `<svg>`           | `role="application"`, `aria-label="Graph"`     |
 | Node container    | `role="list"`, `aria-label="Nodes"`            |
 | Each node `<g>`   | `role="listitem"`, `aria-label={node.label}`, `aria-pressed={isSelected}` |
-| Live region       | `role="status"`, `aria-live="polite"` — announces selection and initial node/edge count |
+| Live region       | `role="status"`, `aria-live="polite"`: announces selection and initial node/edge count |
 
 ### Keyboard model
 
@@ -92,16 +92,16 @@ Roving tabindex: only the currently selected node has `tabIndex={0}`; all others
 
 ### Motion
 
-Simulation ticks run synchronously — there is no DOM animation to suppress. The component fully respects `prefers-reduced-motion` by design.
+Simulation ticks run synchronously, so there is no DOM animation to suppress. The component fully respects `prefers-reduced-motion` by design.
 
 ---
 
 ## When to use
 
-- **Knowledge graphs** — visualise relationships between concepts, notes, or entities (Obsidian-style).
-- **Dependency graphs** — show package or module dependencies.
-- **Network diagrams** — illustrate connections between services, people, or systems.
-- **Exploration interfaces** — let users drag, pan, and zoom to explore complex relationship data.
+- **Knowledge graphs**: visualise relationships between concepts, notes, or entities (Obsidian-style).
+- **Dependency graphs**: show package or module dependencies.
+- **Network diagrams**: illustrate connections between services, people, or systems.
+- **Exploration interfaces**: let users drag, pan, and zoom to explore complex relationship data.
 
 ---
 

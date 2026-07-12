@@ -68,7 +68,7 @@ describe('Popover', () =>
 		);
 		openPopover();
 		const event = fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Tab' });
-		expect(event).toBe(true); // default not prevented — Tab moves on naturally
+		expect(event).toBe(true); // default not prevented: Tab moves on naturally
 	});
 
 	it('closes and returns focus to the trigger on Escape', () =>

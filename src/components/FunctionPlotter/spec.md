@@ -33,7 +33,7 @@ Equations are plain JavaScript expressions with `x` as the variable. Supported s
 | `x^2`       | `x**2`         |
 | `2x`        | `2*x`          |
 | `x3`        | `x*3`          |
-| `sin(x)`    | `Math.sin(x)` — not natively supported; use `Math.sin(x)` |
+| `sin(x)`    | `Math.sin(x)`: not natively supported; use `Math.sin(x)` |
 
 Expressions are evaluated with `new Function` in strict mode. If parsing or evaluation at `x=0` throws, the input is marked invalid (`aria-invalid="true"`, red border). The curve for that equation is not drawn.
 
@@ -93,12 +93,12 @@ These are intentional plot colors, not design tokens.
 
 ## Canvas Rendering
 
-1. **Background** — filled with `--color-surface`.
-2. **Grid** — "nice" step computed as the smallest value in `[0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]` where `step × scale ≥ 60px`. Grid lines use `--color-surface-border`.
-3. **Axes** — x-axis (y=0) and y-axis (x=0) rendered in `--color-text-subtle`, lineWidth 1.5.
-4. **Tick labels** — at each grid line, numeric label in `10px system-ui`. Labels within 20px of the origin are skipped to avoid collision. Color: `--color-text-muted`.
-5. **Curves** — sampled at every pixel column. `NaN`, `Infinity`, or `|screenY| > height × 10` lifts the pen. lineWidth 2, lineCap/lineJoin `round`.
-6. **DPR scaling** — canvas physical pixels are scaled by `devicePixelRatio`. The context is pre-scaled so all draw calls use CSS pixel coordinates.
+1. **Background**: filled with `--color-surface`.
+2. **Grid**: "nice" step computed as the smallest value in `[0.25, 0.5, 1, 2, 5, 10, 25, 50, 100]` where `step × scale ≥ 60px`. Grid lines use `--color-surface-border`.
+3. **Axes**: x-axis (y=0) and y-axis (x=0) rendered in `--color-text-subtle`, lineWidth 1.5.
+4. **Tick labels**: at each grid line, numeric label in `10px system-ui`. Labels within 20px of the origin are skipped to avoid collision. Color: `--color-text-muted`.
+5. **Curves**: sampled at every pixel column. `NaN`, `Infinity`, or `|screenY| > height × 10` lifts the pen. lineWidth 2, lineCap/lineJoin `round`.
+6. **DPR scaling**: canvas physical pixels are scaled by `devicePixelRatio`. The context is pre-scaled so all draw calls use CSS pixel coordinates.
 
 ---
 
@@ -150,6 +150,6 @@ Invalid equation input: `border-danger ring-danger-ring`.
 
 ## When to Use
 
-Use `FunctionPlotter` when you need an exploratory mathematical visualization embedded in a UI — education tools, data exploration pages, documentation for numerical functions, or any context where end users benefit from interactively graphing equations without leaving the application.
+Use `FunctionPlotter` when you need an exploratory mathematical visualization embedded in a UI: education tools, data exploration pages, documentation for numerical functions, or any context where end users benefit from interactively graphing equations without leaving the application.
 
-Do not use it to display static charts or non-mathematical data — reach for the `LineChart` or `AreaChart` components instead.
+Do not use it to display static charts or non-mathematical data; reach for the `LineChart` or `AreaChart` components instead.

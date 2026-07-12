@@ -14,7 +14,7 @@ No npm dependencies. No registry dependencies.
 
 | Prop          | Type                              | Default       | Description                                          |
 |---------------|-----------------------------------|---------------|------------------------------------------------------|
-| `options`     | `SelectOption[]`                  | —             | Array of `{ value, label }` objects.                 |
+| `options`     | `SelectOption[]`                  | required      | Array of `{ value, label }` objects.                 |
 | `value`       | `string`                          | `undefined`   | Controlled selected value.                           |
 | `onChange`    | `(value: string) => void`         | `undefined`   | Called with the new value when a selection is made.  |
 | `placeholder` | `string`                          | `'Select…'`   | Text shown when no value is selected.                |
@@ -36,12 +36,12 @@ No npm dependencies. No registry dependencies.
 | `End`          | Jump to last option                                 |
 | `Escape`       | Close, return focus to trigger                      |
 | `Tab`          | Close, move focus to next page element              |
-| Printable char | Typeahead — moves to next option whose label starts with accumulated characters (resets after 500 ms) |
+| Printable char | Typeahead: moves to next option whose label starts with accumulated characters (resets after 500 ms) |
 
 ## Accessibility
 
 - **Focus on open**: Focus moves to the listbox (`tabIndex={-1}`, focused programmatically).
-- **Focus trap**: Not trapped — Tab closes the dropdown and moves focus naturally.
+- **Focus trap**: Not trapped; Tab closes the dropdown and moves focus naturally.
 - **Escape**: Closes and returns focus to the trigger button.
 - **Tab**: Closes without returning focus to trigger; lets Tab land on the next page element.
 - **ARIA roles**: trigger has `role="button"`, `aria-haspopup="listbox"`, `aria-expanded`, `aria-controls`. List has `role="listbox"`, `aria-activedescendant`. Options have `role="option"`, `aria-selected`.
@@ -54,9 +54,9 @@ No npm dependencies. No registry dependencies.
 | Default      | `border-input-border bg-input`            | `text-text-muted`                   |
 | Hover        | `hover:border-brand`                      | `hover:bg-surface-hover hover:text-text` |
 | Focus-visible | `focus-visible:ring-2 ring-brand-ring`   | N/A (keyboard via `activeIndex`)    |
-| Active (kbd) | —                                         | `bg-surface-active text-text`       |
-| Error        | `border-danger`                           | —                                   |
-| Disabled     | `opacity-50 cursor-not-allowed`           | —                                   |
+| Active (kbd) | N/A                                        | `bg-surface-active text-text`       |
+| Error        | `border-danger`                           | N/A                                  |
+| Disabled     | `opacity-50 cursor-not-allowed`           | N/A                                  |
 
 ## Animation
 

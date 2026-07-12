@@ -50,7 +50,7 @@ const FAQS = [
 	{
 		value: 'switch-plans',
 		question: 'Can I switch plans later?',
-		answer: 'Yes — upgrade or downgrade at any time. Changes are prorated so you only pay for what you use.',
+		answer: 'Yes, upgrade or downgrade at any time. Changes are prorated so you only pay for what you use.',
 	},
 	{
 		value: 'billing-cycle',
@@ -70,7 +70,7 @@ const FAQS = [
 	{
 		value: 'enterprise',
 		question: 'Do you offer custom Enterprise pricing?',
-		answer: 'Yes — contact our sales team for volume discounts, custom contracts, and dedicated onboarding.',
+		answer: 'Yes, contact our sales team for volume discounts, custom contracts, and dedicated onboarding.',
 	},
 ];
 

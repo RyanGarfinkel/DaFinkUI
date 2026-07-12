@@ -15,7 +15,7 @@ export const useSidebarCollapsed = () => useContext(SidebarCollapsedContext);
 export type SidebarTogglePosition = 'top' | 'middle' | 'bottom';
 
 const TOGGLE_POSITION_CLASSES: Record<SidebarTogglePosition, string> = {
-	// Centers the (h-6) toggle on the bottom edge of a standard h-14 (56px) TopNav,
+	// Centers the (h-6) toggle on the bottom edge of a standard h-14 (56px) MenuBar,
 	// so it sits right at the intersection of the sidebar's and top bar's borders.
 	top:    'top-11',
 	middle: 'top-1/2 -translate-y-1/2',
@@ -69,7 +69,7 @@ export const Sidebar = (
             sidebarRef.current.querySelectorAll<HTMLAnchorElement>('a[href]')
         );
         // When more than one link shares aria-current (e.g. a parent "All X" link
-        // plus the specific active child), prefer the most specific — last in DOM order.
+        // plus the specific active child), prefer the most specific: last in DOM order.
         const current = links.filter(l => l.getAttribute('aria-current') === 'page');
         const rover   = current[current.length - 1] ?? links[0];
         links.forEach(l => { l.tabIndex = l === rover ? 0 : -1; });
@@ -88,7 +88,7 @@ export const Sidebar = (
 
         if(!active)
         {
-            // Nothing currently active (or the active link is hidden — e.g. an
+            // Nothing currently active (or the active link is hidden, e.g. an
             // icon-less SidebarLink is unmounted while collapsed). Hide the
             // indicator instead of leaving it at a stale position.
             indicator.style.opacity = '0';
@@ -97,19 +97,28 @@ export const Sidebar = (
 
         indicator.style.opacity = '1';
 
+        // Measured via getBoundingClientRect rather than offsetTop: a SidebarLink
+        // with a trailing `action` wraps its <a> in an extra positioned container,
+        // which would otherwise become the anchor's offsetParent and throw off
+        // offsetTop. Rect math stays correct regardless of intermediate wrappers.
+        const containerRect = (indicator.offsetParent as HTMLElement ?? sidebar).getBoundingClientRect();
+        const activeRect     = active.getBoundingClientRect();
+        const top            = activeRect.top - containerRect.top;
+        const height         = activeRect.height;
+
         if(!initialized.current)
         {
             indicator.style.transition = 'none';
-            indicator.style.top        = `${active.offsetTop}px`;
-            indicator.style.height     = `${active.offsetHeight}px`;
+            indicator.style.top        = `${top}px`;
+            indicator.style.height     = `${height}px`;
             indicator.getBoundingClientRect();
             indicator.style.transition = '';
             initialized.current        = true;
         }
         else
         {
-            indicator.style.top    = `${active.offsetTop}px`;
-            indicator.style.height = `${active.offsetHeight}px`;
+            indicator.style.top    = `${top}px`;
+            indicator.style.height = `${height}px`;
         }
     }, [pathname, isCollapsed]);
 
@@ -160,7 +169,7 @@ export const Sidebar = (
                     aria-expanded={!isCollapsed}
                     aria-label={isCollapsed ? 'Expand navigation' : 'Collapse navigation'}
                     className={[
-                        // z-[60]: higher than a typical fixed TopNav (z-50), so the button
+                        // z-[60]: higher than a typical fixed MenuBar (z-50), so the button
                         // stays visible even when togglePosition="top" straddles that border too.
                         'absolute -right-3 z-[60] flex h-6 w-6 items-center justify-center rounded-full border-[length:var(--border-width)] border-surface-border bg-surface text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
                         TOGGLE_POSITION_CLASSES[togglePosition],
@@ -186,7 +195,7 @@ export const Sidebar = (
             <div className='flex h-full flex-col overflow-hidden'>
                 {headerChild && (
                     // pt-5 + pb-4 + a ~20px content row lands the border at ~56px,
-                    // matching a standard h-14 TopNav so the two border lines align.
+                    // matching a standard h-14 MenuBar so the two border lines align.
                     <div className='shrink-0 border-b-[length:var(--border-width)] border-surface-border px-3 pt-5 pb-4'>
                         {headerChild}
                     </div>
@@ -196,7 +205,7 @@ export const Sidebar = (
                     wrapperClassName='flex-1 min-h-0'
                     className={[
                         // h-full: the outer wrapper (wrapperClassName) is the actual flex item
-                        // that gets constrained to the available space — this inner scrollable
+                        // that gets constrained to the available space; this inner scrollable
                         // element is just a plain block child of it, so it needs h-full explicitly
                         // to fill that constrained height rather than growing to its content size.
                         //
@@ -215,7 +224,7 @@ export const Sidebar = (
                         ref={indicatorRef}
                         aria-hidden='true'
                         // Starts hidden via the (static, never React-toggled) opacity-0 class.
-                        // The position effect below sets el.style.opacity imperatively —
+                        // The position effect below sets el.style.opacity imperatively:
                         // it must never appear in this JSX style/className as conditional
                         // state, or React's reconciliation would fight the imperative value.
                         className='absolute inset-x-3 rounded-[var(--radius)] bg-surface-active opacity-0 pointer-events-none motion-safe:transition-[top,height,opacity] motion-safe:duration-200 motion-safe:ease-[var(--ease-standard)]'
@@ -291,13 +300,15 @@ export interface SidebarLinkProps extends LinkProps
 {
 	isActive?:  boolean;
 	icon?:      ReactNode;
+	action?:    ReactNode;
 	className?: string;
 	children?:  ReactNode;
 }
 
-export const SidebarLink = ({ isActive = false, icon, className = '', children, ...props }: SidebarLinkProps) => {
+export const SidebarLink = ({ isActive = false, icon, action, className = '', children, ...props }: SidebarLinkProps) => {
 	const collapsed  = useSidebarCollapsed();
 	const hideLabel  = collapsed && Boolean(icon);
+	const showAction = Boolean(action) && !hideLabel;
 
 	if(collapsed && !icon) return null;
 
@@ -310,6 +321,7 @@ export const SidebarLink = ({ isActive = false, icon, className = '', children, 
 				'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 				'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 				hideLabel ? 'justify-center' : '',
+				showAction ? 'pr-9' : '',
 				isActive
 					? 'text-text font-medium'
 					: 'text-text-muted hover:bg-surface-hover hover:text-text',
@@ -321,7 +333,23 @@ export const SidebarLink = ({ isActive = false, icon, className = '', children, 
 		</Link>
 	);
 
-	return hideLabel ? <Tooltip content={children} side='right' className='w-full'>{link}</Tooltip> : link;
+	if(hideLabel) return <Tooltip content={children} side='right' className='w-full'>{link}</Tooltip>;
+
+	// `action` renders as a sibling of the <a>, never a descendant: nesting a
+	// button inside an anchor is invalid HTML and breaks keyboard/screen-reader
+	// behavior. It's overlaid on top of the link via absolute positioning instead,
+	// so visually it still reads as one pill while staying two separate,
+	// independently-focusable controls — clicking it can't trigger navigation.
+	if(!showAction) return link;
+
+	return (
+		<div className='relative flex w-full items-center'>
+			{link}
+			<span className='absolute right-1.5 top-1/2 z-20 -translate-y-1/2 opacity-0 motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)] group-hover:opacity-100 focus-within:opacity-100 has-[:focus-visible]:opacity-100 [div:hover>&]:opacity-100'>
+				{action}
+			</span>
+		</div>
+	);
 };
 
 // ─── SidebarDivider ───────────────────────────────────────────────────────────

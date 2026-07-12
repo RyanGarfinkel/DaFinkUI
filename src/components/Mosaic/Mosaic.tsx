@@ -89,9 +89,8 @@ const hasOverlaps = (layout: MosaicTileLayout[]): boolean =>
 // Finds the nearest column (by minimum shift) where the displaced tile fits in its
 // current row without touching the active tile's new footprint or any other tile.
 const findDisplacementPos = (
-	layout:        MosaicTileLayout[],
+	others:        MosaicTileLayout[],
 	displaced:     MosaicTileLayout,
-	activeId:      string,
 	targetCol:     number,
 	targetRow:     number,
 	activeColSpan: number,
@@ -99,8 +98,6 @@ const findDisplacementPos = (
 	cols:          number,
 ): { col: number; row: number } | null =>
 {
-	const others = layout.filter(t => t.id !== activeId && t.id !== displaced.id);
-
 	const fits = (c: number): boolean =>
 	{
 		if(c < 1 || c + displaced.colSpan - 1 > cols) return false;
@@ -128,12 +125,53 @@ const findDisplacementPos = (
 	return bestCol === -1 ? null : { col: bestCol, row: displaced.row };
 }
 
+// Vertical counterpart to findDisplacementPos: finds the nearest row (keeping the
+// displaced tile's column) that clears the active tile's new footprint and every
+// other tile, so a tile dragged up/down onto occupied rows pushes them out of the way.
+const findDisplacementPosVertical = (
+	others:        MosaicTileLayout[],
+	displaced:     MosaicTileLayout,
+	targetCol:     number,
+	targetRow:     number,
+	activeColSpan: number,
+	activeRowSpan: number,
+	rows:          number,
+): { col: number; row: number } | null =>
+{
+	const fits = (r: number): boolean =>
+	{
+		if(r < 1 || r + displaced.rowSpan - 1 > rows) return false;
+		const clearActive = r + displaced.rowSpan <= targetRow ||
+		                    targetRow + activeRowSpan <= r ||
+		                    displaced.col + displaced.colSpan <= targetCol ||
+		                    targetCol + activeColSpan <= displaced.col;
+		if(!clearActive) return false;
+		return others.every(t =>
+			displaced.col + displaced.colSpan <= t.col || t.col + t.colSpan <= displaced.col ||
+			r + displaced.rowSpan <= t.row || t.row + t.rowSpan <= r
+		);
+	};
+
+	let bestRow  = -1;
+	let bestDist = Infinity;
+
+	for(let r = 1; r <= rows - displaced.rowSpan + 1; r++)
+	{
+		if(!fits(r)) continue;
+		const dist = Math.abs(r - displaced.row);
+		if(dist < bestDist) { bestDist = dist; bestRow = r; }
+	}
+
+	return bestRow === -1 ? null : { col: displaced.col, row: bestRow };
+}
+
 const computePreview = (
 	layout:   MosaicTileLayout[],
 	activeId: string,
 	col:      number,
 	row:      number,
 	cols:     number,
+	rows:     number,
 ): MosaicTileLayout[] | null =>
 {
 	const active = layout.find(t => t.id === activeId);
@@ -145,14 +183,36 @@ const computePreview = (
 	const updates = new Map<string, { col: number; row: number }>();
 	updates.set(activeId, { col, row });
 
-	if(overlapping.length === 1)
+	if(overlapping.length >= 1)
 	{
-		const displaced = overlapping[0];
-		const newPos    = findDisplacementPos(
-			layout, displaced, activeId, col, row, active.colSpan, active.rowSpan, cols
-		);
-		if(!newPos) return null;
-		updates.set(displaced.id, newPos);
+		const others = layout.filter(t => t.id !== activeId && !overlapping.some(o => o.id === t.id));
+
+		// Shift every displaced tile along whichever axis the active tile is actually
+		// moving on first (a vertical drag should push tiles down/up, not sideways),
+		// falling back to the other axis if that direction can't place them all.
+		const movingVertically = row !== active.row;
+		const primary    = movingVertically ? findDisplacementPosVertical : findDisplacementPos;
+		const primaryArg = movingVertically ? rows : cols;
+		const fallback    = movingVertically ? findDisplacementPos : findDisplacementPosVertical;
+		const fallbackArg = movingVertically ? cols : rows;
+
+		const place = (finder: typeof primary, arg: number): boolean =>
+		{
+			for(const d of overlapping)
+			{
+				const pos = finder(others, d, col, row, active.colSpan, active.rowSpan, arg);
+				if(!pos) return false;
+				updates.set(d.id, pos);
+			}
+			return true;
+		};
+
+		if(!place(primary, primaryArg))
+		{
+			updates.clear();
+			updates.set(activeId, { col, row });
+			if(!place(fallback, fallbackArg)) return null;
+		}
 	}
 
 	const result = layout.map(t =>
@@ -165,7 +225,7 @@ const computePreview = (
 }
 
 // Scans every grid cell for the closest one that yields a valid placement (empty,
-// or a clean single-tile swap) and snaps to it — so the ghost never lingers over a
+// or a clean single-tile swap) and snaps to it, so the ghost never lingers over a
 // dead zone (e.g. a spot overlapping two tiles) waiting for the pointer to leave it.
 const findBestCell = (
 	layout:    MosaicTileLayout[],
@@ -197,7 +257,7 @@ const findBestCell = (
 		for(let col = 1; col <= cols - active.colSpan + 1; col++)
 		{
 			if(col === active.col && row === active.row) continue;
-			if(!computePreview(layout, activeId, col, row, cols)) continue;
+			if(!computePreview(layout, activeId, col, row, cols, rows)) continue;
 
 			const dist = distSq(col, row);
 			if(dist < bestDist) { bestDist = dist; bestCol = col; bestRow = row; }
@@ -266,7 +326,11 @@ const SizePicker = (
 					const c         = (i % pickerCols) + 1;
 					const r         = Math.floor(i / pickerCols) + 1;
 					const isValid   = c >= minCol && r >= minRow;
-					const isLit     = isValid && c <= hoverCol && r <= hoverRow;
+					// Lit state mirrors the full hovered rectangle (1..hoverCol, 1..hoverRow), not
+					// just the individually-selectable cells — otherwise columns/rows below the min
+					// span never light up and the highlighted block looks smaller than the "W × H"
+					// label below it (e.g. label reads "3 × 2" but only 2 columns glow).
+					const isLit     = c <= hoverCol && r <= hoverRow;
 					const isCurrent = c === currentCol && r === currentRow;
 
 					return (
@@ -360,7 +424,7 @@ export const Mosaic = (
 	useEffect(() => { gapRef.current       = gap;       }, [gap]);
 	useEffect(() => { layoutRef.current    = layout;    }, [layout]);
 
-	// Always defined — explicit prop or derived from current layout.
+	// Always defined: explicit prop or derived from current layout.
 	const effectiveRows = effectiveRowCount(rows, layout);
 
 	const setPreviewLayout = useCallback((next: MosaicTileLayout[] | null) =>
@@ -391,7 +455,7 @@ export const Mosaic = (
 
 	// Positions the DragOverlay ghost at the resolved target cell (the nearest cell
 	// that yields a valid placement) rather than directly under the pointer or the
-	// raw nearest grid cell — so the ghost always sits somewhere a drop will land.
+	// raw nearest grid cell, so the ghost always sits somewhere a drop will land.
 	const snapModifier = useCallback((args: {
 		draggingNodeRect: { left: number; top: number } | null;
 		transform:        { x: number; y: number; scaleX: number; scaleY: number };
@@ -454,7 +518,7 @@ export const Mosaic = (
 			return;
 		}
 
-		setPreviewLayout(computePreview(layoutRef.current, String(active.id), best.col, best.row, c));
+		setPreviewLayout(computePreview(layoutRef.current, String(active.id), best.col, best.row, c, effRows));
 	}, [setPreviewLayout]);
 
 	const onDragEnd = useCallback(() =>

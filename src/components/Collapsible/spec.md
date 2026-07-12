@@ -1,6 +1,6 @@
 # Collapsible
 
-A single-item show/hide component. Use it when you need to toggle one section of content — a filter panel, a "show more" block, a settings group. For multiple togglable sections, use Accordion instead.
+A single-item show/hide component. Use it when you need to toggle one section of content: a filter panel, a "show more" block, a settings group. For multiple togglable sections, use Accordion instead.
 
 ---
 
@@ -15,7 +15,7 @@ A single-item show/hide component. Use it when you need to toggle one section of
 | `onOpenChange` | `(open: boolean) => void` | `undefined` | Called when the open state changes. Receives the new value. |
 | `disabled` | `boolean` | `false` | Disables the trigger and prevents toggling. |
 | `className` | `string` | `""` | Additional classes on the root div. |
-| `children` | `ReactNode` | — | Must include `CollapsibleTrigger` and `CollapsibleContent`. |
+| `children` | `ReactNode` | None | Must include `CollapsibleTrigger` and `CollapsibleContent`. |
 
 ### CollapsibleTrigger
 
@@ -24,7 +24,7 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>`. Renders a full-width button w
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `className` | `string` | `""` | Additional classes on the button element. |
-| `children` | `ReactNode` | — | Trigger label content. |
+| `children` | `ReactNode` | None | Trigger label content. |
 
 ### CollapsibleContent
 
@@ -33,13 +33,13 @@ Extends `HTMLAttributes<HTMLDivElement>`. Animates open and closed using `grid-t
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `className` | `string` | `""` | Additional classes on the inner content wrapper. |
-| `children` | `ReactNode` | — | Content shown when open. |
+| `children` | `ReactNode` | None | Content shown when open. |
 
 ---
 
 ## Variants
 
-None — Collapsible is unstyled at the container level. Apply your own border, background, or padding via `className`.
+None: Collapsible is unstyled at the container level. Apply your own border, background, or padding via `className`.
 
 ---
 
@@ -50,16 +50,16 @@ None — Collapsible is unstyled at the container level. Apply your own border, 
 | Default | `text-text`, no background |
 | Hover | `hover:text-text-muted` |
 | Focus-visible | `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring` |
-| Disabled | `opacity-40`, `pointer-events-none` — no hover or focus-visible styles |
+| Disabled | `opacity-40`, `pointer-events-none`: no hover or focus-visible styles |
 
 ---
 
 ## Accessibility
 
 - `CollapsibleTrigger` sets `aria-expanded` on the `<button>` to reflect the current open state.
-- `CollapsibleContent` sets `role="region"` and `aria-hidden` — `true` when closed, `false` when open.
+- `CollapsibleContent` sets `role="region"` and `aria-hidden`: `true` when closed, `false` when open.
 - The root `<div>` receives `data-state="open"` or `data-state="closed"` for CSS targeting.
-- Keyboard: trigger is a native `<button>` — reachable by Tab, activated by Enter or Space.
+- Keyboard: trigger is a native `<button>`: reachable by Tab, activated by Enter or Space.
 - Disabled state is set via the native `disabled` attribute on the button.
 
 ---

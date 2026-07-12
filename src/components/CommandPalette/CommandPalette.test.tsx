@@ -229,7 +229,7 @@ describe('CommandPalette', () =>
 		const input = await screen.findByRole('combobox');
 		input.focus();
 
-		// 4 presses cycles through all 3 enabled items and wraps — disabled item never receives focus
+		// 4 presses cycles through all 3 enabled items and wraps; disabled item never receives focus
 		await userEvent.keyboard('{ArrowDown}{ArrowDown}{ArrowDown}{ArrowDown}');
 
 		await waitFor(() =>

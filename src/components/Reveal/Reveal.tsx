@@ -49,7 +49,7 @@ type RevealStatus = 'idle' | 'hidden' | 'shown';
 /**
  * Scroll-triggered entrance animation. Progressive enhancement: content is
  * rendered fully visible (`idle`) on the server, without JS, when
- * IntersectionObserver is unavailable, and under prefers-reduced-motion — it
+ * IntersectionObserver is unavailable, and under prefers-reduced-motion; it
  * is only hidden once the observer is confirmed to be running.
  */
 export const Reveal = (

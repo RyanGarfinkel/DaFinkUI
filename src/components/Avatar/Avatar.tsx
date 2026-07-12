@@ -10,7 +10,7 @@ export type AvatarShape = 'circle' | 'square';
 interface AvatarBaseProps extends HTMLAttributes<HTMLSpanElement> {
 	/** Full name used to derive initials for the fallback (e.g. "Ada Lovelace" → "AL"). */
 	name?:      string;
-	/** Explicit fallback text — overrides initials derived from `name`. */
+	/** Explicit fallback text: overrides initials derived from `name`. */
 	fallback?:  string;
 	size?:      AvatarSize;
 	shape?:     AvatarShape;
@@ -19,7 +19,7 @@ interface AvatarBaseProps extends HTMLAttributes<HTMLSpanElement> {
 
 interface AvatarWithImageProps extends AvatarBaseProps {
 	src: string;
-	/** Required whenever `src` is set — describes the person, not the picture. */
+	/** Required whenever `src` is set: describes the person, not the picture. */
 	alt: string;
 }
 
@@ -109,7 +109,7 @@ export const Avatar = (
 	if (showImage) {
 		return (
 			<span {...props} className={rootClasses}>
-				{/* Native img is intentional — copy-paste library components must not depend on next/image. */}
+				{/* Native img is intentional: library components must not depend on next/image. */}
 				{/* eslint-disable-next-line @next/next/no-img-element */}
 				<img
 					src={src}
@@ -121,7 +121,7 @@ export const Avatar = (
 		);
 	}
 
-	// Fallback: initials (or glyph) are decorative — the accessible name lives
+	// Fallback: initials (or glyph) are decorative; the accessible name lives
 	// on the root via role="img" + aria-label. With no name at all, the avatar
 	// is purely decorative and hidden from assistive tech.
 	return (

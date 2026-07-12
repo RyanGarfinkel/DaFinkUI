@@ -51,7 +51,7 @@ export const AuthFormMagicLink = () => {
 			<CardHeader className='flex flex-col gap-1'>
 				<h3 className='text-xl font-semibold text-text'>{sent ? 'Check your inbox' : 'Sign in'}</h3>
 				<p className='text-sm text-text-muted'>
-					{sent ? 'We sent a magic link to your email.' : "Enter your email and we'll send you a link to sign in — no password needed."}
+					{sent ? 'We sent a magic link to your email.' : "Enter your email and we'll send you a link to sign in, no password needed."}
 				</p>
 			</CardHeader>
 			<CardContent>

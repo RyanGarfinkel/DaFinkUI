@@ -102,7 +102,7 @@ export const Attachment = (
 	const Glyph         = ICON_GLYPHS[resolvedIcon];
 	const meta          = [type, size].filter(Boolean).join(' · ');
 
-	// Images can preview themselves — their own href IS a valid <img> source.
+	// Images can preview themselves: their own href IS a valid <img> source.
 	// Anything else (a PDF, say) has no such shortcut: browsers can't render a
 	// PDF file as an <img>, so a real preview there requires an explicit
 	// `thumbnail` (e.g. a pre-rendered cover image of the first page).
@@ -147,7 +147,7 @@ export const Attachment = (
 					{content}
 				</a>
 			) : (
-				// No href means there is nothing to navigate to — render a real <button>
+				// No href means there is nothing to navigate to, so render a real <button>
 				// instead of a non-focusable <a> so the primary action stays keyboard
 				// reachable regardless.
 				<button type='button' title={title ?? name} onClick={onClick} className={primaryClasses} {...rest}>

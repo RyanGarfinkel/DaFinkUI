@@ -17,12 +17,12 @@ npx dafink-ui add code-editor
 
 | Prop          | Type                        | Default | Description                                                                                   |
 |---------------|-----------------------------|---------|-------------------------------------------------------------------------------------------------|
-| `value`       | `string`                    | —       | Required. The current code string.                                                              |
-| `onChange`    | `(value: string) => void`   | —       | Required. Fires with the updated value on every edit.                                           |
-| `extensions`  | `Extension[]`               | `[]`    | Extra CodeMirror extensions layered on top of the built-ins — e.g. a project-specific `autocompletion({ override: [...] })` call. |
-| `aria-label`  | `string`                    | —       | Accessible name for the editor region.                                                          |
+| `value`       | `string`                    | None    | Required. The current code string.                                                              |
+| `onChange`    | `(value: string) => void`   | None    | Required. Fires with the updated value on every edit.                                           |
+| `extensions`  | `Extension[]`               | `[]`    | Extra CodeMirror extensions layered on top of the built-ins, e.g. a project-specific `autocompletion({ override: [...] })` call. |
+| `aria-label`  | `string`                    | None    | Accessible name for the editor region.                                                          |
 | `className`   | `string`                    | `''`    | Additional Tailwind classes merged onto the root wrapper.                                       |
-| `minHeight`   | `string`                    | —       | CSS min-height for the editor surface (e.g. `'200px'`). Keeps the editor from collapsing to a single line on short content. |
+| `minHeight`   | `string`                    | None    | CSS min-height for the editor surface (e.g. `'200px'`). Keeps the editor from collapsing to a single line on short content. |
 
 ---
 
@@ -30,13 +30,13 @@ npx dafink-ui add code-editor
 
 | Behavior | Detail |
 |---|---|
-| Language | `javascript({ jsx: true })` — JSX/JS syntax highlighting always on |
+| Language | `javascript({ jsx: true })`: JSX/JS syntax highlighting always on |
 | Theme | Follows the document's `.dark` class via a `MutationObserver`; switches between CodeMirror's `light` and `dark` themes live |
 | Tab | Indents the current line (CodeMirror's `indentWithTab`, on by default) |
-| Tab (completion open) | Accepts the selected autocomplete suggestion instead of indenting — bound at `Prec.highest` so it intercepts before indentation, but falls through to indent when no completion is active |
-| Escape | Blurs the editor — the accessible way out of the editor now that Tab is repurposed for indentation, matching this repo's "Escape returns focus" overlay convention |
+| Tab (completion open) | Accepts the selected autocomplete suggestion instead of indenting: bound at `Prec.highest` so it intercepts before indentation, but falls through to indent when no completion is active |
+| Escape | Blurs the editor: the accessible way out of the editor now that Tab is repurposed for indentation, matching this repo's "Escape returns focus" overlay convention |
 
-Autocomplete itself is **not** built in — pass an `autocompletion({ override: [...] })` extension via the `extensions` prop with whatever completion sources the consumer needs (e.g. the Playground's registry-aware component/prop name completions). This keeps `CodeEditor` free of any domain-specific knowledge.
+Autocomplete itself is **not** built in; pass an `autocompletion({ override: [...] })` extension via the `extensions` prop with whatever completion sources the consumer needs (e.g. the Playground's registry-aware component/prop name completions). This keeps `CodeEditor` free of any domain-specific knowledge.
 
 ---
 
@@ -53,15 +53,15 @@ Autocomplete itself is **not** built in — pass an `autocompletion({ override: 
 ## Accessibility
 
 - The editor region carries `role="textbox"` and `aria-multiline="true"` (built into CodeMirror), plus whatever `aria-label` the consumer supplies.
-- **No keyboard trap:** although Tab is repurposed for indentation (and, when a completion is open, for accepting it), Escape always blurs the editor and returns focus to the surrounding page — consistent with WCAG 2.1.2 (No Keyboard Trap) and this repo's own overlay focus-return pattern.
+- **No keyboard trap:** although Tab is repurposed for indentation (and, when a completion is open, for accepting it), Escape always blurs the editor and returns focus to the surrounding page, consistent with WCAG 2.1.2 (No Keyboard Trap) and this repo's own overlay focus-return pattern.
 - Autocomplete popups (when the consumer supplies a source) are keyboard-navigable via CodeMirror's own `completionKeymap`: ArrowUp/ArrowDown move the selection, Enter or Tab accepts it, Escape closes the popup (and, since nothing is left open, a second Escape blurs the editor).
 
 ---
 
 ## When to use
 
-- An in-browser surface where a user types or edits code and expects the result to drive something live (a preview, a derived value) — the Design Skill Playground is the reference consumer.
-- Not for displaying static, non-editable code — use `CodeBlock` for that; `CodeEditor` pulls in CodeMirror's editing machinery, which is unnecessary weight for read-only snippets.
+- An in-browser surface where a user types or edits code and expects the result to drive something live (a preview, a derived value); the Design Skill Playground is the reference consumer.
+- Not for displaying static, non-editable code: use `CodeBlock` for that; `CodeEditor` pulls in CodeMirror's editing machinery, which is unnecessary weight for read-only snippets.
 
 ---
 

@@ -8,7 +8,7 @@ export interface MessageProps extends HTMLAttributes<HTMLDivElement>
 {
 	variant?: MessageVariant;
 	avatar?:  ReactNode;
-	/** Set false to render children without the bubble background/padding — for content that supplies its own chrome (an image, an AudioPlayer), so it isn't nested inside a second colored box. Alignment, max-width, and reaction placement are unaffected. */
+	/** Set false to render children without the bubble background/padding: for content that supplies its own chrome (an image, an AudioPlayer), so it isn't nested inside a second colored box. Alignment, max-width, and reaction placement are unaffected. */
 	bubble?:  boolean;
 	children: ReactNode;
 }
@@ -57,7 +57,7 @@ export const Message = ({ variant = 'received', avatar, bubble = true, className
 
 export interface MessageReactionsProps extends HTMLAttributes<HTMLDivElement>
 {
-	/** Maximum number of reaction chips shown before the rest collapse into a "+N" indicator — overlapped into a stack like AvatarGroup, rather than wrapping onto more rows. */
+	/** Maximum number of reaction chips shown before the rest collapse into a "+N" indicator: overlapped into a stack like AvatarGroup, rather than wrapping onto more rows. */
 	max?: number;
 }
 
@@ -99,13 +99,13 @@ export const MessageReactions = ({ className = '', children, max, 'aria-label': 
 
 interface MessageReactionSharedProps
 {
-	/** Decorative glyph — emoji string or icon node. Always hidden from the accessibility tree. */
+	/** Decorative glyph: emoji string or icon node. Always hidden from the accessibility tree. */
 	icon?:      ReactNode;
-	/** Visible text next to the icon — a count label, a footnote number, or a source name. */
+	/** Visible text next to the icon: a count label, a footnote number, or a source name. */
 	label?:     ReactNode;
 	/** Aggregate count for a tapback-style reaction (e.g. 3 people reacted). Drives the auto aria-label. */
 	count?:     number;
-	/** Whether the current user is included in this reaction — shown via border/fill, not color alone. */
+	/** Whether the current user is included in this reaction: shown via border/fill, not color alone. */
 	active?:    boolean;
 	className?: string;
 }

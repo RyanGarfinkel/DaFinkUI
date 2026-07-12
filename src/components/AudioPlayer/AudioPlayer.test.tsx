@@ -107,7 +107,7 @@ describe('AudioPlayer', () =>
 		expect(screen.getByRole('region').className).toContain('my-class');
 	});
 
-	it('applies a chromeless flex row for size="compact" — no padding, border, or background', () =>
+	it('applies a chromeless flex row for size="compact": no padding, border, or background', () =>
 	{
 		render(<AudioPlayer src='/test.mp3' size='compact' />);
 		const region = screen.getByRole('region');

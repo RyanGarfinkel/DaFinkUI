@@ -38,18 +38,18 @@ toast({ title: 'Saved', variant: 'success', duration: 4000 });
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| children | `ReactNode` | — | App content rendered inside the provider. |
+| children | `ReactNode` | - | App content rendered inside the provider. |
 | position | `'top-left' \| 'top-center' \| 'top-right' \| 'bottom-left' \| 'bottom-center' \| 'bottom-right'` | `'bottom-right'` | Where toasts appear on screen. |
 
 ### toast() options
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| title | `string` | — | Bold heading text. |
-| description | `string` | — | Body message rendered below the title. |
+| title | `string` | - | Bold heading text. |
+| description | `string` | - | Body message rendered below the title. |
 | variant | `'default' \| 'success' \| 'warning' \| 'danger'` | `'default'` | Color and icon style. |
 | duration | `number` | `4000` | Auto-dismiss delay in milliseconds. |
-| action | `{ label: string; onClick: () => void }` | — | Optional action button inside the toast. Activating it also dismisses the toast. |
+| action | `{ label: string; onClick: () => void }` | - | Optional action button inside the toast. Activating it also dismisses the toast. |
 
 ## Variants
 
@@ -71,7 +71,7 @@ toast({ title: 'Saved', variant: 'success', duration: 4000 });
 
 ## Accessibility
 
-- Each toast card has `role="status"`, `aria-live="polite"`, and `aria-atomic="true"` — screen readers announce it when it appears
+- Each toast card has `role="status"`, `aria-live="polite"`, and `aria-atomic="true"`; screen readers announce it when it appears
 - The dismiss button has `aria-label="Dismiss"`
 - The action button is a focusable `<button>` in normal tab order
 - The container region has `aria-label="Notifications"`
@@ -80,7 +80,7 @@ toast({ title: 'Saved', variant: 'success', duration: 4000 });
 
 - Use toast for transient feedback that does not require the user to take action (save confirmations, copy success).
 - Use `action` when a single obvious recovery step is available (e.g. "Undo").
-- Do not use toast for errors that block the user's workflow — use an Alert inline in the form or page instead.
+- Do not use toast for errors that block the user's workflow; use an Alert inline in the form or page instead.
 - Keep `title` short (3–5 words) and `description` optional. If you need more space, use a dialog.
 
 ## Installation

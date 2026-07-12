@@ -6,27 +6,27 @@ A styled range input for selecting a numeric value within a defined range. Built
 
 | Prop            | Type                         | Default | Description                                            |
 |-----------------|------------------------------|---------|--------------------------------------------------------|
-| value           | number                       | —       | Controlled current value.                              |
-| onValueChange   | (value: number) => void      | —       | Called with the new numeric value on change.           |
+| value           | number                       | -       | Controlled current value.                              |
+| onValueChange   | (value: number) => void      | -       | Called with the new numeric value on change.           |
 | min             | number                       | 0       | Minimum value.                                         |
 | max             | number                       | 100     | Maximum value.                                         |
 | step            | number                       | 1       | Increment between selectable values.                   |
 | disabled        | boolean                      | false   | Disables the slider.                                   |
-| label           | string                       | —       | Visible label above the track; links to input via id.  |
-| hint            | string                       | —       | Helper text below the track.                           |
+| label           | string                       | -       | Visible label above the track; links to input via id.  |
+| hint            | string                       | -       | Helper text below the track.                           |
 | showValue       | boolean                      | false   | Shows the current numeric value next to the label.     |
 | size            | 'default' \| 'sm'            | 'default' | 'sm' renders a shorter row (h-4) and thinner track (h-1) for dense layouts. |
-| tone            | 'brand' \| 'current'         | 'brand' | 'current' derives the track/fill/thumb color from `currentColor` instead of the brand token — use when the slider sits on an arbitrary colored surface (e.g. inside a colored chat bubble) rather than the page background. |
-| ariaLabel       | string                       | —       | Sets `aria-label` on the input directly — use when there is no visible `label` (e.g. an icon-only context). |
-| ariaValueText   | string                       | —       | Sets `aria-valuetext`, overriding the spoken value with a custom string (e.g. a formatted timestamp). |
+| tone            | 'brand' \| 'current'         | 'brand' | 'current' derives the track/fill/thumb color from `currentColor` instead of the brand token; use when the slider sits on an arbitrary colored surface (e.g. inside a colored chat bubble) rather than the page background. |
+| ariaLabel       | string                       | -       | Sets `aria-label` on the input directly; use when there is no visible `label` (e.g. an icon-only context). |
+| ariaValueText   | string                       | -       | Sets `aria-valuetext`, overriding the spoken value with a custom string (e.g. a formatted timestamp). |
 | className       | string                       | ""      | Additional classes merged onto the root wrapper.       |
 
 ## Interactive States
 
 - **hover**: Native browser thumb hover; `accent-color` token applied to match brand styling.
-- **focus**: `outline-none` — suppresses the browser default outline on the input.
-- **focus-visible**: `ring-2 ring-offset-2 ring-brand-ring` — visible keyboard focus ring on the input element.
-- **disabled**: `opacity-40 pointer-events-none cursor-not-allowed` — muted appearance, no interaction.
+- **focus**: `outline-none` (suppresses the browser default outline on the input).
+- **focus-visible**: `ring-2 ring-offset-2 ring-brand-ring` (visible keyboard focus ring on the input element).
+- **disabled**: `opacity-40 pointer-events-none cursor-not-allowed` (muted appearance, no interaction).
 
 ## Visual Structure
 
@@ -41,13 +41,13 @@ A styled range input for selecting a numeric value within a defined range. Built
 
 ## Drag Behavior
 
-The fill bar tracks the pointer 1:1 during an active drag — no transition is applied while `onPointerDown` through `onPointerUp`/`onPointerCancel` is in progress, so the fill snaps instantly to the input's live value instead of animating toward it. This prevents the fill from lagging behind a fast pointer move.
+The fill bar tracks the pointer 1:1 during an active drag: no transition is applied while `onPointerDown` through `onPointerUp`/`onPointerCancel` is in progress, so the fill snaps instantly to the input's live value instead of animating toward it. This prevents the fill from lagging behind a fast pointer move.
 
 The `motion-safe:transition-all` classes are re-applied as soon as the drag ends, so value changes from keyboard input (arrow keys, Home/End, Page Up/Down) or from a parent component changing `value` programmatically still animate smoothly.
 
 ## Accessibility
 
-- Uses native `<input type="range">` — keyboard-navigable by default (arrow keys, Home/End, Page Up/Down).
+- Uses native `<input type="range">`, keyboard-navigable by default (arrow keys, Home/End, Page Up/Down).
 - `aria-valuemin`, `aria-valuemax`, and `aria-valuenow` are set explicitly.
 - `label` and `input` are linked via `htmlFor`/`id`.
 - `hint` is linked via `aria-describedby`.
@@ -58,16 +58,16 @@ The `motion-safe:transition-all` classes are re-applied as soon as the drag ends
 
 ## When to Use
 
-Use Slider when the user needs to select a value along a continuous or stepped range — volume, brightness, zoom level, price range. Prefer a numeric Input when the user needs to type an exact value.
+Use Slider when the user needs to select a value along a continuous or stepped range: volume, brightness, zoom level, price range. Prefer a numeric Input when the user needs to type an exact value.
 
 ## Tokens Used
 
-- `bg-brand` — filled portion of the track and thumb accent color
-- `bg-surface-active` — empty track background
-- `text-text` — label color
-- `text-text-muted` — hint and value display color
-- `ring-brand-ring` — focus-visible ring
-- `--duration-fast` — filled track transition duration
+- `bg-brand`: filled portion of the track and thumb accent color
+- `bg-surface-active`: empty track background
+- `text-text`: label color
+- `text-text-muted`: hint and value display color
+- `ring-brand-ring`: focus-visible ring
+- `--duration-fast`: filled track transition duration
 
 ## Installation
 

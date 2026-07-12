@@ -164,7 +164,7 @@ export const AuthForm = () => {
 						<div className='w-14 h-14 rounded-full bg-success/15 flex items-center justify-center'>
 							<CheckIcon />
 						</div>
-						<p className='text-sm text-text-muted text-center'>Account created — check your email to verify.</p>
+						<p className='text-sm text-text-muted text-center'>Account created. Check your email to verify.</p>
 					</div>
 				) : (
 					<div className='flex flex-col gap-4'>

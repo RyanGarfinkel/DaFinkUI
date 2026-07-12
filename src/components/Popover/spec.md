@@ -14,8 +14,8 @@ No npm dependencies. No registry dependencies.
 
 | Prop               | Type                                      | Default     | Description                                                  |
 |--------------------|-------------------------------------------|-------------|---------------------------------------------------------------|
-| `trigger`          | `ReactNode`                               | —           | Content of the built-in trigger button.                      |
-| `children`         | `ReactNode`                               | —           | Panel content. May contain interactive elements.             |
+| `trigger`          | `ReactNode`                               | required    | Content of the built-in trigger button.                      |
+| `children`         | `ReactNode`                               | required    | Panel content. May contain interactive elements.             |
 | `side`             | `'top' \| 'right' \| 'bottom' \| 'left'`  | `'bottom'`  | Which side of the trigger the panel appears on.              |
 | `align`            | `'start' \| 'center' \| 'end'`            | `'center'`  | Alignment along the chosen side.                             |
 | `label`            | `string`                                  | `undefined` | Accessible name for the panel (`aria-label`).                |
@@ -36,7 +36,7 @@ No npm dependencies. No registry dependencies.
 ## Accessibility
 
 - **Focus entry**: on open, focus moves to the first focusable element inside the panel, or to the panel itself (`tabIndex={-1}`) if there is none.
-- **Focus trap**: **not trapped** — this is a non-modal overlay. Tab walks through the panel and then out; leaving the panel closes it.
+- **Focus trap**: **not trapped**; this is a non-modal overlay. Tab walks through the panel and then out; leaving the panel closes it.
 - **Escape**: closes and returns focus to the trigger.
 - **Tab**: not intercepted; focus leaving the panel closes it via `focusout` without grabbing focus back.
 - **ARIA roles**: panel has `role="dialog"` with **no** `aria-modal`; trigger has `aria-haspopup="dialog"`, `aria-expanded`, and `aria-controls` while open. Name the panel with `label`.
@@ -48,9 +48,9 @@ No npm dependencies. No registry dependencies.
 | State         | Trigger                                            | Panel                       |
 |---------------|----------------------------------------------------|-----------------------------|
 | Default       | `border-input-border bg-input`                     | `bg-surface border-surface-border shadow-lg` |
-| Hover         | `hover:border-brand`                               | —                           |
-| Focus-visible | `focus-visible:ring-2 ring-brand-ring ring-offset-2` | —                         |
-| Disabled      | `opacity-50 cursor-not-allowed pointer-events-none` | —                          |
+| Hover         | `hover:border-brand`                               | N/A                          |
+| Focus-visible | `focus-visible:ring-2 ring-brand-ring ring-offset-2` | N/A                        |
+| Disabled      | `opacity-50 cursor-not-allowed pointer-events-none` | N/A                         |
 
 ## Rendering
 
@@ -66,4 +66,4 @@ Panel enters with `opacity-0 scale-95` → `opacity-100 scale-100` over `var(--d
 
 ## When to Use
 
-Use Popover for small interactive surfaces anchored to a control — filters, share panels, inline settings. Use Modal/Dialog instead when the task must block the page, and Tooltip when the content is plain non-interactive text. Use DropdownMenu when the content is a list of actions.
+Use Popover for small interactive surfaces anchored to a control: filters, share panels, inline settings. Use Modal/Dialog instead when the task must block the page, and Tooltip when the content is plain non-interactive text. Use DropdownMenu when the content is a list of actions.

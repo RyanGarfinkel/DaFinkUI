@@ -10,7 +10,7 @@ export interface CodeEditorProps {
 	value: string;
 	/** Fires with the updated value on every edit. */
 	onChange: (value: string) => void;
-	/** Extra CodeMirror extensions layered on top of the built-ins — e.g. a project-specific `autocompletion({ override: [...] })` call. */
+	/** Extra CodeMirror extensions layered on top of the built-ins, e.g. a project-specific `autocompletion({ override: [...] })` call. */
 	extensions?: Extension[];
 	/** Accessible name for the editor region. */
 	'aria-label'?: string;
@@ -20,7 +20,7 @@ export interface CodeEditorProps {
 	minHeight?: string;
 }
 
-/** Escape blurs the editor — the accessible way out now that Tab is used for indentation
+/** Escape blurs the editor: the accessible way out now that Tab is used for indentation
  * (the same "Escape returns focus" convention this repo already uses for overlays). */
 const escapeBlurKeymap = keymap.of([
 	{
