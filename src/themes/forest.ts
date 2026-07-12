@@ -1,14 +1,11 @@
-// AUTO-GENERATED — edit tokens/forest.{light,dark}.json then run `npm run tokens`
+// AUTO-GENERATED: edit tokens/forest.{light,dark}.json then run `npm run tokens`
 import type { Theme } from './types';
 
-export const forestTheme: Theme =
-{
+export const forestTheme: Theme = {
 	name:   'forest',
 	label:  'Forest',
 	accent: '#4ade80',
-
-	light:
-	{
+	light: {
 		'--color-brand':                 '#16a34a',
 		'--color-brand-hover':           '#15803d',
 		'--color-brand-active':          '#166534',
@@ -42,9 +39,7 @@ export const forestTheme: Theme =
 		'--color-input-error':           '#dc2626',
 		'--color-input-error-ring':      '#dc2626',
 	},
-
-	dark:
-	{
+	dark: {
 		'--color-brand':                 '#4ade80',
 		'--color-brand-hover':           '#86efac',
 		'--color-brand-active':          '#bbf7d0',

@@ -16,11 +16,9 @@ const NotFound = () => {
 						d='M5.5 0h11A5.5 5.5 0 0 1 22 5.5v11A5.5 5.5 0 0 1 16.5 22h-11A5.5 5.5 0 0 1 0 16.5v-11A5.5 5.5 0 0 1 5.5 0zm5.5 5.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 1 0 0-11z'
 					/>
 				</svg>
-
 				<p className='font-mono text-sm text-text-subtle tracking-wide'>
 					{'<Error status={404} />'}
 				</p>
-
 				<div className='flex flex-col gap-2'>
 					<h1 className='text-4xl font-semibold tracking-tight text-text'>
 						Page not found
@@ -30,7 +28,6 @@ const NotFound = () => {
 						or head back to the homepage.
 					</p>
 				</div>
-
 				<div className='flex flex-wrap items-center justify-center gap-3'>
 					<Link href='/' className={`${BUTTON_BASE} ${BUTTON_PRIMARY}`}>
 						Back to home
@@ -39,7 +36,6 @@ const NotFound = () => {
 						Browse components
 					</Link>
 				</div>
-
 				<p className='text-xs text-text-subtle'>
 					Tip: press <kbd className='rounded border border-surface-border px-1.5 py-0.5 font-mono'>/</kbd> to search.
 				</p>

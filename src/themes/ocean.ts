@@ -1,14 +1,11 @@
-// AUTO-GENERATED — edit tokens/ocean.{light,dark}.json then run `npm run tokens`
+// AUTO-GENERATED: edit tokens/ocean.{light,dark}.json then run `npm run tokens`
 import type { Theme } from './types';
 
-export const oceanTheme: Theme =
-{
+export const oceanTheme: Theme = {
 	name:   'ocean',
 	label:  'Ocean',
 	accent: '#38bdf8',
-
-	light:
-	{
+	light: {
 		'--color-brand':                 '#0284c7',
 		'--color-brand-hover':           '#0369a1',
 		'--color-brand-active':          '#075985',
@@ -42,9 +39,7 @@ export const oceanTheme: Theme =
 		'--color-input-error':           '#dc2626',
 		'--color-input-error-ring':      '#dc2626',
 	},
-
-	dark:
-	{
+	dark: {
 		'--color-brand':                 '#38bdf8',
 		'--color-brand-hover':           '#7dd3fc',
 		'--color-brand-active':          '#bae6fd',

@@ -4,6 +4,8 @@ dafink-audit:
   script:
     - npm ci
     - node scripts/dafink-audit.mjs
+    # - npm run lint  # optional, add if your project has a lint script
+    # - npm test      # optional, add if your project has a test script
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'

@@ -1,16 +1,14 @@
 // Hand-authored surface style. See minimal.ts for the contract.
-// NOTE: Neumorph controls only shape and shadow — it does not override any color
+// NOTE: Neumorph controls only shape and shadow: it does not override any color
 // tokens. The dual-shadow effect is most visible on mid-tone surfaces; on pure
 // white the white highlight is faint, but the dark shadow still provides depth.
 import type { Style } from './types';
 
-export const neumorphStyle: Style =
-{
+export const neumorphStyle: Style = {
 	name:        'neumorph',
 	label:       'Neumorph',
-	description: 'Extruded elements emerge from the surface — depth from dual dark/light shadows, no border.',
-	light:
-	{
+	description: 'Extruded elements emerge from the surface: depth from dual dark/light shadows, no border.',
+	light: {
 		'--radius-sm':     '0.875rem',
 		'--radius':        '1.25rem',
 		'--radius-lg':     '1.5rem',
@@ -23,8 +21,7 @@ export const neumorphStyle: Style =
 		'--inner-shadow':  'inset 5px 5px 12px rgb(0 0 0 / 0.14), inset -5px -5px 12px rgb(255 255 255 / 0.80)',
 		'--input-focus-shadow': '0 0 0 1px var(--color-input-ring), inset 5px 5px 12px rgb(0 0 0 / 0.14), inset -5px -5px 12px rgb(255 255 255 / 0.80)',
 	},
-	dark:
-	{
+	dark: {
 		'--radius-sm':     '0.875rem',
 		'--radius':        '1.25rem',
 		'--radius-lg':     '1.5rem',

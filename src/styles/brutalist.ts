@@ -19,11 +19,10 @@ const lightVars = {
 
 const darkVars = { ...lightVars, '--shadow-color': '#3c3c46' };
 
-export const brutalistStyle: Style =
-{
+export const brutalistStyle: Style = {
 	name:        'brutalist',
 	label:       'Brutalist',
-	description: 'Raw and bold — square corners, thick borders, hard offset shadow, high contrast.',
+	description: 'Raw and bold: square corners, thick borders, hard offset shadow, high contrast.',
 	light:       lightVars,
 	dark:        darkVars,
 };

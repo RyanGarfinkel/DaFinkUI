@@ -38,17 +38,17 @@ chore: add commitlint and husky
 
 The pre-commit hook runs automatically on every `git commit` and will block if either check fails:
 
-1. **Lint** — `npm run lint` must pass with no errors
-2. **Typecheck** — `npm run typecheck` must pass with no errors
-3. **Tests** — `npm test` must pass with no failures
+1. **Lint**: `npm run lint` must pass with no errors
+2. **Typecheck**: `npm run typecheck` must pass with no errors
+3. **Tests**: `npm test` must pass with no failures
 
 Fix all lint errors and failing tests before committing. Do not bypass the hook with `--no-verify`.
 
 ## Rules
 
-- No scope required — keep it flat
+- No scope required, keep it flat
 - No capital letter at the start of the description
 - No period at the end
 - Use imperative mood: "add", not "added" or "adds"
 - If a commit touches multiple concerns, split it into multiple commits
-- Do not add yourself as a co-author — no `Co-Authored-By` trailer in any commit
+- Do not add yourself as a co-author: no `Co-Authored-By` trailer in any commit

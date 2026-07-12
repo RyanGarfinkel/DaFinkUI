@@ -22,7 +22,7 @@
 			"border":      { "$value": "#bbf7d0", "$type": "color" }
 		},
 		"warning": {
-			"default":     { "$value": "#d97706", "$type": "color" },
+			"default":     { "$value": "#92400e", "$type": "color" },
 			"bg":          { "$value": "#fffbeb", "$type": "color" },
 			"border":      { "$value": "#fde68a", "$type": "color" }
 		},

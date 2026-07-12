@@ -1,14 +1,11 @@
-// AUTO-GENERATED — edit tokens/plum.{light,dark}.json then run `npm run tokens`
+// AUTO-GENERATED: edit tokens/plum.{light,dark}.json then run `npm run tokens`
 import type { Theme } from './types';
 
-export const plumTheme: Theme =
-{
+export const plumTheme: Theme = {
 	name:   'plum',
 	label:  'Plum',
 	accent: '#a78bfa',
-
-	light:
-	{
+	light: {
 		'--color-brand':                 '#7c3aed',
 		'--color-brand-hover':           '#6d28d9',
 		'--color-brand-active':          '#5b21b6',
@@ -42,9 +39,7 @@ export const plumTheme: Theme =
 		'--color-input-error':           '#dc2626',
 		'--color-input-error-ring':      '#dc2626',
 	},
-
-	dark:
-	{
+	dark: {
 		'--color-brand':                 '#a78bfa',
 		'--color-brand-hover':           '#c4b5fd',
 		'--color-brand-active':          '#ddd6fe',

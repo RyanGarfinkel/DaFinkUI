@@ -7,14 +7,14 @@ description: >-
   loading and animation effects (Skeleton, Spinner, TextShimmer, Typewriter,
   CountUp, Reveal), feedback hierarchy (Toast vs Alert vs Modal), button and
   action hierarchy, content hierarchy and spacing, and responsive design rules.
-  This is design-judgment guidance, not component API reference — use
+  This is design-judgment guidance, not component API reference: use
   get_component_spec() for prop tables. Triggers: "which style should I use",
   "how should I lay this out", "when should I use a skeleton", "pick a palette",
   "design a dashboard", "build a form page", "choose between modal and drawer",
   "compose components", "UI architecture", "design system guidance".
 ---
 
-# DaFink UI — Design & UX Skill
+# DaFink UI: Design & UX Skill
 
 This skill covers *design judgment*: how to combine components, which style and
 palette to choose, when to use animations and loading effects, and how to
@@ -27,7 +27,7 @@ skill (`dafink-ui`) for installation and CLI instructions.
 
 ## 1. Choosing a Style
 
-A style controls the physical feel of every surface — corner rounding, border
+A style controls the physical feel of every surface: corner rounding, border
 weight, shadow character, and depth. It is set once at the root and cascades to
 all components. Three styles are available.
 
@@ -41,8 +41,8 @@ shadow with low opacity. No inner shadow, no blur.
 
 **Use when:**
 - Building data-dense tools: dashboards, admin panels, analytics, CRMs.
-- The UI needs to recede — content is the product, not the surface.
-- You are unsure which style fits — Minimal is the safe default and works with
+- The UI needs to recede; content is the product, not the surface.
+- You are unsure which style fits; Minimal is the safe default and works with
   every palette.
 - The product will be used in long work sessions; heavy visual effects fatigue
   users over time.
@@ -55,13 +55,13 @@ feels underdeveloped. In that case, reach for Brutalist (strong) or Neumorph
 
 ### Neumorph
 
-**Character:** Soft, rounded, extruded surfaces. No visible borders — depth is
+**Character:** Soft, rounded, extruded surfaces. No visible borders; depth is
 created entirely by bilateral shadow pairs (one dark, one light). Elements
 appear pressed into or raised out of the background.
 
 **Tokens set:** `--radius 1.25rem`, `--border-width 0px`, paired
 `--shadow`/`--inner-shadow` values. The shadow depends on the background being a
-near-neutral mid-tone — too dark or too saturated and the effect breaks.
+near-neutral mid-tone; too dark or too saturated and the effect breaks.
 
 **Use when:**
 - Building consumer apps: health, wellness, meditation, music players, settings
@@ -72,8 +72,8 @@ near-neutral mid-tone — too dark or too saturated and the effect breaks.
 
 **Avoid when:**
 - The app is primarily dark-mode (dark Neumorph reduces the soft-light effect
-  dramatically — the white reflection component dims).
-- Combined with highly chromatic palettes (Ocean, Ember, Forest, Plum) — the
+  dramatically: the white reflection component dims).
+- Combined with highly chromatic palettes (Ocean, Ember, Forest, Plum): the
   fixed white/black shadow components fight tinted backgrounds. Prefer Minimal
   with those palettes.
 - The UI is data-dense; large-radius cards waste space and the borderless style
@@ -91,14 +91,14 @@ hard offset shadows. Nothing is rounded; every surface has a definite boundary.
 
 **Use when:**
 - Building marketing pages, landing pages, portfolio sites, editorial UIs.
-- Making a deliberate stylistic statement — Brutalist reads as intentional, not
+- Making a deliberate stylistic statement: Brutalist reads as intentional, not
   accidental.
 - Combined with Zinc (stark, journalistic) or Plum (dramatic, high-contrast).
 
 **Avoid when:**
-- Building data-dense UIs (tables, forms, dashboards) — the heavy borders
+- Building data-dense UIs (tables, forms, dashboards): the heavy borders
   create visual noise at density.
-- Building apps users will use for hours at a stretch — the stark geometry is
+- Building apps users will use for hours at a stretch: the stark geometry is
   tiring over long sessions.
 - Combined with Ember or Forest where the hard shadows fight the warm/organic
   color character.
@@ -136,7 +136,7 @@ blue-tinted (`#f0f9ff`). Text carries a deep blue hue (`#0c4a6e`).
 **Fits:** SaaS products, productivity tools, task managers, cloud services,
 anything that benefits from a tech-forward, approachable feeling.
 
-**Note:** Light Ocean surfaces are distinctly blue-tinted — this is intentional
+**Note:** Light Ocean surfaces are distinctly blue-tinted; this is intentional
 but may compete with data visualizations that use blue. If charts are a core
 feature, confirm they don't blend with the palette.
 
@@ -183,7 +183,7 @@ and a matte-paper surface tone.
 
 **Fits:** Portfolio sites, photography, developer documentation, design tools,
 any product where coolness and restraint are on-brand. In dark mode the brand
-flips to near-white `#f1f5f9` — excellent for dark-first apps.
+flips to near-white `#f1f5f9`, excellent for dark-first apps.
 
 ---
 
@@ -236,7 +236,7 @@ Neumorph depends on.
 
 ```
 ┌─────────────────────────────────────┐
-│  TopNav (or Sidebar for nav-heavy)  │
+│  MenuBar (or Sidebar for nav-heavy) │
 ├──────────┬──────────────────────────┤
 │ Sidebar  │  Main content area       │
 │ (md:+)   │  (scrollable)            │
@@ -248,9 +248,9 @@ Neumorph depends on.
 
 - Use `Sidebar` (fixed, collapsible) when the app has more than ~6 navigation
   destinations or nested navigation.
-- Use `TopNav` when navigation is flat and shallow (≤5 items).
+- Use `MenuBar` when navigation is flat and shallow (≤5 items).
 - Below `md:`, `Sidebar` hides; navigation moves to a `Drawer` (side `left`)
-  opened by a hamburger in `TopNav`.
+  opened by a hamburger in `MenuBar`.
 - The `Toast` layer sits at fixed position and is always last in the render tree.
 
 ### Card as the primary container
@@ -275,15 +275,15 @@ inside a Card. Use the three-section structure for structured content:
 ```
 
 `CardFooter` stacks actions vertically on narrow containers and rows them at
-`@sm` — this is built-in; don't fight it with custom flex overrides.
+`@sm`: this is built-in; don't fight it with custom flex overrides.
 
 **Card variants:**
-- `default` — standard bordered card with subtle shadow. Use for most content.
-- `elevated` — deeper shadow, no border. Use for modals-within-pages, popovers,
+- `default`: standard bordered card with subtle shadow. Use for most content.
+- `elevated`: deeper shadow, no border. Use for modals-within-pages, popovers,
   or cards that need to float above surrounding content.
-- `outline` — no background, just a border. Use for ghost containers, selection
+- `outline`: no background, just a border. Use for ghost containers, selection
   states, or when the parent already has a surface color.
-- `interactive` — adds hover lift (`-translate-y-0.5`) and focus-visible ring.
+- `interactive`: adds hover lift (`-translate-y-0.5`) and focus-visible ring.
   Use when the entire card is the clickable target (navigation cards, selection
   grids). Do **not** put interactive cards inside another interactive container.
 
@@ -310,14 +310,14 @@ Standard form layout inside a Card:
 
 For multi-field forms: use `SkeletonForm` while the initial form data loads
 (e.g., an edit form fetching current values). Replace the skeleton with the
-real `Form` once data is ready — no layout shift.
+real `Form` once data is ready, so there is no layout shift.
 
 ### Data display
 
-- `Table` — static tabular data; no sorting, no pagination. Use for small,
+- `Table`: static tabular data; no sorting, no pagination. Use for small,
   fixed datasets (5–20 rows). Composes directly in JSX with `TableHead`,
   `TableBody`, `TableRow`, `TableCell`.
-- `DataTable` — interactive tables. Use when the user needs to sort columns,
+- `DataTable`: interactive tables. Use when the user needs to sort columns,
   filter rows, or paginate through a large dataset. Comes with a built-in
   `Paginator`. Accepts a `columns` definition array and a `data` array.
 - Rule: if the user might want to sort or search, use `DataTable`. If the
@@ -351,9 +351,9 @@ Use `SkeletonCard` in place of each dashboard card while data loads on mount.
 
 ### Kanban and Timeline
 
-- `Kanban` — drag-and-drop column/card board. Uses dnd-kit; install with
+- `Kanban`: drag-and-drop column/card board. Uses dnd-kit; install with
   `npx dafink-ui add kanban` (also install `@dnd-kit/core`, `@dnd-kit/sortable`, `@dnd-kit/utilities`).
-- `Timeline` — vertical event sequence. Use for activity logs, order history,
+- `Timeline`: vertical event sequence. Use for activity logs, order history,
   deployment pipelines, onboarding progress.
 
 ---
@@ -373,8 +373,8 @@ Every screen should have at most **one primary action**. The hierarchy:
 
 **Rules:**
 - Never place two `primary` buttons on the same visible surface.
-- Never use `primary` for Cancel — use `secondary` or `ghost`.
-- Use `destructive` inside a confirmation `Modal` — never expose a destructive
+- Never use `primary` for Cancel; use `secondary` or `ghost`.
+- Use `destructive` inside a confirmation `Modal`; never expose a destructive
   action without a confirmation step if the consequence is data loss.
 - For icon-only buttons (toolbar, close buttons), use `ghost` with an
   `aria-label`. Never omit the label.
@@ -400,11 +400,11 @@ Choose the right feedback component based on persistence and blocking behavior:
 
 **Toast guidelines:**
 - Keep `title` to 3–5 words. Use `description` for detail, not the title.
-- Use `action` sparingly — one obvious recovery step only (e.g., "Undo").
+- Use `action` sparingly: one obvious recovery step only (e.g., "Undo").
 - Default `duration` (4000ms) is fine for success; extend to 6000ms for
   warnings that need more reading time.
 - Position: `bottom-right` for desktop apps; `bottom-center` for mobile-first.
-- Do **not** use Toast for errors that block the user's workflow — they auto-
+- Do **not** use Toast for errors that block the user's workflow; they auto-
   dismiss before the user can act on them. Use an inline Alert instead.
 
 **Modal vs Drawer:**
@@ -415,10 +415,10 @@ Choose the right feedback component based on persistence and blocking behavior:
   context. `side="right"` for detail/editing; `side="left"` for navigation;
   `side="bottom"` for mobile-style action sheets.
 - Both require a focus trap and Escape-to-close. This is built into the
-  components — do not suppress it.
+  components; do not suppress it.
 - `SidePanel`: keyboard focus trap, Escape, dismissal on outside click, and
   focus return like `Drawer`, but floats with margin from every viewport edge
-  instead of sitting flush against one — rounded corners on all four sides —
+  instead of sitting flush against one (rounded corners on all four sides)
   and has **no backdrop and no scroll lock**: the rest of the page stays fully
   visible, undimmed, unblurred, and scrollable while it's open. Its body is
   composed from the real `Card` component.
@@ -430,7 +430,7 @@ Choose the right feedback component based on persistence and blocking behavior:
 ## 7. Loading and Skeleton States
 
 Show a skeleton whenever async data will take more than ~300ms to arrive.
-Never render an empty container then snap in content — the layout shift is
+Never render an empty container then snap in content; the layout shift is
 disorienting.
 
 ### Which skeleton to use
@@ -445,7 +445,7 @@ disorienting.
 | Avatar | `Skeleton width="40px" height="40px" className="rounded-full"` |
 | Arbitrary shape | `Skeleton` with explicit `width` and `height` |
 
-**Skeleton vs Spinner — the rule:**
+**Skeleton vs Spinner, the rule:**
 - `Skeleton`: page-level or section-level loading (data arriving on mount or
   navigation). The layout is known; show its shape.
 - `Spinner`: action-triggered loading (button click, form submit, file upload).
@@ -474,13 +474,13 @@ disorienting.
 
 ## 8. Animation and Motion Effects
 
-DaFink UI ships several animated display components. Use them purposefully — one
+DaFink UI ships several animated display components. Use them purposefully; one
 animation effect per view is enough. Stacking multiple animated elements creates
 visual noise.
 
 ### TextShimmer
 
-A gradient shimmer that sweeps across text. Decorative — no interaction, no
+A gradient shimmer that sweeps across text. Decorative: no interaction, no
 semantic meaning.
 
 **Use for:** Hero headings, loading labels ("Generating…"), brand statements on
@@ -490,7 +490,7 @@ marketing pages.
 - Maximum one `TextShimmer` per visible view.
 - Use on display-scale text (headings, large labels). On body text it is too
   subtle to register.
-- The shimmer duration defaults to a slow sweep — leave it at the default unless
+- The shimmer duration defaults to a slow sweep; leave it at the default unless
   there's a strong reason to change it.
 
 ### Typewriter
@@ -503,7 +503,7 @@ Animates text character by character, with an optional blinking cursor.
 **Rules:**
 - Effective at one instance per screen. Two typewriters running simultaneously
   split attention without benefit.
-- If used for AI generation states, chain `showCursor={streaming}` — show the
+- If used for AI generation states, chain `showCursor={streaming}`: show the
   cursor while generating, hide it when done.
 - Pair with `delay` to let the page settle before the animation starts; a
   typewriter that fires instantly on mount feels rushed.
@@ -520,7 +520,7 @@ Animates a number from 0 to its target value on mount.
   `IntersectionObserver` if the stat is below the fold, so it fires when the
   user sees it.
 - Use `prefix` for currency (`"$"`) and `suffix` for units (`"k"`, `"%"`).
-- Keep animation duration natural — the default is around 2s. Faster feels
+- Keep animation duration natural: the default is around 2s. Faster feels
   cheap; slower loses the effect.
 - On a dashboard with multiple stats, they should all fire together (same mount
   timing), not stagger.
@@ -537,7 +537,7 @@ Brings life to content that would otherwise just be static text.
   should see the hero immediately.
 - Do not chain more than 2–3 Reveal sections on a single scroll; past that,
   the pattern feels gimmicky.
-- Trust the default animation — the standard fade+translate is designed for
+- Trust the default animation: the standard fade+translate is designed for
   this system. Aggressive custom transforms fight the motion design language.
 - All Reveal animations are suppressed by `globals.css` when
   `prefers-reduced-motion` is set. Do not add a manual check.
@@ -550,7 +550,7 @@ Multi-item scroll container with navigation.
 browsing.
 
 **Avoid for:** Primary navigation or any content that must all be visible
-simultaneously. Carousels hide content — use them only when the hidden items are
+simultaneously. Carousels hide content: use them only when the hidden items are
 genuinely supplementary.
 
 ### Progress
@@ -577,7 +577,7 @@ The system has three semantic text levels. Use them consistently:
 | Secondary | `text-text-muted` | Descriptions, supporting copy, captions |
 | Tertiary | `text-text-subtle` | Timestamps, metadata, de-emphasized UI chrome |
 
-Never reach for `text-zinc-500` or any palette class — always use tokens. They
+Never reach for `text-zinc-500` or any palette class; always use tokens. They
 adapt to dark mode and palette changes automatically.
 
 ### Scale
@@ -632,10 +632,10 @@ DaFink UI is **mobile-first**. The unprefixed style targets phones; breakpoints
 layer enhancements up.
 
 ```tsx
-// Correct — stacks on mobile, rows on md+
+// Correct: stacks on mobile, rows on md+
 <div className="flex flex-col md:flex-row gap-4">
 
-// Wrong — desktop-first patching
+// Wrong: desktop-first patching
 <div className="flex flex-row max-md:flex-col gap-4">
 ```
 
@@ -643,13 +643,13 @@ layer enhancements up.
 
 | Breakpoint | What changes |
 |------------|-------------|
-| `md:` (768px) | Sidebar appears. TopNav hamburger disappears. Multi-column grids activate. |
+| `md:` (768px) | Sidebar appears. MenuBar hamburger disappears. Multi-column grids activate. |
 | `lg:` (1024px) | Wider containers. Full desktop chrome visible. |
 | `xl:` (1280px) | Max-width containers cap here (`max-w-7xl`). |
 
 ### Component-internal layout
 
-Components use `@container` queries for internal layout — they respond to their
+Components use `@container` queries for internal layout; they respond to their
 container's width, not the viewport. `Card` already establishes a container
 context (`@container`). `CardFooter` switches from stacked to row at `@sm`
 (the card's own width), not at a viewport breakpoint.
@@ -660,7 +660,7 @@ page-level decisions (sidebar/nav visibility, grid column count).
 ### Touch targets
 
 Every interactive element must be at least 44×44px on touch devices. Small
-icon buttons and checkboxes extend their hit area via padding — the visual
+icon buttons and checkboxes extend their hit area via padding; the visual
 element stays its designed size. Minimum 8px of separation between adjacent
 targets.
 
@@ -682,7 +682,7 @@ These are the hardest constraints in the system:
 
 2. **Danger is reserved for destructive/irreversible actions.** One `bg-danger`
    button per screen, inside a confirmation flow. Do not use it for general
-   errors that aren't actions — use `Alert variant="danger"` for those.
+   errors that aren't actions: use `Alert variant="danger"` for those.
 
 3. **Success, warning tokens are for status communication only.** Use
    `bg-success-bg` / `border-success-border` / `text-success` inside Alert and
@@ -722,7 +722,7 @@ These apply to every component and every page, without exception:
 4. **Color is not the only signal.** See rule 6 in the color section above.
 
 5. **All motion respects `prefers-reduced-motion`.** Handled globally in
-   `globals.css` — this covers all Tailwind transitions, Reveal, TextShimmer,
+   `globals.css`: this covers all Tailwind transitions, Reveal, TextShimmer,
    Typewriter, Carousel, and overlay animations. Do not add per-component
    reduced-motion checks or bypass the global rule.
 
@@ -732,7 +732,7 @@ These apply to every component and every page, without exception:
   (Tab closes and moves on).
 - Escape always closes and returns focus to the trigger.
 - Backdrop click closes modals.
-- These behaviors are built into the components — do not suppress them.
+- These behaviors are built into the components; do not suppress them.
 
 ---
 

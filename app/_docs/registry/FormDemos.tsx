@@ -104,7 +104,7 @@ export const ReadOnlyFormDemo = () => {
 				<FormField>
 					<FormLabel htmlFor='plan'>Plan</FormLabel>
 					<FormControl>
-						<Input id='plan' value='Team — 12 seats' disabled />
+						<Input id='plan' value='Team (12 seats)' disabled />
 					</FormControl>
 					<FormDescription>Contact sales to change your plan.</FormDescription>
 				</FormField>

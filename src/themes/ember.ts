@@ -1,14 +1,11 @@
-// AUTO-GENERATED — edit tokens/ember.{light,dark}.json then run `npm run tokens`
+// AUTO-GENERATED: edit tokens/ember.{light,dark}.json then run `npm run tokens`
 import type { Theme } from './types';
 
-export const emberTheme: Theme =
-{
+export const emberTheme: Theme = {
 	name:   'ember',
 	label:  'Ember',
 	accent: '#fb923c',
-
-	light:
-	{
+	light: {
 		'--color-brand':                 '#ea580c',
 		'--color-brand-hover':           '#c2410c',
 		'--color-brand-active':          '#9a3412',
@@ -42,9 +39,7 @@ export const emberTheme: Theme =
 		'--color-input-error':           '#dc2626',
 		'--color-input-error-ring':      '#dc2626',
 	},
-
-	dark:
-	{
+	dark: {
 		'--color-brand':                 '#fb923c',
 		'--color-brand-hover':           '#fdba74',
 		'--color-brand-active':          '#fed7aa',

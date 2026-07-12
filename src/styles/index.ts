@@ -1,9 +1,8 @@
-export type { Style } from './types';
 export { SURFACE_TOKENS } from './types';
-
-export { minimalStyle } from './minimal';
-export { neumorphStyle } from './neumorph';
+export type { Style } from './types';
 export { brutalistStyle } from './brutalist';
+export { neumorphStyle } from './neumorph';
+export { minimalStyle } from './minimal';
 
 import { brutalistStyle } from './brutalist';
 import { neumorphStyle } from './neumorph';
@@ -14,7 +13,6 @@ import type { Style } from './types';
 // so selecting it removes the override entirely.
 export const styles: Style[] = [minimalStyle, neumorphStyle, brutalistStyle];
 
-export const getStyleByName = (name: string) =>
-{
+export const getStyleByName = (name: string) => {
 	return styles.find(s => s.name === name) ?? minimalStyle;
 };

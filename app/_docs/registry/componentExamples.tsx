@@ -14,6 +14,9 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/src/components/Table/Table';
+import { TimelineHorizontalDemo } from '@/app/_docs/components/examples/TimelineHorizontalDemo';
+import { TimelineDeployDemo } from '@/app/_docs/components/examples/TimelineDeployDemo';
+import { TimelineYearsDemo } from '@/app/_docs/components/examples/TimelineYearsDemo';
 import { MessageMediaDemo } from '@/app/_docs/components/examples/MessageMediaDemo';
 import { ManualFormDemo, FieldTypesFormDemo, ReadOnlyFormDemo } from './FormDemos';
 import { StackedSidePanelDemo } from './StackedSidePanelDemo';
@@ -32,7 +35,7 @@ export const componentExamples: Record<string, ComponentExample[]> = {
 		{
 			id:          'arrow-buttons',
 			title:       'Arrow buttons',
-			description: 'Use the arrowleft and arrowright variants to build prev/next controls. The arrow is injected automatically — just pass the label as children.',
+			description: 'Use the arrowleft and arrowright variants to build prev/next controls. The arrow is injected automatically; just pass the label as children.',
 			usage: `export default function Example() {
   return (
     <div className="flex items-center justify-between w-full max-w-sm mx-auto">
@@ -53,7 +56,7 @@ export const componentExamples: Record<string, ComponentExample[]> = {
 		{
 			id:          'media',
 			title:       'Media messages',
-			description: 'Message renders whatever you pass as children. A compact AudioPlayer drops straight into the default bubble — its controls pick up the bubble\'s own text color automatically, no extra props needed. For content with its own visual chrome, like an image, pass bubble={false} so it isn\'t nested inside a second colored box.',
+			description: 'Message renders whatever you pass as children. A compact AudioPlayer drops straight into the default bubble; its controls pick up the bubble\'s own text color automatically, no extra props needed. For content with its own visual chrome, like an image, pass bubble={false} so it isn\'t nested inside a second colored box.',
 			usage: `export default function Example() {
   return (
     <div className="flex w-full max-w-sm flex-col gap-3">
@@ -65,7 +68,7 @@ export const componentExamples: Record<string, ComponentExample[]> = {
         />
       </Message>
 
-      <Message variant="received">Just got back from the trip — here's the view!</Message>
+      <Message variant="received">Just got back from the trip. Here's the view!</Message>
 
       <Message variant="sent">
         <AudioPlayer
@@ -84,7 +87,7 @@ export const componentExamples: Record<string, ComponentExample[]> = {
 		{
 			id:          'manual',
 			title:       'Manual state, no validation',
-			description: 'useZodForm is optional — the layout primitives work with plain useState just as well, for a one-off field that doesn\'t need a schema.',
+			description: 'useZodForm is optional; the layout primitives work with plain useState just as well, for a one-off field that doesn\'t need a schema.',
 			usage: `export default function Example() {
   const [team, setTeam] = useState('');
   const [submitted, setSubmitted] = useState(false);
@@ -115,7 +118,7 @@ export const componentExamples: Record<string, ComponentExample[]> = {
 		{
 			id:          'field-types',
 			title:       'Mixed field types',
-			description: 'Select and Switch already render their own label — wrap them in FormField for spacing and FormSection for grouping. For the optional Textarea, FormLabel adds a muted "(optional)" suffix instead of a hint below the field.',
+			description: 'Select and Switch already render their own label; wrap them in FormField for spacing and FormSection for grouping. For the optional Textarea, FormLabel adds a muted "(optional)" suffix instead of a hint below the field.',
 			usage: `export default function Example() {
   const [notifyByEmail, setNotifyByEmail] = useState(true);
   const [frequency, setFrequency] = useState('daily');
@@ -165,7 +168,7 @@ export const componentExamples: Record<string, ComponentExample[]> = {
 		{
 			id:          'read-only',
 			title:       'Disabled fields',
-			description: 'FormDescription doubles as an explanation for why a field is locked — pair it with disabled instead of just hiding the reason.',
+			description: 'FormDescription doubles as an explanation for why a field is locked; pair it with disabled instead of just hiding the reason.',
 			usage: `export default function Example() {
   return (
     <Form>
@@ -173,7 +176,7 @@ export const componentExamples: Record<string, ComponentExample[]> = {
         <FormField>
           <FormLabel htmlFor="plan">Plan</FormLabel>
           <FormControl>
-            <Input id="plan" value="Team — 12 seats" disabled />
+            <Input id="plan" value="Team (12 seats)" disabled />
           </FormControl>
           <FormDescription>Contact sales to change your plan.</FormDescription>
         </FormField>
@@ -194,7 +197,7 @@ export const componentExamples: Record<string, ComponentExample[]> = {
 		{
 			id:    'stacked',
 			title: 'Stacked panels',
-			description: 'Opening a second SidePanel on the same side automatically pushes earlier ones toward the center — no wiring required. The pushed-back panel stays visible and interactive, but can\'t be closed until the panel in front of it closes; use useSidePanelBlocked to disable your own close controls accordingly.',
+			description: 'Opening a second SidePanel on the same side automatically pushes earlier ones toward the center; no wiring required. The pushed-back panel stays visible and interactive, but can\'t be closed until the panel in front of it closes; use useSidePanelBlocked to disable your own close controls accordingly.',
 			usage: `function FiltersFooter({ onRefine, onClose }) {
   // Disables while a panel opened by this one is still in front of it.
   const isBlocked = useSidePanelBlocked();
@@ -221,7 +224,7 @@ export default function Example() {
           <SidePanelTitle>Filters</SidePanelTitle>
         </SidePanelHeader>
         <SidePanelContent>
-          A trigger inside this panel opens a second one on the same side —
+          A trigger inside this panel opens a second one on the same side;
           watch this panel automatically shift toward the center, and its own
           close controls disable until Advanced filters closes.
         </SidePanelContent>
@@ -237,7 +240,7 @@ export default function Example() {
           <SidePanelTitle>Advanced filters</SidePanelTitle>
         </SidePanelHeader>
         <SidePanelContent>
-          Independent panel — closing this one returns the Filters panel to
+          Independent panel: closing this one returns the Filters panel to
           its original position. Both panels stay interactive the whole time.
         </SidePanelContent>
         <SidePanelFooter>
@@ -254,7 +257,7 @@ export default function Example() {
 		{
 			id:    'minimal',
 			title: 'Minimal variant',
-			description: 'A flat, borderless look — no outer card border, no header fill, no zebra striping. Matches the docs site\'s PropsTable.',
+			description: 'A flat, borderless look: no outer card border, no header fill, no zebra striping. Matches the docs site\'s PropsTable.',
 			usage: `export default function Example() {
   return (
     <Table variant="minimal">
@@ -377,7 +380,7 @@ export default function Example() {
 		{
 			id:    'form',
 			title: 'SkeletonForm',
-			description: 'Stacks multiple labelled SkeletonInput fields — useful while a form section loads.',
+			description: 'Stacks multiple labelled SkeletonInput fields; useful while a form section loads.',
 			usage: `export default function Example() {
   return <SkeletonForm fields={4} className="w-72 max-w-full" />;
 }`,
@@ -407,7 +410,7 @@ export default function Example() {
 		{
 			id:    'table-row',
 			title: 'SkeletonTableRow',
-			description: 'A row of equal-width columns — stack several to simulate a full table body.',
+			description: 'A row of equal-width columns; stack several to simulate a full table body.',
 			usage: `export default function Example() {
   return (
     <div className="flex flex-col gap-3 w-full max-w-lg">
@@ -429,6 +432,93 @@ export default function Example() {
 					<SkeletonTableRow columns={4} />
 				</div>
 			),
+		},
+	],
+	timeline: [
+		{
+			id:          'horizontal',
+			title:       'Horizontal variant',
+			description: 'Pass direction="horizontal" to lay steps out in a row with a connecting line across the top.',
+			usage: `export default function Example() {
+  const phases = [
+    { title: 'Discovery', body: 'Research & requirements' },
+    { title: 'Design',    body: 'Wireframes & prototypes'  },
+    { title: 'Build',     body: 'Development & testing'    },
+    { title: 'Launch',    body: 'Deploy & monitor'          },
+  ];
+
+  return (
+    <div className="w-full">
+      <Timeline direction="horizontal">
+        {phases.map((phase) => (
+          <TimelineItem key={phase.title} title={phase.title}>
+            {phase.body}
+          </TimelineItem>
+        ))}
+      </Timeline>
+    </div>
+  );
+}`,
+			preview: <TimelineHorizontalDemo />,
+		},
+		{
+			id:          'interactive',
+			title:       'Interactive example',
+			description: 'Click the button to append steps one at a time. Each new entry slides in and the indicator dot pops.',
+			usage: `export default function Example() {
+  const steps = [
+    { title: 'Clone repository',       body: 'main @ a1b2c3d, 0.4s'           },
+    { title: 'Install dependencies',   body: '847 packages installed, 4.2s'   },
+    { title: 'Run test suite',         body: '47 tests passed, 1.1s'          },
+    { title: 'Build for production',   body: 'Bundle 142 kb gzipped, 8.3s'    },
+    { title: 'Deploy to edge network', body: 'Live at myapp.vercel.app, 2.0s' },
+  ];
+  const [count, setCount] = useState(1);
+
+  return (
+    <div className="flex flex-col gap-6 w-full max-w-sm">
+      <Button size="sm" onClick={() => setCount((c) => Math.min(c + 1, steps.length))}>
+        Run next step
+      </Button>
+
+      <Timeline animate="none">
+        {steps.slice(0, count).map((step) => (
+          <TimelineItem key={step.title} title={step.title}>
+            <span className="text-xs text-text-muted">{step.body}</span>
+          </TimelineItem>
+        ))}
+      </Timeline>
+    </div>
+  );
+}`,
+			preview: <TimelineDeployDemo />,
+		},
+		{
+			id:          'custom-labels',
+			title:       'Custom labels',
+			description: 'Pass any string as indicator, years, initials, icons, and the dot resizes to fit: a perfect circle for short content, a pill for longer content like a 4-digit year.',
+			usage: `export default function Example() {
+  const milestones = [
+    { year: '2000', title: 'Company founded',  body: 'Started as a two-person design studio.' },
+    { year: '2004', title: 'First product',    body: 'Shipped our first component library, v1.' },
+    { year: '2015', title: 'Series A',         body: 'Raised funding to grow the platform team.' },
+    { year: '2020', title: 'Remote-first',     body: 'Moved to a fully distributed team.' },
+    { year: '2026', title: 'Product launch', body: 'Open-sourced our internal design system.' },
+  ];
+
+  return (
+    <div className="w-full">
+      <Timeline>
+        {milestones.map((m) => (
+          <TimelineItem key={m.year} title={m.title} indicator={m.year}>
+            {m.body}
+          </TimelineItem>
+        ))}
+      </Timeline>
+    </div>
+  );
+}`,
+			preview: <TimelineYearsDemo />,
 		},
 	],
 };

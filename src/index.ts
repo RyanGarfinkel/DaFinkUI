@@ -123,7 +123,7 @@ export type { SliderProps } from './components/Slider/Slider';
 
 export { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from './components/Sidebar/Sidebar';
 
-export { Skeleton, SkeletonCard, SkeletonInput, SkeletonTableRow, SkeletonForm } from './components/Skeleton/Skeleton';
+export { Skeleton, SkeletonCard, SkeletonInput, SkeletonTableRow, SkeletonForm, SkeletonImage } from './components/Skeleton/Skeleton';
 
 export { Spinner } from './components/Spinner/Spinner';
 export type { SpinnerSize } from './components/Spinner/Spinner';

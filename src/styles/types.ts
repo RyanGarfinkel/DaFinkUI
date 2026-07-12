@@ -1,5 +1,4 @@
-export interface Style
-{
+export interface Style {
 	name:  string;
 	label: string;
 	/** One-line description of the surface treatment, shown in docs */
@@ -12,7 +11,7 @@ export interface Style
 
 /**
  * The surface-token contract every Style sets. These are orthogonal to the
- * color tokens owned by a Theme (palette) — a Style controls shape, depth,
+ * color tokens owned by a Theme (palette): a Style controls shape, depth,
  * and translucency; a Theme controls hue. Components consume them via
  * arbitrary-value utilities, e.g. `rounded-[var(--radius)]`.
  */

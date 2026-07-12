@@ -1,15 +1,12 @@
-// AUTO-GENERATED — edit tokens/zinc.{light,dark}.json then run `npm run tokens`
-export const colors =
-{
-	brand:
-	{
+// AUTO-GENERATED: edit tokens/zinc.{light,dark}.json then run `npm run tokens`
+export const colors = {
+	brand: {
 		default: '#18181b',
 		hover:   '#27272a',
 		active:  '#3f3f46',
 		ring:    '#18181b',
 		fg:      '#ffffff',
-		dark:
-		{
+		dark: {
 			default: '#e8e8ea',
 			hover:   '#d0d0d4',
 			active:  '#b4b4b9',
@@ -17,53 +14,45 @@ export const colors =
 			fg:      '#111113',
 		},
 	},
-	danger:
-	{
+	danger: {
 		default: '#dc2626',
 		hover:   '#b91c1c',
 		active:  '#991b1b',
 		ring:    '#dc2626',
-		dark:
-		{
+		dark: {
 			default: '#f87171',
 			hover:   '#fca5a5',
 			active:  '#fecaca',
 			ring:    '#f87171',
 		},
 	},
-	success:
-	{
+	success: {
 		default: '#16a34a',
 		bg:      '#f0fdf4',
 		border:  '#bbf7d0',
-		dark:
-		{
+		dark: {
 			default: '#4ade80',
 			bg:      '#052e16',
 			border:  '#166534',
 		},
 	},
-	warning:
-	{
-		default: '#d97706',
+	warning: {
+		default: '#92400e',
 		bg:      '#fffbeb',
 		border:  '#fde68a',
-		dark:
-		{
+		dark: {
 			default: '#fbbf24',
 			bg:      '#1c1200',
 			border:  '#92400e',
 		},
 	},
-	surface:
-	{
+	surface: {
 		default:     '#ffffff',
 		hover:       '#f9fafb',
 		active:      '#f4f4f5',
 		border:      '#e4e4e7',
 		borderHover: '#d4d4d8',
-		dark:
-		{
+		dark: {
 			default:     '#111113',
 			hover:       '#1c1c1f',
 			active:      '#26262a',
@@ -71,36 +60,32 @@ export const colors =
 			borderHover: '#3e3e43',
 		},
 	},
-	text:
-	{
+	text: {
 		default:  '#18181b',
 		muted:    '#52525b',
-		subtle:   '#a1a1aa',
+		subtle:   '#737380',
 		inverted: '#ffffff',
-		dark:
-		{
+		dark: {
 			default:  '#e8e8ea',
 			muted:    '#8e8e9a',
-			subtle:   '#54545e',
+			subtle:   '#7d7d8b',
 			inverted: '#111113',
 		},
 	},
-	input:
-	{
+	input: {
 		border:       '#d4d4d8',
 		borderHover:  '#a1a1aa',
 		ring:         '#18181b',
-		placeholder:  '#a1a1aa',
+		placeholder:  '#737380',
 		disabledBg:   '#f4f4f5',
 		disabledText: '#a1a1aa',
 		error:        '#dc2626',
 		errorRing:    '#dc2626',
-		dark:
-		{
+		dark: {
 			border:       '#2e2e32',
 			borderHover:  '#3e3e43',
 			ring:         '#e8e8ea',
-			placeholder:  '#54545e',
+			placeholder:  '#7d7d8b',
 			disabledBg:   '#1c1c1f',
 			disabledText: '#2e2e32',
 			error:        '#f87171',

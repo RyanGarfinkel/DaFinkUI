@@ -15,8 +15,7 @@ const vars = {
 	'--inner-shadow':  'none',
 };
 
-export const minimalStyle: Style =
-{
+export const minimalStyle: Style = {
 	name:        'minimal',
 	label:       'Minimal',
 	description: 'Restrained radius, hairline borders, soft shadow. The clean default.',

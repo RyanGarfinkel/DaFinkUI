@@ -31,7 +31,7 @@ describe('evaluateBody', () =>
 		expect(() => evaluateBody('return (<NotInScope />);', {})).toThrow();
 	});
 
-	it('does not hang on an infinite while loop — loop-protect breaks it and execution continues', () =>
+	it('does not hang on an infinite while loop; loop-protect breaks it and execution continues', () =>
 	{
 		const start = Date.now();
 		const node = evaluateBody(

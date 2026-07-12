@@ -13,7 +13,7 @@ src/components/ComponentName/
 └── spec.md                  # Machine-readable spec for MCP
 ```
 
-No exceptions. All three files are required. After creating the files, add an entry for the component to `app/_docs/registry/index.ts` — this is what populates the docs site. A component that exists in code but is not in the registry is invisible to users of the docs site.
+No exceptions. All three files are required. After creating the files, add an entry for the component to `app/_docs/registry/index.ts`: this is what populates the docs site. A component that exists in code but is not in the registry is invisible to users of the docs site.
 
 **Note:** Storybook stories (`.stories.tsx`) are no longer part of the required structure. The docs site registry replaces them as the primary showcase.
 
@@ -24,14 +24,14 @@ Every interactive element in the component must implement all three states. Refe
 | State         | Implementation                                                    |
 |---------------|-------------------------------------------------------------------|
 | hover         | Distinct background or border shift via `hover:` Tailwind prefix |
-| focus         | `focus:outline-none` — suppresses browser default                 |
+| focus         | `focus:outline-none`, suppresses browser default                  |
 | focus-visible | `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-{color}` |
 
 Rules:
 - Hover, default, and focus-visible must each be visually distinct from one another
 - Disabled elements must not show hover or focus-visible styles
 - Ring color must match the component's semantic intent (primary → blue, destructive → red, neutral → zinc)
-- **Composite widgets** (ToggleGroup, tab lists, segmented controls, radio groups) use the roving tabindex pattern — one `tabIndex={0}`, rest `tabIndex={-1}`, arrow keys navigate without changing selection, Tab exits the widget. See `src/patterns/accessibility.md` → Composite Widgets.
+- **Composite widgets** (ToggleGroup, tab lists, segmented controls, radio groups) use the roving tabindex pattern: one `tabIndex={0}`, rest `tabIndex={-1}`, arrow keys navigate without changing selection, Tab exits the widget. See `src/patterns/accessibility.md` → Composite Widgets.
 - When a composite item is both focused and selected, use `ring-2 ring-offset-2` (double outline). When focused but not selected, use `ring-2` only (no offset).
 
 ## ComponentName.tsx
@@ -58,17 +58,17 @@ Every new component must have an entry in the registry. Categories follow the si
 | `Overlay`     | Modal, Dialog, Drawer, Dropdown, Menu, Popover, Tooltip           |
 | `Feedback`    | Toast, Alert, Badge, Progress                                     |
 
-The `usage` field must be a complete, runnable code example — not a snippet. The `props` array drives the PropsTable on the detail page and must be kept in sync with the component's actual props interface.
+The `usage` field must be a complete, runnable code example, not a snippet. The `props` array drives the PropsTable on the detail page and must be kept in sync with the component's actual props interface.
 
 ### Declaring Dependencies
 
 Every registry entry must explicitly declare its dependencies. Omitting them breaks the CLI installer for users.
 
-**`dependencies`** — npm packages the component imports that are not already in the base install (`react`, `react-dom`, `next`, `tailwindcss`). Example: a CalendarInput that uses `date-fns` must list `["date-fns"]`.
+**`dependencies`**: npm packages the component imports that are not already in the base install (`react`, `react-dom`, `next`, `tailwindcss`). Example: a CalendarInput that uses `date-fns` must list `["date-fns"]`.
 
-**`registryDependencies`** — other components from this registry that must be present for this component to work. Use the slug (lowercase). Example: a Modal that renders a Button internally must list `["button"]`. The CLI resolves these transitively — declare only direct dependencies, not the full tree.
+**`registryDependencies`**: other components from this registry that must be present for this component to work. Use the slug (lowercase). Example: a Modal that renders a Button internally must list `["button"]`. The CLI resolves these transitively; declare only direct dependencies, not the full tree.
 
-**`files`** — the source files to copy into the user's project, relative to `src/components/`. A single-file component is `["Button/Button.tsx"]`. A compound component with subcomponents may list multiple files.
+**`files`**: the source files to copy into the user's project, relative to `src/components/`. A single-file component is `["Button/Button.tsx"]`. A compound component with subcomponents may list multiple files.
 
 ```ts
 // Example entry with all fields
@@ -85,21 +85,21 @@ Every registry entry must explicitly declare its dependencies. Omitting them bre
 }
 ```
 
-If a component has zero npm dependencies and zero registry dependencies, still include the fields as empty arrays — this signals the entry is complete, not missing.
+If a component has zero npm dependencies and zero registry dependencies, still include the fields as empty arrays: this signals the entry is complete, not missing.
 
 ## Live Preview (Required)
 
-Every component must have a live preview case in `app/_docs/components/ComponentLivePreview.tsx`. Add a `case` for the component's slug in the switch statement. Without it, the component detail page shows "No preview available for this component" — this is not acceptable.
+Every component must have a live preview case in `app/_docs/components/ComponentLivePreview.tsx`. Add a `case` for the component's slug in the switch statement. Without it, the component detail page shows "No preview available for this component", and this is not acceptable.
 
 The preview must match the `usage` field in the registry entry exactly. If the preview shows `<Input label="Email" />`, the `usage` string must also show `<Input label="Email" />`. They are always kept in sync.
 
-**Whenever you change the live preview, update the `usage` string in the registry to match — and vice versa.** Divergence between the two is a bug. The easiest way to check: search for the component's slug in `app/_docs/registry/index.ts` and compare the `usage` field against the `case` block in `ComponentLivePreview.tsx` side by side.
+**Whenever you change the live preview, update the `usage` string in the registry to match, and vice versa.** Divergence between the two is a bug. The easiest way to check: search for the component's slug in `app/_docs/registry/index.ts` and compare the `usage` field against the `case` block in `ComponentLivePreview.tsx` side by side.
 
 A component is not done until its preview case exists and renders correctly on the docs site.
 
 ## Tests for Bugs Found
 
-Whenever a bug or unexpected behavior is noticed — whether caught in code review, manual testing, or reported by a user — write a failing test that reproduces it **before** fixing it. The test proves the bug existed, proves the fix works, and prevents regression.
+Whenever a bug or unexpected behavior is noticed (whether caught in code review, manual testing, or reported by a user), write a failing test that reproduces it **before** fixing it. The test proves the bug existed, proves the fix works, and prevents regression.
 
 This applies to all components, not just new ones. If you fix a bug in an existing component that has no test for that case, add one.
 
@@ -107,12 +107,12 @@ This applies to all components, not just new ones. If you fix a bug in an existi
 
 Use Vitest and `@testing-library/react`. Tests must cover:
 
-1. **Renders** — component mounts without errors
-2. **Variants** — each variant renders with the correct Tailwind classes
-3. **Interactive states** — hover, focus-visible classes are present on the element
-4. **Disabled** — disabled state removes pointer events and shows correct classes
-5. **Accessibility** — any `aria-*` attributes set by the component are correct
-6. **Forwarded props** — native HTML attributes (e.g. `onClick`, `type`) are passed through
+1. **Renders**: component mounts without errors
+2. **Variants**: each variant renders with the correct Tailwind classes
+3. **Interactive states**: hover, focus-visible classes are present on the element
+4. **Disabled**: disabled state removes pointer events and shows correct classes
+5. **Accessibility**: any `aria-*` attributes set by the component are correct
+6. **Forwarded props**: native HTML attributes (e.g. `onClick`, `type`) are passed through
 
 ```tsx
 import { render, screen } from '@testing-library/react';
@@ -131,25 +131,25 @@ describe('ComponentName', () =>
 
 ## Popup and Overlay Components
 
-Any component that opens a floating layer — Modal, Dialog, Drawer, Dropdown, Menu, Combobox, Popover, Tooltip — must satisfy all of the following before it is considered complete. Read `src/patterns/accessibility.md` for the full implementation guide.
+Any component that opens a floating layer (Modal, Dialog, Drawer, Dropdown, Menu, Combobox, Popover, Tooltip) must satisfy all of the following before it is considered complete. Read `src/patterns/accessibility.md` for the full implementation guide.
 
 ### Required Behavior Checklist
 
-- [ ] **Focus on open** — focus moves inside the overlay immediately when it opens
-- [ ] **Focus trap** (modals, dialogs, drawers only) — Tab and Shift+Tab cycle within the overlay; focus cannot escape to the document behind it
-- [ ] **Escape closes** — pressing Escape always closes the overlay
-- [ ] **Focus return** — when the overlay closes, focus returns to the element that triggered it
-- [ ] **Tab in menus/dropdowns** — Tab closes the menu and moves focus to the next page element (does not trap)
-- [ ] **Arrow key navigation** (menus, listboxes, select) — ArrowDown/ArrowUp move between items; Home/End jump to first/last
-- [ ] **Typeahead** (menus, listboxes) — typing a character moves focus to the next matching item
-- [ ] **Enter/Space confirms** — activates the focused item and closes the overlay
-- [ ] **Background scroll lock** (modals/dialogs/drawers) — `overflow: hidden` on `<body>` while overlay is open
-- [ ] **Backdrop click** (modals/dialogs) — clicking the backdrop closes the overlay, same as Escape
-- [ ] **ARIA roles** — correct `role`, `aria-modal`, `aria-expanded`, `aria-haspopup`, `aria-labelledby`, `aria-describedby` as applicable
-- [ ] **Animation** — enters with `opacity-0 scale-95` → `opacity-100 scale-100`; exits in reverse; respects `prefers-reduced-motion`
-- [ ] **Target size** — all interactive targets are ≥ 24×24 CSS px, or have adequate spacing so a 24px circle centered on the target doesn't overlap another target (WCAG 2.5.8 AA)
-- [ ] **No paste blocking** — never call `e.preventDefault()` on paste events in any text input within the component
-- [ ] **Autocomplete** — identity inputs (`type="email"`, `type="tel"`, name/address fields) have the correct `autocomplete` attribute set (WCAG 1.3.5 AA)
+- [ ] **Focus on open**: focus moves inside the overlay immediately when it opens
+- [ ] **Focus trap** (modals, dialogs, drawers only): Tab and Shift+Tab cycle within the overlay; focus cannot escape to the document behind it
+- [ ] **Escape closes**: pressing Escape always closes the overlay
+- [ ] **Focus return**: when the overlay closes, focus returns to the element that triggered it
+- [ ] **Tab in menus/dropdowns**: Tab closes the menu and moves focus to the next page element (does not trap)
+- [ ] **Arrow key navigation** (menus, listboxes, select): ArrowDown/ArrowUp move between items; Home/End jump to first/last
+- [ ] **Typeahead** (menus, listboxes): typing a character moves focus to the next matching item
+- [ ] **Enter/Space confirms**: activates the focused item and closes the overlay
+- [ ] **Background scroll lock** (modals/dialogs/drawers): `overflow: hidden` on `<body>` while overlay is open
+- [ ] **Backdrop click** (modals/dialogs): clicking the backdrop closes the overlay, same as Escape
+- [ ] **ARIA roles**: correct `role`, `aria-modal`, `aria-expanded`, `aria-haspopup`, `aria-labelledby`, `aria-describedby` as applicable
+- [ ] **Animation**: enters with `opacity-0 scale-95` → `opacity-100 scale-100`; exits in reverse; respects `prefers-reduced-motion`
+- [ ] **Target size**: all interactive targets are ≥ 24×24 CSS px, or have adequate spacing so a 24px circle centered on the target doesn't overlap another target (WCAG 2.5.8 AA)
+- [ ] **No paste blocking**: never call `e.preventDefault()` on paste events in any text input within the component
+- [ ] **Autocomplete**: identity inputs (`type="email"`, `type="tel"`, name/address fields) have the correct `autocomplete` attribute set (WCAG 1.3.5 AA)
 
 ### Animation Pattern
 
@@ -217,9 +217,9 @@ Changes that do not require a spec update:
 ## Update Tests When Behavior Changes
 
 Update `ComponentName.test.tsx` whenever:
-- A prop is added, removed, or renamed — add/remove/update the corresponding test
-- A class name changes — update assertions that check for that class
-- A new variant or size is added — add a test case for it
-- Accessibility attributes change — update `aria-*` assertions
+- A prop is added, removed, or renamed: add/remove/update the corresponding test
+- A class name changes: update assertions that check for that class
+- A new variant or size is added: add a test case for it
+- Accessibility attributes change: update `aria-*` assertions
 
 Do not delete tests unless the behavior they cover no longer exists. Do not leave tests asserting against stale class names or removed props.

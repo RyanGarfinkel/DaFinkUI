@@ -4,7 +4,7 @@ General code style rules that apply to all files in this repo.
 
 ## Import Order
 
-Imports must be ordered by statement length — longest import statement at the top, shortest at the bottom. No grouping by type (third-party vs local).
+Imports must be ordered by statement length: longest import statement at the top, shortest at the bottom. No grouping by type (third-party vs local).
 
 ```ts
 // Correct
@@ -12,7 +12,7 @@ import { createContext, useContext, useRef, useState, useEffect } from 'react';
 import { something } from '../utils';
 import type { Foo } from './types';
 
-// Wrong — shorter imports above longer ones
+// Wrong: shorter imports above longer ones
 import type { Foo } from './types';
 import { createContext, useContext } from 'react';
 ```

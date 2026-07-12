@@ -1,5 +1,5 @@
 /**
- * Motion tokens — mirrors CSS custom properties defined in globals.css @theme.
+ * Motion tokens: mirrors CSS custom properties defined in globals.css @theme.
  * For MCP consumption. Not imported into components.
  */
 export const motion = {

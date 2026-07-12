@@ -1,14 +1,11 @@
-// AUTO-GENERATED — edit tokens/noir.{light,dark}.json then run `npm run tokens`
+// AUTO-GENERATED: edit tokens/noir.{light,dark}.json then run `npm run tokens`
 import type { Theme } from './types';
 
-export const noirTheme: Theme =
-{
+export const noirTheme: Theme = {
 	name:   'noir',
 	label:  'Noir',
 	accent: '#64748b',
-
-	light:
-	{
+	light: {
 		'--color-brand':                 '#1e293b',
 		'--color-brand-hover':           '#334155',
 		'--color-brand-active':          '#475569',
@@ -42,9 +39,7 @@ export const noirTheme: Theme =
 		'--color-input-error':           '#dc2626',
 		'--color-input-error-ring':      '#dc2626',
 	},
-
-	dark:
-	{
+	dark: {
 		'--color-brand':                 '#f1f5f9',
 		'--color-brand-hover':           '#e2e8f0',
 		'--color-brand-active':          '#cbd5e1',

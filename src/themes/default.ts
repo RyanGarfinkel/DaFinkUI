@@ -1,14 +1,11 @@
-// AUTO-GENERATED — edit tokens/default.{light,dark}.json then run `npm run tokens`
+// AUTO-GENERATED: edit tokens/default.{light,dark}.json then run `npm run tokens`
 import type { Theme } from './types';
 
-export const defaultTheme: Theme =
-{
+export const defaultTheme: Theme = {
 	name:   'default',
 	label:  'Zinc',
 	accent: '#18181b',
-
-	light:
-	{
+	light: {
 		'--color-brand':                 '#18181b',
 		'--color-brand-hover':           '#27272a',
 		'--color-brand-active':          '#3f3f46',
@@ -21,7 +18,7 @@ export const defaultTheme: Theme =
 		'--color-success':               '#16a34a',
 		'--color-success-bg':            '#f0fdf4',
 		'--color-success-border':        '#bbf7d0',
-		'--color-warning':               '#d97706',
+		'--color-warning':               '#92400e',
 		'--color-warning-bg':            '#fffbeb',
 		'--color-warning-border':        '#fde68a',
 		'--color-surface':               '#ffffff',
@@ -31,20 +28,18 @@ export const defaultTheme: Theme =
 		'--color-surface-border-hover':  '#d4d4d8',
 		'--color-text':                  '#18181b',
 		'--color-text-muted':            '#52525b',
-		'--color-text-subtle':           '#a1a1aa',
+		'--color-text-subtle':           '#737380',
 		'--color-text-inverted':         '#ffffff',
 		'--color-input-border':          '#d4d4d8',
 		'--color-input-border-hover':    '#a1a1aa',
 		'--color-input-ring':            '#18181b',
-		'--color-input-placeholder':     '#a1a1aa',
+		'--color-input-placeholder':     '#737380',
 		'--color-input-disabled-bg':     '#f4f4f5',
 		'--color-input-disabled-text':   '#a1a1aa',
 		'--color-input-error':           '#dc2626',
 		'--color-input-error-ring':      '#dc2626',
 	},
-
-	dark:
-	{
+	dark: {
 		'--color-brand':                 '#e8e8ea',
 		'--color-brand-hover':           '#d0d0d4',
 		'--color-brand-active':          '#b4b4b9',
@@ -67,12 +62,12 @@ export const defaultTheme: Theme =
 		'--color-surface-border-hover':  '#3e3e43',
 		'--color-text':                  '#e8e8ea',
 		'--color-text-muted':            '#8e8e9a',
-		'--color-text-subtle':           '#54545e',
+		'--color-text-subtle':           '#7d7d8b',
 		'--color-text-inverted':         '#111113',
 		'--color-input-border':          '#2e2e32',
 		'--color-input-border-hover':    '#3e3e43',
 		'--color-input-ring':            '#e8e8ea',
-		'--color-input-placeholder':     '#54545e',
+		'--color-input-placeholder':     '#7d7d8b',
 		'--color-input-disabled-bg':     '#1c1c1f',
 		'--color-input-disabled-text':   '#2e2e32',
 		'--color-input-error':           '#f87171',

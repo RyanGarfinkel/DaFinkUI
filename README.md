@@ -1,6 +1,6 @@
 # DaFink UI
 
-A token-driven, accessibility-first design system built on Next.js and Tailwind v4. Components ship as source you own — each one lives in its own folder with implementation, tests, and a machine-readable spec, and is documented on the built-in docs site with a live preview.
+A token-driven, accessibility-first design system built on Next.js and Tailwind v4. Components ship as source you own: each one lives in its own folder with implementation, tests, and a machine-readable spec, and is documented on the built-in docs site with a live preview.
 
 ## Getting Started
 
@@ -26,10 +26,10 @@ npm run dev   # docs site at http://localhost:3000
 
 ```
 app/              # Next.js docs site
-  api/mcp/        # MCP server — serves component specs, tokens, and patterns
+  api/mcp/        # MCP server, serves component specs, tokens, and patterns
   _docs/          # Docs site components and the component registry
 src/
-  components/     # Library source — each component has TSX, tests, and spec.md
+  components/     # Library source, each component has TSX, tests, and spec.md
   tokens/         # Design token definitions (TypeScript mirror of globals.css)
   themes/         # Theme definitions (zinc, ocean, ember, forest, noir, plum)
   patterns/       # Design, accessibility, and interaction guidelines
@@ -46,10 +46,10 @@ The docs site exposes an MCP endpoint at `/api/mcp` that serves component specs 
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md). Before adding or modifying a component, read the rules in `rules/`:
 
-- `design.md` — visual and motion decisions
-- `tokens.md` — how to use design tokens
-- `new-component.md` — required file structure for every component
-- `docs-site.md` — conventions for the docs site under `app/`
-- `commits.md` — commit message format
+- `design.md`: visual and motion decisions
+- `tokens.md`: how to use design tokens
+- `new-component.md`: required file structure for every component
+- `docs-site.md`: conventions for the docs site under `app/`
+- `commits.md`: commit message format
 
-Accessibility is non-negotiable — every component must be keyboard-navigable, have visible focus indicators, meet contrast minimums, never rely on color alone, and respect `prefers-reduced-motion`.
+Accessibility is non-negotiable: every component must be keyboard-navigable, have visible focus indicators, meet contrast minimums, never rely on color alone, and respect `prefers-reduced-motion`.
