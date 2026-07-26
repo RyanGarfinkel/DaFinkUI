@@ -150,43 +150,49 @@ export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
 					<span className='text-sm font-semibold tracking-tight'>DaFink UI</span>
 				</Link>
 
-				{/* Search trigger */}
-				<button
-					type='button'
-					onClick={() => setPaletteOpen(true)}
-					aria-label='Search'
-					aria-keyshortcuts='/ Meta+k'
-					className={[
-						'relative flex-1 max-w-sm mx-auto flex items-center gap-2',
-						'rounded-lg border border-surface-border bg-surface-hover/40 px-3 py-2 md:py-1.5',
-						'text-sm text-text-subtle text-left',
-						'transition-colors duration-[var(--duration-fast)]',
-						'hover:border-surface-border-hover hover:bg-surface-hover',
-						'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
-					].join(' ')}
-				>
-					<svg
-						width='14'
-						height='14'
-						viewBox='0 0 24 24'
-						fill='none'
-						stroke='currentColor'
-						strokeWidth='2'
-						strokeLinecap='round'
-						strokeLinejoin='round'
-						className='shrink-0 text-text-subtle'
-						aria-hidden='true'
+				{/* Search trigger — wrapped in a flex-1 + justify-center container rather
+				    than putting mx-auto directly on the button: MenuBarActions uses
+				    ml-auto to push itself right, and auto margins on sibling flex items
+				    share the same leftover-space pool, which split unevenly and left the
+				    button off-center. Centering via the wrapper isn't subject to that. */}
+				<div className='flex-1 min-w-0 flex justify-center'>
+					<button
+						type='button'
+						onClick={() => setPaletteOpen(true)}
+						aria-label='Search'
+						aria-keyshortcuts='/ Meta+k'
+						className={[
+							'relative w-full max-w-sm flex items-center gap-2',
+							'rounded-lg border border-surface-border bg-surface-hover/40 px-3 py-2 md:py-1.5',
+							'text-sm text-text-subtle text-left',
+							'transition-colors duration-[var(--duration-fast)]',
+							'hover:border-surface-border-hover hover:bg-surface-hover',
+							'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
+						].join(' ')}
 					>
-						<circle cx='11' cy='11' r='8' />
-						<path d='m21 21-4.35-4.35' />
-					</svg>
+						<svg
+							width='14'
+							height='14'
+							viewBox='0 0 24 24'
+							fill='none'
+							stroke='currentColor'
+							strokeWidth='2'
+							strokeLinecap='round'
+							strokeLinejoin='round'
+							className='shrink-0 text-text-subtle'
+							aria-hidden='true'
+						>
+							<circle cx='11' cy='11' r='8' />
+							<path d='m21 21-4.35-4.35' />
+						</svg>
 
-					<span className='flex-1'>Search…</span>
+						<span className='flex-1'>Search…</span>
 
-					<kbd className='hidden sm:inline-flex items-center gap-0.5 rounded border border-surface-border px-1.5 py-0.5 text-[10px] font-mono text-text-subtle'>
-						/
-					</kbd>
-				</button>
+						<kbd className='hidden sm:inline-flex items-center gap-0.5 rounded border border-surface-border px-1.5 py-0.5 text-[10px] font-mono text-text-subtle'>
+							/
+						</kbd>
+					</button>
+				</div>
 
 				{/* Right controls */}
 				<MenuBarActions>
