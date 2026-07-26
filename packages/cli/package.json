@@ -15,7 +15,7 @@
 		"templates"
 	],
 	"scripts": {
-		"build": "tsc && node scripts/build-registry.mjs",
+		"build": "node scripts/build-registry.mjs && tsc",
 		"dev": "tsc --watch"
 	},
 	"dependencies": {

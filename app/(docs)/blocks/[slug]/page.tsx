@@ -91,21 +91,38 @@ const BlockPage = async (
 
         {extraDemos.length > 0 && (
           <div className='flex flex-col gap-10 mt-2 pt-6 border-t border-surface-border'>
-            {extraDemos.map((example) => (
-              <section key={example.id} className='flex flex-col gap-1'>
-                <h3 className='text-sm font-semibold text-text font-mono'>
-                  {example.title}
-                </h3>
-                {example.description && (
-                  <p className='text-sm text-text-muted mb-3'>
-                    {example.description}
-                  </p>
-                )}
-                <CodeBlock variant='example' label={example.id} code={example.usage} minHeight='320px'>
-                  {example.preview}
-                </CodeBlock>
-              </section>
-            ))}
+            {extraDemos.map((example) => {
+              const exampleEntry = getBlock(example.slug);
+
+              return (
+                <section key={example.id} className='flex flex-col gap-1'>
+                  <h3 className='text-sm font-semibold text-text font-mono'>
+                    {example.title}
+                  </h3>
+                  {example.description && (
+                    <p className='text-sm text-text-muted mb-3'>
+                      {example.description}
+                    </p>
+                  )}
+                  <CodeBlock variant='example' label={example.id} code={example.usage} minHeight='320px'>
+                    {example.preview}
+                  </CodeBlock>
+                  {exampleEntry && (
+                    <div className='flex flex-col gap-2 mt-3'>
+                      <CodeBlock code={`npx dafink-ui add ${exampleEntry.slug}`} />
+                      {exampleEntry.registryDependencies.length > 0 && (
+                        <p className='text-xs text-text-muted'>
+                          Also installs:{' '}
+                          {exampleEntry.registryDependencies
+                            .map((dep) => dep.charAt(0).toUpperCase() + dep.slice(1))
+                            .join(', ')}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </section>
+              );
+            })}
           </div>
         )}
       </section>

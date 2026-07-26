@@ -3,9 +3,9 @@ import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, 
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerClose } from '@/src/components/Drawer/Drawer';
 import { SidebarSection, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
 import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
+import { visibleRegistry as registry } from '@/app/_docs/registry';
 import { CATEGORIES } from '@/app/_docs/registry/categories';
 import { blocks } from '@/app/_docs/registry/blocks';
-import { registry } from '@/app/_docs/registry';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -97,7 +97,7 @@ export const MobileNav = () =>
 
 						{showBlocks && (
 							<nav className='flex flex-col gap-1'>
-								{blocks.map((entry) => (
+								{blocks.filter((entry) => !entry.hidden).map((entry) => (
 									<DocsSidebarLink
 										key={entry.slug}
 										href={`/blocks/${entry.slug}`}

@@ -92,6 +92,15 @@ const buildEntryRegions = () =>
 
 const entryRegions = buildEntryRegions();
 
+// Hidden entries (e.g. "charts") back other entries' registryDependencies
+// without a catalog page of their own, so they don't necessarily render as
+// their own named JSX; checks 5 and 6 skip them for that reason.
+const hiddenSlugs = new Set(
+	Object.entries(entryRegions)
+		.filter(([, region]) => /^ {4}hidden:\s*true/m.test(region))
+		.map(([slug]) => slug)
+);
+
 // ─── Collect component directories ───────────────────────────────────────────
 
 const compDirs = readdirSync(COMP_DIR).filter(name =>
@@ -159,6 +168,8 @@ console.log('Checking usage code contains JSX…');
 
 for(const entry of entries)
 {
+	if(hiddenSlugs.has(entry.slug)) continue;
+
 	const region = entryRegions[entry.slug];
 	if(!region)
 	{
@@ -176,6 +187,8 @@ console.log('Checking preview/usage alignment…');
 
 for(const entry of entries)
 {
+	if(hiddenSlugs.has(entry.slug)) continue;
+
 	const block = getCaseBlock(entry.slug);
 	if(!block) continue; // already caught in check 4
 
@@ -189,14 +202,18 @@ console.log('Checking CLI registry coverage…');
 
 const CLI_REGISTRY_FILE = join(ROOT, 'packages/cli/src/lib/registry.ts');
 const cliText  = readFileSync(CLI_REGISTRY_FILE, 'utf8');
-const cliNames = new Set(
-	[...cliText.matchAll(/\bname:\s*'([^']+)'/g)].map(m => m[1])
+
+// Matched against `files:` (not `name:`) for the same reason as check 2: a
+// directory's primary export name (e.g. KanbanBoard in Kanban/) doesn't
+// always match its folder name, but its file path always does.
+const cliFiles = new Set(
+	[...cliText.matchAll(/'([^']+\.tsx)'/g)].map(m => m[1])
 );
 
 for(const dir of compDirs)
 {
-	if(!cliNames.has(dir))
-		fail(`${dir} is missing from packages/cli/src/lib/registry.ts`);
+	if(!cliFiles.has(`${dir}/${dir}.tsx`))
+		fail(`${dir}/${dir}.tsx is missing from packages/cli/src/lib/registry.ts`);
 }
 
 // ─── Report ───────────────────────────────────────────────────────────────────

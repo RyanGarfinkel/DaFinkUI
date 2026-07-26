@@ -3,9 +3,9 @@
 import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
 import { Sidebar, SidebarHeader, SidebarFooter, SidebarDivider, useSidebarCollapsed } from '@/src/components/Sidebar/Sidebar';
 import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
+import { visibleRegistry as registry } from '@/app/_docs/registry';
 import Tooltip from '@/src/components/Tooltip/Tooltip';
 import { blocks } from '@/app/_docs/registry/blocks';
-import { registry } from '@/app/_docs/registry';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 

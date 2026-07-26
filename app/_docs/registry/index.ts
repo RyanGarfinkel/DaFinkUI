@@ -22,6 +22,12 @@ export interface ComponentEntry {
   registryDependencies: string[];
   files: string[];
   composition?: CompositionNode;
+  /** Installable via the CLI and directly linkable at /components/{slug}, but omitted from
+   * the /components gallery, sidebar, and search. Used for entries that back other
+   * components' or blocks' registryDependencies (e.g. "charts", the combined export
+   * behind LineChart/BarChart/AreaChart/DonutChart/RadarChart) without duplicating a
+   * catalog page those already cover. */
+  hidden?: boolean;
 }
 
 export const registry: ComponentEntry[] = [
@@ -1279,7 +1285,7 @@ export default function Example() {
       { name: 'className',         type: 'string',                       default: "''",        description: 'Additional CSS classes.' },
       { name: 'children',          type: 'ReactNode',                    default: 'undefined', description: 'Sidebar content (header, sections, links, dividers, footer).' },
     ],
-    dependencies:         ['next/link'],
+    dependencies:         [],
     registryDependencies: ['tooltip', 'scroll-fade'],
     files:                ['Sidebar/Sidebar.tsx'],
     composition: {
@@ -1417,6 +1423,18 @@ export default function Example() {
   },
 
   // ─── Charts ──────────────────────────────────────────────────────────────
+  {
+    slug: 'charts',
+    name: 'Charts',
+    category: 'Charts',
+    description: 'The shared Charts.tsx module (LineChart, BarChart, AreaChart, DonutChart, RadarChart). Not a catalog page on its own — see the individual chart types below — but a real, installable slug that other components and blocks depend on.',
+    usage: 'import { LineChart, BarChart, AreaChart, DonutChart, RadarChart } from \'@components\';',
+    props: [],
+    dependencies: ['recharts'],
+    registryDependencies: [],
+    files: ['Charts/Charts.tsx'],
+    hidden: true,
+  },
   {
     slug: 'line-chart',
     name: 'LineChart',
@@ -2458,7 +2476,7 @@ export default function Example() {
     ],
     dependencies: [],
     registryDependencies: [],
-    files: ['DataTable/DataTable.tsx'],
+    files: ['DataTable/DataTable.tsx', 'DataTable/Paginator.tsx'],
   },
   {
     slug: 'function-plotter',
@@ -3665,7 +3683,7 @@ export default function Example() {
         description: 'Called when a node is selected via click or keyboard Enter/Space.',
       },
     ],
-    dependencies: ['d3-force'],
+    dependencies: ['d3-force', '@types/d3-force'],
     registryDependencies: [],
     files: ['Graph/Graph.tsx'],
   },
@@ -3867,3 +3885,8 @@ export default function Example() {
 export const getComponent = (slug: string) => {
   return registry.find(c => c.slug === slug);
 };
+
+/** `registry` filtered to entries meant for the /components gallery, sidebar,
+ * and search. Use this for any listing UI; use raw `registry` (or `getComponent`)
+ * for direct slug lookups, so hidden entries stay installable and linkable. */
+export const visibleRegistry = registry.filter(c => !c.hidden);

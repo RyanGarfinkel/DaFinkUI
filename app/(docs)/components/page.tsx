@@ -1,5 +1,5 @@
+import { visibleRegistry as registry } from '@/app/_docs/registry';
 import { CATEGORIES } from '@/app/_docs/registry/categories';
-import { registry } from '@/app/_docs/registry';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 

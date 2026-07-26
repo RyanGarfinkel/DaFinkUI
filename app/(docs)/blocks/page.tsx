@@ -9,16 +9,18 @@ export const metadata: Metadata = {
 };
 
 const BlocksPage = () => {
+  const listedBlocks = blocks.filter((b) => !b.hidden);
+
   const byCategory = BLOCK_CATEGORIES.reduce<Record<string, typeof blocks>>(
     (acc, cat) => {
-      const entries = blocks.filter((b) => b.category === cat);
+      const entries = listedBlocks.filter((b) => b.category === cat);
       if (entries.length > 0) acc[cat] = entries;
       return acc;
     },
     {},
   );
 
-  const total = blocks.length;
+  const total = listedBlocks.length;
 
   return (
     <div className='flex flex-col gap-10'>

@@ -754,7 +754,7 @@ export default function PricingSection() {
   );
 }`,
 		dependencies: [],
-		registryDependencies: ['accordion', 'toggle-group', 'card', 'button', 'badge', 'slider'],
+		registryDependencies: ['accordion', 'toggle-group', 'card', 'button', 'badge'],
 		files: ['PricingSection/PricingSection.tsx'],
 	},
 	{
@@ -819,7 +819,7 @@ export default function NotificationsPanel() {
   );
 }`,
 		dependencies: [],
-		registryDependencies: ['card', 'scroll-fade', 'avatar', 'button', 'tabs', 'badge'],
+		registryDependencies: ['card', 'scroll-fade', 'avatar', 'button'],
 		files: ['NotificationsPanel/NotificationsPanel.tsx'],
 	},
 	{

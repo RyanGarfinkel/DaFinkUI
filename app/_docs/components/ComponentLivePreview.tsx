@@ -476,6 +476,26 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         />
       );
 
+    case 'charts': {
+      const data = [
+        { month: 'Jan', revenue: 4000, expenses: 2400 },
+        { month: 'Feb', revenue: 3000, expenses: 1398 },
+        { month: 'Mar', revenue: 5000, expenses: 2800 },
+      ];
+      return (
+        <div className='w-full flex flex-col gap-3'>
+          <p className='text-sm text-text-muted'>
+            This is the shared module behind LineChart, BarChart, AreaChart, DonutChart, and RadarChart — see those pages for the full set.
+          </p>
+          <LineChart
+            data={data}
+            xKey='month'
+            series={[{ key: 'revenue', label: 'Revenue' }, { key: 'expenses', label: 'Expenses' }]}
+          />
+        </div>
+      );
+    }
+
     case 'line-chart': {
       const data = [
         { month: 'Jan', revenue: 4000, expenses: 2400 },

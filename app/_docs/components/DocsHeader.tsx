@@ -2,6 +2,7 @@
 import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
 import { MenuBar, MenuBarActions } from '@/src/components/MenuBar/MenuBar';
 import ThemeToggle from '@/src/components/ThemeToggle/ThemeToggle';
+import { visibleRegistry as registry } from '@/app/_docs/registry';
 import { themes, getThemeByName, type Theme } from '@/src/themes';
 import { styles, getStyleByName, type Style } from '@/src/styles';
 import { ArrowRightIcon } from '@/app/_docs/components/NavIcons';
@@ -10,7 +11,6 @@ import { MobileNav } from '@/app/_docs/components/MobileNav';
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { Select } from '@/src/components/Select/Select';
 import { blocks } from '@/app/_docs/registry/blocks';
-import { registry } from '@/app/_docs/registry';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -250,7 +250,7 @@ export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
 				</CommandGroup>
 
 				<CommandGroup label='Blocks'>
-					{blocks.map(entry => (
+					{blocks.filter(entry => !entry.hidden).map(entry => (
 						<CommandItem
 							key={entry.slug}
 							value={entry.name}
