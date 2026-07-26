@@ -1,6 +1,6 @@
 import { ComponentPreview } from '@/app/_docs/components/ComponentPreview';
 import { Card, CardHeader, CardContent } from '@/src/components/Card/Card';
-import { DarkModeToggle } from '@/app/_docs/components/DarkModeToggle';
+import ThemeToggle from '@/src/components/ThemeToggle/ThemeToggle';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
 import { Tooltip } from '@/src/components/Tooltip/Tooltip';
 import { themes } from '@/src/themes';
@@ -13,12 +13,12 @@ export const metadata: Metadata = {
 };
 
 const THEME_DESCRIPTIONS: Record<string, string> = {
-	default: 'Pure white surfaces with a jet-black brand — a neutral premium look that works in any context.',
+	default: 'Pure white surfaces with a jet-black brand, a neutral premium look that works in any context.',
 	ocean:   'Deep sky blue brand over cool blue-tinted surfaces. Dark mode drops into a true deep navy with precise elevation steps.',
-	ember:   'Warm orange brand with amber-tinted surfaces. Dark mode goes to a near-black with deep warm undertones — rich without being aggressive.',
-	forest:  'Fresh emerald brand over subtly green-tinted surfaces. Dark mode is a true deep forest — near-black with green undertones and clear hierarchy.',
-	noir:    'Cool slate surfaces with a deep charcoal brand. Quieter than Zinc — every surface has a blue undertone that reads refined and editorial.',
-	plum:    'Rich violet brand over barely-tinted surfaces. Dark mode is deep violet-black — luxurious, design-forward, and high contrast.',
+	ember:   'Warm orange brand with amber-tinted surfaces. Dark mode goes to a near-black with deep warm undertones, rich without being aggressive.',
+	forest:  'Fresh emerald brand over subtly green-tinted surfaces. Dark mode is a true deep forest: near-black with green undertones and clear hierarchy.',
+	noir:    'Cool slate surfaces with a deep charcoal brand. Quieter than Zinc: every surface has a blue undertone that reads refined and editorial.',
+	plum:    'Rich violet brand over barely-tinted surfaces. Dark mode is deep violet-black, luxurious, design-forward, and high contrast.',
 };
 
 const SWATCH_LABELS: Record<string, string> = {
@@ -43,11 +43,11 @@ const STYLE_DETAILS: Record<string, StyleDetail> = {
 		traits:    'Restrained radius, hairline borders, little to no shadow, generous whitespace, neutral surfaces. The closest fit to a clean, unopinionated default.',
 		a11y:      'Strong. High contrast and clear separation come naturally, with few effects to compromise legibility.',
 		a11yTone:  'strong',
-		whenToUse: 'Content-heavy apps, enterprise tools, reading experiences — anything that prioritizes clarity and longevity.',
+		whenToUse: 'Content-heavy apps, enterprise tools, reading experiences: anything that prioritizes clarity and longevity.',
 	},
 	neumorph: {
 		traits:    'The surface is locked to a neutral gray so dual shadows (white top-left, dark bottom-right) are visible. Depth comes entirely from shadow, with no border and a medium-to-large radius. Form fields use an inset version of the shadow to feel sunken.',
-		a11y:      'The weakest style for accessibility. Borders vanish and contrast between elements is low. Treat it as opt-in and use it sparingly — toggles, sliders, and cards only — while keeping the rest of the UI flat.',
+		a11y:      'The weakest style for accessibility. Borders vanish and contrast between elements is low. Treat it as opt-in and use it sparingly (toggles, sliders, and cards only) while keeping the rest of the UI flat.',
 		a11yTone:  'caution',
 		whenToUse: 'Sparingly, for tactile accents on individual controls. Do not build a whole interface in Neumorph.',
 	},
@@ -55,14 +55,14 @@ const STYLE_DETAILS: Record<string, StyleDetail> = {
 		traits:    'Radius 0, thick solid borders (2–4px), and a hard offset shadow (e.g. 4px 4px 0 with no blur). High contrast, with bold or monospaced type.',
 		a11y:      'Generally strong. High contrast and visible, heavy borders make boundaries and focus easy to perceive.',
 		a11yTone:  'strong',
-		whenToUse: 'Brands that want to stand out — portfolios, editorial sites, developer tools, and marketing pages.',
+		whenToUse: 'Brands that want to stand out: portfolios, editorial sites, developer tools, and marketing pages.',
 	},
 };
 
 const TONE_LABEL: Record<StyleDetail['a11yTone'], string> = {
-	strong:  'Accessibility — strong',
-	caution: 'Accessibility — caution',
-	note:    'Accessibility — note',
+	strong:  'Accessibility: strong',
+	caution: 'Accessibility: caution',
+	note:    'Accessibility: note',
 };
 
 const TONE_DOT: Record<StyleDetail['a11yTone'], string> = {
@@ -135,7 +135,7 @@ const ThemePage = () =>
 				<h1 className='text-3xl font-semibold tracking-tight text-text'>Theme</h1>
 				<p className='text-base text-text-muted leading-relaxed'>
 					DaFink UI is fully themeable via CSS custom properties. A color palette, a
-					surface style, and light/dark mode compose freely and independently — swap any
+					surface style, and light/dark mode compose freely and independently. Swap any
 					one of them without touching a single component.
 				</p>
 			</div>
@@ -144,15 +144,20 @@ const ThemePage = () =>
 			<div className='flex flex-col gap-4'>
 				<h2 className='text-xl font-semibold text-text'>Light & dark mode</h2>
 				<p className='text-sm text-text-muted leading-relaxed'>
-					Mode is class-based — toggling adds or removes <InlineCode>.dark</InlineCode>{' '}
+					Mode is class-based: toggling adds or removes <InlineCode>.dark</InlineCode>{' '}
 					on <InlineCode>&lt;html&gt;</InlineCode>, which flips every theme and style to
 					its <InlineCode>dark</InlineCode> token map. The choice is stored in{' '}
 					<InlineCode>localStorage</InlineCode> and mirrored to a cookie so the server
 					renders the correct mode on first paint, with no flash.
 				</p>
 				<ComponentPreview>
-					<DarkModeToggle />
+					<ThemeToggle />
 				</ComponentPreview>
+
+				<div className='flex flex-col gap-3'>
+					<h2 className='text-sm font-semibold text-text uppercase tracking-wide'>Installation</h2>
+					<CodeBlock code={'npx dafink-ui add theme-toggle'} />
+				</div>
 			</div>
 
 			{/* Color palettes */}
@@ -161,7 +166,7 @@ const ThemePage = () =>
 					<h2 className='text-xl font-semibold text-text'>Color palettes</h2>
 					<p className='text-sm text-text-muted'>
 						Six color palettes ship with DaFink UI as built-in themes, imported from{' '}
-						<InlineCode>@/src/themes</InlineCode>. Each is a color swap only — radius,
+						<InlineCode>@/src/themes</InlineCode>. Each is a color swap only. Radius,
 						shadow, and border come from the active Style, not the Theme. Hover or focus
 						a swatch for its hex value.
 					</p>
@@ -256,8 +261,8 @@ const ThemePage = () =>
 				</p>
 				<CodeBlock code={APPLY_SNIPPET} />
 				<p className='text-sm text-text-muted leading-relaxed'>
-					This docs site uses this pattern in the top nav&apos;s theme and style dropdowns
-					— selecting a value injects the token map onto a <InlineCode>style</InlineCode>{' '}
+					This docs site uses this pattern in the top nav&apos;s theme and style dropdowns:
+					selecting a value injects the token map onto a <InlineCode>style</InlineCode>{' '}
 					override that wraps the whole preview area.
 				</p>
 			</div>
@@ -269,13 +274,13 @@ const ThemePage = () =>
 					A theme is a plain TypeScript object that satisfies the{' '}
 					<InlineCode>Theme</InlineCode> interface from{' '}
 					<InlineCode>@/src/themes/types</InlineCode>. You only need to override the
-					tokens you want to change — start from a copy of{' '}
+					tokens you want to change. Start from a copy of{' '}
 					<InlineCode>defaultTheme</InlineCode> and adjust the brand and surface palette.
 				</p>
 				<CodeBlock code={THEME_SHAPE_SNIPPET} />
 				<p className='text-sm text-text-muted leading-relaxed'>
 					Define both <InlineCode>light</InlineCode> and <InlineCode>dark</InlineCode>{' '}
-					token maps. Do not rely on cascade fallbacks — if a token is not in the map it
+					token maps. Do not rely on cascade fallbacks: if a token is not in the map it
 					will fall back to the global default, which may not match your intended palette.
 				</p>
 			</div>
@@ -291,16 +296,16 @@ const ThemePage = () =>
 				</p>
 				<p className='text-sm text-text-muted leading-relaxed'>
 					These values are generated, not hand-written. The source of truth is the set
-					of JSON files in <InlineCode>tokens/</InlineCode> (one per theme, per mode —
+					of JSON files in <InlineCode>tokens/</InlineCode> (one per theme, per mode,
 					e.g. <InlineCode>tokens/zinc.light.json</InlineCode>), plus{' '}
 					<InlineCode>tokens/motion.json</InlineCode>. Running{' '}
 					<InlineCode>npm run tokens</InlineCode> compiles those files into{' '}
 					<InlineCode>src/tokens/colors.ts</InlineCode> and the CSS custom properties in{' '}
-					<InlineCode>globals.css</InlineCode>. Edit the JSON, then re-run the script —
-					do not edit the generated files directly.
+					<InlineCode>globals.css</InlineCode>. Edit the JSON, then re-run the script.
+					Do not edit the generated files directly.
 				</p>
 				<p className='text-sm text-text-muted leading-relaxed'>
-					Themes do not need to redefine every token — only the ones that differ from
+					Themes do not need to redefine every token, only the ones that differ from
 					the defaults. The recommended starting point is to override the five brand
 					tokens (<InlineCode>--color-brand</InlineCode>,{' '}
 					<InlineCode>--color-brand-hover</InlineCode>,{' '}

@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
 	title: 'Components',
-	description: 'Browse the full DaFink UI component registry — accessible, copy-paste React components organized by category.',
+	description: 'Browse the full DaFink UI component registry: accessible React components organized by category.',
 };
 
 const ComponentsPage = () => {
@@ -26,8 +26,8 @@ const ComponentsPage = () => {
       <div className='flex flex-col gap-2'>
         <h1 className='text-3xl font-semibold tracking-tight text-text'>Components</h1>
         <p className='text-base text-text-muted leading-relaxed'>
-          {total} components across {Object.keys(byCategory).length} categories. Each one is
-          copy-paste ready — install only what you need.
+          {total} components across {Object.keys(byCategory).length} categories. Install only
+          what you need.
         </p>
       </div>
 

@@ -49,7 +49,7 @@ const McpPage = () =>
           server hosted at{' '}
           <code className='font-mono text-xs'>/api/mcp</code>. Connect it to
           Claude or any MCP-compatible AI tool and it will have live access to
-          every component spec, design token, and pattern — so it uses the
+          every component spec, design token, and pattern, so it uses the
           actual DaFink UI API instead of guessing.
         </p>
       </section>
@@ -64,7 +64,7 @@ const McpPage = () =>
               <code className='text-sm font-mono text-text'>dafink://components</code>
             </div>
             <p className='text-sm text-text-muted leading-relaxed'>
-              Full registry for every component — slug, name, category,
+              Full registry for every component: slug, name, category,
               description, props table, usage code, and dependency list.
             </p>
           </div>
@@ -75,7 +75,7 @@ const McpPage = () =>
               <code className='text-sm font-mono text-text'>dafink://tokens</code>
             </div>
             <p className='text-sm text-text-muted leading-relaxed'>
-              Every design token — colors, spacing, motion, typography — as a
+              Every design token (colors, spacing, motion, typography) as a
               structured JSON object.
             </p>
           </div>
@@ -97,7 +97,7 @@ const McpPage = () =>
               <code className='text-sm font-mono text-text'>dafink://rules</code>
             </div>
             <p className='text-sm text-text-muted leading-relaxed'>
-              The list of project rule documents — coding standards, component
+              The list of project rule documents: coding standards, component
               creation rules, token usage, commit conventions, and more.
             </p>
           </div>
@@ -109,7 +109,7 @@ const McpPage = () =>
             </div>
             <p className='text-sm text-text-muted leading-relaxed'>
               Returns the full <code className='font-mono text-xs'>spec.md</code> for a
-              named component — variants, interactive states, accessibility notes,
+              named component: variants, interactive states, accessibility notes,
               and design guidance.
             </p>
           </div>
@@ -120,7 +120,7 @@ const McpPage = () =>
               <code className='text-sm font-mono text-text'>get_component_registry_entry</code>
             </div>
             <p className='text-sm text-text-muted leading-relaxed'>
-              Returns the registry entry for a component — working usage code,
+              Returns the registry entry for a component: working usage code,
               structured props, npm dependencies, and category. Accepts name or slug.
             </p>
           </div>
@@ -132,7 +132,7 @@ const McpPage = () =>
             </div>
             <p className='text-sm text-text-muted leading-relaxed'>
               Searches name, slug, category, and description. Use when you know
-              what you need but not the exact component name — e.g.{' '}
+              what you need but not the exact component name, e.g.{' '}
               <code className='font-mono text-xs'>&quot;loading indicator&quot;</code>.
             </p>
           </div>
@@ -155,7 +155,7 @@ const McpPage = () =>
               <code className='text-sm font-mono text-text'>get_pattern</code>
             </div>
             <p className='text-sm text-text-muted leading-relaxed'>
-              Returns a named pattern document by slug — e.g.{' '}
+              Returns a named pattern document by slug, e.g.{' '}
               <code className='font-mono text-xs'>&quot;accessibility&quot;</code> or{' '}
               <code className='font-mono text-xs'>&quot;design&quot;</code>.
             </p>
@@ -167,7 +167,7 @@ const McpPage = () =>
               <code className='text-sm font-mono text-text'>get_rule</code>
             </div>
             <p className='text-sm text-text-muted leading-relaxed'>
-              Returns a project rule document by name — e.g.{' '}
+              Returns a project rule document by name, e.g.{' '}
               <code className='font-mono text-xs'>&quot;new-component&quot;</code>,{' '}
               <code className='font-mono text-xs'>&quot;code&quot;</code>, or{' '}
               <code className='font-mono text-xs'>&quot;tokens&quot;</code>.
@@ -222,7 +222,7 @@ const McpPage = () =>
         <h2 className='text-xl font-semibold text-text'>Built-in prompts</h2>
         <p className='text-sm text-text-muted leading-relaxed'>
           The server ships three curated prompts that wire up the right tool calls
-          automatically — invoke them from any MCP client that supports prompts.
+          automatically. Invoke them from any MCP client that supports prompts.
         </p>
         <div className='grid grid-cols-1 gap-3 sm:grid-cols-3'>
           <div className='rounded-lg border border-surface-border bg-surface p-4 flex flex-col gap-1'>
@@ -254,14 +254,14 @@ const McpPage = () =>
         <h2 className='text-xl font-semibold text-text'>How it changes your workflow</h2>
         <p className='text-sm text-text-muted leading-relaxed'>
           Without the MCP server, asking an AI to &quot;build a form using DaFink
-          UI&quot; is a gamble — it may hallucinate prop names, invent variants that
+          UI&quot; is a gamble. It may hallucinate prop names, invent variants that
           don&apos;t exist, or use an old API it saw in training data.
         </p>
         <p className='text-sm text-text-muted leading-relaxed'>
           With the server connected, Claude can call{' '}
           <code className='font-mono text-xs'>get_component_registry_entry(&quot;Form&quot;)</code>{' '}
           before writing any code. It gets a working import, a runnable usage
-          example, the exact prop table, and the component&apos;s dependencies —
+          example, the exact prop table, and the component&apos;s dependencies:
           not prose, but structured data it can use directly.
         </p>
         <p className='text-sm text-text-muted leading-relaxed'>
@@ -269,7 +269,7 @@ const McpPage = () =>
           <code className='font-mono text-xs'>search_components(&quot;date picker&quot;)</code>{' '}
           finds it. When rules matter,{' '}
           <code className='font-mono text-xs'>get_rule(&quot;new-component&quot;)</code>{' '}
-          returns the current spec — not whatever the model was trained on.
+          returns the current spec, not whatever the model was trained on.
         </p>
       </section>
 
@@ -279,7 +279,7 @@ const McpPage = () =>
         <p className='text-sm text-text-muted leading-relaxed'>
           Each component has a <code className='font-mono text-xs'>spec.md</code> file
           alongside its source code. The MCP server reads these files at request
-          time — there is no cache to invalidate. When you update a component
+          time; there is no cache to invalidate. When you update a component
           and update its spec, the server immediately returns the new information.
         </p>
         <p className='text-sm text-text-muted leading-relaxed'>

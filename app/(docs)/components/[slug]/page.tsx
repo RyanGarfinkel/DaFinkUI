@@ -81,7 +81,7 @@ const ComponentPage = async (
         )}
       </section>
 
-      {/* Demo(s) — a list of at least one (the primary live preview + its usage
+      {/* Demo(s): a list of at least one (the primary live preview + its usage
           code), plus any additional named examples registered for this slug in
           componentExamples. Every item shows its own Preview/Code toggle, so
           there is no separate standalone "Usage" section. */}
@@ -114,7 +114,7 @@ const ComponentPage = async (
         )}
       </section>
 
-      {/* Composition — only rendered for compound components */}
+      {/* Composition: only rendered for compound components */}
       {entry.composition && (
         <section className='flex flex-col gap-3'>
           <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
@@ -126,7 +126,7 @@ const ComponentPage = async (
         </section>
       )}
 
-      {/* Extra sections (variant demos, interactive examples) — data-driven per slug */}
+      {/* Extra sections (variant demos, interactive examples), data-driven per slug */}
       {(extraSections[slug] ?? []).map((section) => (
         <section key={section.heading} className='flex flex-col gap-3'>
           <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>

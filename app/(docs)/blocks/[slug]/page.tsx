@@ -77,7 +77,7 @@ const BlockPage = async (
         )}
       </section>
 
-      {/* Demo(s) — a list of at least one (the primary live preview + its usage
+      {/* Demo(s): a list of at least one (the primary live preview + its usage
           code), plus any additional named examples registered for this slug in
           blockExamples. Every item shows its own Preview/Code toggle, so there
           is no separate standalone "Usage" section. */}

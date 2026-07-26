@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Blocks',
-  description: 'Prebuilt DaFink UI blocks — full compositions like dashboards, login forms, and settings forms, meant to be copied and adapted.',
+  description: 'Prebuilt DaFink UI blocks: full compositions like dashboards, login forms, and settings forms, meant to be adapted to your use case.',
 };
 
 const BlocksPage = () => {
@@ -29,7 +29,7 @@ const BlocksPage = () => {
         <h1 className='text-3xl font-semibold tracking-tight text-text'>Blocks</h1>
         <p className='text-base text-text-muted leading-relaxed'>
           {total} prebuilt blocks across {Object.keys(byCategory).length} categories. Each one is a full
-          composition of existing components — copy it in, then adapt it to your use case.
+          composition of existing components, meant to be adapted to your use case.
         </p>
       </div>
 

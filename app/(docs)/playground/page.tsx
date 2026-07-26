@@ -17,7 +17,7 @@ import * as React from 'react';
 
 const DEFAULT_CODE = '<Button variant="primary">Click me</Button>';
 
-/** Suggests registry component names — triggers after `<` (tag position) or on any identifier,
+/** Suggests registry component names. Triggers after `<` (tag position) or on any identifier,
  * so typing `<Bu` or just `Bu` both offer `Button` with its description as a hint. */
 const componentCompletionSource = (context: CompletionContext): CompletionResult | null => {
 	const word = context.matchBefore(/<?[A-Za-z]*/);
@@ -37,7 +37,7 @@ const componentCompletionSource = (context: CompletionContext): CompletionResult
 	return { from, options, validFor: /^[A-Za-z]*$/ };
 };
 
-/** Suggests prop names for the nearest unclosed JSX tag before the cursor — e.g. inside
+/** Suggests prop names for the nearest unclosed JSX tag before the cursor, e.g. inside
  * `<Button ` it offers `variant`, `size`, etc. from that component's registry entry. */
 const propCompletionSource = (context: CompletionContext): CompletionResult | null => {
 	const textBefore = context.state.sliceDoc(0, context.pos);
@@ -62,7 +62,7 @@ const propCompletionSource = (context: CompletionContext): CompletionResult | nu
 		.map((prop) => ({
 			label:  prop.name,
 			type:   'property',
-			info:   `${prop.type} — ${prop.description}`,
+			info:   `${prop.type}: ${prop.description}`,
 			apply:  prop.type === 'boolean'
 				? prop.name
 				: (view: EditorView, _completion: Completion, from: number, to: number) => {
@@ -107,7 +107,7 @@ const PlaygroundPage = () => {
 			setTimeout(() => setCopied(false), 2000);
 		}
 		catch {
-			// clipboard unavailable — silently ignore
+			// clipboard unavailable, silently ignore
 		}
 	};
 
@@ -116,7 +116,7 @@ const PlaygroundPage = () => {
 			<div className='flex flex-col gap-2'>
 				<h1 className='text-3xl font-semibold tracking-tight text-text'>Playground</h1>
 				<p className='text-base text-text-muted leading-relaxed'>
-					Write JSX in the editor — browse components on the side for usage examples. Imports are derived automatically when you copy.
+					Write JSX in the editor, browse components on the side for usage examples. Imports are derived automatically when you copy.
 				</p>
 			</div>
 
@@ -144,7 +144,7 @@ const PlaygroundPage = () => {
 								{copied ? 'Copied' : 'Copy'}
 							</Button>
 						</div>
-						<p className='text-sm text-text-muted'>Write JSX directly — no imports and no return statement needed. Tab indents or accepts a suggestion; Escape moves focus out of the editor.</p>
+						<p className='text-sm text-text-muted'>Write JSX directly, no imports and no return statement needed. Tab indents or accepts a suggestion; Escape moves focus out of the editor.</p>
 						<CodeEditor
 							value={code}
 							onChange={setCode}
