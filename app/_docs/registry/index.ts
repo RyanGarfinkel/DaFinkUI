@@ -2741,6 +2741,52 @@ export default function Example() {
     files: ['CodeBlock/CodeBlock.tsx'],
   },
   {
+    slug: 'formula',
+    name: 'Formula',
+    category: 'Display',
+    description: 'Renders real LaTeX math notation via KaTeX, with graceful fallback rendering for invalid expressions and a MathML tree for screen readers.',
+    usage: `import { Formula } from '@components';
+
+export default function Example() {
+  return (
+    <div className="flex flex-col gap-4 items-center">
+      <Formula expression="x^2 + y^2 = r^2" size="lg" />
+      <Formula display="block" expression="\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}" size="lg" />
+      <Formula expression="\\sum_{i=1}^{n} x_i" />
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'expression',
+        type: 'string',
+        default: '-',
+        description: 'Required. A LaTeX math expression, e.g. "x^2", "\\frac{a}{b}", "\\sum_{i=1}^{n} x_i". Rendered with KaTeX.',
+      },
+      {
+        name: 'display',
+        type: '"inline" | "block"',
+        default: '"inline"',
+        description: '"inline" flows with surrounding text as a <span>. "block" centers the formula on its own line as a <div>.',
+      },
+      {
+        name: 'size',
+        type: '"sm" | "md" | "lg"',
+        default: '"md"',
+        description: 'Font size of the rendered formula: text-sm, text-base, or text-lg.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: '""',
+        description: 'Additional Tailwind classes merged onto the root wrapper.',
+      },
+    ],
+    dependencies: ['katex'],
+    registryDependencies: [],
+    files: ['Formula/Formula.tsx'],
+  },
+  {
     slug: 'code-editor',
     name: 'CodeEditor',
     category: 'Inputs',

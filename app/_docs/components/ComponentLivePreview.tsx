@@ -53,6 +53,7 @@ import { Canvas } from '@/src/components/Canvas/Canvas';
 import Popover from '@/src/components/Popover/Popover';
 import Tooltip from '@/src/components/Tooltip/Tooltip';
 import CountUp from '@/src/components/CountUp/CountUp';
+import Formula from '@/src/components/Formula/Formula';
 import { Alert } from '@/src/components/Alert/Alert';
 import { Badge } from '@/src/components/Badge/Badge';
 import Switch from '@/src/components/Switch/Switch';
@@ -203,6 +204,15 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
     }
+
+    case 'formula':
+      return (
+        <div className='flex flex-col gap-4 items-center'>
+          <Formula expression='x^2 + y^2 = r^2' size='lg' />
+          <Formula display='block' expression='\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}' size='lg' />
+          <Formula expression='\sum_{i=1}^{n} x_i' />
+        </div>
+      );
 
     case 'code-editor':
       return (
