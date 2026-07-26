@@ -1,5 +1,5 @@
 'use client';
-import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon } from '@/app/_docs/components/NavIcons';
+import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerClose } from '@/src/components/Drawer/Drawer';
 import { SidebarSection, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
 import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
@@ -108,6 +108,30 @@ export const MobileNav = () =>
 								))}
 							</nav>
 						)}
+
+						<SidebarDivider />
+
+						<nav className='flex flex-col gap-1'>
+							<DocsSidebarLink href='/changelog' icon={<ChangelogIcon />} className='py-3'>Changelog</DocsSidebarLink>
+							<a
+								href='https://github.com/RyanGarfinkel/DaFinkUI'
+								target='_blank'
+								rel='noopener noreferrer'
+								className='flex w-full items-center gap-2 rounded-[var(--radius)] px-3 py-3 text-sm text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
+							>
+								<span aria-hidden='true' className='shrink-0 [&>svg]:h-4 [&>svg]:w-4'><GithubIcon /></span>
+								GitHub
+							</a>
+							<a
+								href='https://www.npmjs.com/package/dafink-ui'
+								target='_blank'
+								rel='noopener noreferrer'
+								className='flex w-full items-center gap-2 rounded-[var(--radius)] px-3 py-3 text-sm text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
+							>
+								<span aria-hidden='true' className='shrink-0 [&>svg]:h-4 [&>svg]:w-4'><PackageIcon /></span>
+								npm
+							</a>
+						</nav>
 					</div>
 				</DrawerContent>
 			</Drawer>

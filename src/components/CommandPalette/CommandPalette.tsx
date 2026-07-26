@@ -478,13 +478,33 @@ export const CommandItem = (
 		return () => removeItem(id);
 	}, [id, groupId, value, disabled, onSelect, registerItem, removeItem]);
 
+    const pointerStart = useRef<{ x: number; y: number } | null>(null);
+
     const handlePointerEnter = () => {
 		if(!disabled) ctx.setActiveId(id);
 	};
 
     const handlePointerDown = (e: React.PointerEvent) => {
 		if(disabled) return;
-		e.preventDefault();
+		if(e.pointerType === 'mouse')
+		{
+			e.preventDefault();
+			onSelect();
+			ctx.onClose();
+			return;
+		}
+		pointerStart.current = { x: e.clientX, y: e.clientY };
+	};
+
+    const handlePointerUp = (e: React.PointerEvent) => {
+		if(disabled || e.pointerType === 'mouse') return;
+		const start = pointerStart.current;
+		pointerStart.current = null;
+		if(!start) return;
+
+		const movedTooFar = Math.abs(e.clientX - start.x) > 10 || Math.abs(e.clientY - start.y) > 10;
+		if(movedTooFar) return;
+
 		onSelect();
 		ctx.onClose();
 	};
@@ -498,6 +518,7 @@ export const CommandItem = (
 			aria-selected={isActive}
 			aria-disabled={disabled || undefined}
 			onPointerDown={handlePointerDown}
+			onPointerUp={handlePointerUp}
 			onPointerEnter={handlePointerEnter}
 			className={[
 				'flex items-center gap-3 mx-1.5 px-2.5 py-2 rounded-[var(--radius-lg)] text-sm select-none',

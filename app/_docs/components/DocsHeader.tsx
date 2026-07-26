@@ -262,13 +262,13 @@ export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
 				</CommandGroup>
 
 				<CommandGroup label='Misc'>
-					<CommandItem value='Changelog' onSelect={() => goTo('/changelog')}>
+					<CommandItem value='Changelog' icon={<ArrowRightIcon />} onSelect={() => goTo('/changelog')}>
 						Changelog
 					</CommandItem>
-					<CommandItem value='GitHub' onSelect={() => goToExternal('https://github.com/RyanGarfinkel/DaFinkUI')}>
+					<CommandItem value='GitHub' icon={<ArrowRightIcon />} onSelect={() => goToExternal('https://github.com/RyanGarfinkel/DaFinkUI')}>
 						GitHub
 					</CommandItem>
-					<CommandItem value='npm' onSelect={() => goToExternal('https://www.npmjs.com/package/dafink-ui')}>
+					<CommandItem value='npm' icon={<ArrowRightIcon />} onSelect={() => goToExternal('https://www.npmjs.com/package/dafink-ui')}>
 						npm
 					</CommandItem>
 				</CommandGroup>
