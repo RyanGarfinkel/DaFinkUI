@@ -87,8 +87,8 @@ export type { InputProps } from './components/Input/Input';
 export { KanbanBoard, KanbanCard, KanbanColumn } from './components/Kanban/Kanban';
 export type { KanbanCardProps, KanbanColumnProps } from './components/Kanban/Kanban';
 
-export { MenuBar, MenuBarBrand, MenuBarActions } from './components/MenuBar/MenuBar';
-export type { MenuBarProps } from './components/MenuBar/MenuBar';
+export { MenuBar, MenuBarBrand, MenuBarActions, MenuBarNav, MenuBarNavItem, MenuBarNavMore } from './components/MenuBar/MenuBar';
+export type { MenuBarProps, MenuBarNavProps, MenuBarNavItemProps, MenuBarNavMoreProps, MenuBarNavMoreItem } from './components/MenuBar/MenuBar';
 
 export { default as Message, MessageReactions, MessageReaction } from './components/Message/Message';
 export type { MessageProps, MessageVariant, MessageReactionsProps, MessageReactionProps } from './components/Message/Message';

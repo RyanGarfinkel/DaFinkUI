@@ -32,7 +32,7 @@ export const REGISTRY: RegistryEntry[] = [
 	{ name: 'Tabs', slug: 'tabs', files: ['Tabs/Tabs.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'Sidebar', slug: 'sidebar', files: ['Sidebar/Sidebar.tsx'], deps: [], registryDependencies: ['tooltip', 'scroll-fade'] },
 	{ name: 'Breadcrumb', slug: 'breadcrumb', files: ['Breadcrumb/Breadcrumb.tsx'], deps: [], registryDependencies: [] },
-	{ name: 'MenuBar', slug: 'menu-bar', files: ['MenuBar/MenuBar.tsx'], deps: [], registryDependencies: [] },
+	{ name: 'MenuBar', slug: 'menu-bar', files: ['MenuBar/MenuBar.tsx'], deps: [], registryDependencies: ['dropdown-menu'] },
 	{ name: 'TableOfContents', slug: 'table-of-contents', files: ['TableOfContents/TableOfContents.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'Charts', slug: 'charts', files: ['Charts/Charts.tsx'], deps: ['recharts'], registryDependencies: [] },
 	{ name: 'LineChart', slug: 'line-chart', files: ['Charts/Charts.tsx'], deps: ['recharts'], registryDependencies: [] },

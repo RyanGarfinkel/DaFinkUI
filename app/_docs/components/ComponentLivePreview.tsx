@@ -4,6 +4,7 @@ import SidePanel, { SidePanelHeader, SidePanelTitle, SidePanelContent, SidePanel
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, type DrawerSide } from '@/src/components/Drawer/Drawer';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots } from '@/src/components/Carousel/Carousel';
 import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
+import { MenuBar, MenuBarBrand, MenuBarActions, MenuBarNav, MenuBarNavItem, MenuBarNavMore } from '@/src/components/MenuBar/MenuBar';
 import Form, { FormControl, FormDescription, FormField, FormLabel, FormMessage, useZodForm } from '@/src/components/Form/Form';
 import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
 import Accordion, { AccordionContent, AccordionItem, AccordionTrigger } from '@/src/components/Accordion/Accordion';
@@ -15,7 +16,6 @@ import { AreaChart, BarChart, DonutChart, LineChart, RadarChart } from '@/src/co
 import { Message, MessageReactions, MessageReaction } from '@/src/components/Message/Message';
 import Mosaic, { MosaicTile, type MosaicTileLayout } from '@/src/components/Mosaic/Mosaic';
 import { Skeleton, SkeletonCard, SkeletonImage } from '@/src/components/Skeleton/Skeleton';
-import { MenuBar, MenuBarBrand, MenuBarActions } from '@/src/components/MenuBar/MenuBar';
 import ToggleGroup, { ToggleGroupItem } from '@/src/components/ToggleGroup/ToggleGroup';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/Tabs/Tabs';
 import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
@@ -76,6 +76,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
   const [radioValue, setRadioValue] = useState('option-1');
   const [toggleValue, setToggleValue] = useState<string | string[]>('left');
   const [tabValue, setTabValue] = useState('account');
+  const [menuBarNavValue, setMenuBarNavValue] = useState('home');
   const [pickerDate, setPickerDate] = useState<Date | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [editorCode, setEditorCode] = useState('<Button>Click me</Button>');
@@ -420,11 +421,26 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
 
     case 'menu-bar':
       return (
-        <div className='w-full max-w-xl overflow-hidden rounded-lg border border-surface-border'>
+        <div className='w-full max-w-2xl overflow-hidden rounded-lg border border-surface-border'>
           <MenuBar className='relative'>
             <MenuBarBrand>
               <span className='font-semibold text-text'>Acme</span>
             </MenuBarBrand>
+            <MenuBarNav value={menuBarNavValue} onValueChange={setMenuBarNavValue} aria-label='Main' className='mx-auto'>
+              <MenuBarNavItem value='home'>Home</MenuBarNavItem>
+              <MenuBarNavItem value='docs'>Docs</MenuBarNavItem>
+              <MenuBarNavItem value='pricing'>Pricing</MenuBarNavItem>
+              <MenuBarNavMore
+                value='more'
+                items={[
+                  { label: 'Blog', value: 'blog' },
+                  { label: 'Changelog', value: 'changelog' },
+                  { label: 'Support', value: 'support' },
+                ]}
+              >
+                More
+              </MenuBarNavMore>
+            </MenuBarNav>
             <MenuBarActions>
               <Button variant='ghost' size='icon' aria-label='Search'>
                 <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>

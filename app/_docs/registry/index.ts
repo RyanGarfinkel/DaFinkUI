@@ -1325,14 +1325,34 @@ export default function Example() {
     name: 'MenuBar',
     category: 'Navigation',
     description: 'A fixed horizontal top bar composed of a brand slot and a right-aligned actions slot.',
-    usage: `import { MenuBar, MenuBarBrand, MenuBarActions, Button } from '@components';
+    usage: `'use client';
+
+import { useState } from 'react';
+import { MenuBar, MenuBarBrand, MenuBarNav, MenuBarNavItem, MenuBarNavMore, MenuBarActions, Button } from '@components';
 
 export default function Example() {
+  const [nav, setNav] = useState('home');
+
   return (
     <MenuBar>
       <MenuBarBrand>
         <span className="font-semibold text-text">Acme</span>
       </MenuBarBrand>
+      <MenuBarNav value={nav} onValueChange={setNav} aria-label="Main" className="mx-auto">
+        <MenuBarNavItem value="home">Home</MenuBarNavItem>
+        <MenuBarNavItem value="docs">Docs</MenuBarNavItem>
+        <MenuBarNavItem value="pricing">Pricing</MenuBarNavItem>
+        <MenuBarNavMore
+          value="more"
+          items={[
+            { label: 'Blog', value: 'blog' },
+            { label: 'Changelog', value: 'changelog' },
+            { label: 'Support', value: 'support' },
+          ]}
+        >
+          More
+        </MenuBarNavMore>
+      </MenuBarNav>
       <MenuBarActions>
         <Button variant="ghost" size="icon" aria-label="Search">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -1345,15 +1365,23 @@ export default function Example() {
     props: [
       { name: 'height',    type: 'string',    default: "'h-14'",    description: 'Tailwind height class for the bar.' },
       { name: 'className', type: 'string',    default: "''",        description: 'Additional CSS classes.' },
-      { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'MenuBar content (brand, search, actions).' },
+      { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'MenuBar content (brand, nav, search, actions).' },
     ],
     dependencies:         [],
-    registryDependencies: [],
+    registryDependencies: ['dropdown-menu'],
     files:                ['MenuBar/MenuBar.tsx'],
     composition: {
       name: 'MenuBar',
       children: [
         { name: 'MenuBarBrand' },
+        {
+          name:        'MenuBarNav',
+          description: 'sliding-pill nav group',
+          children: [
+            { name: 'MenuBarNavItem' },
+            { name: 'MenuBarNavMore', description: 'overflow dropdown' },
+          ],
+        },
         { name: 'MenuBarActions' },
       ],
     },
