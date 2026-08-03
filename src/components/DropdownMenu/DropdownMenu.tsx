@@ -1,8 +1,8 @@
 'use client';
 
 import { KeyboardEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
+import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import type { ReactNode } from 'react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -33,6 +33,8 @@ export interface DropdownMenuProps
 	disabled?:         boolean;
 	className?:        string;
 	triggerClassName?: string;
+	triggerProps?:     ButtonHTMLAttributes<HTMLButtonElement>;
+	unstyledTrigger?:  boolean;
 }
 
 const isSeparator = (entry: DropdownMenuEntry): entry is DropdownMenuSeparator =>
@@ -50,6 +52,8 @@ export const DropdownMenu = (
         disabled         = false,
         className        = '',
         triggerClassName = '',
+        triggerProps,
+        unstyledTrigger  = false,
     }: DropdownMenuProps
 ) => {
     const [mounted,     setMounted]     = useState(false);
@@ -267,13 +271,14 @@ export const DropdownMenu = (
 				aria-controls={mounted ? menuId : undefined}
 				onClick={() => (mounted ? closeMenu() : openMenu('first'))}
 				onKeyDown={handleTriggerKeyDown}
-				className={[
+				className={unstyledTrigger ? triggerClassName : [
 					'inline-flex items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-input-border bg-surface px-3 py-2 text-sm text-text',
 					'transition-colors duration-[var(--duration-fast)]',
 					'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 					disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:border-brand',
 					triggerClassName,
 				].join(' ')}
+				{...triggerProps}
 			>
 				{trigger}
 			</button>

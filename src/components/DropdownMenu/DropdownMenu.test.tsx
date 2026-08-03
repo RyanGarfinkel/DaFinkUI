@@ -270,4 +270,27 @@ describe('DropdownMenu', () =>
 		render(<DropdownMenu trigger='Actions' items={ITEMS} />);
 		expect(screen.getByRole('button', { name: 'Actions' }).className).toContain('focus-visible:ring-2');
 	});
+
+	it('appends triggerClassName after the built-in trigger classes by default', () =>
+	{
+		render(<DropdownMenu trigger='Actions' items={ITEMS} triggerClassName='text-brand-fg' />);
+		const trigger = screen.getByRole('button', { name: 'Actions' });
+		expect(trigger.className).toContain('bg-surface');
+		expect(trigger.className).toContain('text-brand-fg');
+	});
+
+	it('replaces the built-in trigger classes entirely when unstyledTrigger is set', () =>
+	{
+		render(<DropdownMenu trigger='Actions' items={ITEMS} triggerClassName='text-brand-fg' unstyledTrigger />);
+		const trigger = screen.getByRole('button', { name: 'Actions' });
+		expect(trigger.className).toBe('text-brand-fg');
+	});
+
+	it('spreads triggerProps onto the trigger button', () =>
+	{
+		render(<DropdownMenu trigger='Actions' items={ITEMS} triggerProps={{ 'data-testid': 'more-trigger', tabIndex: -1 } as Record<string, unknown>} />);
+		const trigger = screen.getByRole('button', { name: 'Actions' });
+		expect(trigger.getAttribute('data-testid')).toBe('more-trigger');
+		expect(trigger.tabIndex).toBe(-1);
+	});
 });

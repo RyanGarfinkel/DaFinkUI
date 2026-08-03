@@ -21,7 +21,9 @@ No npm dependencies. No registry dependencies.
 | `onSelect`         | `(item: DropdownMenuItem) => void`        | `undefined` | Called with the activated item, in addition to the item's own `onSelect`. |
 | `disabled`         | `boolean`                                 | `false`     | Disables the trigger.                                        |
 | `className`        | `string`                                  | `''`        | Additional classes on the menu list.                         |
-| `triggerClassName` | `string`                                  | `''`        | Additional classes on the trigger button.                    |
+| `triggerClassName` | `string`                                  | `''`        | Classes on the trigger button. Appended after the built-in trigger style unless `unstyledTrigger` is set. |
+| `triggerProps`     | `ButtonHTMLAttributes<HTMLButtonElement>` | `undefined` | Extra native attributes spread onto the trigger button (e.g. `data-*`, `aria-current`, `tabIndex`) for composing DropdownMenu into a larger widget's roving-tabindex/ARIA model. |
+| `unstyledTrigger`  | `boolean`                                 | `false`     | When `true`, `triggerClassName` fully replaces the built-in trigger classes instead of being appended after them — use when composing DropdownMenu into a component with its own trigger styling, since Tailwind's generated class order isn't guaranteed to let an appended override win over the built-in defaults (this bit `MenuBarNavMore`: the active-state text color silently lost to the built-in `text-text`). |
 
 ## Keyboard Behavior
 
