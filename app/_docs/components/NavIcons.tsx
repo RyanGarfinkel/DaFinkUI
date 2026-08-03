@@ -56,6 +56,13 @@ export const BlocksIcon = () => (
 	</svg>
 );
 
+export const EffectsIcon = () => (
+	<svg {...iconProps}>
+		<path d='M11 3l1.5 6.5L19 11l-6.5 1.5L11 19l-1.5-6.5L3 11l6.5-1.5z' />
+		<path d='M19 3v3M17.5 4.5h3' />
+	</svg>
+);
+
 export const McpIcon = () => (
 	<svg {...iconProps}>
 		<rect x='2' y='3' width='20' height='7' rx='1' />

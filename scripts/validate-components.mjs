@@ -1,13 +1,20 @@
 /**
  * Validates that every component is complete and consistent.
  *
+ * Runs against two catalogs — the component registry (index.ts +
+ * ComponentLivePreview.tsx) and the effect registry (effects.ts +
+ * EffectLivePreview.tsx) — since effects are real components that just live
+ * in their own docs registry/gallery. See rules/docs-site.md -> "Effect
+ * Registry".
+ *
  * Checks:
  *  1. Every component directory has: ComponentName.tsx, ComponentName.test.tsx, spec.md
- *  2. Every component source file appears in at least one registry entry's files array
+ *  2. Every component source file appears in at least one registry entry's files array (either catalog)
  *  3. Every registry entry's files all exist on disk
- *  4. Every registry entry has a matching case in ComponentLivePreview.tsx
+ *  4. Every registry entry has a matching case in its catalog's live preview file
  *  5. Every registry entry's usage code contains the component as JSX (<ComponentName)
- *  6. The ComponentLivePreview case block also uses the component as JSX (<ComponentName)
+ *  6. The live preview case block also uses the component as JSX (<ComponentName)
+ *  7. Every component directory has a CLI registry entry (across registry.ts + blocksRegistry.ts's component-shaped entries)
  */
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'fs';
@@ -17,8 +24,19 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT       = resolve(__dirname, '..');
 const COMP_DIR   = join(ROOT, 'src/components');
-const REGISTRY   = join(ROOT, 'app/_docs/registry/index.ts');
-const PREVIEW    = join(ROOT, 'app/_docs/components/ComponentLivePreview.tsx');
+
+const CATALOGS = [
+	{
+		label:      'component',
+		registry:   join(ROOT, 'app/_docs/registry/index.ts'),
+		preview:    join(ROOT, 'app/_docs/components/ComponentLivePreview.tsx'),
+	},
+	{
+		label:      'effect',
+		registry:   join(ROOT, 'app/_docs/registry/effects.ts'),
+		preview:    join(ROOT, 'app/_docs/components/EffectLivePreview.tsx'),
+	},
+];
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -28,53 +46,31 @@ const warnings = [];
 const fail = (msg) => errors.push(`  ✗ ${msg}`);
 const warn = (msg) => warnings.push(`  ⚠ ${msg}`);
 
-// ─── Parse registry ──────────────────────────────────────────────────────────
-
-const registryText = readFileSync(REGISTRY, 'utf8');
-
 // Properties in registry entries are indented with 4 spaces. Props inside
 // the props array are deeper (8+), so anchoring to exactly 4 spaces prevents
 // false matches from nested objects.
-const slugs       = [...registryText.matchAll(/^ {4}slug:\s*'([^']+)'/gm)].map(m => m[1]);
-const names       = [...registryText.matchAll(/^ {4}name:\s*'([^']+)'/gm)].map(m => m[1]);
-const filesBlocks = [...registryText.matchAll(/^ {4}files:\s*\[([^\]]*)\]/gm)].map(m =>
-	[...m[1].matchAll(/'([^']+)'/g)].map(f => f[1])
-);
-
-if(slugs.length !== names.length || slugs.length !== filesBlocks.length)
+const parseRegistry = (registryText) =>
 {
-	console.error('Registry parse error: unequal counts of slug/name/files entries.');
-	console.error(`  slugs=${slugs.length}  names=${names.length}  files=${filesBlocks.length}`);
-	process.exit(1);
-}
+	const slugs       = [...registryText.matchAll(/^ {4}slug:\s*'([^']+)'/gm)].map(m => m[1]);
+	const names       = [...registryText.matchAll(/^ {4}name:\s*'([^']+)'/gm)].map(m => m[1]);
+	const filesBlocks = [...registryText.matchAll(/^ {4}files:\s*\[([^\]]*)\]/gm)].map(m =>
+		[...m[1].matchAll(/'([^']+)'/g)].map(f => f[1])
+	);
 
-const entries = slugs.map((slug, i) => ({ slug, name: names[i], files: filesBlocks[i] }));
+	if(slugs.length !== names.length || slugs.length !== filesBlocks.length)
+	{
+		console.error('Registry parse error: unequal counts of slug/name/files entries.');
+		console.error(`  slugs=${slugs.length}  names=${names.length}  files=${filesBlocks.length}`);
+		process.exit(1);
+	}
 
-// ─── Parse ComponentLivePreview ───────────────────────────────────────────────
-
-const previewText = readFileSync(PREVIEW, 'utf8');
-
-const caseSlugSet = new Set(
-	[...previewText.matchAll(/case\s+'([^']+)':/g)].map(m => m[1])
-);
-
-const getCaseBlock = (slug) =>
-{
-	const start = previewText.indexOf(`case '${slug}':`);
-	if(start === -1) return null;
-
-	// Walk forward to the next case keyword or the end of the switch block.
-	const rest  = previewText.slice(start);
-	const endMatch = rest.match(/\n\s+case\s+'|\n\s+default:/);
-	return endMatch ? rest.slice(0, endMatch.index) : rest;
-}
-
-// ─── Extract per-entry text regions from registry ────────────────────────────
+	return slugs.map((slug, i) => ({ slug, name: names[i], files: filesBlocks[i] }));
+};
 
 // Rather than parsing template literals (which breaks on escaped backticks),
 // slice the registry text between each entry's slug line and the next one.
 // This gives us the full text of each entry to search for JSX usage.
-const buildEntryRegions = () =>
+const buildEntryRegions = (registryText) =>
 {
 	const regions = {};
 	const slugPositions = [...registryText.matchAll(/^ {4}slug:\s*'([^']+)'/gm)];
@@ -88,18 +84,42 @@ const buildEntryRegions = () =>
 	}
 
 	return regions;
+};
+
+const getCaseBlock = (previewText, slug) =>
+{
+	const start = previewText.indexOf(`case '${slug}':`);
+	if(start === -1) return null;
+
+	// Walk forward to the next case keyword or the end of the switch block.
+	const rest  = previewText.slice(start);
+	const endMatch = rest.match(/\n\s+case\s+'|\n\s+default:/);
+	return endMatch ? rest.slice(0, endMatch.index) : rest;
+};
+
+// ─── Parse both catalogs ───────────────────────────────────────────────────
+
+for(const catalog of CATALOGS)
+{
+	catalog.registryText  = readFileSync(catalog.registry, 'utf8');
+	catalog.previewText   = readFileSync(catalog.preview, 'utf8');
+	catalog.entries       = parseRegistry(catalog.registryText);
+	catalog.entryRegions  = buildEntryRegions(catalog.registryText);
+	catalog.caseSlugSet   = new Set(
+		[...catalog.previewText.matchAll(/case\s+'([^']+)':/g)].map(m => m[1])
+	);
+
+	// Hidden entries (e.g. "charts") back other entries' registryDependencies
+	// without a catalog page of their own, so they don't necessarily render as
+	// their own named JSX; checks 5 and 6 skip them for that reason.
+	catalog.hiddenSlugs = new Set(
+		Object.entries(catalog.entryRegions)
+			.filter(([, region]) => /^ {4}hidden:\s*true/m.test(region))
+			.map(([slug]) => slug)
+	);
 }
 
-const entryRegions = buildEntryRegions();
-
-// Hidden entries (e.g. "charts") back other entries' registryDependencies
-// without a catalog page of their own, so they don't necessarily render as
-// their own named JSX; checks 5 and 6 skip them for that reason.
-const hiddenSlugs = new Set(
-	Object.entries(entryRegions)
-		.filter(([, region]) => /^ {4}hidden:\s*true/m.test(region))
-		.map(([slug]) => slug)
-);
+const allEntries = CATALOGS.flatMap(c => c.entries);
 
 // ─── Collect component directories ───────────────────────────────────────────
 
@@ -125,11 +145,11 @@ for(const dir of compDirs)
 		fail(`${dir}/ missing spec.md`);
 }
 
-// ─── Check 2: Every component source file appears in the registry ─────────────
+// ─── Check 2: Every component source file appears in a registry ──────────────
 
 console.log('Checking registry coverage…');
 
-const allRegistryFiles = new Set(entries.flatMap(e => e.files));
+const allRegistryFiles = new Set(allEntries.flatMap(e => e.files));
 
 for(const dir of compDirs)
 {
@@ -142,7 +162,7 @@ for(const dir of compDirs)
 
 console.log('Checking registry file paths…');
 
-for(const entry of entries)
+for(const entry of allEntries)
 {
 	for(const file of entry.files)
 	{
@@ -152,48 +172,45 @@ for(const entry of entries)
 	}
 }
 
-// ─── Check 4: Every registry entry has a live preview case ───────────────────
+// ─── Checks 4-6: per-catalog live preview coverage and JSX alignment ─────────
 
 console.log('Checking live preview coverage…');
-
-for(const entry of entries)
-{
-	if(!caseSlugSet.has(entry.slug))
-		fail(`Registry '${entry.slug}' has no case in ComponentLivePreview.tsx`);
-}
-
-// ─── Check 5: Usage code contains the component as JSX ───────────────────────
-
 console.log('Checking usage code contains JSX…');
-
-for(const entry of entries)
-{
-	if(hiddenSlugs.has(entry.slug)) continue;
-
-	const region = entryRegions[entry.slug];
-	if(!region)
-	{
-		warn(`Could not locate entry region for '${entry.slug}', skipping JSX check`);
-		continue;
-	}
-
-	if(!region.includes(`<${entry.name}`))
-		fail(`Registry '${entry.slug}': usage code missing <${entry.name} JSX`);
-}
-
-// ─── Check 6: Preview case uses the same component ───────────────────────────
-
 console.log('Checking preview/usage alignment…');
 
-for(const entry of entries)
+for(const catalog of CATALOGS)
 {
-	if(hiddenSlugs.has(entry.slug)) continue;
+	for(const entry of catalog.entries)
+	{
+		if(!catalog.caseSlugSet.has(entry.slug))
+			fail(`Registry '${entry.slug}' has no case in ${catalog.label} live preview`);
+	}
 
-	const block = getCaseBlock(entry.slug);
-	if(!block) continue; // already caught in check 4
+	for(const entry of catalog.entries)
+	{
+		if(catalog.hiddenSlugs.has(entry.slug)) continue;
 
-	if(!block.includes(`<${entry.name}`))
-		fail(`ComponentLivePreview case '${entry.slug}' missing <${entry.name}: preview and usage are out of sync`);
+		const region = catalog.entryRegions[entry.slug];
+		if(!region)
+		{
+			warn(`Could not locate entry region for '${entry.slug}', skipping JSX check`);
+			continue;
+		}
+
+		if(!region.includes(`<${entry.name}`))
+			fail(`Registry '${entry.slug}': usage code missing <${entry.name} JSX`);
+	}
+
+	for(const entry of catalog.entries)
+	{
+		if(catalog.hiddenSlugs.has(entry.slug)) continue;
+
+		const block = getCaseBlock(catalog.previewText, entry.slug);
+		if(!block) continue; // already caught above
+
+		if(!block.includes(`<${entry.name}`))
+			fail(`${catalog.label} live preview case '${entry.slug}' missing <${entry.name}: preview and usage are out of sync`);
+	}
 }
 
 // ─── Check 7: Every component directory has a CLI registry entry ──────────────
@@ -235,4 +252,4 @@ if(errors.length > 0)
 	process.exit(1);
 }
 
-console.log(`✓ All ${entries.length} registry entries and ${compDirs.length} component directories are valid.\n`);
+console.log(`✓ All ${allEntries.length} registry entries and ${compDirs.length} component directories are valid.\n`);

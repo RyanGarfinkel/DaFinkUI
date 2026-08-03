@@ -1,7 +1,8 @@
 'use client';
-import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
+import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, EffectsIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerClose } from '@/src/components/Drawer/Drawer';
 import { SidebarSection, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
+import { visibleEffects as effects } from '@/app/_docs/registry/effects';
 import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
 import { visibleRegistry as registry } from '@/app/_docs/registry';
 import { CATEGORIES } from '@/app/_docs/registry/categories';
@@ -24,6 +25,7 @@ export const MobileNav = () =>
 
 	const showComponents = pathname === '/components' || pathname.startsWith('/components/');
 	const showBlocks = pathname === '/blocks' || pathname.startsWith('/blocks/');
+	const showEffects = pathname === '/effects' || pathname.startsWith('/effects/');
 
 	const byCategory = CATEGORIES.reduce<Record<string, typeof registry>>((acc, cat) =>
 	{
@@ -79,6 +81,7 @@ export const MobileNav = () =>
 						<nav className='flex flex-col gap-1'>
 							<DocsSidebarLink href='/components' icon={<ComponentsIcon />} className='py-3'>All Components</DocsSidebarLink>
 							<DocsSidebarLink href='/blocks' icon={<BlocksIcon />} className='py-3'>All Blocks</DocsSidebarLink>
+							<DocsSidebarLink href='/effects' icon={<EffectsIcon />} className='py-3'>All Effects</DocsSidebarLink>
 						</nav>
 
 						{showComponents && CATEGORIES.filter((cat) => byCategory[cat]).map((category) => (
@@ -101,6 +104,20 @@ export const MobileNav = () =>
 									<DocsSidebarLink
 										key={entry.slug}
 										href={`/blocks/${entry.slug}`}
+										className='py-3'
+									>
+										{entry.name}
+									</DocsSidebarLink>
+								))}
+							</nav>
+						)}
+
+						{showEffects && (
+							<nav className='flex flex-col gap-1'>
+								{effects.map((entry) => (
+									<DocsSidebarLink
+										key={entry.slug}
+										href={`/effects/${entry.slug}`}
 										className='py-3'
 									>
 										{entry.name}

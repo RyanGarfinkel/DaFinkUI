@@ -18,6 +18,10 @@ app/
 │   │   ├── index.ts                  # Component registry (ComponentEntry[])
 │   │   ├── componentExamples.tsx     # Data-driven "Examples" sections (one entry per sub-example), keyed by component slug
 │   │   ├── extraSections.tsx         # Data-driven variant/interactive sections, keyed by component slug
+│   │   ├── effects.ts                # Effect registry (EffectEntry[], = ComponentEntry), see "Effect Registry" below
+│   │   ├── effectCategories.ts       # Effect category order
+│   │   ├── effectExamples.tsx        # Data-driven "Examples" sections for effects, mirrors componentExamples.tsx
+│   │   ├── effectExtraSections.tsx   # Data-driven variant/interactive sections for effects, mirrors extraSections.tsx
 │   │   ├── blocks.ts                 # Block registry (BlockEntry[])
 │   │   ├── blockCategories.ts        # Block category order
 │   │   ├── blockPreviews.tsx         # Live preview per block, keyed by block slug
@@ -32,6 +36,10 @@ app/
     ├── components/
     │   └── [slug]/
     │       └── page.tsx              # Component detail page
+    ├── effects/
+    │   ├── page.tsx                  # Effects gallery page
+    │   └── [slug]/
+    │       └── page.tsx              # Effect detail page
     └── blocks/
         ├── page.tsx                  # Blocks gallery page
         └── [slug]/
@@ -51,10 +59,11 @@ Dark mode is class-based (`.dark` on `<html>`). The active mode is stored in bot
 - `DocsSidebar` is a **Client Component** (`'use client'`): it calls `usePathname()` directly to decide which item list to expand, and receives `collapsed`/`onCollapsedChange` from `DocsShell`'s collapse state.
 - `DocsSidebarLink` is also a **Client Component**: it uses `usePathname()` to apply active styles, and forwards an optional `icon` to `SidebarLink`
 - Sidebar's top-level links: Home, Installation, Theme, Typography, Examples, MCP Server, Design Skill, each a plain nav item with a matching icon from `app/_docs/components/NavIcons.tsx`. There is no standalone "Blocks" top-level link; Blocks is reached via "All Blocks" below. "Theme" is a single page (`/theme`) covering the color-palette system, the surface-style system, and light/dark mode together; there is no separate "Styles" page.
-- Below a `SidebarDivider`, two links are **always visible**, regardless of route: "All Components" (`/components`) and "All Blocks" (`/blocks`), Components first. Only the *item list underneath each* is route-conditional:
+- Below a `SidebarDivider`, three links are **always visible**, regardless of route: "All Components" (`/components`), "All Blocks" (`/blocks`), and "All Effects" (`/effects`), in that order. Only the *item list underneath each* is route-conditional:
   - On `/components` or `/components/*`: the full category tree renders under "All Components" (`CATEGORIES` from `app/_docs/registry/categories.ts`, one `SidebarSection` per category, matching registry `category` fields exactly).
   - On `/blocks` or `/blocks/*`: a flat list of every block renders under "All Blocks", no category grouping (only the `/blocks` gallery page itself groups by category; the sidebar list intentionally doesn't, since the block count doesn't warrant it).
-  - On every other route, both links show with nothing expanded beneath them.
+  - On `/effects` or `/effects/*`: a flat list of every effect renders under "All Effects", same rationale as blocks (only the `/effects` gallery page groups by category).
+  - On every other route, all three links show with nothing expanded beneath them.
 - Sidebar is `collapsible` (`togglePosition="top"`) and full viewport height (`h-screen`, `top-0`) on desktop (`md:` and up), hidden below `md:`. `DocsShell` lifts the collapsed state so `DocsHeader` and the main content margin shift in sync. On mobile, navigation lives in `MobileNav`, a hamburger button in the `DocsHeader` that opens the library's `Drawer` (side `left`) with the same links and the same always-visible-link/conditional-list behavior. The drawer closes on route change and follows the standard overlay accessibility contract
 
 ## Component Registry
@@ -166,6 +175,20 @@ Each page (`app/(docs)/blocks/[slug]/page.tsx`) renders:
 
 No Props section, blocks have none. The gallery page (`app/(docs)/blocks/page.tsx`) mirrors `app/(docs)/components/page.tsx`'s category-grouped card grid, filtered to `!entry.hidden`.
 
+## Effect Registry
+
+Effects (ScrollFade, Reveal, CountUp, TextShimmer, Typewriter, Marquee, Ripple, BorderBeam, Particles, Spotlight, Meteors, Magnetic, TextScramble, …) are **real, prop-driven, individually testable/specced components** — they live in `src/components/{Name}/{Name}.tsx` with the full `.test.tsx` + `spec.md` requirement from `rules/new-component.md`, exactly like Button or Modal. The only thing that makes them "effects" rather than plain components is that they get their own docs registry, gallery, and detail-page section instead of showing up under `/components`, the same way Blocks get their own section — but unlike blocks, an effect keeps a `props` array and a Props section, because it has a real, stable API to document.
+
+`app/_docs/registry/effects.ts` mirrors `index.ts` exactly: `export type EffectEntry = ComponentEntry` (imported from `./index`), same fields (`slug, name, category, description, usage, props, dependencies, registryDependencies, files`, optional `composition`/`hidden`), same `getEffect(slug)` / `visibleEffects` helpers as `getComponent` / `visibleRegistry`. `app/_docs/registry/effectCategories.ts` is `EFFECT_CATEGORIES`, the effect-specific category order (`Text`, `Scroll`, `Cursor`, `Background`), separate from the component `CATEGORIES` list.
+
+Live previews for effects live in `app/_docs/components/EffectLivePreview.tsx`, a `switch (slug)` component mirroring `ComponentLivePreview.tsx` exactly (add a `case` there, not in `ComponentLivePreview.tsx`, for a new effect). `effectExamples.tsx` / `effectExtraSections.tsx` mirror `componentExamples.tsx` / `extraSections.tsx` field-for-field (they re-export the same `ComponentExample` / `ExtraSection` types).
+
+Because an effect is a real component, `packages/cli/scripts/build-registry.mjs` merges `effects.ts`'s entries directly into the *same* generated `packages/cli/src/lib/registry.ts` as `index.ts`'s components (not a separate CLI-side file the way blocks get `blocksRegistry.ts`): effects copy into the same `components/ui/` target directory via the same `npx dafink-ui add <slug>` path as any other component, so there's no reason to give them separate CLI resolution logic. `scripts/validate-components.mjs` runs its full check suite against both the component catalog (`index.ts` + `ComponentLivePreview.tsx`) and the effect catalog (`effects.ts` + `EffectLivePreview.tsx`) independently, but checks directory-required-files and CLI-registry-coverage globally across both.
+
+## Effect Detail Page
+
+Each page (`app/(docs)/effects/[slug]/page.tsx`) is byte-for-byte the same template as the Component Detail Page above (Header, Installation, Demo/Demos via `EffectLivePreview` + `effectExamples`, optional Composition, optional Extra Sections via `effectExtraSections`, Props), just pointed at `getEffect`/`effects` instead of `getComponent`/`registry`. The gallery page (`app/(docs)/effects/page.tsx`) mirrors `app/(docs)/components/page.tsx`'s category-grouped card grid (using `EFFECT_CATEGORIES`), not the blocks gallery, since effects aren't filtered by `hidden` any differently than components are.
+
 ## Themes and Styles
 
 The docs site supports multiple built-in themes (color palette) and styles (surface treatment) that the user can switch between live, site-wide. Both axes are documented together on the single `/theme` page (see "Theme Page" below) and are orthogonal to light/dark mode, see "Light & Dark Mode" above.
@@ -197,11 +220,13 @@ These live in `app/_docs/components/`:
 | Component             | Type   | Purpose                                                             |
 |-----------------------|--------|---------------------------------------------------------------------|
 | `DocsShell`           | Client | Owns sidebar collapsed state; renders `DocsHeader`, `DocsSidebar`, main content, and `Footer` in sync |
-| `DocsSidebar`         | Client | Sidebar shell: brand header, top-level links, route-conditional Components/Blocks lists, footer (Changelog, GitHub, npm) |
+| `DocsSidebar`         | Client | Sidebar shell: brand header, top-level links, route-conditional Components/Blocks/Effects lists, footer (Changelog, GitHub, npm) |
 | `DocsSidebarLink`     | Client | Single sidebar link with active state via `usePathname()` and optional `icon`   |
 | `CodeBlock`           | Server | `<pre><code>` with token background and horizontal scroll           |
 | `PropsTable`          | Server | Renders a prop rows table from `PropRow[]`                          |
 | `ComponentPreview`    | Client | Wrapper that centers/pads the live demo; horizontally scrollable with conditional focusability when content overflows |
+| `ComponentLivePreview`| Client | `switch (slug)` live render per component slug, used by the component detail page |
+| `EffectLivePreview`   | Client | `switch (slug)` live render per effect slug, used by the effect detail page; mirrors `ComponentLivePreview` exactly, kept separate rather than merged in |
 | `MobileNav`           | Client | Hamburger + left `Drawer` with navigation links only; shown below `md:` |
 
 ## Styling Rules

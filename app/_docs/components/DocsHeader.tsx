@@ -1,6 +1,7 @@
 'use client';
 import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
 import { MenuBar, MenuBarActions } from '@/src/components/MenuBar/MenuBar';
+import { visibleEffects as effects } from '@/app/_docs/registry/effects';
 import ThemeToggle from '@/src/components/ThemeToggle/ThemeToggle';
 import { visibleRegistry as registry } from '@/app/_docs/registry';
 import { themes, getThemeByName, type Theme } from '@/src/themes';
@@ -261,6 +262,18 @@ export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
 							key={entry.slug}
 							value={entry.name}
 							onSelect={() => goTo(`/blocks/${entry.slug}`)}
+						>
+							{entry.name}
+						</CommandItem>
+					))}
+				</CommandGroup>
+
+				<CommandGroup label='Effects'>
+					{effects.map(entry => (
+						<CommandItem
+							key={entry.slug}
+							value={entry.name}
+							onSelect={() => goTo(`/effects/${entry.slug}`)}
 						>
 							{entry.name}
 						</CommandItem>

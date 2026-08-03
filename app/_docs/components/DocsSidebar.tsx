@@ -1,7 +1,8 @@
 'use client';
 
-import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
+import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, EffectsIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
 import { Sidebar, SidebarHeader, SidebarFooter, SidebarDivider, useSidebarCollapsed } from '@/src/components/Sidebar/Sidebar';
+import { visibleEffects as effects } from '@/app/_docs/registry/effects';
 import { DocsSidebarLink } from '@/app/_docs/components/DocsSidebarLink';
 import { visibleRegistry as registry } from '@/app/_docs/registry';
 import Tooltip from '@/src/components/Tooltip/Tooltip';
@@ -101,6 +102,7 @@ export const DocsSidebar = ({ collapsed, onCollapsedChange }: DocsSidebarProps) 
 
 	const showComponents = pathname === '/components' || pathname.startsWith('/components/');
 	const showBlocks = pathname === '/blocks' || pathname.startsWith('/blocks/');
+	const showEffects = pathname === '/effects' || pathname.startsWith('/effects/');
 
 	const sortedComponents = [...registry].sort((a, b) => a.name.localeCompare(b.name));
 
@@ -134,6 +136,7 @@ export const DocsSidebar = ({ collapsed, onCollapsedChange }: DocsSidebarProps) 
 			<nav className='flex flex-col gap-1'>
 				<DocsSidebarLink href='/components' icon={<ComponentsIcon />}>All Components</DocsSidebarLink>
 				<DocsSidebarLink href='/blocks' icon={<BlocksIcon />}>All Blocks</DocsSidebarLink>
+				<DocsSidebarLink href='/effects' icon={<EffectsIcon />}>All Effects</DocsSidebarLink>
 
 				{showComponents && sortedComponents.map((entry) => (
 					<DocsSidebarLink
@@ -148,6 +151,15 @@ export const DocsSidebar = ({ collapsed, onCollapsedChange }: DocsSidebarProps) 
 					<DocsSidebarLink
 						key={entry.slug}
 						href={`/blocks/${entry.slug}`}
+					>
+						{entry.name}
+					</DocsSidebarLink>
+				))}
+
+				{showEffects && effects.map((entry) => (
+					<DocsSidebarLink
+						key={entry.slug}
+						href={`/effects/${entry.slug}`}
 					>
 						{entry.name}
 					</DocsSidebarLink>

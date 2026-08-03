@@ -28,15 +28,11 @@ import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
 import { ToastProvider, useToast } from '@/src/components/Toast/Toast';
 import DropdownMenu from '@/src/components/DropdownMenu/DropdownMenu';
 import Avatar, { AvatarGroup } from '@/src/components/Avatar/Avatar';
-import Reveal, { RevealGroup } from '@/src/components/Reveal/Reveal';
 import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
-import { ScrollFade } from '@/src/components/ScrollFade/ScrollFade';
 import { DatePicker } from '@/src/components/DatePicker/DatePicker';
-import TextShimmer from '@/src/components/TextShimmer/TextShimmer';
 import ThemeToggle from '@/src/components/ThemeToggle/ThemeToggle';
 import AudioPlayer from '@/src/components/AudioPlayer/AudioPlayer';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
-import Typewriter from '@/src/components/Typewriter/Typewriter';
 import Breadcrumb from '@/src/components/Breadcrumb/Breadcrumb';
 import CodeEditor from '@/src/components/CodeEditor/CodeEditor';
 import { Combobox } from '@/src/components/Combobox/Combobox';
@@ -219,17 +215,6 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         <div className='w-full max-w-2xl'>
           <CodeEditor value={editorCode} onChange={setEditorCode} aria-label='JSX code editor' minHeight='160px' />
         </div>
-      );
-
-    case 'scroll-fade':
-      return (
-        <ScrollFade className='h-48 w-full max-w-sm rounded-[var(--radius-lg)] border border-surface-border bg-surface p-4'>
-          <ul className='flex flex-col gap-3 text-sm text-text'>
-            {Array.from({ length: 12 }, (_, i) => (
-              <li key={i}>Item {i + 1}</li>
-            ))}
-          </ul>
-        </ScrollFade>
       );
 
     case 'card':
@@ -1172,59 +1157,6 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
             <MessageReaction label='1' href='https://en.wikipedia.org/wiki/Eiffel_Tower' aria-label='Source 1: wikipedia.org' />
             <MessageReaction label='2' href='https://www.toureiffel.paris' aria-label='Source 2: toureiffel.paris' />
           </MessageReactions>
-        </div>
-      );
-
-    case 'reveal':
-      return (
-        <RevealGroup stagger={120} effect='slide-up' className='flex flex-col gap-3 w-full max-w-sm'>
-          <Reveal>
-            <div className='rounded-lg border border-surface-border bg-surface px-4 py-3 text-sm text-text'>Scroll-triggered entrance</div>
-          </Reveal>
-          <Reveal>
-            <div className='rounded-lg border border-surface-border bg-surface px-4 py-3 text-sm text-text'>Staggered by 120ms</div>
-          </Reveal>
-          <Reveal effect='scale'>
-            <div className='rounded-lg border border-surface-border bg-surface px-4 py-3 text-sm text-text'>With its own effect</div>
-          </Reveal>
-        </RevealGroup>
-      );
-
-    case 'count-up':
-      return (
-        <div className='flex flex-wrap items-center justify-center gap-10'>
-          <div className='flex flex-col items-center gap-1'>
-            <CountUp value={12480} separator=',' className='text-3xl font-semibold tracking-tight text-text' />
-            <span className='text-xs text-text-muted'>Daily downloads</span>
-          </div>
-          <div className='flex flex-col items-center gap-1'>
-            <CountUp value={99.98} decimals={2} suffix='%' className='text-3xl font-semibold tracking-tight text-text' />
-            <span className='text-xs text-text-muted'>Uptime</span>
-          </div>
-          <div className='flex flex-col items-center gap-1'>
-            <CountUp value={1200000} prefix='$' separator=',' duration={1500} className='text-3xl font-semibold tracking-tight text-text' />
-            <span className='text-xs text-text-muted'>ARR</span>
-          </div>
-        </div>
-      );
-
-    case 'text-shimmer':
-      return (
-        <div className='flex flex-col items-center gap-4'>
-          <TextShimmer className='text-2xl font-semibold tracking-tight'>Generating your report…</TextShimmer>
-          <TextShimmer duration={1600} className='text-sm font-medium'>Thinking…</TextShimmer>
-        </div>
-      );
-
-    case 'typewriter':
-      return (
-        <div className='flex flex-col items-start gap-6'>
-          <h2 className='text-3xl font-bold tracking-tight text-text'>
-            <Typewriter text='Hello, world.' />
-          </h2>
-          <p className='text-base font-mono text-text-muted'>
-            <Typewriter text='System ready. Awaiting input…' speed={60} delay={400} cursorPersist />
-          </p>
         </div>
       );
 

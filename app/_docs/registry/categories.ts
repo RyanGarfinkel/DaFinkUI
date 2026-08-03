@@ -9,7 +9,6 @@ export const CATEGORIES = [
 	'Disclosure',
 	'Forms',
 	'Overlay',
-	'Effects',
 	'Charts',
 	'Drag & Drop',
 	'Canvas',
