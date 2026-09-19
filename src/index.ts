@@ -164,5 +164,5 @@ export { default as Tilt } from './components/Tilt/Tilt';
 export type { TiltProps } from './components/Tilt/Tilt';
 
 export { default as WorkflowBuilder } from './components/WorkflowBuilder/WorkflowBuilder';
-export type { WorkflowBuilderProps, WorkflowGraph, WorkflowNodeType } from './components/WorkflowBuilder/WorkflowBuilder';
+export type { WorkflowBuilderProps, WorkflowGraph, WorkflowPort, WorkflowDirection } from './components/WorkflowBuilder/WorkflowBuilder';
 

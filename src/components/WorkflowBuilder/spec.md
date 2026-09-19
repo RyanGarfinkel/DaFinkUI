@@ -1,6 +1,6 @@
 # WorkflowBuilder
 
-A drag-and-drop graph editor for building typed workflows. Users connect nodes visually; the component outputs a serializable `WorkflowGraph` object (nodes + edges) via an `onChange` callback.
+A drag-and-drop graph editor for generic input/logic/output nodes. Users connect nodes visually and edit each node's title, description, and ports in a docked inspector panel; the component outputs a serializable `WorkflowGraph` object (nodes + edges) via an `onChange` callback.
 
 ## Installation
 
@@ -9,6 +9,8 @@ npx dafink-ui add workflow-builder
 ```
 
 **npm dependency:** `@xyflow/react`
+
+**Registry dependency:** `toggle-group` (powers the horizontal/vertical layout toggle; installed automatically by the CLI)
 
 Also add the React Flow stylesheet to your entry CSS:
 
@@ -24,129 +26,172 @@ import '@xyflow/react/dist/style.css';
 
 ## Props
 
-| Prop           | Type                          | Default | Description                                                         |
-|----------------|-------------------------------|---------|---------------------------------------------------------------------|
-| `defaultGraph` | `WorkflowGraph`               | -       | Pre-populated graph. Nodes and edges are loaded on first render only. Not reactive: subsequent changes are managed internally. |
-| `onChange`     | `(graph: WorkflowGraph) => void` | -    | Fired after every change: node move, edge connect, label edit, node add/delete. |
-| `height`       | `number`                      | `500`   | Canvas height in pixels.                                            |
-| `className`    | `string`                      | `""`    | Additional classes on the root container.                           |
+| Prop               | Type                              | Default        | Description                                                         |
+|--------------------|-----------------------------------|----------------|-----------------------------------------------------------------------|
+| `defaultGraph`     | `WorkflowGraph`                   | -              | Pre-populated graph. Nodes and edges are loaded on first render only. Not reactive: subsequent changes are managed internally. |
+| `onChange`         | `(graph: WorkflowGraph) => void`  | -              | Fired after every change: node move, edge connection, inspector panel edit (title/description/ports), node add/delete. |
+| `height`           | `number`                          | `500`          | Canvas height in pixels.                                            |
+| `className`        | `string`                          | `""`           | Additional classes on the root container.                           |
+| `defaultDirection` | `'horizontal' \| 'vertical'`      | `'horizontal'` | Initial flow orientation. Not reactive after mount — the user can still switch orientation live via the "Layout" toggle in the toolbar. When no `defaultGraph` is given and `defaultDirection` is `'vertical'`, the built-in demo graph is auto-laid-out vertically on first render. |
 
 ## Data Shape
 
 ```ts
-type WorkflowNodeType = 'trigger' | 'condition' | 'action' | 'transform' | 'output';
+interface WorkflowPort {
+  id:    string;
+  label: string;
+}
 
 interface WorkflowGraph {
   nodes: {
-    id:       string;
-    type:     WorkflowNodeType;
-    label:    string;
-    position: { x: number; y: number };
+    id:           string;
+    label:        string;          // node title
+    description?: string;          // free-text "logic" shown on the card + editable in the panel
+    inputs:       WorkflowPort[];  // 0+ named input ports
+    outputs:      WorkflowPort[];  // 0+ named output ports
+    position:     { x: number; y: number };
   }[];
   edges: {
-    id:     string;
-    source: string;
-    target: string;
+    id:           string;
+    source:       string;
+    target:       string;
+    sourceHandle: string;          // id of the source node's output port
+    targetHandle: string;          // id of the target node's input port
   }[];
 }
 ```
 
-## Node Types
+## Node Model
 
-Each type has a distinct shape and accent color so they are instantly recognisable in a dense graph. Shapes are achieved purely via CSS (border-radius and transform) so they remain legible UI components rather than clip-art icons.
+Every node is the same shape: it has zero-or-more **inputs**, some free-text **logic** (title + optional description), and zero-or-more **outputs**. There is no fixed vocabulary of node types — a node's role in the graph is entirely determined by its ports:
 
-| Type        | Icon | Shape                              | Accent color | Purpose                                              | Default label             |
-|-------------|------|------------------------------------|--------------|------------------------------------------------------|---------------------------|
-| `trigger`   | ⚡   | Pill (border-radius: 9999px)       | Brand        | Entry point: something that starts the workflow     | "When this happens"       |
-| `condition` | ◇    | Diamond (80×80 square, rotate 45°, inside a 120×120 container) | Warning | Branching logic: a decision point in the flow | "If condition is met" |
-| `action`    | ▶    | Standard card (border-radius: var(--radius)) | Success | Side effect: sends email, writes to DB, calls API | "Do something"         |
-| `transform` | ⇄    | Sharp left, rounded right (4px 12px 12px 4px) | Text-muted | Data mutation: formats, maps, or filters a value | "Transform data"      |
-| `output`    | ◼    | Flat top, curved bottom (4px 4px 14px 14px)  | Danger     | Terminal node: the final result or response      | "Return result"        |
+- A node with **0 inputs** is an **entry point** — nothing needs to happen before it, so the run animation starts there and the auto-layout treats it as level 0.
+- A node with **0 outputs** is **terminal** — nothing flows out of it.
+- A node can have any number of inputs and outputs (e.g. a branching node with 2 outputs, or a merge node with 2 inputs); each port gets its own connection handle.
 
-The condition node occupies a 120×120 bounding box (vs 176px wide for the others) so the diamond fits without overflow. Its connection handles sit at the left and right midpoints of the bounding box, which coincide with the visual diamond tips.
+Ports are rendered along the node's edges, direction-aware: in horizontal layout, inputs stack down the left edge and outputs stack down the right edge; in vertical layout, inputs spread across the top edge and outputs spread across the bottom edge. Each port `<Handle>` is positioned via CSS absolute positioning relative to its own row/cell (not the whole card), so this works regardless of card height or port count. Handle `id` is the port's own `id` — required by `@xyflow/react` so multiple handles of the same type on one node resolve correctly.
+
+Port **names are not shown on the canvas card** — only the dot — to keep nodes visually quiet; a port's `label` is a native `title` tooltip on hover, and the full editable name lives in the inspector panel (see "Editing" below).
 
 ## Interactions
 
-| Action                  | How                                                                       |
-|-------------------------|---------------------------------------------------------------------------|
-| Move a node             | Drag the node card                                                        |
-| Connect nodes           | Drag from a right-side handle to a left-side handle on another node       |
-| Edit a label            | Click the label text; press Enter or click away to confirm                |
-| Add a node              | Click a type button in the "Add node" panel (top-left)                    |
-| Delete a node (button)  | Hover the node; click the × button that appears in the top-right corner   |
-| Delete a node (keyboard)| Select it and press Delete or Backspace                                   |
-| Delete an edge          | Select it and press Delete or Backspace                                   |
-| Pan the canvas          | Click and drag on the background                                          |
-| Zoom                    | Scroll wheel, or use the Controls panel buttons                           |
-| Fit to view             | Click the fit button in the Controls panel                                |
+| Action                     | How                                                                       |
+|-----------------------------|---------------------------------------------------------------------------|
+| Move a node                | Drag the node card; snaps to a 20px grid (matches the dot Background)     |
+| Connect nodes               | Drag from an output handle to an input handle on another node (right→left when horizontal, bottom→top when vertical) |
+| Select a node / open panel | Click the node card                                                       |
+| Edit a node                | Select it, then edit Title / Description / Inputs / Outputs in the inspector panel (top-right) |
+| Add a node                 | Click "Add node" in the toolbar (top-left); it starts with 1 input and 1 output |
+| Switch layout direction    | Click "Horizontal" or "Vertical" in the "Layout" toggle (top-left panel)  |
+| Delete a node (button)     | Hover the node; click the × button that appears in the top-right corner   |
+| Delete a node (keyboard)   | Select it and press Delete or Backspace                                   |
+| Delete an edge             | Select it and press Delete or Backspace                                   |
+| Pan the canvas             | Click and drag on the background                                          |
+| Zoom                       | Scroll wheel, or use the Controls panel buttons                           |
+| Fit to view                | Click the fit button in the Controls panel                                |
+
+## Editing: Node Inspector Panel
+
+Clicking a node selects it (`selected: true`, managed internally by `@xyflow/react`'s node state) and opens a panel docked to the right edge of the canvas — full height, not a floating overlay. It disappears automatically when the node is deselected (clicking blank canvas, per React Flow's default behavior) or via its own close (×) button.
+
+- **Node ID**: read-only, monospace, shown in the panel header for reference.
+- **Title**: a text input bound to the node's `label`. Updates are live — no separate draft/commit step, since this is a form, not a click-to-edit affordance.
+- **Description**: a textarea bound to the node's `description`.
+- **Inputs** / **Outputs**: a list of rows, each a text input (the port's `label`) plus a × remove button, and a "+ Add input" / "+ Add output" button below the list. New ports default to the label `"in"`/`"out"`.
+- **Removing a port also removes any edge connected to it** (matched by `sourceHandle`/`targetHandle` against the removed port's id) — this prevents dangling edges that reference a handle that no longer exists.
+
+This is a **persistent, docked panel — not an overlay**. It does not need (and does not implement) any of the Modal/Dialog/Drawer/Popover focus-trap/Escape-close/`aria-modal` treatment described in `rules/new-component.md`'s "Popup and Overlay Components" section: that checklist applies to floating layers, and this panel is part of normal document layout the same way `Sidebar` is, just docked to the opposite edge (`border-l` instead of `border-r`). All of its fields use plain, normal tab order.
+
+## Layout Direction
+
+The "Layout" toggle in the toolbar switches the graph between a horizontal (left→right) and vertical (top→bottom) flow:
+
+- Toggling **flips every port's handle positions** (`Position.Left`/`Position.Right` ↔ `Position.Top`/`Position.Bottom`, and the input/output column layout ↔ row layout) so connections always point the right way.
+- Toggling also **re-runs an auto-layout pass**: nodes are grouped into levels via BFS from all entry nodes (nodes with 0 inputs — or, failing that, nodes with no incoming edges), then spread along the flow axis (260px per level) and across the cross axis (220px per sibling, wide enough to clear the node card's width), centered within their level.
+- The canvas re-fits to the new layout (`fitView`) after the toggle.
+- The toggle is disabled while the run animation is in progress.
+- `defaultDirection` only sets the *initial* orientation; the toggle is the live, user-facing control. There is no `onDirectionChange` callback — orientation is not part of the serialized `WorkflowGraph`.
+
+## Grid Snapping
+
+Dragging a node snaps its position to a 20px grid (`GRID_SIZE` in `WorkflowBuilder.tsx`), via `@xyflow/react`'s `snapToGrid`/`snapGrid={[20, 20]}` props — the same value used for the dot `Background`'s `gap`, so the visible dots are exactly the grid nodes snap to, not just a similar-looking texture. A node added via the toolbar also gets its randomized initial position rounded to the nearest grid multiple, so it never starts off-grid.
 
 ## Run Animation
 
-Click **▶ Run** in the toolbar to visualise workflow execution. A BFS traversal starts from all `trigger` nodes and propagates outward wave-by-wave.
+Click **▶ Run** in the toolbar to visualise workflow execution. Every entry node (0 inputs) activates immediately; from there, execution is a proper dependency-gated scheduler, not a simple breadth-first wave: **a node only activates once every edge feeding it has arrived**, not on the first one. A merge node with two connected inputs from branches of different lengths correctly waits for the slower branch — it does not fire early just because one input got there first. A node with multiple outputs fires all of them in parallel once it activates.
 
-**Timing (full motion)**
+The animation is intentionally flat — no blur, no drop-shadow, no multi-dot particle trail — to match the minimal card/wire look. A single solid pulse crosses each edge once; active nodes get a crisp 2px brand-colored ring, not a glow.
+
+**Implementation**: `runAnimation` builds `incomingEdges`/`outgoingEdges` maps, then recursively calls `activateNode` for each entry node (`Promise.all` across all entry nodes so independent branches run concurrently). After a node's outgoing edges finish animating, it checks, for each downstream target, whether *every* edge in that target's `incomingEdges` is now in a plain runtime `doneEdges` set (not React state — concurrent branches need synchronous read/write, which state updates batched across renders can't guarantee); only the branch that delivers the last required edge proceeds to activate the target (a `claimed` set prevents double-activation if that check ever raced). `doneEdges`/`claimed` are local to one `runAnimation()` call and discarded when it finishes.
+
+**Timing (full motion)** — named constants in `WorkflowBuilder.tsx` (`TRIGGER_DWELL_MS`, `EDGE_TRAVEL_MS`, `NODE_DWELL_MS`, `COMPLETE_HOLD_MS`, `REDUCED_MOTION_HOLD_MS`); the edge pulse's `<animateMotion dur>` is derived from `EDGE_TRAVEL_MS` so they can never drift apart.
 
 | Step | Duration |
 |---|---|
-| Initial trigger dwell | 300 ms |
-| Pulse dot travels each edge | 600 ms |
-| Active-node dwell before moving to next wave | 300 ms |
-| "Complete" hold before resetting | 1 500 ms |
+| Initial entry-node dwell | 250 ms |
+| Pulse travels each edge | 450 ms |
+| Active-node dwell before its own outgoing edges start | 200 ms |
+| "Complete" hold before resetting | 900 ms |
 
 **Node states during animation**
 
 | State | Visual |
 |---|---|
 | `idle` | Default appearance |
-| `active` | Accent-coloured glow ring via `box-shadow` |
+| `active` | Crisp 2px `var(--color-brand)` ring via `box-shadow: 0 0 0 2px var(--color-brand)` — no blur layer |
 | `completed` | 60 % opacity + ✓ badge top-right |
 
 **Edge state during animation**
 
-An SVG `<circle r={5}>` travels along the bezier path using `<animateMotion>`. Each edge in the current wave animates simultaneously (branching condition nodes fire both outgoing edges in parallel).
+Edges route as right-angle "step" paths (`getSmoothStepPath`, 8px corner radius) rather than curves, so the graph reads as a clean wiring diagram — **except** when the two handles are perfectly aligned (straight down for a vertical Bottom→Top connection, straight across for a horizontal Right→Left one), in which case `AnimatedEdge` uses `getStraightPath` instead: `getSmoothStepPath` otherwise draws a small unnecessary jog even when there's nothing to step around. A single flat SVG `<circle r={4}>` (solid brand fill, no filter) travels the step path once via `<animateMotion dur={EDGE_TRAVEL_MS}ms repeatCount="1">`, then unmounts the instant its wave ends — it never loops or lingers. The circle sets `cx`/`cy` to the edge's own source point so it starts anchored on the wire; without that, the browser briefly renders it at the SVG origin (the canvas's top-left corner) before the motion path takes over. Idle (non-animating, non-completed) edges are tinted with a brand/border color mix (`color-mix(in srgb, var(--color-brand) 45%, var(--color-surface-border-hover))`, 1.5px stroke) so the wiring reads as intentional even before Run is clicked. Completed edges hold flat brand-colored stroke at 35% opacity, no filter.
 
-**Reduced motion**: when `prefers-reduced-motion: reduce` is set, all delays collapse to near-zero and the traveling dot is never rendered; the graph snaps through states and resets after 600 ms.
+**Reduced motion**: when `prefers-reduced-motion: reduce` is set, all delays collapse to near-zero and the traveling pulse is never rendered; the graph snaps through states and resets after `REDUCED_MOTION_HOLD_MS` (400 ms).
 
-**Stop / reset**: the button becomes **◼ Stop** while running. Clicking it (or pressing Stop from outside) increments an internal generation counter that cancels any in-flight async steps and immediately resets all visual states.
+**Run button**: a filled, full-width button in the toolbar with three visual states — idle (`bg-brand`/`text-brand-fg`, "▶ Run"), running (`bg-danger/10`/`text-danger`, "◼ Stop"), complete (`bg-success-bg`/`text-success`, "✓ Done", briefly disabled). Clicking it while running (or pressing Stop) increments an internal generation counter that cancels any in-flight async steps and immediately resets all visual states.
 
-**Add-node buttons** are disabled (opacity 40 %, pointer-events off) while the animation is running.
+**The Add-node button** is disabled (opacity 40 %, pointer-events off) while the animation is running. So is the Layout toggle.
 
 ## Accessibility
 
-- The "Add node" toolbar is a `role="toolbar"`, with each button having a descriptive `aria-label`.
-- Each node renders with `aria-label` stating its type and current label.
-- Node label paragraphs have `role="button"` and `tabIndex={0}`; keyboard users can reach and activate them with Enter or Space.
-- The label input supports Escape to cancel and Enter to confirm.
+- The "Add node" toolbar is a `role="toolbar"`, with its button carrying a descriptive `aria-label`.
+- The "Layout" direction control is a `ToggleGroup` (`role="group"`) with roving tabindex between its two items; the active item carries `aria-pressed="true"`.
+- Each node renders with `aria-label` stating its label and description (when present).
+- The node inspector panel (`aria-label="Node inspector"`) is a plain docked form region, not an overlay — see "Editing" above. Every field is a real `<label>`-associated `<input>`/`<textarea>`; port rows carry a descriptive `aria-label` (e.g. "Input port label", "Remove output out"); the close button is `aria-label="Close node inspector"`.
 - Canvas pan/zoom interactions are handled by `@xyflow/react`'s built-in keyboard support (arrow keys pan, +/- zoom).
 - React Flow's Controls panel provides focus-accessible zoom/fit buttons.
 
 ## Tokens Used
 
-| Token                       | Usage                                      |
-|-----------------------------|--------------------------------------------|
-| `--color-surface`           | Node card background, handle fill          |
-| `--color-surface-border`    | Node border, canvas dot grid color         |
-| `--color-surface-border-hover` | Handle border                           |
-| `--color-surface-hover`     | Add-node toolbar button hover              |
-| `--color-text`              | Node label text                            |
-| `--color-text-subtle`       | Node type badge text                       |
-| `--color-brand`             | Trigger accent, connection line preview    |
-| `--color-brand-ring`        | Focus ring on label / node selection ring  |
-| `--color-warning`           | Condition accent                           |
-| `--color-success`           | Action accent                              |
-| `--color-text-muted`        | Transform accent                           |
-| `--color-danger`            | Output accent; delete button hover tint    |
-| `--shadow`                  | Node card shadow                           |
-| `--shadow-sm`               | Add-node toolbar shadow                    |
-| `--radius`                  | Node card corner radius                    |
-| `--radius-lg`               | Container corner radius                    |
-| `--radius-sm`               | Toolbar button corner radius               |
-| `--duration-fast`           | Toolbar button hover transition            |
+| Token                            | Usage                                                        |
+|-----------------------------------|---------------------------------------------------------------|
+| `--color-surface`                | Node card background, handle fill, inspector panel & field backgrounds |
+| `--color-surface-border`         | Node border, canvas dot grid color, toolbar/panel borders    |
+| `--color-surface-border-hover`   | Handle border, idle edge stroke color-mix                    |
+| `--color-surface-hover`          | Add-node/toolbar button hover, panel close-button hover       |
+| `--color-text`                   | Node title text, field input text                             |
+| `--color-text-muted`             | Node description text                                         |
+| `--color-text-subtle`            | Untitled-node placeholder, toolbar section headers, panel field captions, Node ID text |
+| `--color-input-border`           | Title/Description/port-label field borders                    |
+| `--color-brand`                  | Idle edge tint, run-pulse dot, active-node ring, Run button (idle) background, "+ Add input/output" link |
+| `--color-brand-fg`               | Run button (idle) text                                        |
+| `--color-brand-hover` / `--color-brand-active` | Run button (idle) hover/active                   |
+| `--color-brand-ring`             | Focus-visible ring (toolbar, ToggleGroup, panel fields, node selection ring) |
+| `--color-success`                | ✓ completed badge, Run button (complete) text                 |
+| `--color-success-bg` / `--color-success-border` | Run button (complete) background/border          |
+| `--color-danger`                 | Delete-button hover tint (node + port), Run button (running) text |
+| `--color-danger-ring`            | Run button (running) focus ring                                |
+| `--shadow`                       | Node card shadow                                               |
+| `--shadow-sm`                    | Toolbar and inspector panel shadow                              |
+| `--radius`                       | Node card corner radius                                        |
+| `--radius-lg`                    | Container corner radius                                        |
+| `--radius-sm`                    | Toolbar/Run/field input corner radius                           |
+| `--border-width`                 | Inspector panel's left border width                             |
+| `--duration-fast`                | Toolbar/button hover transition                                 |
 
 ## When to Use
 
-- Visual workflow editors, automation builders, decision-tree designers
-- Anywhere the user needs to define a sequence of typed operations by connecting them visually
+- Visual node-based editors: automation builders, shader/material graphs, data pipelines, blueprint-style logic editors
+- Anywhere the user needs to define a graph of input→logic→output nodes by connecting them visually, without a fixed vocabulary of node kinds
 - Configuration UIs where the structure (not just the values) is user-defined
 
 Not a substitute for a read-only force-directed graph (`Graph`) or a static diagram: use WorkflowBuilder when editing is the primary goal.

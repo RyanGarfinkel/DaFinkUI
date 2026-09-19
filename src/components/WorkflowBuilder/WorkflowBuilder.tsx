@@ -1,85 +1,49 @@
 'use client';
 
-import { ReactFlow, Background, Controls, Handle, Panel, Position, addEdge, useNodesState, useEdgesState, useReactFlow, getBezierPath, BaseEdge } from '@xyflow/react';
+import { ReactFlow, Background, Controls, Handle, Panel, Position, addEdge, useNodesState, useEdgesState, useReactFlow, getSmoothStepPath, getStraightPath, BaseEdge } from '@xyflow/react';
+import type { Node, Edge, NodeProps, Connection, EdgeProps, ReactFlowInstance } from '@xyflow/react';
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
-import type { Node, Edge, NodeProps, Connection, EdgeProps } from '@xyflow/react';
+import ToggleGroup, { ToggleGroupItem } from '../ToggleGroup/ToggleGroup';
 import '@xyflow/react/dist/style.css';
 
 // ─── Public types ──────────────────────────────────────────────────────────────
 
-export type WorkflowNodeType = 'trigger' | 'condition' | 'action' | 'transform' | 'output';
+export type WorkflowDirection = 'horizontal' | 'vertical';
+
+export interface WorkflowPort
+{
+	id:    string;
+	label: string;
+}
 
 export interface WorkflowGraph
 {
-	nodes: { id: string; type: WorkflowNodeType; label: string; position: { x: number; y: number } }[];
-	edges: { id: string; source: string; target: string }[];
+	nodes: {
+		id:           string;
+		label:        string;
+		description?: string;
+		inputs:       WorkflowPort[];
+		outputs:      WorkflowPort[];
+		position:     { x: number; y: number };
+	}[];
+	edges: { id: string; source: string; target: string; sourceHandle: string; targetHandle: string }[];
 }
 
 export interface WorkflowBuilderProps
 {
-	defaultGraph?: WorkflowGraph;
-	onChange?:     (graph: WorkflowGraph) => void;
-	height?:       number;
-	className?:    string;
+	defaultGraph?:     WorkflowGraph;
+	onChange?:         (graph: WorkflowGraph) => void;
+	height?:           number;
+	className?:        string;
+	defaultDirection?: WorkflowDirection;
 }
 
 // ─── Internal RF types ─────────────────────────────────────────────────────────
 
-type WFData = { nodeType: WorkflowNodeType; label: string };
+type WFData = { label: string; description: string; inputs: WorkflowPort[]; outputs: WorkflowPort[] };
 type WFNode = Node<WFData>;
 type WFEdge = Edge;
-
-// ─── Node type metadata ────────────────────────────────────────────────────────
-
-const ICONS: Record<WorkflowNodeType, string> = {
-	trigger:   '⚡',
-	condition: '◇',
-	action:    '▶',
-	transform: '⇄',
-	output:    '◼',
-};
-
-const TYPE_LABELS: Record<WorkflowNodeType, string> = {
-	trigger:   'Trigger',
-	condition: 'Condition',
-	action:    'Action',
-	transform: 'Transform',
-	output:    'Output',
-};
-
-const DEFAULT_LABELS: Record<WorkflowNodeType, string> = {
-	trigger:   'When this happens',
-	condition: 'If condition is met',
-	action:    'Do something',
-	transform: 'Transform data',
-	output:    'Return result',
-};
-
-const ACCENT_COLORS: Record<WorkflowNodeType, string> = {
-	trigger:   'var(--color-brand)',
-	condition: 'var(--color-warning)',
-	action:    'var(--color-success)',
-	transform: 'var(--color-text-muted)',
-	output:    'var(--color-danger)',
-};
-
-const SHAPE_STYLES: Record<WorkflowNodeType, { borderRadius?: string }> = {
-	trigger:   { borderRadius: '9999px' },
-	condition: {},
-	action:    { borderRadius: 'var(--radius)' },
-	transform: { borderRadius: '4px 12px 12px 4px' },
-	output:    { borderRadius: '4px 4px 14px 14px' },
-};
-
-const BAR_RADIUS: Record<WorkflowNodeType, string | null> = {
-	trigger:   null,
-	condition: null,
-	action:    'var(--radius) 0 0 var(--radius)',
-	transform: '4px 0 0 4px',
-	output:    '4px 0 0 14px',
-};
-
-const ALL_NODE_TYPES: WorkflowNodeType[] = ['trigger', 'condition', 'action', 'transform', 'output'];
+type PortKind = 'inputs' | 'outputs';
 
 // ─── Run animation context ─────────────────────────────────────────────────────
 
@@ -93,6 +57,7 @@ interface RunContextValue
 	animatingEdgeIds:     Set<string>;
 	completedEdgeIds:     Set<string>;
 	prefersReducedMotion: boolean;
+	direction:            WorkflowDirection;
 }
 
 const RunContext = createContext<RunContextValue>({
@@ -101,35 +66,38 @@ const RunContext = createContext<RunContextValue>({
 	animatingEdgeIds:     new Set(),
 	completedEdgeIds:     new Set(),
 	prefersReducedMotion: false,
+	direction:            'horizontal',
 });
 
 // ─── Built-in demo graph ───────────────────────────────────────────────────────
+// A node with zero inputs is an entry point; a node with zero outputs is terminal.
+// n2 (2 outputs) and n5 (2 inputs) demonstrate branching/merging via real multi-port nodes.
 
 const DEMO_NODES: WFNode[] = [
-	{ id: 'n1', type: 'workflow', position: { x: 0,   y: 70  }, data: { nodeType: 'trigger',   label: 'User submits form'    } },
-	{ id: 'n2', type: 'workflow', position: { x: 230, y: 40  }, data: { nodeType: 'condition',  label: 'Score > 80?'          } },
-	{ id: 'n3', type: 'workflow', position: { x: 430, y: 0   }, data: { nodeType: 'action',     label: 'Send approval email'  } },
-	{ id: 'n4', type: 'workflow', position: { x: 430, y: 150 }, data: { nodeType: 'transform',  label: 'Format rejection msg' } },
-	{ id: 'n5', type: 'workflow', position: { x: 640, y: 70  }, data: { nodeType: 'output',     label: 'Return result'        } },
+	{ id: 'n1', type: 'workflow', position: { x: 0,   y: 90  }, data: { label: 'Form submitted',      description: 'A user submits the onboarding form.',           inputs: [],                                            outputs: [{ id: 'out', label: 'out' }] } },
+	{ id: 'n2', type: 'workflow', position: { x: 260, y: 90  }, data: { label: 'Score check',          description: 'Branches on whether the score clears the bar.', inputs: [{ id: 'in', label: 'in' }],                   outputs: [{ id: 'pass', label: 'pass' }, { id: 'fail', label: 'fail' }] } },
+	{ id: 'n3', type: 'workflow', position: { x: 560, y: 0   }, data: { label: 'Send approval email',  description: '',                                              inputs: [{ id: 'in', label: 'in' }],                   outputs: [{ id: 'out', label: 'out' }] } },
+	{ id: 'n4', type: 'workflow', position: { x: 560, y: 200 }, data: { label: 'Format rejection msg', description: '',                                              inputs: [{ id: 'in', label: 'in' }],                   outputs: [{ id: 'out', label: 'out' }] } },
+	{ id: 'n5', type: 'workflow', position: { x: 860, y: 90  }, data: { label: 'Return result',        description: '',                                              inputs: [{ id: 'a', label: 'a' }, { id: 'b', label: 'b' }], outputs: [] } },
 ];
 
 const DEMO_EDGES: WFEdge[] = [
-	{ id: 'e1', type: 'animated', source: 'n1', target: 'n2' },
-	{ id: 'e2', type: 'animated', source: 'n2', target: 'n3' },
-	{ id: 'e3', type: 'animated', source: 'n2', target: 'n4' },
-	{ id: 'e4', type: 'animated', source: 'n3', target: 'n5' },
-	{ id: 'e5', type: 'animated', source: 'n4', target: 'n5' },
+	{ id: 'e1', type: 'animated', source: 'n1', target: 'n2', sourceHandle: 'out',  targetHandle: 'in' },
+	{ id: 'e2', type: 'animated', source: 'n2', target: 'n3', sourceHandle: 'pass', targetHandle: 'in' },
+	{ id: 'e3', type: 'animated', source: 'n2', target: 'n4', sourceHandle: 'fail', targetHandle: 'in' },
+	{ id: 'e4', type: 'animated', source: 'n3', target: 'n5', sourceHandle: 'out',  targetHandle: 'a' },
+	{ id: 'e5', type: 'animated', source: 'n4', target: 'n5', sourceHandle: 'out',  targetHandle: 'b' },
 ];
 
-// ─── Utilities ────────────────────────────────────────────────────────────────
+// ─── Run animation timing ───────────────────────────────────────────────────────
+// Named so AnimatedEdge's travel duration always matches the wave delay in
+// runAnimation below — they must stay in lockstep, not just visually similar.
 
-// Staggered particle stream: 3 dots loop every 400ms, evenly spaced at 133ms intervals.
-// While isAnimating, there are always ~3 dots visible on the path simultaneously.
-const PARTICLE_STREAM = [
-	{ begin: '0s',     r: 5, opacity: 0.95 },
-	{ begin: '0.133s', r: 4, opacity: 0.75 },
-	{ begin: '0.267s', r: 3, opacity: 0.55 },
-] as const;
+const TRIGGER_DWELL_MS       = 250; // beat before the first wave starts
+const EDGE_TRAVEL_MS         = 450; // time the pulse takes to cross one edge
+const NODE_DWELL_MS          = 200; // active-node hold before advancing to the next wave
+const COMPLETE_HOLD_MS       = 900; // "complete" hold before auto-reset
+const REDUCED_MOTION_HOLD_MS = 400; // reduced-motion equivalent of COMPLETE_HOLD_MS
 
 // ─── AnimatedEdge ─────────────────────────────────────────────────────────────
 
@@ -142,60 +110,57 @@ const AnimatedEdge = ({
 	const isAnimating = animatingEdgeIds.has(id);
 	const isCompleted = completedEdgeIds.has(id);
 
-	const [edgePath] = getBezierPath({
-		sourceX, sourceY, sourcePosition,
-		targetX, targetY, targetPosition,
-	});
+	// getSmoothStepPath inserts an unnecessary little jog even when the two handles
+	// are perfectly aligned (straight down or straight across) — fall back to a
+	// true straight line in that case rather than a step path with nothing to step around.
+	const isAligned =
+		(sourcePosition === Position.Bottom && targetPosition === Position.Top  && Math.abs(sourceX - targetX) < 1) ||
+		(sourcePosition === Position.Right  && targetPosition === Position.Left && Math.abs(sourceY - targetY) < 1);
 
-	// Completed edges stay lit in brand color at low opacity.
-	// Animating edges become full brand color to show the "wire is live".
+	const [edgePath] = isAligned
+		? getStraightPath({ sourceX, sourceY, targetX, targetY })
+		: getSmoothStepPath({
+			sourceX, sourceY, sourcePosition,
+			targetX, targetY, targetPosition,
+			borderRadius: 8,
+		});
+
+	// Completed edges stay lit in flat brand color at low opacity.
+	// Animating edges switch to full-strength brand color to show the "wire is live" —
+	// no blur/glow on either state, kept flat to match the minimal card look.
 	const edgeStyle = isAnimating
 		? { stroke: 'var(--color-brand)', strokeWidth: 2 }
 		: isCompleted
-		? { stroke: 'var(--color-brand)', strokeWidth: 2, opacity: 0.35,
-			filter: 'drop-shadow(0 0 2px var(--color-brand))' }
+		? { stroke: 'var(--color-brand)', strokeWidth: 2, opacity: 0.35 }
 		: style;
 
 	return (
 		<>
 			<BaseEdge id={id} path={edgePath} markerEnd={markerEnd} style={edgeStyle} />
 
+			{/* A single flat pulse travels the edge once per wave — no glow, no trail.
+			    Its duration matches EDGE_TRAVEL_MS exactly, and it unmounts the instant
+			    isAnimating goes false, so it never lingers past its wave. */}
+			{/* cx/cy anchor the dot at the path's own start point (not the SVG origin)
+			    for the frame before animateMotion takes over — without them the dot
+			    briefly renders at (0,0), i.e. the canvas's top-left corner. */}
 			{isAnimating && !prefersReducedMotion && (
-				<>
-					{/* Sweep fill: a bright stroke that draws itself from source to target.
-					    pathLength="1" normalises the path so dasharray/dashoffset values
-					    are 0-1 fractions: no need to measure actual path length. */}
-					<path
-						d={edgePath}
-						fill='none'
-						stroke='var(--color-brand)'
-						strokeWidth={4}
-						strokeLinecap='round'
-						pathLength={1}
-						strokeDasharray={1}
-						style={{
-							strokeDashoffset: 1,
-							animation: 'wf-dash-fill 0.6s linear forwards',
-							filter: 'drop-shadow(0 0 4px var(--color-brand)) drop-shadow(0 0 10px var(--color-brand)) drop-shadow(0 0 20px var(--color-brand))',
-						}}
-					/>
-
-					{/* Particle stream: dots loop at 400ms, staggered so ~3 are visible
-					    simultaneously at any point during the 600ms animation window. */}
-					{PARTICLE_STREAM.map(({ begin, r, opacity }) => (
-						<circle key={begin} r={r} fill='var(--color-brand)' opacity={opacity}
-							style={{ filter: 'drop-shadow(0 0 3px var(--color-brand)) drop-shadow(0 0 6px var(--color-brand))' }}
-						>
-							<animateMotion dur='0.4s' repeatCount='indefinite' begin={begin} fill='freeze' path={edgePath} />
-						</circle>
-					))}
-				</>
+				<circle r={4} cx={sourceX} cy={sourceY} fill='var(--color-brand)'>
+					<animateMotion dur={`${EDGE_TRAVEL_MS}ms`} repeatCount='1' path={edgePath} />
+				</circle>
 			)}
 		</>
 	);
 };
 
 const EDGE_TYPES = { animated: AnimatedEdge };
+
+// Idle wires stay lightly tinted with the brand color (rather than flat gray)
+// so the graph reads as "alive" even before Run is clicked.
+const EDGE_IDLE_STYLE = {
+	stroke:      'color-mix(in srgb, var(--color-brand) 45%, var(--color-surface-border-hover))',
+	strokeWidth: 1.5,
+};
 
 const HANDLE_STYLE = {
 	background: 'var(--color-surface)',
@@ -204,50 +169,34 @@ const HANDLE_STYLE = {
 	height:     10,
 };
 
+// Dragged nodes snap to this spacing, matching the dot Background's gap so the
+// grid you see is the grid nodes actually snap to.
+const GRID_SIZE = 20;
+
 // ─── WorkflowNode ──────────────────────────────────────────────────────────────
+// Every node is the same shape: some inputs, a title + optional description
+// ("the logic"), and some outputs. A node with no inputs is an entry point;
+// one with no outputs is terminal. All editing happens in the inspector panel
+// (rendered by WorkflowBuilder) — nodes here are display + drag + select + delete only.
 
 const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) =>
 {
-	const { setNodes, setEdges, updateNodeData } = useReactFlow();
-	const { runPhase, nodeRunStates }             = useContext(RunContext);
-	const nodeType = data.nodeType;
-	const label    = data.label;
+	const { setNodes, setEdges }                 = useReactFlow();
+	const { runPhase, nodeRunStates, direction } = useContext(RunContext);
+	const { label, description, inputs, outputs } = data;
 
-	const [editing, setEditing] = useState(false);
-	const [draft,   setDraft]   = useState(label);
+	const isHorizontal = direction === 'horizontal';
+
 	const [hovered, setHovered] = useState(false);
 
 	const nodeRunState = nodeRunStates.get(id) ?? 'idle';
 	const isRunActive  = nodeRunState === 'active';
 	const isRunDone    = nodeRunState === 'completed';
 
-	const commitEdit = () =>
-	{
-		updateNodeData(id, { label: draft });
-		setEditing(false);
-	};
-
-	const startEdit = () =>
-	{
-		setDraft(label);
-		setEditing(true);
-	};
-
 	const deleteNode = () =>
 	{
 		setNodes(ns => ns.filter(n => n.id !== id));
 		setEdges(es => es.filter(edge => edge.source !== id && edge.target !== id));
-	};
-
-	const handleInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) =>
-	{
-		if(e.key === 'Enter')  { e.preventDefault(); commitEdit(); }
-		if(e.key === 'Escape') { setDraft(label); setEditing(false); }
-	};
-
-	const handleLabelKeyDown = (e: React.KeyboardEvent<HTMLParagraphElement>) =>
-	{
-		if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); startEdit(); }
 	};
 
 	const showDelete = runPhase === 'idle' && (selected || hovered);
@@ -263,118 +212,56 @@ const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) =>
 		</button>
 	) : null;
 
-	// ── Condition: diamond shape ─────────────────────────────────────────────────
+	const activeRingStyle = isRunActive ? { boxShadow: '0 0 0 2px var(--color-brand)' } : undefined;
 
-	if(nodeType === 'condition')
+	const renderPort = (port: WorkflowPort, kind: 'input' | 'output') =>
 	{
-		const glowStyle = isRunActive
-			? { boxShadow: '0 0 0 2px var(--color-warning), 0 0 14px 4px color-mix(in srgb, var(--color-warning) 40%, transparent)' }
-			: undefined;
+		const isInput     = kind === 'input';
+		const handleType  = isInput ? 'target' : 'source';
+		const position    = isHorizontal
+			? (isInput ? Position.Left : Position.Right)
+			: (isInput ? Position.Top  : Position.Bottom);
+		const handleStyle = isHorizontal
+			? { ...HANDLE_STYLE, ...(isInput ? { left: -5 } : { right: -5 }) }
+			: { ...HANDLE_STYLE, ...(isInput ? { top: -5 }  : { bottom: -5 }) };
 
 		return (
 			<div
-				className={['relative', isRunDone ? 'opacity-60' : ''].join(' ')}
-				style={{ width: 120, height: 120 }}
-				onMouseEnter={() => setHovered(true)}
-				onMouseLeave={() => setHovered(false)}
-				aria-label={`Condition node: ${label}`}
+				key={port.id}
+				className={isHorizontal ? 'relative h-5' : 'relative w-5'}
+				title={port.label}
 			>
-				<div
-					className='absolute bg-surface border border-surface-border shadow-[var(--shadow)]'
-					style={{
-						width: 80, height: 80,
-						top: 20, left: 20,
-						borderRadius: 6,
-						transform: 'rotate(45deg)',
-						...glowStyle,
-					}}
-				/>
-
-				{selected && (
-					<div
-						className='absolute pointer-events-none'
-						style={{
-							width: 88, height: 88,
-							top: 16, left: 16,
-							borderRadius: 8,
-							border: '2px solid var(--color-brand-ring)',
-							transform: 'rotate(45deg)',
-						}}
-					/>
-				)}
-
-				<div className='absolute inset-0 flex flex-col items-center justify-center gap-0.5 text-center'>
-					<span aria-hidden='true' className='text-xs leading-none' style={{ color: ACCENT_COLORS.condition }}>
-						{ICONS.condition}
-					</span>
-					<span className='text-[9px] font-semibold uppercase tracking-widest text-text-subtle'>
-						{TYPE_LABELS.condition}
-					</span>
-					{editing ? (
-						<input
-							autoFocus
-							value={draft}
-							onChange={e => setDraft(e.target.value)}
-							onBlur={commitEdit}
-							onKeyDown={handleInputKeyDown}
-							className='text-[10px] text-center text-text bg-transparent border-b border-brand-ring outline-none w-16 mt-0.5'
-							aria-label='Edit label for Condition node'
-						/>
-					) : (
-						<p
-							role='button'
-							tabIndex={0}
-							className='text-[10px] text-text leading-tight cursor-text focus:outline-none focus-visible:ring-1 focus-visible:ring-brand-ring rounded-sm max-w-[72px] line-clamp-2 mt-0.5'
-							onClick={startEdit}
-							onKeyDown={handleLabelKeyDown}
-							aria-label={`${label || 'Empty label'}. Click to edit.`}
-						>
-							{label || <span className='text-text-subtle italic'>Edit</span>}
-						</p>
-					)}
-				</div>
-
-				{isRunDone && (
-					<div className='absolute top-2 right-3 text-success text-[11px] font-bold pointer-events-none' aria-hidden='true'>
-						✓
-					</div>
-				)}
-
-				{deleteBtn}
-
-				<Handle type='target' position={Position.Left}  style={{ ...HANDLE_STYLE, left:  -5 }} />
-				<Handle type='source' position={Position.Right} style={{ ...HANDLE_STYLE, right: -5 }} />
+				<Handle type={handleType} id={port.id} position={position} style={handleStyle} />
 			</div>
 		);
-	}
+	};
 
-	// ── All other node types ─────────────────────────────────────────────────────
+	const inputPorts  = inputs.map(p => renderPort(p, 'input'));
+	const outputPorts = outputs.map(p => renderPort(p, 'output'));
 
-	const barRadius = BAR_RADIUS[nodeType];
-	const glowStyle = isRunActive
-		? { boxShadow: `0 0 0 2px ${ACCENT_COLORS[nodeType]}, 0 0 14px 4px color-mix(in srgb, ${ACCENT_COLORS[nodeType]} 40%, transparent)` }
-		: {};
+	const body = (
+		<div className='flex-1 min-w-0 px-2.5 py-2'>
+			<p className='text-xs font-medium text-text truncate'>
+				{label || <span className='text-text-subtle italic'>Untitled node</span>}
+			</p>
+			{description && (
+				<p className='text-[10px] text-text-muted leading-snug line-clamp-2 mt-0.5'>{description}</p>
+			)}
+		</div>
+	);
 
 	return (
 		<div
 			className={[
-				'relative bg-surface border border-surface-border shadow-[var(--shadow)] w-44',
+				'relative bg-surface border border-surface-border shadow-[var(--shadow)] rounded-[var(--radius)] min-w-[176px] max-w-[260px]',
 				selected  ? 'ring-2 ring-offset-1 ring-brand-ring' : '',
 				isRunDone ? 'opacity-60' : '',
 			].join(' ')}
-			style={{ ...SHAPE_STYLES[nodeType], ...glowStyle }}
+			style={activeRingStyle}
 			onMouseEnter={() => setHovered(true)}
 			onMouseLeave={() => setHovered(false)}
-			aria-label={`${TYPE_LABELS[nodeType]} node: ${label}`}
+			aria-label={`Node: ${label}${description ? `, ${description}` : ''}`}
 		>
-			{barRadius && (
-				<div
-					className='absolute left-0 top-0 bottom-0 w-[3px]'
-					style={{ backgroundColor: ACCENT_COLORS[nodeType], borderRadius: barRadius }}
-					aria-hidden='true'
-				/>
-			)}
-
 			{isRunDone && (
 				<div className='absolute top-1.5 right-1.5 text-success text-[11px] font-bold pointer-events-none' aria-hidden='true'>
 					✓
@@ -383,42 +270,19 @@ const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) =>
 
 			{deleteBtn}
 
-			<Handle type='target' position={Position.Left}  style={{ ...HANDLE_STYLE, left:  -5 }} />
-			<Handle type='source' position={Position.Right} style={{ ...HANDLE_STYLE, right: -5 }} />
-
-			<div className='pl-4 pr-5 py-2.5'>
-				<div className='flex items-center gap-1.5 mb-1.5'>
-					<span aria-hidden='true' className='text-xs leading-none' style={{ color: ACCENT_COLORS[nodeType] }}>
-						{ICONS[nodeType]}
-					</span>
-					<span className='text-[10px] font-semibold uppercase tracking-widest text-text-subtle'>
-						{TYPE_LABELS[nodeType]}
-					</span>
+			{isHorizontal ? (
+				<div className='flex'>
+					{inputPorts.length > 0 && <div className='flex flex-col justify-center gap-1.5 py-1.5 pl-1'>{inputPorts}</div>}
+					{body}
+					{outputPorts.length > 0 && <div className='flex flex-col justify-center gap-1.5 py-1.5 pr-1'>{outputPorts}</div>}
 				</div>
-
-				{editing ? (
-					<input
-						autoFocus
-						value={draft}
-						onChange={e => setDraft(e.target.value)}
-						onBlur={commitEdit}
-						onKeyDown={handleInputKeyDown}
-						className='text-xs text-text bg-transparent w-full border-b border-brand-ring outline-none py-0.5'
-						aria-label={`Edit label for ${TYPE_LABELS[nodeType]} node`}
-					/>
-				) : (
-					<p
-						role='button'
-						tabIndex={0}
-						className='text-xs text-text leading-snug cursor-text focus:outline-none focus-visible:ring-1 focus-visible:ring-brand-ring rounded-sm'
-						onClick={startEdit}
-						onKeyDown={handleLabelKeyDown}
-						aria-label={`${label || 'Empty label'}. Click to edit.`}
-					>
-						{label || <span className='text-text-subtle italic'>Click to edit</span>}
-					</p>
-				)}
-			</div>
+			) : (
+				<div className='flex flex-col'>
+					{inputPorts.length > 0 && <div className='flex justify-center gap-3 pt-1'>{inputPorts}</div>}
+					{body}
+					{outputPorts.length > 0 && <div className='flex justify-center gap-3 pb-1'>{outputPorts}</div>}
+				</div>
+			)}
 		</div>
 	);
 };
@@ -432,31 +296,113 @@ const toRFNodes = (nodes: WorkflowGraph['nodes']): WFNode[] =>
 		id:       n.id,
 		type:     'workflow' as const,
 		position: n.position,
-		data:     { nodeType: n.type, label: n.label },
+		data:     { label: n.label, description: n.description ?? '', inputs: n.inputs, outputs: n.outputs },
 	}));
 
 const toRFEdges = (edges: WorkflowGraph['edges']): WFEdge[] =>
-	edges.map(e => ({ id: e.id, type: 'animated', source: e.source, target: e.target }));
+	edges.map(e => ({ id: e.id, type: 'animated', source: e.source, target: e.target, sourceHandle: e.sourceHandle, targetHandle: e.targetHandle }));
 
 const toWorkflowGraph = (nodes: WFNode[], edges: WFEdge[]): WorkflowGraph => ({
 	nodes: nodes.map(n => ({
-		id:       n.id,
-		type:     n.data.nodeType,
-		label:    n.data.label,
-		position: n.position,
+		id:          n.id,
+		label:       n.data.label,
+		description: n.data.description,
+		inputs:      n.data.inputs,
+		outputs:     n.data.outputs,
+		position:    n.position,
 	})),
-	edges: edges.map(e => ({ id: e.id, source: e.source, target: e.target })),
+	edges: edges.map(e => ({ id: e.id, source: e.source, target: e.target, sourceHandle: e.sourceHandle ?? '', targetHandle: e.targetHandle ?? '' })),
 });
+
+// ─── Auto-layout ────────────────────────────────────────────────────────────────
+// Arranges nodes into levels via BFS from entry nodes (nodes with no inputs — or,
+// failing that, nodes with no incoming edges), then lays levels out along the flow
+// axis and spreads siblings across the cross axis. Used on direction toggle so
+// switching orientation always yields a sane graph.
+
+const LEVEL_SPACING   = 260;
+const SIBLING_SPACING = 220;
+
+const computeLayeredLayout = (nds: WFNode[], eds: WFEdge[], direction: WorkflowDirection): WFNode[] =>
+{
+	const outgoing = new Map<string, string[]>();
+	eds.forEach(e =>
+	{
+		if(!outgoing.has(e.source)) outgoing.set(e.source, []);
+		outgoing.get(e.source)!.push(e.target);
+	});
+
+	const hasIncoming = new Set(eds.map(e => e.target));
+	const entryIds    = nds.filter(n => n.data.inputs.length === 0).map(n => n.id);
+	const rootIds     = entryIds.length > 0 ? entryIds : nds.filter(n => !hasIncoming.has(n.id)).map(n => n.id);
+
+	const level = new Map<string, number>();
+	let frontier = rootIds.length > 0 ? rootIds : nds.slice(0, 1).map(n => n.id);
+	frontier.forEach(id => level.set(id, 0));
+
+	let depth = 0;
+	while(frontier.length > 0)
+	{
+		const next: string[] = [];
+		frontier.forEach(id =>
+		{
+			(outgoing.get(id) ?? []).forEach(targetId =>
+			{
+				if(!level.has(targetId))
+				{
+					level.set(targetId, depth + 1);
+					next.push(targetId);
+				}
+			});
+		});
+		frontier = next;
+		depth++;
+	}
+
+	let maxLevel = Math.max(0, ...level.values());
+	nds.forEach(n => { if(!level.has(n.id)) level.set(n.id, ++maxLevel); });
+
+	const byLevel = new Map<number, string[]>();
+	nds.forEach(n =>
+	{
+		const lv = level.get(n.id)!;
+		if(!byLevel.has(lv)) byLevel.set(lv, []);
+		byLevel.get(lv)!.push(n.id);
+	});
+
+	const maxCount  = Math.max(...[...byLevel.values()].map(ids => ids.length));
+	const positions = new Map<string, { x: number; y: number }>();
+
+	byLevel.forEach((ids, lv) =>
+	{
+		const crossOffset = ((maxCount - ids.length) * SIBLING_SPACING) / 2;
+		ids.forEach((id, i) =>
+		{
+			const main  = lv * LEVEL_SPACING;
+			const cross = crossOffset + i * SIBLING_SPACING;
+			positions.set(id, direction === 'horizontal' ? { x: main, y: cross } : { x: cross, y: main });
+		});
+	});
+
+	return nds.map(n => ({ ...n, position: positions.get(n.id) ?? n.position }));
+};
 
 // ─── WorkflowBuilder ──────────────────────────────────────────────────────────
 
-const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '' }: WorkflowBuilderProps) =>
+const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '', defaultDirection }: WorkflowBuilderProps) =>
 {
-	const initialNodes = defaultGraph ? toRFNodes(defaultGraph.nodes) : DEMO_NODES;
+	const initialDirection: WorkflowDirection = defaultDirection ?? 'horizontal';
+
+	const initialNodes = defaultGraph
+		? toRFNodes(defaultGraph.nodes)
+		: initialDirection === 'vertical'
+			? computeLayeredLayout(DEMO_NODES, DEMO_EDGES, 'vertical')
+			: DEMO_NODES;
 	const initialEdges = defaultGraph ? toRFEdges(defaultGraph.edges) : DEMO_EDGES;
 
 	const [nodes, setNodes, onNodesChange] = useNodesState<WFNode>(initialNodes);
 	const [edges, setEdges, onEdgesChange] = useEdgesState<WFEdge>(initialEdges);
+	const [direction, setDirection]        = useState<WorkflowDirection>(initialDirection);
 
 	const [runPhase,         setRunPhase]        = useState<RunPhase>('idle');
 	const [nodeRunStates,    setNodeRunStates]    = useState<Map<string, NodeRunState>>(new Map());
@@ -465,10 +411,14 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '' 
 
 	const onChangeRef  = useRef(onChange);
 	const nodeCounter  = useRef(200);
+	const portCounter  = useRef(200);
 	const runGenRef    = useRef(0);
+	const rfInstance   = useRef<ReactFlowInstance<WFNode, WFEdge> | null>(null);
 
 	const prefersReducedMotion = typeof window !== 'undefined' &&
 		window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+	const selectedNode = nodes.find(n => n.selected) ?? null;
 
 	useEffect(() => { onChangeRef.current = onChange; });
 
@@ -482,18 +432,87 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '' 
 		setEdges(eds => addEdge({ ...params, id: `e-${Date.now()}`, type: 'animated' }, eds));
 	}, [setEdges]);
 
-	const addNode = (type: WorkflowNodeType) =>
+	const addNode = () =>
 	{
-		const id = `n${++nodeCounter.current}`;
+		const id       = `n${++nodeCounter.current}`;
+		const inputId  = `p${++portCounter.current}`;
+		const outputId = `p${++portCounter.current}`;
 		setNodes(nds => [
 			...nds,
 			{
 				id,
 				type:     'workflow',
-				position: { x: 180 + Math.random() * 160, y: 100 + Math.random() * 200 },
-				data:     { nodeType: type, label: DEFAULT_LABELS[type] },
+				position: {
+					x: Math.round((180 + Math.random() * 160) / GRID_SIZE) * GRID_SIZE,
+					y: Math.round((100 + Math.random() * 200) / GRID_SIZE) * GRID_SIZE,
+				},
+				data:     {
+					label:       'Untitled node',
+					description: '',
+					inputs:      [{ id: inputId, label: 'in' }],
+					outputs:     [{ id: outputId, label: 'out' }],
+				},
 			},
 		]);
+	};
+
+	const deselectAll = () =>
+	{
+		setNodes(nds => nds.map(n => n.selected ? { ...n, selected: false } : n));
+	};
+
+	const updateSelectedNode = (patch: Partial<WFData>) =>
+	{
+		if(!selectedNode) return;
+		const nodeId = selectedNode.id;
+		setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n));
+	};
+
+	const addPort = (kind: PortKind) =>
+	{
+		if(!selectedNode) return;
+		const newPort: WorkflowPort = { id: `p${++portCounter.current}`, label: kind === 'inputs' ? 'in' : 'out' };
+
+		if(kind === 'inputs') updateSelectedNode({ inputs: [...selectedNode.data.inputs, newPort] });
+		else                  updateSelectedNode({ outputs: [...selectedNode.data.outputs, newPort] });
+	};
+
+	const renamePort = (kind: PortKind, portId: string, label: string) =>
+	{
+		if(!selectedNode) return;
+
+		if(kind === 'inputs') updateSelectedNode({ inputs: selectedNode.data.inputs.map(p => p.id === portId ? { ...p, label } : p) });
+		else                  updateSelectedNode({ outputs: selectedNode.data.outputs.map(p => p.id === portId ? { ...p, label } : p) });
+	};
+
+	const removePort = (kind: PortKind, portId: string) =>
+	{
+		if(!selectedNode) return;
+		const nodeId = selectedNode.id;
+
+		if(kind === 'inputs')
+		{
+			updateSelectedNode({ inputs: selectedNode.data.inputs.filter(p => p.id !== portId) });
+			setEdges(eds => eds.filter(e => !(e.target === nodeId && e.targetHandle === portId)));
+		}
+		else
+		{
+			updateSelectedNode({ outputs: selectedNode.data.outputs.filter(p => p.id !== portId) });
+			setEdges(eds => eds.filter(e => !(e.source === nodeId && e.sourceHandle === portId)));
+		}
+	};
+
+	const handleDirectionChange = (next: WorkflowDirection) =>
+	{
+		if(next === direction || runPhase !== 'idle') return;
+
+		setDirection(next);
+		setNodes(nds => computeLayeredLayout(nds, edges, next));
+
+		requestAnimationFrame(() =>
+		{
+			rfInstance.current?.fitView({ padding: 0.3, duration: prefersReducedMotion ? 0 : 300 });
+		});
 	};
 
 	const resetAnimation = () =>
@@ -516,77 +535,87 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '' 
 		const currNodes = nodes;
 		const currEdges = edges;
 
-		const outgoing = new Map<string, { edgeId: string; targetId: string }[]>();
+		// outgoingEdges: what fires out of a node once it completes.
+		// incomingEdges: everything that must have completed before a node may fire —
+		// a node with 2+ connected inputs only activates once ALL of them have arrived,
+		// not on the first one. doneEdges is plain runtime bookkeeping (not React state):
+		// concurrent branches read/write it synchronously, so it can't wait for a render.
+		const outgoingEdges = new Map<string, { edgeId: string; targetId: string }[]>();
+		const incomingEdges = new Map<string, string[]>();
 		currEdges.forEach(e =>
 		{
-			if(!outgoing.has(e.source)) outgoing.set(e.source, []);
-			outgoing.get(e.source)!.push({ edgeId: e.id, targetId: e.target });
+			if(!outgoingEdges.has(e.source)) outgoingEdges.set(e.source, []);
+			outgoingEdges.get(e.source)!.push({ edgeId: e.id, targetId: e.target });
+
+			if(!incomingEdges.has(e.target)) incomingEdges.set(e.target, []);
+			incomingEdges.get(e.target)!.push(e.id);
 		});
 
-		const triggerIds = currNodes
-			.filter(n => n.data.nodeType === 'trigger')
+		const entryIds = currNodes
+			.filter(n => n.data.inputs.length === 0)
 			.map(n => n.id);
 
-		if(triggerIds.length === 0) return;
+		if(entryIds.length === 0) return;
 
 		setRunPhase('running');
-		setNodeRunStates(new Map(triggerIds.map(id => [id, 'active' as NodeRunState])));
+		setNodeRunStates(new Map(entryIds.map(id => [id, 'active' as NodeRunState])));
 
-		const visited = new Set<string>(triggerIds);
-		let wave = triggerIds;
+		const doneEdges = new Set<string>();
+		const claimed   = new Set<string>(entryIds);
 
-		if(!prefersReducedMotion) await go(300);
-		if(!alive()) return;
-
-		while(wave.length > 0)
+		const activateNode = async (nodeId: string, dwellMs: number): Promise<void> =>
 		{
-			const edgesThisWave = wave.flatMap(id => outgoing.get(id) ?? []);
+			if(!prefersReducedMotion) await go(dwellMs);
+			if(!alive()) return;
 
-			if(edgesThisWave.length === 0)
+			const myOutgoing = outgoingEdges.get(nodeId) ?? [];
+
+			if(myOutgoing.length === 0)
 			{
-				setNodeRunStates(prev =>
-				{
-					const m = new Map(prev);
-					wave.forEach(id => m.set(id, 'completed'));
-					return m;
-				});
-				break;
+				setNodeRunStates(prev => new Map(prev).set(nodeId, 'completed'));
+				return;
 			}
 
 			if(!prefersReducedMotion)
 			{
-				setAnimatingEdgeIds(new Set(edgesThisWave.map(e => e.edgeId)));
-				await go(600);
+				const edgeIds = myOutgoing.map(e => e.edgeId);
+				setAnimatingEdgeIds(prev => new Set([...prev, ...edgeIds]));
+				await go(EDGE_TRAVEL_MS);
 				if(!alive()) return;
-				setAnimatingEdgeIds(new Set());
+				setAnimatingEdgeIds(prev =>
+				{
+					const next = new Set(prev);
+					edgeIds.forEach(id => next.delete(id));
+					return next;
+				});
 				// Edges that just animated stay lit as "completed"
-				setCompletedEdgeIds(prev => new Set([...prev, ...edgesThisWave.map(e => e.edgeId)]));
+				setCompletedEdgeIds(prev => new Set([...prev, ...edgeIds]));
 			}
 
-			const nextWave = [
-				...new Set(edgesThisWave.map(e => e.targetId).filter(id => !visited.has(id))),
-			];
-			nextWave.forEach(id => visited.add(id));
+			myOutgoing.forEach(e => doneEdges.add(e.edgeId));
+			setNodeRunStates(prev => new Map(prev).set(nodeId, 'completed'));
 
-			setNodeRunStates(prev =>
+			// Each downstream target only activates once every edge feeding it has
+			// arrived. Whichever branch delivers the LAST required edge is the one
+			// that wins the race and fires it — earlier arrivals just no-op here.
+			await Promise.all(myOutgoing.map(async ({ targetId }) =>
 			{
-				const m = new Map(prev);
-				wave.forEach(id => m.set(id, 'completed'));
-				nextWave.forEach(id => m.set(id, 'active'));
-				return m;
-			});
+				const required = incomingEdges.get(targetId) ?? [];
+				const isReady  = required.every(id => doneEdges.has(id));
+				if(!isReady || claimed.has(targetId)) return;
 
-			if(!prefersReducedMotion) await go(300);
-			if(!alive()) return;
+				claimed.add(targetId);
+				setNodeRunStates(prev => new Map(prev).set(targetId, 'active'));
+				await activateNode(targetId, NODE_DWELL_MS);
+			}));
+		};
 
-			wave = nextWave;
-		}
-
+		await Promise.all(entryIds.map(id => activateNode(id, TRIGGER_DWELL_MS)));
 		if(!alive()) return;
 
 		setRunPhase('complete');
 
-		await go(prefersReducedMotion ? 600 : 1500);
+		await go(prefersReducedMotion ? REDUCED_MOTION_HOLD_MS : COMPLETE_HOLD_MS);
 		if(!alive()) return;
 
 		resetAnimation();
@@ -598,8 +627,24 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '' 
 		'hover:bg-surface-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring',
 	].join(' ');
 
+	const RUN_BTN_BASE = [
+		'flex items-center justify-center gap-1.5 w-full h-8 mt-0.5 text-xs font-medium',
+		'rounded-[var(--radius-sm)] border transition-colors duration-[var(--duration-fast)]',
+		'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-surface',
+		'disabled:opacity-70',
+	].join(' ');
+
+	const RUN_BTN_STATE: Record<RunPhase, string> = {
+		idle:     'bg-brand text-brand-fg border-transparent hover:bg-brand-hover active:bg-brand-active focus-visible:ring-brand-ring',
+		running:  'bg-danger/10 text-danger border-danger/20 hover:bg-danger/15 focus-visible:ring-danger-ring',
+		complete: 'bg-success-bg text-success border-success-border focus-visible:ring-brand-ring',
+	};
+
 	const runBtnLabel = runPhase === 'running' ? '◼ Stop' : runPhase === 'complete' ? '✓ Done' : '▶ Run';
-	const runBtnColor = runPhase === 'running' ? 'text-danger' : runPhase === 'complete' ? 'text-success' : '';
+
+	const FIELD_INPUT = 'text-xs text-text bg-surface border border-input-border rounded-[var(--radius-sm)] px-2 py-1.5 outline-none focus-visible:ring-2 focus-visible:ring-brand-ring';
+	const FIELD_LABEL = 'text-[10px] font-medium text-text-subtle uppercase tracking-wider';
+	const ICON_BTN     = 'shrink-0 w-[18px] h-[18px] flex items-center justify-center rounded-full text-text-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring';
 
 	const runCtxValue: RunContextValue = {
 		runPhase,
@@ -607,6 +652,7 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '' 
 		animatingEdgeIds,
 		completedEdgeIds,
 		prefersReducedMotion,
+		direction,
 	};
 
 	return (
@@ -626,13 +672,14 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '' 
 					fitView
 					fitViewOptions={{ padding: 0.3 }}
 					deleteKeyCode={['Delete', 'Backspace']}
-					defaultEdgeOptions={{
-						style: { stroke: 'var(--color-surface-border-hover)', strokeWidth: 2 },
-					}}
+					onInit={instance => { rfInstance.current = instance; }}
+					defaultEdgeOptions={{ style: EDGE_IDLE_STYLE }}
 					connectionLineStyle={{ stroke: 'var(--color-brand)', strokeWidth: 2 }}
 					proOptions={{ hideAttribution: true }}
+					snapToGrid
+					snapGrid={[GRID_SIZE, GRID_SIZE]}
 				>
-					<Background color='var(--color-surface-border)' gap={20} />
+					<Background color='var(--color-surface-border)' gap={GRID_SIZE} />
 					<Controls />
 
 					<Panel position='top-left'>
@@ -641,40 +688,131 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '' 
 							role='toolbar'
 							aria-label='Workflow controls'
 						>
-							<span className='text-[10px] font-semibold text-text-subtle uppercase tracking-wider px-1 pb-1'>
+							<button
+								type='button'
+								onClick={addNode}
+								disabled={runPhase !== 'idle'}
+								className={[
+									TOOLBAR_BTN,
+									runPhase !== 'idle' ? 'opacity-40 pointer-events-none' : '',
+								].join(' ')}
+								aria-label='Add node'
+							>
+								<span aria-hidden='true'>+</span>
 								Add node
+							</button>
+
+							<div className='border-t border-surface-border my-1' aria-hidden='true' />
+
+							<span className='text-[10px] font-semibold text-text-subtle uppercase tracking-wider px-1 pb-1'>
+								Layout
 							</span>
-							{ALL_NODE_TYPES.map(type => (
-								<button
-									key={type}
-									type='button'
-									onClick={() => addNode(type)}
-									disabled={runPhase !== 'idle'}
-									className={[
-										TOOLBAR_BTN,
-										runPhase !== 'idle' ? 'opacity-40 pointer-events-none' : '',
-									].join(' ')}
-									aria-label={`Add ${TYPE_LABELS[type]} node`}
-								>
-									<span aria-hidden='true' style={{ color: ACCENT_COLORS[type] }}>
-										{ICONS[type]}
-									</span>
-									{TYPE_LABELS[type]}
-								</button>
-							))}
+							<ToggleGroup
+								type='single'
+								size='sm'
+								value={direction}
+								onValueChange={value => handleDirectionChange(value as WorkflowDirection)}
+								disabled={runPhase !== 'idle'}
+								aria-label='Workflow layout direction'
+								className='w-full'
+							>
+								<ToggleGroupItem value='horizontal' className='flex-1'>Horizontal</ToggleGroupItem>
+								<ToggleGroupItem value='vertical' className='flex-1'>Vertical</ToggleGroupItem>
+							</ToggleGroup>
 
 							<div className='border-t border-surface-border my-1' aria-hidden='true' />
 
 							<button
 								type='button'
 								onClick={runPhase === 'running' ? resetAnimation : runAnimation}
-								className={[TOOLBAR_BTN, 'font-medium', runBtnColor].join(' ')}
+								disabled={runPhase === 'complete'}
+								className={[RUN_BTN_BASE, RUN_BTN_STATE[runPhase]].join(' ')}
 								aria-label={runPhase === 'running' ? 'Stop animation' : 'Run workflow animation'}
 							>
 								{runBtnLabel}
 							</button>
 						</div>
 					</Panel>
+
+					{selectedNode && (
+						<Panel position='top-right' style={{ margin: 0, top: 0, right: 0, bottom: 0 }}>
+							<aside
+								className='w-72 max-w-[85vw] h-full flex flex-col bg-surface border-l-[length:var(--border-width)] border-surface-border shadow-[var(--shadow-sm)] overflow-y-auto scrollbar-thin'
+								aria-label='Node inspector'
+							>
+								<div className='flex items-start justify-between gap-2 px-3 pt-3 pb-2 border-b border-surface-border'>
+									<div className='min-w-0'>
+										<p className={FIELD_LABEL}>Node</p>
+										<p className='text-[10px] text-text-subtle font-mono truncate' title={selectedNode.id}>
+											{selectedNode.id}
+										</p>
+									</div>
+									<button
+										type='button'
+										onClick={deselectAll}
+										className={`${ICON_BTN} hover:bg-surface-hover hover:text-text`}
+										aria-label='Close node inspector'
+									>
+										×
+									</button>
+								</div>
+
+								<div className='flex flex-col gap-3 px-3 py-3'>
+									<label className='flex flex-col gap-1'>
+										<span className={FIELD_LABEL}>Title</span>
+										<input
+											value={selectedNode.data.label}
+											onChange={e => updateSelectedNode({ label: e.target.value })}
+											className={FIELD_INPUT}
+										/>
+									</label>
+
+									<label className='flex flex-col gap-1'>
+										<span className={FIELD_LABEL}>Description</span>
+										<textarea
+											value={selectedNode.data.description}
+											onChange={e => updateSelectedNode({ description: e.target.value })}
+											rows={3}
+											className={`${FIELD_INPUT} resize-none`}
+										/>
+									</label>
+
+									{(['inputs', 'outputs'] as const).map(kind => (
+										<div key={kind}>
+											<span className={FIELD_LABEL}>{kind === 'inputs' ? 'Inputs' : 'Outputs'}</span>
+											<div className='flex flex-col gap-1.5 mt-1.5'>
+												{selectedNode.data[kind].map(port => (
+													<div key={port.id} className='flex items-center gap-1.5'>
+														<input
+															value={port.label}
+															onChange={e => renamePort(kind, port.id, e.target.value)}
+															aria-label={`${kind === 'inputs' ? 'Input' : 'Output'} port label`}
+															className={`flex-1 min-w-0 ${FIELD_INPUT}`}
+														/>
+														<button
+															type='button'
+															onClick={() => removePort(kind, port.id)}
+															aria-label={`Remove ${kind === 'inputs' ? 'input' : 'output'} ${port.label || ''}`}
+															className={`${ICON_BTN} hover:bg-danger/20 hover:text-danger`}
+														>
+															×
+														</button>
+													</div>
+												))}
+											</div>
+											<button
+												type='button'
+												onClick={() => addPort(kind)}
+												className='mt-1.5 text-[11px] text-brand hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring rounded-sm'
+											>
+												+ Add {kind === 'inputs' ? 'input' : 'output'}
+											</button>
+										</div>
+									))}
+								</div>
+							</aside>
+						</Panel>
+					)}
 				</ReactFlow>
 			</div>
 		</RunContext.Provider>
