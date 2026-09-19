@@ -143,6 +143,59 @@ describe('Timeline', () =>
 		expect(container.querySelector('.bg-surface-active')).not.toBeNull();
 	});
 
+	// ── spacing ───────────────────────────────────────────────────────────────
+
+	it('applies pb-8 to non-last items with the default comfortable spacing', () =>
+	{
+		const { container } = render(
+			<Timeline animate='none'>
+				<TimelineItem title='First' />
+				<TimelineItem title='Last' />
+			</Timeline>
+		);
+		const items = container.querySelectorAll('.flex-1.min-w-0');
+		expect(items[0].className).toContain('pb-8');
+		expect(items[1].className).toContain('pb-0');
+	});
+
+	it('applies pb-3 to non-last items when spacing="compact"', () =>
+	{
+		const { container } = render(
+			<Timeline animate='none' spacing='compact'>
+				<TimelineItem title='First' />
+				<TimelineItem title='Last' />
+			</Timeline>
+		);
+		const items = container.querySelectorAll('.flex-1.min-w-0');
+		expect(items[0].className).toContain('pb-3');
+		expect(items[0].className).not.toContain('pb-8');
+		expect(items[1].className).toContain('pb-0');
+	});
+
+	it('applies mb-1 instead of mb-2 to the title when spacing="compact"', () =>
+	{
+		render(
+			<Timeline animate='none' spacing='compact'>
+				<TimelineItem title='First' />
+			</Timeline>
+		);
+		const title = screen.getByText('First');
+		expect(title.className).toContain('mb-1');
+		expect(title.className).not.toContain('mb-2');
+	});
+
+	it('applies pt-1.5 instead of pt-3 to horizontal items when spacing="compact"', () =>
+	{
+		const { container } = render(
+			<Timeline direction='horizontal' animate='none' spacing='compact'>
+				<TimelineItem title='A' />
+			</Timeline>
+		);
+		const content = container.querySelector('.pr-4.min-w-0');
+		expect(content?.className).toContain('pt-1.5');
+		expect(content?.className).not.toContain('pt-3');
+	});
+
 	// ── direction ─────────────────────────────────────────────────────────────
 
 	it('renders as flex-col by default (vertical)', () =>

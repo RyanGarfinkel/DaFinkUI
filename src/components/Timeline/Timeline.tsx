@@ -7,6 +7,7 @@ import { Children, cloneElement, isValidElement, HTMLAttributes } from 'react';
 export type TimelineVariant   = 'brand' | 'muted';
 export type TimelineDirection = 'vertical' | 'horizontal';
 export type TimelineAnimate   = 'stagger' | 'none';
+export type TimelineSpacing   = 'comfortable' | 'compact';
 
 export interface TimelineProps extends HTMLAttributes<HTMLDivElement> {
 	variant?:   TimelineVariant;
@@ -19,6 +20,12 @@ export interface TimelineProps extends HTMLAttributes<HTMLDivElement> {
 	 *   dynamically over time and handling animation yourself via className.
 	 */
 	animate?:   TimelineAnimate;
+	/**
+	 * Gap between items.
+	 * - `"comfortable"` (default): generous spacing for standalone timelines (onboarding, activity logs).
+	 * - `"compact"`: tighter spacing for timelines nested inside other content (a collapsible, a card, a sidebar).
+	 */
+	spacing?:   TimelineSpacing;
 	children:   React.ReactNode;
 	className?: string;
 }
@@ -38,6 +45,8 @@ export interface TimelineItemProps extends HTMLAttributes<HTMLDivElement> {
 	_direction?:  TimelineDirection;
 	/** Injected by <Timeline>: do not set manually. */
 	_animate?:    TimelineAnimate;
+	/** Injected by <Timeline>: do not set manually. */
+	_spacing?:    TimelineSpacing;
 }
 
 // ─── TimelineItem ─────────────────────────────────────────────────────────────
@@ -53,6 +62,7 @@ export const TimelineItem = (
         _variant   = 'brand',
         _direction = 'vertical',
         _animate   = 'stagger',
+        _spacing   = 'comfortable',
         style,
         ...props
     }: TimelineItemProps
@@ -106,7 +116,7 @@ export const TimelineItem = (
 				</div>
 
 				{/* Content */}
-				<div style={staggerStyle} className='pt-3 pr-4 min-w-0'>
+				<div style={staggerStyle} className={[_spacing === 'compact' ? 'pt-1.5' : 'pt-3', 'pr-4 min-w-0'].join(' ')}>
 					<p className='text-sm font-semibold text-text mb-1'>{title}</p>
 					{children && (
 						<div className='text-sm text-text-muted'>{children}</div>
@@ -145,8 +155,8 @@ export const TimelineItem = (
 			</div>
 
 			{/* Content */}
-			<div style={staggerStyle} className={['flex-1 min-w-0', _isLast ? 'pb-0' : 'pb-8'].join(' ')}>
-				<p className='text-sm font-semibold text-text leading-7 mb-2'>{title}</p>
+			<div style={staggerStyle} className={['flex-1 min-w-0', _isLast ? 'pb-0' : _spacing === 'compact' ? 'pb-3' : 'pb-8'].join(' ')}>
+				<p className={['text-sm font-semibold text-text leading-7', _spacing === 'compact' ? 'mb-1' : 'mb-2'].join(' ')}>{title}</p>
 				{children && (
 					<div className='text-sm text-text-muted'>{children}</div>
 				)}
@@ -162,6 +172,7 @@ export const Timeline = (
         variant   = 'brand',
         direction = 'vertical',
         animate   = 'stagger',
+        spacing   = 'comfortable',
         children,
         className = '',
         ...props
@@ -177,6 +188,7 @@ export const Timeline = (
 			_variant:   variant,
 			_direction: direction,
 			_animate:   animate,
+			_spacing:   spacing,
 		})
 	);
 

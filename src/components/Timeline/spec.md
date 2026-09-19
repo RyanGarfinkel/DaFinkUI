@@ -28,6 +28,7 @@ No npm dependencies. No registry dependencies.
 | `animate`   | `"stagger" \| "none"`        | `"stagger"`  | Mount animation. `stagger` fades and slides each item in with a cascading delay; the container holds its full size from the start (no layout shift). Use `"none"` when items arrive dynamically and you're animating them yourself. |
 | `direction` | `"vertical" \| "horizontal"` | `"vertical"` | Layout direction. `horizontal` places items in a row with the connector line across the top. |
 | `variant`   | `"brand" \| "muted"`         | `"brand"`    | Controls the indicator dot color. `brand` = filled brand blue; `muted` = outlined neutral. |
+| `spacing`   | `"comfortable" \| "compact"` | `"comfortable"` | Gap between items, and between each item's title and its body. `compact` tightens the space after each item (vertical: `pb-3` instead of `pb-8`; horizontal: `pt-1.5` instead of `pt-3`) and the title-to-body gap (vertical: `mb-1` instead of `mb-2`) for timelines nested inside other content — a collapsible, a card, a sidebar. |
 | `className` | `string`                      | `""`         | Additional classes on the wrapper `<div>`.                    |
 | `children`  | `React.ReactNode`             | -            | One or more `<TimelineItem>` elements.                        |
 
@@ -67,6 +68,13 @@ No npm dependencies. No registry dependencies.
 |---|---|
 | All data available at render time | `"stagger"` (default) |
 | Items arrive one by one over time | `"none"`, animate per-item via `className` |
+
+### Choosing `spacing`
+
+| Situation | Recommended value |
+|---|---|
+| Standalone timeline (its own page section) | `"comfortable"` (default) |
+| Timeline nested inside a Collapsible, Card, sidebar, or other compact container | `"compact"` |
 
 ---
 
