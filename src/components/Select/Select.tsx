@@ -24,6 +24,10 @@ export interface SelectProps
 	size?:        SelectSize;
 	disabled?:    boolean;
 	className?:   string;
+	/** Extra classes on the trigger button itself, for a consumer restyling the control (e.g. a borderless-until-hover look inline in a table cell). `className` only reaches the outer wrapper. */
+	triggerClassName?: string;
+	/** Accessible name for the trigger when there's no visible `label` (e.g. a compact inline use like a table cell). */
+	'aria-label'?: string;
 }
 
 // ─── Size map ─────────────────────────────────────────────────────────────────
@@ -47,6 +51,8 @@ export const Select = (
         size        = 'md',
         disabled    = false,
         className   = '',
+        triggerClassName = '',
+        'aria-label': ariaLabel,
     }: SelectProps
 ) => {
     const [mounted,     setMounted]     = useState(false);
@@ -194,6 +200,7 @@ export const Select = (
 					aria-haspopup='listbox'
 					aria-expanded={mounted}
 					aria-controls={listboxId}
+					aria-label={ariaLabel}
 					onClick={openList}
 					className={[
 						'w-full flex items-center justify-between rounded-[var(--radius)] border-[length:var(--border-width)]',
@@ -204,6 +211,7 @@ export const Select = (
 							? 'border-danger bg-surface text-text'
 							: 'border-input-border bg-surface text-text hover:border-input-border-hover',
 						disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer',
+						triggerClassName,
 					].join(' ')}
 				>
 					<span className={selectedLabel ? 'text-text' : 'text-text-subtle'}>
@@ -234,7 +242,7 @@ export const Select = (
 						id={listboxId}
 						role='listbox'
 						tabIndex={-1}
-						aria-label={label ?? placeholder}
+						aria-label={ariaLabel ?? label ?? placeholder}
 						aria-activedescendant={`${id}-opt-${activeIndex}`}
 						onKeyDown={handleListKeyDown}
 						className={[

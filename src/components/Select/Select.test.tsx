@@ -28,6 +28,18 @@ describe('Select', () =>
 		expect(screen.getByText('Fruit')).toBeInTheDocument();
 	});
 
+	it('sets the trigger\'s accessible name from aria-label when there is no visible label', () =>
+	{
+		render(<Select options={OPTIONS} aria-label='Fruit picker' />);
+		expect(screen.getByRole('button', { name: 'Fruit picker' })).toBeInTheDocument();
+	});
+
+	it('applies triggerClassName to the trigger button, not the outer wrapper', () =>
+	{
+		render(<Select options={OPTIONS} triggerClassName='custom-trigger' />);
+		expect(screen.getByRole('button')).toHaveClass('custom-trigger');
+	});
+
 	it('opens the listbox on trigger click', () =>
 	{
 		render(<Select options={OPTIONS} />);
