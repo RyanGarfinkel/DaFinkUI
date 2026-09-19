@@ -34,12 +34,23 @@ const useModalContext = () =>
 	return ctx;
 };
 
+// ─── Modal size ───────────────────────────────────────────────────────────────
+
+export type ModalSize = 'sm' | 'md' | 'lg';
+
+const sizeClasses: Record<ModalSize, string> = {
+	sm: 'max-w-sm',
+	md: 'max-w-md',
+	lg: 'max-w-3xl',
+};
+
 // ─── Modal ────────────────────────────────────────────────────────────────────
 
 export interface ModalProps extends DialogHTMLAttributes<HTMLDialogElement>
 {
 	open:         boolean;
 	onOpenChange: (open: boolean) => void;
+	size?:        ModalSize;
 	className?:   string;
 }
 
@@ -47,6 +58,7 @@ const Modal = (
     {
         open,
         onOpenChange,
+        size = 'md',
         className = '',
         children,
         ...props
@@ -211,7 +223,8 @@ const Modal = (
 					data-state={visible ? 'open' : 'closed'}
 					onPointerDown={(e) => e.stopPropagation()}
 					className={[
-						'relative z-10 w-full max-w-md rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
+						'relative z-10 w-full flex flex-col rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
+						sizeClasses[size],
 						'focus:outline-none',
 						'motion-safe:transition-[opacity,transform]',
 						visible
@@ -270,7 +283,7 @@ export interface ModalContentProps extends HTMLAttributes<HTMLDivElement>
 
 export const ModalContent = ({ className = '', children, ...props }: ModalContentProps) => {
 	return (
-		<div className={`px-6 py-2 text-sm text-text-muted leading-relaxed ${className}`} {...props}>
+		<div className={`flex-1 overflow-y-auto px-6 py-2 text-sm text-text-muted leading-relaxed ${className}`} {...props}>
 			{children}
 		</div>
 	);

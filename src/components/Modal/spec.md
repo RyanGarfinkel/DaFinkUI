@@ -35,10 +35,13 @@ No additional npm packages required. No registry dependencies.
 |----------------|---------------------------|---------|----------------------------------------------------------|
 | `open`         | `boolean`                 | required | Controls whether the modal is rendered and visible (controlled). |
 | `onOpenChange` | `(open: boolean) => void` | required | Called with `false` when the user dismisses via Escape, backdrop click, or `ModalClose`. |
+| `size`         | `'sm' \| 'md' \| 'lg'`    | `'md'`  | Controls the panel's max width. `sm` → `max-w-sm`, `md` → `max-w-md` (both size to content). `lg` → `max-w-5xl` and a fixed `h-[60vh]` (capped at `max-h-[75vh]` on short viewports); the panel is `flex flex-col` so `ModalContent` (`flex-1 overflow-y-auto`) fills and scrolls independently while `ModalHeader`/`ModalFooter` stay pinned — same split as `DrawerContent`. |
 | `className`    | `string`                  | `''`    | Additional classes merged onto the panel element.        |
 | `children`     | `ReactNode`               | required | Modal subcomponents and arbitrary content.              |
 
 `Modal` extends `DialogHTMLAttributes<HTMLDialogElement>`: all native dialog props are spread onto the `<dialog>` element.
+
+`ModalSize` is exported as a named type for consumers building their own variant maps.
 
 ### ModalHeader / ModalContent / ModalFooter
 

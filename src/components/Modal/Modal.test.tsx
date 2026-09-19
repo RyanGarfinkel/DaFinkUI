@@ -287,6 +287,61 @@ describe('Modal', () =>
 		});
 	});
 
+	it('defaults to size="md" (max-w-md)', async () =>
+	{
+		renderControlled(true);
+
+		await waitFor(() =>
+		{
+			expect(getPanel().className).toContain('max-w-md');
+		});
+	});
+
+	it('applies max-w-sm for size="sm"', async () =>
+	{
+		render(
+			<Modal open onOpenChange={() => {}} size='sm'>
+				<ModalTitle>Title</ModalTitle>
+			</Modal>
+		);
+
+		await waitFor(() =>
+		{
+			expect(getPanel().className).toContain('max-w-sm');
+		});
+	});
+
+	it('applies max-w-3xl for size="lg"', async () =>
+	{
+		render(
+			<Modal open onOpenChange={() => {}} size='lg'>
+				<ModalTitle>Title</ModalTitle>
+			</Modal>
+		);
+
+		await waitFor(() =>
+		{
+			expect(getPanel().className).toContain('max-w-3xl');
+		});
+	});
+
+	it('ModalContent grows to fill space and scrolls independently', async () =>
+	{
+		render(
+			<Modal open onOpenChange={() => {}} size='lg'>
+				<ModalTitle>Title</ModalTitle>
+				<ModalContent>Body</ModalContent>
+			</Modal>
+		);
+
+		await waitFor(() =>
+		{
+			const content = screen.getByText('Body');
+			expect(content.className).toContain('flex-1');
+			expect(content.className).toContain('overflow-y-auto');
+		});
+	});
+
 	it('merges a custom className onto the panel', async () =>
 	{
 		render(
