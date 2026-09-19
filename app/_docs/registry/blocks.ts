@@ -1141,7 +1141,7 @@ export default function TeamManagement() {
 		description: 'Sign in with Google or GitHub, or fall back to a standard email and password form.',
 		usage: `'use client';
 
-import { Card, CardContent, CardFooter, CardHeader, FormField, FormLabel, Button, Badge, Input } from '@components';
+import { Card, CardContent, CardFooter, CardHeader, FormField, FormLabel, Button, Badge, Input } from '@components/ui';
 import { useState } from 'react';
 
 const GoogleIcon = () => (
@@ -1270,7 +1270,7 @@ export default function AuthFormSocialExample() {
 		description: 'Passwordless sign-in: email a one-time link instead of asking for a password.',
 		usage: `'use client';
 
-import { Card, CardContent, CardFooter, CardHeader, FormField, FormLabel, Button, Input } from '@components';
+import { Card, CardContent, CardFooter, CardHeader, FormField, FormLabel, Button, Input } from '@components/ui';
 import { useEffect, useState } from 'react';
 
 const RESEND_COOLDOWN = 30;
@@ -1371,7 +1371,7 @@ export default function AuthFormMagicLinkExample() {
 		description: 'Same card shell, a RadarChart instead: comparing team scores against target benchmarks across skill areas.',
 		usage: `'use client';
 
-import { Card, CardContent, CardHeader, RadarChart, CountUp, Badge } from '@components';
+import { Card, CardContent, CardHeader, RadarChart, CountUp, Badge } from '@components/ui';
 
 const SKILL_DATA = [
   { skill: 'Frontend', team: 88, target: 80 },
@@ -1417,7 +1417,7 @@ export default function ChartCardRadarExample() {
 		description: 'A ranking variant of the same card shell: a BarChart totaling revenue across a product lineup.',
 		usage: `'use client';
 
-import { Card, CardContent, CardHeader, BarChart, CountUp, Badge } from '@components';
+import { Card, CardContent, CardHeader, BarChart, CountUp, Badge } from '@components/ui';
 
 const PRODUCT_DATA = [
   { product: 'Core', revenue: 42500 },
@@ -1465,7 +1465,7 @@ export default function ChartCardBarExample() {
 		description: 'A metered pricing card: drag the slider to estimate a monthly bill from a base fee plus a per-unit rate.',
 		usage: `'use client';
 
-import { Card, CardContent, CardFooter, CardHeader, Slider, Button, Badge } from '@components';
+import { Card, CardContent, CardFooter, CardHeader, Slider, Button, Badge } from '@components/ui';
 import { useState } from 'react';
 
 const BASE_FEE = 19;
@@ -1526,7 +1526,7 @@ export default function Example() {
 		description: 'An All/Unread filter plus per-notification mark-as-read and dismiss actions, with type icons and an empty state.',
 		usage: `'use client';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger, Card, CardContent, CardHeader, ScrollFade, Button, Badge } from '@components';
+import { Tabs, TabsContent, TabsList, TabsTrigger, Card, CardContent, CardHeader, ScrollFade, Button, Badge } from '@components/ui';
 import { useState } from 'react';
 
 const INITIAL_NOTIFICATIONS = [

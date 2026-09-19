@@ -115,10 +115,11 @@ const InstallationPage = () => {
                 This writes <InlineCode>dafink.config.json</InlineCode> and generates{' '}
                 <InlineCode>dafink-ui.css</InlineCode> with your chosen design tokens, then
                 imports it into your CSS file. It also adds a{' '}
-                <InlineCode>@components/*</InlineCode> path alias to your{' '}
+                <InlineCode>@components/ui/*</InlineCode> path alias to your{' '}
                 <InlineCode>tsconfig.json</InlineCode> (or <InlineCode>jsconfig.json</InlineCode>),
                 pointing at wherever your components directory is configured, so example
-                imports work the same regardless of that setting.
+                imports work the same regardless of that setting. <InlineCode>@components</InlineCode>{' '}
+                itself is left free for your own composed components built on top of DaFink UI.
               </p>
             </div>
           </TimelineItem>
@@ -137,14 +138,14 @@ const InstallationPage = () => {
 
           <TimelineItem title='Import and use'>
             <div className='flex flex-col gap-3'>
-              <CodeBlock code={`import { Button } from '@components';
+              <CodeBlock code={`import { Button } from '@components/ui';
 
 export default function Page() {
   return <Button variant="primary">Get started</Button>;
 }`} />
               <p>
                 Every component example in these docs imports from{' '}
-                <InlineCode>@components</InlineCode>, the barrel file{' '}
+                <InlineCode>@components/ui</InlineCode>, the barrel file{' '}
                 <InlineCode>dafink-ui add</InlineCode> regenerates on every run, pointing at
                 the alias <InlineCode>dafink-ui init</InlineCode> configured in the previous step.
               </p>

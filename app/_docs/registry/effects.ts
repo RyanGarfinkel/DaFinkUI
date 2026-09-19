@@ -12,7 +12,7 @@ export const effects: EffectEntry[] = [
     name: 'ScrollFade',
     category: 'Scroll',
     description: 'A scroll container that fades whichever edge still has more content to reveal, instead of cutting content off abruptly.',
-    usage: `import { ScrollFade } from '@components';
+    usage: `import { ScrollFade } from '@components/ui';
 
 export default function Example() {
   return (
@@ -42,7 +42,7 @@ export default function Example() {
     name: 'Reveal',
     category: 'Scroll',
     description: 'Scroll-triggered entrance animation driven by IntersectionObserver, with a RevealGroup for staggered cascades. Content stays visible without JS and under reduced motion.',
-    usage: `import { Reveal, RevealGroup } from '@components';
+    usage: `import { Reveal, RevealGroup } from '@components/ui';
 
 export default function Example() {
   return (
@@ -112,7 +112,7 @@ export default function Example() {
     name: 'SlideIn',
     category: 'Scroll',
     description: 'A small, fixed-distance jump-and-fade entrance triggered by IntersectionObserver, from the left, right, or bottom edge.',
-    usage: `import { SlideIn } from '@components';
+    usage: `import { SlideIn } from '@components/ui';
 
 export default function Example() {
   return (
@@ -145,7 +145,7 @@ export default function Example() {
     name: 'CountUp',
     category: 'Text',
     description: 'Animates a number from a start value to its final value when scrolled into view. Screen readers always get the real value; reduced motion renders it immediately.',
-    usage: `import { CountUp } from '@components';
+    usage: `import { CountUp } from '@components/ui';
 
 export default function Example() {
   return (
@@ -224,7 +224,7 @@ export default function Example() {
     name: 'TextShimmer',
     category: 'Text',
     description: 'Text with a looping gradient shimmer sweeping across it via background-clip: text. Token-driven colors keep AA contrast; reduced motion renders static text.',
-    usage: `import { TextShimmer } from '@components';
+    usage: `import { TextShimmer } from '@components/ui';
 
 export default function Example() {
   return (
@@ -263,7 +263,7 @@ export default function Example() {
     name: 'Typewriter',
     category: 'Text',
     description: 'Reveals text character by character, like a terminal being typed in real time. Screen readers receive the full string immediately; reduced motion renders it statically.',
-    usage: `import { Typewriter } from '@components';
+    usage: `import { Typewriter } from '@components/ui';
 
 export default function Example() {
   return (
@@ -335,7 +335,7 @@ export default function Example() {
     name: 'Marquee',
     category: 'Background',
     description: 'Infinite horizontal scrolling strip of content, used as an ambient ticker or logo wall. Renders children twice in a track that translates by exactly -50% for a seamless loop.',
-    usage: `import { Marquee } from '@components';
+    usage: `import { Marquee } from '@components/ui';
 
 export default function Example() {
   return (
@@ -364,7 +364,7 @@ export default function Example() {
     name: 'Ripple',
     category: 'Background',
     description: 'Decorative concentric rings expanding outward and fading out in a continuous, staggered loop, typically placed behind a logo or icon.',
-    usage: `import { Ripple } from '@components';
+    usage: `import { Ripple } from '@components/ui';
 
 export default function Example() {
   return (
@@ -388,7 +388,7 @@ export default function Example() {
     name: 'Particles',
     category: 'Background',
     description: 'A purely decorative ambient background of small floating dots, gently drifting and pulsing opacity, meant to sit behind real content. Dot positions come from a deterministic seeded PRNG so server and client render identically.',
-    usage: `import { Particles } from '@components';
+    usage: `import { Particles } from '@components/ui';
 
 export default function Example() {
   return (
@@ -413,7 +413,7 @@ export default function Example() {
     name: 'Spotlight',
     category: 'Cursor',
     description: 'Wraps content in a container with a soft radial glow that follows the cursor, revealing a "spotlight" highlight as it moves over it.',
-    usage: `import { Spotlight } from '@components';
+    usage: `import { Spotlight } from '@components/ui';
 
 export default function Example() {
   return (
@@ -436,7 +436,7 @@ export default function Example() {
     name: 'Meteors',
     category: 'Background',
     description: 'A purely decorative ambient background of small diagonal "shooting star" streaks that repeatedly fall across a container, staggered so several are visible mid-flight at once.',
-    usage: `import { Meteors } from '@components';
+    usage: `import { Meteors } from '@components/ui';
 
 export default function Example() {
   return (
@@ -461,8 +461,8 @@ export default function Example() {
     name: 'Magnetic',
     category: 'Cursor',
     description: "A wrapper that makes its child subtly translate toward the cursor when nearby, and snap back to rest when the cursor leaves. Common on buttons for a tactile 'magnetic hover' feel.",
-    usage: `import { Magnetic } from '@components';
-import { Button } from '@components';
+    usage: `import { Magnetic } from '@components/ui';
+import { Button } from '@components/ui';
 
 export default function Example() {
   return (
@@ -486,7 +486,7 @@ export default function Example() {
     name: 'CursorTrail',
     category: 'Cursor',
     description: 'A short trail of glowing dots that follows the cursor with a slight lag, each dot progressively smaller and fainter toward the tail.',
-    usage: `import { CursorTrail } from '@components';
+    usage: `import { CursorTrail } from '@components/ui';
 
 export default function Example() {
   return (
@@ -512,7 +512,7 @@ export default function Example() {
     name: 'ClickSpark',
     category: 'Cursor',
     description: 'Spawns a brief burst of thin spark lines radiating outward from the click point on every click, fading out as they travel — a satisfying, subtle click-feedback effect.',
-    usage: `import { ClickSpark } from '@components';
+    usage: `import { ClickSpark } from '@components/ui';
 
 export default function Example() {
   return (
@@ -537,8 +537,8 @@ export default function Example() {
     name: 'Confetti',
     category: 'Cursor',
     description: 'Bursts colorful confetti pieces outward from the click point on every click — falling, spinning, and fading out. A celebratory effect for success states, completions, and purchases.',
-    usage: `import { Confetti } from '@components';
-import { Button } from '@components';
+    usage: `import { Confetti } from '@components/ui';
+import { Button } from '@components/ui';
 
 export default function Example() {
   return (
@@ -563,7 +563,7 @@ export default function Example() {
     name: 'TextScramble',
     category: 'Text',
     description: 'Text that animates in by rapidly cycling through random-looking characters before resolving, left-to-right, into the real final text — a "decrypt" reveal effect.',
-    usage: `import { TextScramble } from '@components';
+    usage: `import { TextScramble } from '@components/ui';
 
 export default function Example() {
   return (

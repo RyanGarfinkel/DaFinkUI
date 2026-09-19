@@ -36,7 +36,7 @@ export const registry: ComponentEntry[] = [
     name: 'Button',
     category: 'Inputs',
     description: 'A clickable control that triggers an action, supporting nine visual variants and five sizes.',
-    usage: `import { Button } from '@components';
+    usage: `import { Button } from '@components/ui';
 
 export default function Example() {
   return (
@@ -116,7 +116,7 @@ export default function Example() {
     name: 'Input',
     category: 'Inputs',
     description: 'A single-line text input with optional label, hint, and error messaging. Supports a floating label variant where the label animates inside the field.',
-    usage: `import { Input } from '@components';
+    usage: `import { Input } from '@components/ui';
 
 export default function Example() {
   return (
@@ -178,7 +178,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { OTPInput } from '@components';
+import { OTPInput } from '@components/ui';
 
 export default function Example() {
   const [code, setCode] = useState('');
@@ -243,7 +243,7 @@ export default function Example() {
     name: 'Textarea',
     category: 'Inputs',
     description: 'A multi-line text input with optional label, hint, and error messaging.',
-    usage: `import { Textarea } from '@components';
+    usage: `import { Textarea } from '@components/ui';
 
 export default function Example() {
   return (
@@ -303,7 +303,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { RadioGroup, RadioItem } from '@components';
+import { RadioGroup, RadioItem } from '@components/ui';
 
 export default function Example() {
   const [plan, setPlan] = useState('pro');
@@ -360,7 +360,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { Switch } from '@components';
+import { Switch } from '@components/ui';
 
 export default function Example() {
   const [enabled, setEnabled] = useState(false);
@@ -428,7 +428,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { ToggleGroup, ToggleGroupItem } from '@components';
+import { ToggleGroup, ToggleGroupItem } from '@components/ui';
 
 export default function Example() {
   const [align, setAlign] = useState('left');
@@ -490,7 +490,7 @@ export default function Example() {
     name: 'Badge',
     category: 'Display',
     description: 'Inline label for status, category, or count.',
-    usage: `import { Badge } from '@components';
+    usage: `import { Badge } from '@components/ui';
 
 export default function Example() {
   return (
@@ -516,7 +516,7 @@ export default function Example() {
     name: 'Card',
     category: 'Display',
     description: 'A flexible container component for grouping related content into a distinct visual surface, composed with CardHeader, CardContent, and CardFooter.',
-    usage: `import { Card, CardHeader, CardContent, CardFooter, Button } from '@components';
+    usage: `import { Card, CardHeader, CardContent, CardFooter, Button } from '@components/ui';
 
 export default function Example() {
   return (
@@ -581,7 +581,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { Select } from '@components';
+import { Select } from '@components/ui';
 
 const FRAMEWORKS = [
   { value: 'next',    label: 'Next.js'  },
@@ -625,7 +625,7 @@ export default function Example() {
     name: 'Checkbox',
     category: 'Inputs',
     description: 'Controlled or uncontrolled checkbox with optional label.',
-    usage: `import { Checkbox } from '@components';
+    usage: `import { Checkbox } from '@components/ui';
 
 export default function Example() {
   return (
@@ -659,7 +659,7 @@ export default function Example() {
   TableRow,
   TableHeader,
   TableCell,
-} from '@components';
+} from '@components/ui';
 
 export default function Example() {
   return (
@@ -743,7 +743,7 @@ export default function Example() {
   SkeletonImage,
   SkeletonInput,
   SkeletonTableRow,
-} from '@components';
+} from '@components/ui';
 
 export default function Example() {
   return (
@@ -834,7 +834,7 @@ export default function Example() {
     name: 'Form',
     category: 'Forms',
     description: 'A set of composable layout primitives for building forms: handling spacing, labeling, error display, and section grouping. Optionally pair with the useZodForm hook for Zod schema validation powered by react-hook-form.',
-    usage: `import { Form, FormField, FormLabel, FormControl, FormDescription, FormMessage, useZodForm, Input, Button } from '@components';
+    usage: `import { Form, FormField, FormLabel, FormControl, FormDescription, FormMessage, useZodForm, Input, Button } from '@components/ui';
 import { z } from 'zod';
 
 const schema = z.object({
@@ -920,7 +920,7 @@ export default function Example() {
     name: 'Alert',
     category: 'Feedback',
     description: 'Contextual feedback banner for success, warning, danger, or info.',
-    usage: `import { Alert } from '@components';
+    usage: `import { Alert } from '@components/ui';
 
 export default function Example() {
   return (
@@ -1023,7 +1023,7 @@ export default function Example() {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from '@components';
+} from '@components/ui';
 
 export default function Example() {
   return (
@@ -1101,7 +1101,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@components/ui';
 
 export default function Example() {
   const [tab, setTab] = useState('overview');
@@ -1166,7 +1166,7 @@ export default function Example() {
     name: 'Sidebar',
     category: 'Navigation',
     description: 'Vertical navigation sidebar with a header, footer, sections, links, dividers, and an optional collapse toggle.',
-    usage: `import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider, Button } from '@components';
+    usage: `import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider, Button } from '@components/ui';
 import { useState } from 'react';
 
 function NavIcon({ d }: { d: string }) {
@@ -1283,7 +1283,7 @@ export default function Example() {
     name: 'Breadcrumb',
     category: 'Navigation',
     description: 'A navigational landmark that shows the user\'s current location within a site hierarchy.',
-    usage: `import { Breadcrumb } from '@components';
+    usage: `import { Breadcrumb } from '@components/ui';
 
 export default function Example() {
   return (
@@ -1328,7 +1328,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { MenuBar, MenuBarBrand, MenuBarNav, MenuBarNavItem, MenuBarNavMore, MenuBarActions, Button } from '@components';
+import { MenuBar, MenuBarBrand, MenuBarNav, MenuBarNavItem, MenuBarNavMore, MenuBarActions, Button } from '@components/ui';
 
 export default function Example() {
   const [nav, setNav] = useState('home');
@@ -1393,7 +1393,7 @@ export default function Example() {
     description: 'A scroll-spy navigation sidebar that scans a content container for h2/h3 headings and links to each one, bolding whichever section is currently in view.',
     usage: `'use client';
 
-import { TableOfContents } from '@components';
+import { TableOfContents } from '@components/ui';
 
 export default function Example() {
   return (
@@ -1438,7 +1438,7 @@ export default function Example() {
     name: 'LineChart',
     category: 'Charts',
     description: 'A line chart for visualising trends over time, supporting multiple series.',
-    usage: `import { LineChart } from '@components';
+    usage: `import { LineChart } from '@components/ui';
 
 const data = [
   { month: 'Jan', revenue: 4000, expenses: 2400 },
@@ -1479,7 +1479,7 @@ export default function Example() {
     name: 'BarChart',
     category: 'Charts',
     description: 'A vertical bar chart for comparing values across categories, with optional stacking.',
-    usage: `import { BarChart } from '@components';
+    usage: `import { BarChart } from '@components/ui';
 
 const data = [
   { quarter: 'Q1', sales: 4000, returns: 400 },
@@ -1519,7 +1519,7 @@ export default function Example() {
     name: 'AreaChart',
     category: 'Charts',
     description: 'A filled area chart for emphasising volume and cumulative values over time.',
-    usage: `import { AreaChart } from '@components';
+    usage: `import { AreaChart } from '@components/ui';
 
 const data = [
   { month: 'Jan', users: 800, sessions: 1200 },
@@ -1561,7 +1561,7 @@ export default function Example() {
     name: 'DonutChart',
     category: 'Charts',
     description: 'A donut (or pie) chart for part-to-whole proportions across named slices.',
-    usage: `import { DonutChart } from '@components';
+    usage: `import { DonutChart } from '@components/ui';
 
 export default function Example() {
   return (
@@ -1591,7 +1591,7 @@ export default function Example() {
     name: 'RadarChart',
     category: 'Charts',
     description: 'A radar chart for comparing multiple entries across several shared dimensions.',
-    usage: `import { RadarChart } from '@components';
+    usage: `import { RadarChart } from '@components/ui';
 
 const data = [
   { metric: 'Speed', modelX: 90, modelY: 70 },
@@ -1780,7 +1780,7 @@ export default function Example() {
     name: 'KanbanBoard',
     category: 'Drag & Drop',
     description: 'A drag-and-drop Kanban board with keyboard support. Cards can be dragged between columns and reordered within columns.',
-    usage: `import { KanbanBoard } from '@components';
+    usage: `import { KanbanBoard } from '@components/ui';
 
 const initialColumns = [
   {
@@ -1835,8 +1835,8 @@ export default function Example() {
     name:        'WorkflowBuilder',
     category:    'Drag & Drop',
     description: 'Drag-and-drop graph editor for building typed workflows. Connects trigger, condition, action, transform, and output nodes. Outputs a serializable WorkflowGraph via onChange.',
-    usage: `import { WorkflowBuilder } from '@components';
-import type { WorkflowGraph } from '@components';
+    usage: `import { WorkflowBuilder } from '@components/ui';
+import type { WorkflowGraph } from '@components/ui';
 import { useState } from 'react';
 
 export default function Example() {
@@ -1864,7 +1864,7 @@ export default function Example() {
     name: 'Progress',
     category: 'Feedback',
     description: 'Horizontal bar indicating task completion.',
-    usage: `import { Progress } from '@components';
+    usage: `import { Progress } from '@components/ui';
 
 export default function Example() {
   return (
@@ -1891,7 +1891,7 @@ export default function Example() {
     name: 'Spinner',
     category: 'Feedback',
     description: 'Animated loading indicator.',
-    usage: `import { Spinner } from '@components';
+    usage: `import { Spinner } from '@components/ui';
 
 export default function Example() {
   return (
@@ -1916,7 +1916,7 @@ export default function Example() {
     name:        'Toast',
     category:    'Feedback',
     description: 'Ephemeral notification toasts with auto-dismiss, variants, and optional actions.',
-    usage: `import { ToastProvider, useToast } from '@components';
+    usage: `import { ToastProvider, useToast } from '@components/ui';
 
 // 1. Wrap your app (or layout) with ToastProvider
 export default function Example({ children }) {
@@ -1961,7 +1961,7 @@ function MyComponent() {
     name: 'Canvas',
     category: 'Canvas',
     description: 'A freehand drawing surface with pen and eraser tools, color palette, variable stroke widths, undo/redo, and PNG download.',
-    usage: `import { Canvas } from '@components';
+    usage: `import { Canvas } from '@components/ui';
 
 export default function Example() {
   return (
@@ -1989,7 +1989,7 @@ export default function Example() {
     name: 'Tree',
     category: 'Display',
     description: 'A collapsible, keyboard-navigable tree view for hierarchical data: file trees, org charts, and nested navigation.',
-    usage: `import { Tree, TreeItem } from '@components';
+    usage: `import { Tree, TreeItem } from '@components/ui';
 
 export default function Example() {
   return (
@@ -2091,7 +2091,7 @@ export default function Example() {
     name: 'Timeline',
     category: 'Display',
     description: 'A vertical step list with numbered indicators and connector lines, for ordered sequences like setup guides, onboarding flows, and activity feeds.',
-    usage: `import { Timeline, TimelineItem } from '@components';
+    usage: `import { Timeline, TimelineItem } from '@components/ui';
 
 export default function Example() {
   return (
@@ -2159,7 +2159,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { CommandPalette, CommandGroup, CommandItem } from '@components';
+import { CommandPalette, CommandGroup, CommandItem } from '@components/ui';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
@@ -2206,7 +2206,7 @@ export default function Example() {
     name: 'Tooltip',
     category: 'Overlay',
     description: 'A small floating text label that appears next to its trigger on hover or keyboard focus. Never contains interactive content.',
-    usage: `import { Tooltip } from '@components';
+    usage: `import { Tooltip } from '@components/ui';
 
 const InfoIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -2253,7 +2253,7 @@ export default function Example() {
     name: 'Popover',
     category: 'Overlay',
     description: 'A click-triggered, non-modal floating panel anchored to its trigger. Focus moves in on open but is never trapped; Escape and outside clicks close it.',
-    usage: `import { Popover } from '@components';
+    usage: `import { Popover } from '@components/ui';
 
 export default function Example() {
   return (
@@ -2288,7 +2288,7 @@ export default function Example() {
     name: 'DropdownMenu',
     category: 'Overlay',
     description: 'A trigger button that opens a floating menu of actions with arrow-key navigation, typeahead, separators, and disabled items.',
-    usage: `import { DropdownMenu } from '@components';
+    usage: `import { DropdownMenu } from '@components/ui';
 
 export default function Example() {
   return (
@@ -2326,7 +2326,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { Combobox } from '@components';
+import { Combobox } from '@components/ui';
 
 const LANGUAGES = [
   { value: 'ts',  label: 'TypeScript' },
@@ -2385,7 +2385,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { DatePicker } from '@components';
+import { DatePicker } from '@components/ui';
 
 export default function Example() {
   const [date, setDate] = useState<Date | null>(null);
@@ -2432,8 +2432,8 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { DataTable } from '@components';
-import type { ColumnDef } from '@components';
+import { DataTable } from '@components/ui';
+import type { ColumnDef } from '@components/ui';
 
 interface Person { id: number; name: string; role: string; status: string; }
 
@@ -2481,7 +2481,7 @@ export default function Example() {
     name: 'FunctionPlotter',
     category: 'Display',
     description: 'An interactive 2D function plotter with pan, zoom, and support for multiple equations. Enter expressions like x^2 or 2*x+1 and see them graphed in real time.',
-    usage: `import { FunctionPlotter } from '@components';
+    usage: `import { FunctionPlotter } from '@components/ui';
 
 export default function Example() {
   return (
@@ -2511,7 +2511,7 @@ export default function Example() {
   CarouselPrevious,
   CarouselNext,
   CarouselDots,
-} from '@components';
+} from '@components/ui';
 
 const slides = [1, 2, 3, 4, 5];
 
@@ -2564,7 +2564,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { Slider } from '@components';
+import { Slider } from '@components/ui';
 
 export default function Example() {
   const [volume, setVolume] = useState(40);
@@ -2680,9 +2680,9 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { CodeBlock } from '@components';
+import { CodeBlock } from '@components/ui';
 
-const SNIPPET = \`import { Button } from '@components';
+const SNIPPET = \`import { Button } from '@components/ui';
 
 export default function Example() {
   return <Button>Click me</Button>;
@@ -2761,7 +2761,7 @@ export default function Example() {
     name: 'Formula',
     category: 'Display',
     description: 'Renders real LaTeX math notation via KaTeX, with graceful fallback rendering for invalid expressions and a MathML tree for screen readers.',
-    usage: `import { Formula } from '@components';
+    usage: `import { Formula } from '@components/ui';
 
 export default function Example() {
   return (
@@ -2810,7 +2810,7 @@ export default function Example() {
     usage: `'use client';
 
 import { useState } from 'react';
-import { CodeEditor } from '@components';
+import { CodeEditor } from '@components/ui';
 
 export default function Example() {
   const [code, setCode] = useState('<Button>Click me</Button>');
@@ -2871,7 +2871,7 @@ export default function Example() {
     name: 'Avatar',
     category: 'Display',
     description: 'User or entity image with graceful fallback to initials, plus an overlapping AvatarGroup with a +N overflow indicator.',
-    usage: `import { Avatar, AvatarGroup } from '@components';
+    usage: `import { Avatar, AvatarGroup } from '@components/ui';
 
 export default function Example() {
   return (
@@ -2957,7 +2957,7 @@ export default function Example() {
     name: 'Attachment',
     category: 'Display',
     description: 'A compact chip for a linked file (icon, filename, and optional size/type) with an automatic image/PDF thumbnail, plus AttachmentGroup for a wrapped row of files.',
-    usage: `import { Attachment, AttachmentGroup } from '@components';
+    usage: `import { Attachment, AttachmentGroup } from '@components/ui';
 
 export default function Example() {
   return (
@@ -3011,7 +3011,7 @@ export default function Example() {
     name: 'Message',
     category: 'Display',
     description: 'A chat-style message bubble with sent/received variants and iOS-tapback-style reactions overlapping the bubble corner, a MessageReactions max/+N overflow stack like AvatarGroup, plus a source-citation use case for LLM responses.',
-    usage: `import { Message, MessageReactions, MessageReaction } from '@components';
+    usage: `import { Message, MessageReactions, MessageReaction } from '@components/ui';
 
 export default function Example() {
   return (
@@ -3077,7 +3077,7 @@ import {
   ModalFooter,
   ModalClose,
   Button,
-} from '@components';
+} from '@components/ui';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
@@ -3163,8 +3163,8 @@ import {
   DrawerFooter,
   DrawerClose,
   Button,
-} from '@components';
-import type { DrawerSide } from '@components';
+} from '@components/ui';
+import type { DrawerSide } from '@components/ui';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
@@ -3263,8 +3263,8 @@ import {
   SidePanelFooter,
   SidePanelClose,
   Button,
-} from '@components';
-import type { SidePanelSide } from '@components';
+} from '@components/ui';
+import type { SidePanelSide } from '@components/ui';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
@@ -3354,8 +3354,8 @@ export default function Example() {
     description: 'Force-directed node/edge graph with draggable nodes, pan/zoom, hover-highlighting, and keyboard navigation.',
     usage: `'use client';
 
-import { Graph } from '@components';
-import type { GraphNode, GraphEdge } from '@components';
+import { Graph } from '@components/ui';
+import type { GraphNode, GraphEdge } from '@components/ui';
 
 const NODES: GraphNode[] = [
   { id: 'react',      label: 'React'      },
@@ -3430,7 +3430,7 @@ export default function Example() {
     name: 'AudioPlayer',
     category: 'Display',
     description: 'A full-featured audio playback bar with play/pause, seeking, skip, volume, and speed controls.',
-    usage: `import { AudioPlayer } from '@components';
+    usage: `import { AudioPlayer } from '@components/ui';
 
 export default function Example() {
   return (
@@ -3484,7 +3484,7 @@ export default function Example() {
     name: 'Tilt',
     category: 'Display',
     description: 'A wrapper that applies a mouse-tracking CSS 3D perspective tilt to any child element.',
-    usage: `import { Tilt } from '@components';
+    usage: `import { Tilt } from '@components/ui';
 
 export default function Example() {
   return (
@@ -3543,7 +3543,7 @@ export default function Example() {
     name: 'Separator',
     category: 'Display',
     description: 'A thin horizontal or vertical dividing line, optionally broken up by a short text label like "OR".',
-    usage: `import { Separator } from '@components';
+    usage: `import { Separator } from '@components/ui';
 
 export default function Example() {
   return (
@@ -3601,7 +3601,7 @@ export default function Example() {
     name: 'ThemeToggle',
     category: 'Actions',
     description: 'A button that switches the site between light and dark mode, persisting the choice to localStorage and a cookie.',
-    usage: `import { ThemeToggle } from '@components';
+    usage: `import { ThemeToggle } from '@components/ui';
 
 export default function Example() {
   return <ThemeToggle />;

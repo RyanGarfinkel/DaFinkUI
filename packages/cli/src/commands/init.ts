@@ -155,8 +155,8 @@ export async function runInit(cwd: string): Promise<void>
 	const aliasResult = addComponentsAlias(cwd, config.componentsDir);
 
 	const aliasLine = aliasResult.updated
-		? '  ' + pc.dim(aliasResult.configFile!) + ' updated with ' + pc.dim('@components/*') + ' alias\n'
-		: '  ' + pc.yellow(aliasResult.reason ?? 'skipped @components alias setup') + '\n';
+		? '  ' + pc.dim(aliasResult.configFile!) + ' updated with ' + pc.dim('@components/ui/*') + ' alias\n'
+		: '  ' + pc.yellow(aliasResult.reason ?? 'skipped @components/ui alias setup') + '\n';
 
 	outro(
 		pc.green('Done!') + '\n\n' +
