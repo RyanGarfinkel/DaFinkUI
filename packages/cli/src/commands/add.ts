@@ -24,12 +24,62 @@ function installCmd(pm: 'pnpm' | 'yarn' | 'npm', deps: string[]): string
 	return `npm install ${pkgs}`;
 }
 
+const NEXT_LINK_WITH_PROPS_RE = /^import Link, \{ (\w+) \} from ['"]next\/link['"];\n/m;
+const NEXT_LINK_BARE_RE = /^import Link from ['"]next\/link['"];\n/m;
+const NEXT_USE_PATHNAME_RE = /^import \{ usePathname \} from ['"]next\/navigation['"];\n/m;
+const REACT_NAMED_IMPORT_RE = /^import \{([^}]+)\} from 'react';/m;
+
+function replaceLinkTag(content: string): string
+{
+	return content.replace(/<Link\b/g, '<a').replace(/<\/Link>/g, '</a>');
+}
+
+function addNamedReactImport(content: string, name: string): string
+{
+	const match = content.match(REACT_NAMED_IMPORT_RE);
+
+	if(!match)
+		return `import { ${name} } from 'react';\n${content}`;
+
+	const names = match[1].split(',').map(n => n.trim()).filter(Boolean);
+	if(names.includes(name)) return content;
+
+	names.push(name);
+	return content.replace(REACT_NAMED_IMPORT_RE, `import { ${names.join(', ')} } from 'react';`);
+}
+
+/** next/link and next/navigation are the only Next-only APIs the registry currently
+ * uses (Link, LinkProps, usePathname); everything else in the registry is already
+ * framework-agnostic. Anything outside those three still falls through to the warning
+ * below rather than being silently left broken. */
 function transformForReact(content: string, file: string): string
 {
 	let result = content.replace(/^'use client';\n\n?/m, '');
 
-	const nextImports = [...result.matchAll(/from ['"]next\//g)];
-	if(nextImports.length > 0)
+	const linkPropsMatch = result.match(NEXT_LINK_WITH_PROPS_RE);
+
+	if(linkPropsMatch)
+	{
+		const typeName = linkPropsMatch[1];
+		result = result.replace(NEXT_LINK_WITH_PROPS_RE, '');
+		result = result.replace(new RegExp(`\\b${typeName}\\b`, 'g'), 'AnchorHTMLAttributes<HTMLAnchorElement>');
+		result = addNamedReactImport(result, 'AnchorHTMLAttributes');
+		result = replaceLinkTag(result);
+	}
+	else if(NEXT_LINK_BARE_RE.test(result))
+	{
+		result = result.replace(NEXT_LINK_BARE_RE, '');
+		result = replaceLinkTag(result);
+	}
+
+	if(NEXT_USE_PATHNAME_RE.test(result))
+	{
+		result = result.replace(NEXT_USE_PATHNAME_RE, '');
+		result = result.replace(/usePathname\(\)/g, "(typeof window !== 'undefined' ? window.location.pathname : '')");
+	}
+
+	const remainingNextImports = [...result.matchAll(/from ['"]next\//g)];
+	if(remainingNextImports.length > 0)
 		log.warn(pc.yellow(`${file} has Next.js imports; review and replace manually`));
 
 	return result;
