@@ -1,20 +1,24 @@
 'use client';;
 import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
+import TimeField from './TimeField';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+type Granularity = 'date' | 'time' | 'datetime';
+
 export interface DatePickerProps
 {
-	value?:       Date | null;
-	onChange?:    (date: Date) => void;
-	placeholder?: string;
-	min?:         Date;
-	max?:         Date;
-	disabled?:    boolean;
-	label?:       string;
-	hint?:        string;
-	error?:       string;
-	className?:   string;
+	value?:        Date | null;
+	onChange?:     (date: Date) => void;
+	placeholder?:  string;
+	granularity?:  Granularity;
+	min?:          Date;
+	max?:          Date;
+	disabled?:     boolean;
+	label?:        string;
+	hint?:         string;
+	error?:        string;
+	className?:    string;
 }
 
 // ─── DatePicker ───────────────────────────────────────────────────────────────
@@ -23,7 +27,8 @@ export const DatePicker = (
     {
         value,
         onChange,
-        placeholder = 'Pick a date',
+        placeholder,
+        granularity = 'date',
         min,
         max,
         disabled    = false,
@@ -33,11 +38,17 @@ export const DatePicker = (
         className   = '',
     }: DatePickerProps
 ) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const [mounted,       setMounted]       = useState(false);
     const [visible,       setVisible]       = useState(false);
-    const [viewYear,      setViewYear]      = useState(() => (value ?? new Date()).getFullYear());
-    const [viewMonth,     setViewMonth]     = useState(() => (value ?? new Date()).getMonth());
+    const [viewYear,      setViewYear]      = useState(() => (value ?? today).getFullYear());
+    const [viewMonth,     setViewMonth]     = useState(() => (value ?? today).getMonth());
     const [focusedDay,    setFocusedDay]    = useState<number | null>(null);
+    const [hour24,        setHour24]        = useState(() => (value ?? today).getHours());
+    const [minute,        setMinute]        = useState(() => (value ?? today).getMinutes());
+    const [second,        setSecond]        = useState(() => (value ?? today).getSeconds());
 
     const triggerRef  = useRef<HTMLButtonElement>(null);
     const popupRef    = useRef<HTMLDivElement>(null);
@@ -48,9 +59,6 @@ export const DatePicker = (
     const popupId  = `${id}-popup`;
     const gridId   = `${id}-grid`;
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     const openPopup = () => {
 		if(disabled) return;
 
@@ -58,6 +66,9 @@ export const DatePicker = (
 		setViewYear(base.getFullYear());
 		setViewMonth(base.getMonth());
 		setFocusedDay(base.getDate());
+		setHour24(base.getHours());
+		setMinute(base.getMinutes());
+		setSecond(base.getSeconds());
 		setMounted(true);
 	};
 
@@ -69,14 +80,14 @@ export const DatePicker = (
 
     useEffect(() =>
 	{
-		if(focusedDay === null || !mounted) return;
+		if(focusedDay === null || !mounted || granularity === 'time') return;
 		const frame = requestAnimationFrame(() =>
 		{
 			const key = `${viewYear}-${viewMonth}-${focusedDay}`;
 			buttonRefs.current.get(key)?.focus();
 		});
 		return () => cancelAnimationFrame(frame);
-	}, [focusedDay, viewYear, viewMonth, mounted]);
+	}, [focusedDay, viewYear, viewMonth, mounted, granularity]);
 
     const closePopup = (returnFocus = true) => {
 		setVisible(false);
@@ -101,9 +112,18 @@ export const DatePicker = (
     }, [mounted]);
 
     const selectDate = (day: number) => {
-		const selected = new Date(viewYear, viewMonth, day);
+		const selected = new Date(viewYear, viewMonth, day, hour24, minute, second);
 		onChange?.(selected);
-		closePopup();
+		setFocusedDay(day);
+		if(granularity === 'date') closePopup();
+	};
+
+    const handleTimeChange = (next: { hour: number; minute: number; second: number }) => {
+		setHour24(next.hour);
+		setMinute(next.minute);
+		setSecond(next.second);
+		const day = focusedDay ?? (value ?? today).getDate();
+		onChange?.(new Date(viewYear, viewMonth, day, next.hour, next.minute, next.second));
 	};
 
     const isDisabledDate = (year: number, month: number, day: number) => {
@@ -216,7 +236,7 @@ export const DatePicker = (
 				break;
 
 			case 'Tab':
-				closePopup(false);
+				if(granularity === 'date') closePopup(false);
 				break;
 		}
 	};
@@ -245,9 +265,46 @@ export const DatePicker = (
 		});
 	};
 
-    const formattedValue = value ? formatDate(value) : null;
-    const monthLabel     = `${MONTHS[viewMonth]} ${viewYear}`;
-    const gridCells      = buildCalendarGrid(viewYear, viewMonth);
+    const formattedValue = value
+		? granularity === 'datetime'
+			? `${formatDate(value)}, ${formatTime(value)}`
+			: formatDate(value)
+		: null;
+    const effectivePlaceholder = placeholder ?? PLACEHOLDER_BY_GRANULARITY[granularity];
+    const dialogLabel          = DIALOG_LABEL_BY_GRANULARITY[granularity];
+    const monthLabel           = `${MONTHS[viewMonth]} ${viewYear}`;
+    const gridCells            = buildCalendarGrid(viewYear, viewMonth);
+
+    if(granularity === 'time')
+	{
+		return (
+			<div className={['flex flex-col gap-1.5 w-full', className].join(' ')}>
+				{label && (
+					<span className='text-sm font-medium text-text'>
+						{label}
+					</span>
+				)}
+
+				<TimeField
+					hour={hour24}
+					minute={minute}
+					second={second}
+					onChange={handleTimeChange}
+					onClose={() => {}}
+					onTabOutOfLast={() => {}}
+					disabled={disabled}
+					ariaLabel={label ?? 'Time'}
+					icon={<ClockIcon />}
+				/>
+
+				{error ? (
+					<p className='text-xs text-danger'>{error}</p>
+				) : hint ? (
+					<p className='text-xs text-text-muted'>{hint}</p>
+				) : null}
+			</div>
+		);
+	}
 
     return (
 		<div className={['flex flex-col gap-1.5 w-full', className].join(' ')}>
@@ -278,7 +335,7 @@ export const DatePicker = (
 					].join(' ')}
 				>
 					<span className={formattedValue ? 'text-text' : 'text-text-subtle'}>
-						{formattedValue ?? placeholder}
+						{formattedValue ?? effectivePlaceholder}
 					</span>
 					<CalendarIcon />
 				</button>
@@ -288,7 +345,7 @@ export const DatePicker = (
 						ref={popupRef}
 						id={popupId}
 						role='dialog'
-						aria-label='Date picker'
+						aria-label={dialogLabel}
 						className={[
 							'absolute z-50 top-full mt-1 left-0 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
 							'p-3 w-72 outline-none',
@@ -375,6 +432,7 @@ export const DatePicker = (
 												role='gridcell'
 												aria-selected={isSelected}
 												aria-disabled={isDisabled}
+												className='p-1'
 											>
 												<button
 													type='button'
@@ -399,13 +457,12 @@ export const DatePicker = (
 														!isCurrentMonth && !isDisabled
 															? 'opacity-30'
 															: '',
+														isToday ? 'underline underline-offset-2' : '',
 														isSelected
 															? 'bg-brand text-brand-fg font-medium'
-															: isToday && !isDisabled
-																? 'ring-2 ring-brand-ring ring-offset-1 text-text hover:bg-surface-hover'
-																: !isDisabled
-																	? 'text-text hover:bg-surface-hover'
-																	: 'text-text',
+															: !isDisabled
+																? 'text-text hover:bg-surface-hover'
+																: 'text-text',
 													].join(' ')}
 												>
 													{day}
@@ -416,9 +473,21 @@ export const DatePicker = (
 								</div>
 							))}
 						</div>
-					</div>
-				)}
-			</div>
+
+					{granularity === 'datetime' && (
+						<TimeField
+							hour={hour24}
+							minute={minute}
+							second={second}
+							onChange={handleTimeChange}
+							onClose={() => closePopup()}
+							onTabOutOfLast={() => closePopup(false)}
+							className='mt-3 pt-3 border-t border-surface-border'
+						/>
+					)}
+				</div>
+			)}
+		</div>
 
 			{error ? (
 				<p className='text-xs text-danger'>{error}</p>
@@ -449,6 +518,26 @@ const CalendarIcon = () => {
 			<line x1='16' y1='2' x2='16' y2='6' />
 			<line x1='8' y1='2' x2='8' y2='6' />
 			<line x1='3' y1='10' x2='21' y2='10' />
+		</svg>
+	);
+};
+
+const ClockIcon = () => {
+	return (
+		<svg
+			width='15'
+			height='15'
+			viewBox='0 0 24 24'
+			fill='none'
+			stroke='currentColor'
+			strokeWidth='2'
+			strokeLinecap='round'
+			strokeLinejoin='round'
+			aria-hidden='true'
+			className='text-text-muted shrink-0'
+		>
+			<circle cx='12' cy='12' r='9' />
+			<polyline points='12 7 12 12 15.5 14' />
 		</svg>
 	);
 };
@@ -506,6 +595,18 @@ const DAY_LABELS = [
 	{ abbr: 'Sa', full: 'Saturday' },
 ];
 
+const PLACEHOLDER_BY_GRANULARITY: Record<Granularity, string> = {
+	date:     'Pick a date',
+	time:     'Pick a time',
+	datetime: 'Pick a date & time',
+};
+
+const DIALOG_LABEL_BY_GRANULARITY: Record<Granularity, string> = {
+	date:     'Date picker',
+	time:     'Time picker',
+	datetime: 'Date and time picker',
+};
+
 interface CalendarCell
 {
 	day:            number;
@@ -560,4 +661,12 @@ const formatDate = (date: Date) => {
 	const day   = date.getDate();
 	const year  = date.getFullYear();
 	return `${month} ${day}, ${year}`;
+};
+
+const formatTime = (date: Date) => {
+	const hour12   = date.getHours() % 12 === 0 ? 12 : date.getHours() % 12;
+	const minute   = String(date.getMinutes()).padStart(2, '0');
+	const second   = String(date.getSeconds()).padStart(2, '0');
+	const meridiem = date.getHours() < 12 ? 'AM' : 'PM';
+	return `${String(hour12).padStart(2, '0')}:${minute}:${second} ${meridiem}`;
 };
