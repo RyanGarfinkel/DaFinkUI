@@ -12,10 +12,11 @@ A navigational landmark that shows the user's current location within a site hie
 
 ## Item Shape
 
-| Field   | Type     | Required | Description                                                              |
-|---------|----------|----------|--------------------------------------------------------------------------|
-| `label` | `string` | Yes      | Display text for the breadcrumb item.                                    |
-| `href`  | `string` | No       | Navigation target. Omit for the last (current) item.                    |
+| Field     | Type         | Required | Description                                                              |
+|-----------|--------------|----------|--------------------------------------------------------------------------|
+| `label`   | `string`     | Yes      | Display text for the breadcrumb item.                                    |
+| `href`    | `string`     | No       | Navigation target. Omit for the last (current) item.                    |
+| `onClick` | `() => void` | No       | Renders the item as a `<button>` that calls this instead of a `Link`, for crumbs that switch in-page state rather than navigate to a real route. Takes precedence over `href` when both are set. |
 
 ## Accessibility
 

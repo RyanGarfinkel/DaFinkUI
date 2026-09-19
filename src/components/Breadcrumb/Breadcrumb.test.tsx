@@ -1,5 +1,5 @@
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
 import Breadcrumb from './Breadcrumb';
 
 const threeItems = [
@@ -60,5 +60,17 @@ describe('Breadcrumb', () =>
 		render(<Breadcrumb items={threeItems} className='custom-class' />);
 		const nav = screen.getByRole('navigation');
 		expect(nav.className).toContain('custom-class');
+	});
+
+	it('renders a button and calls onClick for an item with onClick instead of href', () =>
+	{
+		const onClick = vi.fn();
+		render(<Breadcrumb items={[{ label: 'Projects', onClick }, { label: 'Acme redesign' }]} />);
+
+		const button = screen.getByRole('button', { name: 'Projects' });
+		fireEvent.click(button);
+
+		expect(onClick).toHaveBeenCalledTimes(1);
+		expect(screen.queryAllByRole('link').length).toBe(0);
 	});
 });
