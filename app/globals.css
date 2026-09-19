@@ -225,6 +225,22 @@
 	background-color: var(--color-surface-border-hover);
 }
 
+/* Utility for scroll containers where the scrollbar should never be visible at all */
+.scrollbar-none {
+	scrollbar-width: none;
+}
+
+.scrollbar-none::-webkit-scrollbar {
+	display: none;
+}
+
+/* Recharts' keyboard nav already dims the individual active bar on focus —
+   that's the focus indicator, so suppress the browser's default ring around
+   the whole chart surface (would otherwise double up as a second, redundant cue). */
+.recharts-surface:focus-visible {
+	outline: none;
+}
+
 /* ─── Base styles ────────────────────────────────────── */
 
 html {
@@ -287,11 +303,6 @@ p {
 @keyframes fade-in {
 	from { opacity: 0; }
 	to   { opacity: 1; }
-}
-
-@keyframes wf-dash-fill {
-	from { stroke-dashoffset: 1; }
-	to   { stroke-dashoffset: 0; }
 }
 
 /* ─── Theme cross-fade ───────────────────────────────── */
