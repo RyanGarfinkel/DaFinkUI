@@ -120,6 +120,6 @@ describe('Collapsible', () =>
 	{
 		render(<Base />);
 		const trigger = screen.getByRole('button', { name: 'Toggle' });
-		expect(trigger.className).toContain('focus-visible:ring-2');
+		expect(trigger.className).toContain('focus-visible:ring-1');
 	});
 });

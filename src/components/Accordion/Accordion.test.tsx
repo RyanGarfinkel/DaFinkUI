@@ -106,8 +106,8 @@ describe('Accordion', () =>
 	{
 		renderAccordion();
 		const trigger = screen.getByRole('button', { name: /Item One/i });
-		expect(trigger.className).toContain('focus-visible:ring-2');
-		expect(trigger.className).toContain('focus-visible:ring-offset-2');
+		expect(trigger.className).toContain('focus-visible:ring-1');
+		expect(trigger.className).toContain('focus-visible:ring-inset');
 		expect(trigger.className).toContain('focus-visible:ring-brand-ring');
 	});
 
