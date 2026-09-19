@@ -50,6 +50,9 @@ export { Checkbox } from './components/Checkbox/Checkbox';
 export { Combobox } from './components/Combobox/Combobox';
 export type { ComboboxSize, ComboboxSingleProps, ComboboxMultiProps } from './components/Combobox/Combobox';
 
+export { default as CommandInput } from './components/CommandInput/CommandInput';
+export type { CommandInputProps, CommandInputMenuSide, CommandOption } from './components/CommandInput/CommandInput';
+
 export { default as CountUp } from './components/CountUp/CountUp';
 export type { CountUpProps } from './components/CountUp/CountUp';
 
