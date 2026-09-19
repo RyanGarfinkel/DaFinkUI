@@ -108,6 +108,8 @@ export const Combobox = (props: ComboboxProps) => {
     const inputRef    = useRef<HTMLInputElement>(null);
     const listRef     = useRef<HTMLUListElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const pillsRef    = useRef<HTMLDivElement>(null);
+    const pendingFocusIndexRef = useRef<number | null>(null);
 
     const id      = useId();
     const listId  = `${id}-listbox`;
@@ -119,6 +121,10 @@ export const Combobox = (props: ComboboxProps) => {
 			: [];
 
     const filtered = getFilteredOptions(options, inputValue);
+
+    const pills = isMulti
+		? (props.value ?? []).map((v) => options.find((o) => o.value === v)).filter(Boolean) as ComboboxOption[]
+		: [];
 
     const openList = () => {
 		if(disabled) return;
@@ -184,8 +190,23 @@ export const Combobox = (props: ComboboxProps) => {
     const removePill = (value: string) => {
 		if(!isMulti) return;
 		const current = props.value ?? [];
+		pendingFocusIndexRef.current = pills.findIndex((p) => p.value === value);
 		props.onChange?.(current.filter((v) => v !== value));
 	};
+
+    useEffect(() =>
+	{
+		if(pendingFocusIndexRef.current === null) return;
+
+		const index = pendingFocusIndexRef.current;
+		pendingFocusIndexRef.current = null;
+
+		const buttons = pillsRef.current?.querySelectorAll('button');
+		if(buttons && buttons.length > 0)
+			(buttons[Math.min(index, buttons.length - 1)] as HTMLButtonElement).focus();
+		else
+			inputRef.current?.focus();
+	}, [pills.length]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setInputValue(e.target.value);
@@ -277,10 +298,6 @@ export const Combobox = (props: ComboboxProps) => {
     const inputSizeClasses  = INPUT_SIZE[size];
     const optionSizeClasses = OPTION_SIZE[size];
 
-    const pills = isMulti
-		? (props.value ?? []).map((v) => options.find((o) => o.value === v)).filter(Boolean) as ComboboxOption[]
-		: [];
-
     return (
 		<div className={['flex flex-col gap-1.5 w-full', className].join(' ')}>
 			{label && (
@@ -296,6 +313,7 @@ export const Combobox = (props: ComboboxProps) => {
 
 				{isMulti && pills.length > 0 && (
 					<div
+						ref={pillsRef}
 						aria-label='Selected options'
 						className='flex flex-wrap gap-1 mb-1.5'
 					>
