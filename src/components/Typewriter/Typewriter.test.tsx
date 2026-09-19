@@ -62,6 +62,36 @@ describe('Typewriter', () =>
 		expect(onComplete).toHaveBeenCalledTimes(1);
 	});
 
+	it('calls onReveal with the running character count as each character appears', () =>
+	{
+		const onReveal = vi.fn();
+		render(<Typewriter text='Hi' speed={50} onReveal={onReveal} />);
+
+		act(() =>
+		{
+			vi.advanceTimersByTime(50);
+		});
+		expect(onReveal).toHaveBeenLastCalledWith(1);
+
+		act(() =>
+		{
+			vi.advanceTimersByTime(50);
+		});
+		expect(onReveal).toHaveBeenLastCalledWith(2);
+		expect(onReveal).toHaveBeenCalledTimes(2);
+	});
+
+	it('calls onReveal with the full length immediately under prefers-reduced-motion', () =>
+	{
+		stubMatchMedia(true);
+		const onReveal = vi.fn();
+		render(<Typewriter text='Hello' onReveal={onReveal} />);
+
+		act(() => { vi.runAllTimers(); });
+
+		expect(onReveal).toHaveBeenCalledWith(5);
+	});
+
 	it('reveals the full text immediately under prefers-reduced-motion', () =>
 	{
 		stubMatchMedia(true);

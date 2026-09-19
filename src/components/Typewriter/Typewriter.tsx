@@ -16,6 +16,8 @@ export interface TypewriterProps extends HTMLAttributes<HTMLSpanElement>
 	cursorPersist?:   boolean;
 	/** Called when all characters have been revealed. */
 	onComplete?:      () => void;
+	/** Called with the current character count every time a new character is revealed. */
+	onReveal?:        (charsRevealed: number) => void;
 	className?:       string;
 }
 
@@ -27,6 +29,7 @@ export const Typewriter = (
 		cursor         = true,
 		cursorPersist  = false,
 		onComplete,
+		onReveal,
 		className      = '',
 		style,
 		...props
@@ -35,7 +38,9 @@ export const Typewriter = (
 {
 	const [displayedChars, setDisplayedChars] = useState(0);
 	const onCompleteRef = useRef(onComplete);
+	const onRevealRef = useRef(onReveal);
 	useEffect(() => { onCompleteRef.current = onComplete; });
+	useEffect(() => { onRevealRef.current = onReveal; });
 
 	useEffect(() =>
 	{
@@ -44,6 +49,7 @@ export const Typewriter = (
 			const id = setTimeout(() =>
 			{
 				setDisplayedChars(text.length);
+				onRevealRef.current?.(text.length);
 				onCompleteRef.current?.();
 			}, 0);
 			return () => clearTimeout(id);
@@ -60,6 +66,7 @@ export const Typewriter = (
 			{
 				current += 1;
 				setDisplayedChars(current);
+				onRevealRef.current?.(current);
 
 				if(current >= text.length)
 				{

@@ -14,6 +14,7 @@ Reveals text character by character, like a terminal being typed in real time. A
 | cursor | `boolean` | `true` | Show a blinking `|` cursor while typing. |
 | cursorPersist | `boolean` | `false` | Keep the cursor visible after typing completes. |
 | onComplete | `() => void` | - | Called when all characters have been revealed. |
+| onReveal | `(charsRevealed: number) => void` | - | Called with the running character count every time a new character is revealed. Use it to track progress externally (e.g. to snapshot and freeze the text at its current position on demand, like a "stop generating" control). |
 | className | `string` | `''` | Additional CSS classes on the root `<span>`. |
 
 Extends all native `<span>` HTML attributes.
@@ -26,6 +27,7 @@ Extends all native `<span>` HTML attributes.
 - Typing begins after `delay` ms. Use `delay` to stagger multiple instances or to let a page settle before the animation starts.
 - When `text` changes the component restarts from zero automatically.
 - `onComplete` fires exactly once per text value, when the last character is revealed.
+- `onReveal` fires once per revealed character (and once immediately with the full length under reduced motion), so a parent can always read the current reveal position without polling the DOM.
 
 ---
 
