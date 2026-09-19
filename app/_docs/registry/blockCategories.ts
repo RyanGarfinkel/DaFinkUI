@@ -7,7 +7,7 @@ export const BLOCK_CATEGORIES = [
 	'Forms',
 	'Billing',
 	'Marketing',
-	'Chat',
+	'AI',
 	'Feedback',
 	'Display',
 ] as const;

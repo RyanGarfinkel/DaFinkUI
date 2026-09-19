@@ -4,9 +4,9 @@ import SidePanel, { SidePanelHeader, SidePanelTitle, SidePanelContent, SidePanel
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, type DrawerSide } from '@/src/components/Drawer/Drawer';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots } from '@/src/components/Carousel/Carousel';
 import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
+import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose, type ModalSize } from '@/src/components/Modal/Modal';
 import { MenuBar, MenuBarBrand, MenuBarActions, MenuBarNav, MenuBarNavItem, MenuBarNavMore } from '@/src/components/MenuBar/MenuBar';
 import Form, { FormControl, FormDescription, FormField, FormLabel, FormMessage, useZodForm } from '@/src/components/Form/Form';
-import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
 import Accordion, { AccordionContent, AccordionItem, AccordionTrigger } from '@/src/components/Accordion/Accordion';
 import Collapsible, { CollapsibleTrigger, CollapsibleContent } from '@/src/components/Collapsible/Collapsible';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/src/components/Table/Table';
@@ -14,6 +14,8 @@ import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/Comm
 import DataTable, { type ColumnDef, type PaginatorVariant } from '@/src/components/DataTable/DataTable';
 import { AreaChart, BarChart, DonutChart, LineChart, RadarChart } from '@/src/components/Charts/Charts';
 import { Message, MessageReactions, MessageReaction } from '@/src/components/Message/Message';
+import { CommandInput, type CommandOption } from '@/src/components/CommandInput/CommandInput';
+import { KanbanBoard, type KanbanCardDetailsRenderer } from '@/src/components/Kanban/Kanban';
 import Mosaic, { MosaicTile, type MosaicTileLayout } from '@/src/components/Mosaic/Mosaic';
 import { Skeleton, SkeletonCard, SkeletonImage } from '@/src/components/Skeleton/Skeleton';
 import ToggleGroup, { ToggleGroupItem } from '@/src/components/ToggleGroup/ToggleGroup';
@@ -38,7 +40,6 @@ import CodeEditor from '@/src/components/CodeEditor/CodeEditor';
 import { Combobox } from '@/src/components/Combobox/Combobox';
 import { Progress } from '@/src/components/Progress/Progress';
 import { Checkbox } from '@/src/components/Checkbox/Checkbox';
-import { KanbanBoard } from '@/src/components/Kanban/Kanban';
 import Separator from '@/src/components/Separator/Separator';
 import Tree, { TreeItem } from '@/src/components/Tree/Tree';
 import { Spinner } from '@/src/components/Spinner/Spinner';
@@ -78,6 +79,8 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
   const [tabValue, setTabValue] = useState('account');
   const [menuBarNavValue, setMenuBarNavValue] = useState('home');
   const [pickerDate, setPickerDate] = useState<Date | null>(null);
+  const [pickerTime, setPickerTime] = useState<Date | null>(null);
+  const [pickerDateTime, setPickerDateTime] = useState<Date | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [editorCode, setEditorCode] = useState('<Button>Click me</Button>');
   const [sidebarFavorites, setSidebarFavorites] = useState<Record<string, boolean>>({});
@@ -741,7 +744,35 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
           ],
         },
       ];
-      return <KanbanBoard initialColumns={columns} />;
+
+      const CardDetails: KanbanCardDetailsRenderer = ({ card, onUpdate, onDelete, onClose }) => {
+        // A minimal, self-contained example of a details renderer. KanbanCard has
+        // no built-in form: you own everything shown here, down to which fields exist.
+        const [title, setTitle] = useState(card.title);
+        const [tag, setTag] = useState(card.tag ?? '');
+        const [description, setDescription] = useState(card.description ?? '');
+
+        return (
+          <>
+            <ModalClose />
+            <ModalHeader>
+              <ModalTitle>Edit card</ModalTitle>
+            </ModalHeader>
+            <ModalContent className='flex flex-col gap-4'>
+              <Input label='Title' value={title} onChange={(e) => setTitle(e.target.value)} />
+              <Input label='Tag' placeholder='Optional' value={tag} onChange={(e) => setTag(e.target.value)} />
+              <Textarea label='Description' placeholder='Optional' rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+            </ModalContent>
+            <ModalFooter>
+              <Button variant='destructive' size='sm' className='mr-auto' onClick={() => onDelete(card.id)}>Delete</Button>
+              <Button variant='secondary' size='sm' onClick={onClose}>Cancel</Button>
+              <Button size='sm' onClick={() => onUpdate({ ...card, title, tag: tag || undefined, description: description || undefined })} disabled={!title.trim()}>Save</Button>
+            </ModalFooter>
+          </>
+        );
+      };
+
+      return <KanbanBoard initialColumns={columns} renderCardDetails={CardDetails} />;
     }
 
     case 'timeline':
@@ -859,7 +890,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
 
     case 'function-plotter':
-      return <FunctionPlotter initialEquations={['x^2 - 2', 'sin(x)', '0.5*x + 3']} readOnly />;
+      return <FunctionPlotter initialEquations={['x^2 - 2', 'sin(x)', '0.5*x + 3']} layout='side' />;
 
     case 'command-palette':
       return (
@@ -978,11 +1009,43 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       return <ComboboxPreview />;
     }
 
+    case 'command-input': {
+      const COMMANDS: CommandOption[] = [
+        { name: 'compact', description: 'Summarize the conversation to save space' },
+        { name: 'clear',   description: 'Clear all messages' },
+        { name: 'rename',  description: 'Rename this chat' },
+      ];
+
+      const CommandInputPreview = () =>
+      {
+        const [value, setValue] = useState('');
+        const [lastCommand, setLastCommand] = useState<string | null>(null);
+
+        return (
+          <div className='flex flex-col gap-3 w-full max-w-sm'>
+            <CommandInput
+              value={value}
+              onChange={setValue}
+              commands={COMMANDS}
+              onCommand={(command) => setLastCommand(command.name)}
+              placeholder='Type a message, or / for commands…'
+              menuSide='bottom'
+            />
+            {lastCommand && (
+              <p className='text-sm text-text-muted'>Ran /{lastCommand}</p>
+            )}
+          </div>
+        );
+      }
+
+      return <CommandInputPreview />;
+    }
+
     case 'date-picker':
       return (
         <div className='w-full max-w-xs flex flex-col gap-3'>
           <DatePicker
-            label='Select a date'
+            label='Appointment date'
             placeholder='Pick a date'
             value={pickerDate}
             onChange={setPickerDate}
@@ -996,6 +1059,42 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
               </span>
             </p>
           )}
+          <DatePicker
+            label='Appointment date & time'
+            granularity='datetime'
+            value={pickerDateTime}
+            onChange={setPickerDateTime}
+            hint='Type digits or use arrow keys on the time segments.'
+          />
+          {pickerDateTime && (
+            <p className='text-sm text-text-muted'>
+              Selected:{' '}
+              <span className='font-medium text-text'>
+                {pickerDateTime.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' })}
+              </span>
+            </p>
+          )}
+          <DatePicker
+            label='Reminder time'
+            granularity='time'
+            value={pickerTime}
+            onChange={setPickerTime}
+            hint='Time-only picker, no calendar grid.'
+          />
+          {pickerTime && (
+            <p className='text-sm text-text-muted'>
+              Selected:{' '}
+              <span className='font-medium text-text'>
+                {pickerTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' })}
+              </span>
+            </p>
+          )}
+          <DatePicker
+            label='Disabled'
+            value={null}
+            onChange={() => {}}
+            disabled
+          />
         </div>
       );
 
@@ -1142,7 +1241,6 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
           />
           <Attachment
             name='hero-shot.png'
-            href='#'
             size='840 KB'
             onClick={(event) => {
               event.preventDefault();
@@ -1180,11 +1278,21 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       const ModalPreview = () =>
       {
         const [open, setOpen] = useState(false);
-        return (
-          <>
-            <Button onClick={() => setOpen(true)}>Open modal</Button>
+        const [size, setSize] = useState<ModalSize>('md');
 
-            <Modal open={open} onOpenChange={setOpen}>
+        const openWith = (s: ModalSize) =>
+        {
+          setSize(s);
+          setOpen(true);
+        };
+
+        return (
+          <div className='flex flex-wrap gap-2 justify-center'>
+            <Button variant='secondary' onClick={() => openWith('sm')}>Small</Button>
+            <Button variant='secondary' onClick={() => openWith('md')}>Medium</Button>
+            <Button variant='secondary' onClick={() => openWith('lg')}>Large</Button>
+
+            <Modal open={open} onOpenChange={setOpen} size={size}>
               <ModalClose />
               <ModalHeader>
                 <ModalTitle>Delete project</ModalTitle>
@@ -1198,7 +1306,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
                 <Button variant='destructive' onClick={() => setOpen(false)}>Delete</Button>
               </ModalFooter>
             </Modal>
-          </>
+          </div>
         );
       };
       return <ModalPreview />;

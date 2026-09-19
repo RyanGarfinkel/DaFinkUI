@@ -8,6 +8,7 @@ export interface BlockEntry {
 	registryDependencies: string[];  // Components from the component registry this block requires
 	files: string[];                 // Source files to copy, relative to src/blocks/
 	hidden?: boolean;                // Installable via the CLI and directly linkable, but omitted from the /blocks gallery and index. Used for blockExamples.tsx variants: they're surfaced only through their parent block's Demos section, not as their own gallery entry.
+	promptSnippet?: string;          // Optional copy-paste system-prompt text a consumer adds to their own LLM call to make a real model emit content this block knows how to render (e.g. the ```lineplot fence convention). Docs-only; never touched by the CLI.
 }
 
 export const blocks: BlockEntry[] = [
@@ -920,96 +921,1078 @@ export default function ChartCard() {
 	{
 		slug: 'ai-chat',
 		name: 'AI chat',
-		category: 'Chat',
-		description: 'A chat interface with an AI assistant: seeded with a fake, predefined conversation and canned streamed replies. No real model calls.',
+		category: 'AI',
+		description: 'A full ChatGPT-style chat app: a chat-history sidebar (new chat, inline rename, delete) on the left, and a conversation panel on the right where sent messages render as bubbles, assistant replies render as plain bubble-less text, and a floating composer bar (attach, message, send) sits below the thread. Seeded with a fake, predefined conversation and canned streamed replies. No real model calls. Installing it copies a folder, not a single file: AiChat.tsx (the orchestrator) plus two sibling pieces it imports directly, ToolCallTrace.tsx (the collapsible thought/tool-call summary above a reply) and QuestionCard.tsx (the structured question widget shown inside a reply) — see their own Demos below for their prop shapes.',
 		usage: `'use client';
 
-import { Card, CardContent, CardFooter, CardHeader } from '@/src/components/Card/Card';
+import { LineChart, BarChart, AreaChart, DonutChart, RadarChart, type ChartSeries, type DonutSlice } from '@/src/components/Charts/Charts';
+import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
+import { Sidebar, SidebarButton, SidebarHeader, SidebarSection } from '@/src/components/Sidebar/Sidebar';
+import CommandInput, { type CommandOption } from '@/src/components/CommandInput/CommandInput';
+import { ChangeEvent, FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
+import ToolCallTrace, { type ToolCallEntry, type ToolCallLink } from '@/src/blocks/AiChat/ToolCallTrace';
+import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
+import { Skeleton, SkeletonImage } from '@/src/components/Skeleton/Skeleton';
+import AudioPlayer from '@/src/components/AudioPlayer/AudioPlayer';
+import QuestionCard, { type QuestionStep } from '@/src/blocks/AiChat/QuestionCard';
 import ScrollFade from '@/src/components/ScrollFade/ScrollFade';
 import Typewriter from '@/src/components/Typewriter/Typewriter';
+import Attachment from '@/src/components/Attachment/Attachment';
 import Message from '@/src/components/Message/Message';
-import Avatar from '@/src/components/Avatar/Avatar';
 import Button from '@/src/components/Button/Button';
-import Badge from '@/src/components/Badge/Badge';
 import Input from '@/src/components/Input/Input';
-import { useEffect, useRef, useState } from 'react';
+import ChatMarkdown from '@/src/blocks/AiChat/ChatMarkdown';
 
-const INITIAL_MESSAGES = [
-  { id: 1, sender: 'ai', text: "Hi! I'm the DaFink UI assistant. Ask me anything about installing or using components." },
-  { id: 2, sender: 'user', text: 'How do I install a component?' },
-  { id: 3, sender: 'ai', text: 'Run npx dafink-ui add button in your project root; it copies the component source straight into your repo.' },
-  { id: 4, sender: 'user', text: 'Does it work with dark mode out of the box?' },
-  { id: 5, sender: 'ai', text: "Yes, every component is built on design tokens, so it adapts automatically to your theme's light and dark palettes." },
+interface MessageAttachment
+{
+	name: string;
+	size: string;
+}
+
+interface ChatTextMessage
+{
+	id:                 number;
+	kind:               'message';
+	sender:             'user' | 'ai';
+	text:               string;
+	animate?:           boolean;
+	generating?:        'image' | 'audio';
+	attachment?:        MessageAttachment;
+	toolCalls?:         ToolCallEntry[];
+	questionnaire?:     QuestionStep;
+	questionnaireAnswer?: string;
+}
+
+interface ChatCheckpoint
+{
+	id:    number;
+	kind:  'checkpoint';
+	label: string;
+}
+
+type ChatMessage = ChatTextMessage | ChatCheckpoint;
+
+interface ChartSpec
+{
+	xKey:   string;
+	series: ChartSeries[];
+	data:   Record<string, string | number>[];
+}
+
+interface StackableChartSpec extends ChartSpec
+{
+	stacked?: boolean;
+}
+
+interface DonutSpec
+{
+	data: DonutSlice[];
+}
+
+interface MathSpec
+{
+	equations: string[];
+}
+
+interface ImageSpec
+{
+	url: string;
+	alt: string;
+}
+
+interface AudioSpec
+{
+	src:    string;
+	title?: string;
+}
+
+interface TableSpec
+{
+	columns: { key: string; label: string }[];
+	rows:    Record<string, string | number>[];
+}
+
+const toMarkdownTable = ({ columns, rows }: TableSpec): string => {
+	const header  = \`| \${columns.map((c) => c.label).join(' | ')} |\`;
+	const divider = \`| \${columns.map(() => '---').join(' | ')} |\`;
+	const body    = rows.map((row) => \`| \${columns.map((c) => row[c.key]).join(' | ')} |\`).join('\\n');
+	return [header, divider, body].join('\\n');
+};
+
+type MessageSegment =
+	| { kind: 'text';       text: string }
+	| { kind: 'lineplot';   spec: ChartSpec }
+	| { kind: 'barchart';   spec: StackableChartSpec }
+	| { kind: 'areachart';  spec: StackableChartSpec }
+	| { kind: 'radarchart'; spec: ChartSpec }
+	| { kind: 'donutchart'; spec: DonutSpec }
+	| { kind: 'math';       spec: MathSpec }
+	| { kind: 'image';      spec: ImageSpec }
+	| { kind: 'audio';      spec: AudioSpec };
+
+const FENCE_PATTERN = /\`\`\`(\\w+)\\n([\\s\\S]*?)\`\`\`/g;
+
+const FENCE_LANGS = new Set(['lineplot', 'barchart', 'areachart', 'radarchart', 'donutchart', 'math', 'image', 'audio']);
+
+const parseMessageSegments = (text: string): MessageSegment[] => {
+	const segments: MessageSegment[] = [];
+	let lastIndex = 0;
+
+	FENCE_PATTERN.lastIndex = 0;
+	let match: RegExpExecArray | null;
+	while((match = FENCE_PATTERN.exec(text)) !== null)
+	{
+		const [full, lang, body] = match;
+		if(match.index > lastIndex) segments.push({ kind: 'text', text: text.slice(lastIndex, match.index) });
+
+		if(FENCE_LANGS.has(lang))
+		{
+			try { segments.push({ kind: lang, spec: JSON.parse(body) } as MessageSegment); }
+			catch { segments.push({ kind: 'text', text: full }); }
+		}
+		else segments.push({ kind: 'text', text: full });
+
+		lastIndex = match.index + full.length;
+	}
+
+	if(lastIndex < text.length) segments.push({ kind: 'text', text: text.slice(lastIndex) });
+	if(segments.length === 0) segments.push({ kind: 'text', text });
+
+	return segments;
+};
+
+const renderSegment = (seg: MessageSegment, index: number) => {
+	switch(seg.kind)
+	{
+		case 'lineplot':
+			return <LineChart key={index} data={seg.spec.data} xKey={seg.spec.xKey} series={seg.spec.series} height={180} />;
+
+		case 'barchart':
+			return <BarChart key={index} data={seg.spec.data} xKey={seg.spec.xKey} series={seg.spec.series} stacked={seg.spec.stacked} height={180} />;
+
+		case 'areachart':
+			return <AreaChart key={index} data={seg.spec.data} xKey={seg.spec.xKey} series={seg.spec.series} stacked={seg.spec.stacked} height={180} />;
+
+		case 'radarchart':
+			return <RadarChart key={index} data={seg.spec.data} xKey={seg.spec.xKey} series={seg.spec.series} height={220} />;
+
+		case 'donutchart':
+			return <DonutChart key={index} data={seg.spec.data} height={200} />;
+
+		case 'math':
+			return <FunctionPlotter key={index} initialEquations={seg.spec.equations} readOnly layout='bottom' height={220} />;
+
+		case 'image':
+			return (
+				// eslint-disable-next-line @next/next/no-img-element -- arbitrary generated-image URL, not a static asset
+				<img key={index} src={seg.spec.url} alt={seg.spec.alt} className='w-full max-w-xs rounded-[var(--radius-lg)]' />
+			);
+
+		case 'audio':
+			return <AudioPlayer key={index} size='compact' src={seg.spec.src} title={seg.spec.title} className='w-56' />;
+
+		case 'text':
+			return seg.text.trim() ? <ChatMarkdown key={index} text={seg.text.trim()} /> : null;
+	}
+};
+
+interface ChatEntry
+{
+	id:       string;
+	title:    string;
+	messages: ChatMessage[];
+}
+
+const HOME_PRICE_DATA: Record<string, string | number>[] = [
+	{ year: 2019, price: 313000 },
+	{ year: 2020, price: 329000 },
+	{ year: 2021, price: 375000 },
+	{ year: 2022, price: 395000 },
+	{ year: 2023, price: 410000 },
+	{ year: 2024, price: 426000 },
 ];
 
-const CANNED_REPLIES = [
-  "Good question. Check the component's spec.md for full prop details and accessibility notes.",
-  'You can customize that with design tokens instead of hardcoded colors; see rules/tokens.md.',
-  "That's supported out of the box. Try it live in the playground on the component's docs page.",
-  "Most components ship with keyboard navigation and focus states built in, so you shouldn't need extra work there.",
+const HOME_PRICE_LINEPLOT: ChartSpec = {
+	xKey:   'year',
+	series: [{ key: 'price', label: 'Median home price' }],
+	data:   HOME_PRICE_DATA,
+};
+
+const DOWNLOADS_BARCHART: StackableChartSpec = {
+	xKey:   'month',
+	series: [{ key: 'downloads', label: 'npm downloads' }],
+	data: [
+		{ month: 'Apr', downloads: 1200 },
+		{ month: 'May', downloads: 1850 },
+		{ month: 'Jun', downloads: 2400 },
+		{ month: 'Jul', downloads: 3100 },
+	],
+};
+
+const READING_PACE_AREACHART: StackableChartSpec = {
+	xKey:   'week',
+	series: [{ key: 'pages', label: 'Pages read' }],
+	data: [
+		{ week: 'Week 1', pages: 120 },
+		{ week: 'Week 2', pages: 260 },
+		{ week: 'Week 3', pages: 410 },
+		{ week: 'Week 4', pages: 590 },
+	],
+};
+
+const WORKOUT_SPLIT_DONUTCHART: DonutSpec = {
+	data: [
+		{ label: 'Push', value: 2 },
+		{ label: 'Pull', value: 2 },
+		{ label: 'Legs', value: 1 },
+		{ label: 'Rest', value: 2 },
+	],
+};
+
+const FITNESS_RADARCHART: ChartSpec = {
+	xKey:   'category',
+	series: [{ key: 'score', label: 'This month' }],
+	data: [
+		{ category: 'Strength',    score: 8 },
+		{ category: 'Endurance',   score: 6 },
+		{ category: 'Flexibility', score: 4 },
+		{ category: 'Balance',     score: 5 },
+		{ category: 'Speed',       score: 7 },
+	],
+};
+
+const SAMPLE_EQUATIONS = ['x^2 - 2', 'sin(x)', '0.5*x + 3'];
+
+const SAMPLE_IMAGE: ImageSpec = {
+	url: 'https://picsum.photos/seed/dafink-aichat/480/320',
+	alt: 'A generated illustration',
+};
+
+const SAMPLE_AUDIO: AudioSpec = {
+	src:   'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+	title: 'Generated audio clip',
+};
+
+const PASTA_TABLE: TableSpec = {
+	columns: [
+		{ key: 'ingredient', label: 'Ingredient' },
+		{ key: 'amount',     label: 'Amount' },
+	],
+	rows: [
+		{ ingredient: 'Spaghetti',     amount: '200g' },
+		{ ingredient: 'Garlic',        amount: '4 cloves, sliced' },
+		{ ingredient: 'Olive oil',     amount: '60ml' },
+		{ ingredient: 'Chili flakes',  amount: '1 tsp' },
+		{ ingredient: 'Parsley',       amount: '2 tbsp, chopped' },
+	],
+};
+
+const BENCH_PRESS_LINEPLOT: ChartSpec = {
+	xKey:   'week',
+	series: [{ key: 'weight', label: 'Bench press (lb)' }],
+	data: [
+		{ week: 1,  weight: 135 },
+		{ week: 3,  weight: 145 },
+		{ week: 5,  weight: 150 },
+		{ week: 7,  weight: 160 },
+		{ week: 9,  weight: 165 },
+		{ week: 11, weight: 175 },
+	],
+};
+
+const WORKOUT_SPLIT_TABLE: TableSpec = {
+	columns: [
+		{ key: 'day',   label: 'Day' },
+		{ key: 'focus', label: 'Focus' },
+	],
+	rows: [
+		{ day: 'Monday',    focus: 'Push (chest, shoulders, triceps)' },
+		{ day: 'Tuesday',   focus: 'Pull (back, biceps)' },
+		{ day: 'Wednesday', focus: 'Legs' },
+		{ day: 'Thursday',  focus: 'Rest' },
+		{ day: 'Friday',    focus: 'Full body' },
+		{ day: 'Saturday',  focus: 'Optional cardio' },
+		{ day: 'Sunday',    focus: 'Rest' },
+	],
+};
+
+const READING_LIST_TABLE: TableSpec = {
+	columns: [
+		{ key: 'title', label: 'Title' },
+		{ key: 'genre', label: 'Genre' },
+		{ key: 'pages', label: 'Pages' },
+	],
+	rows: [
+		{ title: 'Klara and the Sun',  genre: 'Literary fiction', pages: 303 },
+		{ title: 'Project Hail Mary',  genre: 'Sci-fi',           pages: 496 },
+		{ title: 'Atomic Habits',      genre: 'Non-fiction',      pages: 320 },
+	],
+};
+
+const INSTALL_SEARCH_LINKS: ToolCallLink[] = [
+	{ title: 'Installation — DaFink UI Docs', url: 'https://ui.ryangarfinkel.dev/installation' },
+	{ title: 'dafink-ui — npm',                url: 'https://www.npmjs.com/package/dafink-ui' },
+	{ title: 'DaFink UI CLI source — GitHub',  url: 'https://github.com/RyanGarfinkel/DaFinkUI/tree/main/packages/cli' },
 ];
 
-export default function AiChat() {
-  const [messages, setMessages] = useState(INITIAL_MESSAGES);
-  const [draft, setDraft] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
-  const containerRef = useRef(null);
-  const nextId = useRef(INITIAL_MESSAGES.length + 1);
+const PASTA_SEARCH_LINKS: ToolCallLink[] = [
+	{ title: 'Spaghetti Aglio e Olio Recipe',   url: 'https://www.seriouseats.com/spaghetti-aglio-e-olio-recipe' },
+	{ title: 'Aglio e Olio — Bon Appétit',      url: 'https://www.bonappetit.com/recipe/spaghetti-aglio-e-olio' },
+	{ title: 'Classic Aglio e Olio — NYT Cooking', url: 'https://cooking.nytimes.com/recipes/1017256-spaghetti-aglio-e-olio' },
+];
 
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    el.scrollTop = el.scrollHeight;
-  }, [messages, isTyping]);
+const WORKOUT_SEARCH_LINKS: ToolCallLink[] = [
+	{ title: 'Push Pull Legs: The Complete Guide', url: 'https://www.strongerbyscience.com/push-pull-legs/' },
+	{ title: 'PPL Split for Beginners — r/Fitness Wiki', url: 'https://thefitness.wiki/routines/push-pull-legs/' },
+	{ title: 'Push/Pull/Legs Split — Bodybuilding.com', url: 'https://www.bodybuilding.com/content/push-pull-legs-split.html' },
+];
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const text = draft.trim();
-    if (!text) return;
+const READING_SEARCH_LINKS: ToolCallLink[] = [
+	{ title: 'The Best Reviewed Books of 2025', url: 'https://www.goodreads.com/list/show/best-books-2025' },
+	{ title: '2025 in Books — The New York Times', url: 'https://www.nytimes.com/2025/books/best-books-2025.html' },
+	{ title: "NPR's Book Picks for 2025",       url: 'https://www.npr.org/2025/books-we-love' },
+];
 
-    setMessages((prev) => [...prev, { id: nextId.current++, sender: 'user', text }]);
-    setDraft('');
-    setIsTyping(true);
+const INSTALL_MESSAGES: ChatMessage[] = [
+	{ id: 1, kind: 'message', sender: 'ai',   text: 'Hi! I’m the DaFink UI assistant. Ask me anything about installing or using components.' },
+	{ id: 2, kind: 'message', sender: 'user', text: 'How do I install a component?' },
+	{
+		id: 3, kind: 'message', sender: 'ai',
+		text: 'Run this in your project root — it copies the component source straight into your repo:\\n\\n\`\`\`bash\\nnpx dafink-ui add button\\n\`\`\`',
+		toolCalls: [
+			{ id: 't1', kind: 'thought', title: 'Thinking',   detail: 'The user wants the install command — check the CLI docs for the exact syntax before answering.' },
+			{ id: 't2', kind: 'search',  title: 'Web search', detail: '"dafink-ui cli install command"', links: INSTALL_SEARCH_LINKS },
+			{ id: 't3', kind: 'tool',    title: 'Read file',  detail: 'packages/cli/src/commands/add.ts', result: 'Found the add command implementation' },
+		],
+	},
+	{ id: 4, kind: 'message', sender: 'user', text: 'Does it work with dark mode out of the box?' },
+	{ id: 5, kind: 'message', sender: 'ai',   text: 'Yes — every component is built on [design tokens](https://ui.ryangarfinkel.dev/theme), so it adapts automatically to your theme’s light and dark palettes.' },
+];
 
-    setTimeout(() => {
-      const reply = CANNED_REPLIES[Math.floor(Math.random() * CANNED_REPLIES.length)];
-      setIsTyping(false);
-      setMessages((prev) => [...prev, { id: nextId.current++, sender: 'ai', text: reply, animate: true }]);
-    }, 600 + Math.random() * 300);
-  };
+const PASTA_MESSAGES: ChatMessage[] = [
+	{ id: 6, kind: 'message', sender: 'user', text: 'What’s a good pasta recipe for a weeknight?' },
+	{
+		id: 7, kind: 'message', sender: 'ai',
+		text: \`Here's a quick weeknight pasta you can have on the table in 20 minutes:\\n\\n\${toMarkdownTable(PASTA_TABLE)}\`,
+		toolCalls: [
+			{ id: 'p1', kind: 'search', title: 'Web search', detail: '"quick pasta aglio e olio recipe"', links: PASTA_SEARCH_LINKS },
+		],
+	},
+];
 
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-text">Assistant</h3>
-        <Badge variant="success">Online</Badge>
-      </CardHeader>
-      <CardContent>
-        <ScrollFade ref={containerRef} direction="vertical" className="max-h-96">
-          <div className="flex flex-col gap-3">
-            {messages.map((m) => (
-              <Message key={m.id} variant={m.sender === 'user' ? 'sent' : 'received'}
-                avatar={<Avatar name={m.sender === 'user' ? 'You' : 'AI'} size="sm" />}>
-                {m.animate ? <Typewriter text={m.text} speed={18} /> : m.text}
-              </Message>
-            ))}
-            {isTyping && <p className="text-xs text-text-muted pl-9">Assistant is typing…</p>}
-          </div>
-        </ScrollFade>
-      </CardContent>
-      <CardFooter>
-        <form onSubmit={handleSubmit} className="flex w-full gap-2">
-          <Input value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="Ask a question…"
-            aria-label="Message" className="flex-1" />
-          <Button type="submit" disabled={!draft.trim()}>Send</Button>
-        </form>
-      </CardFooter>
-    </Card>
-  );
-}`,
-		dependencies: [],
-		registryDependencies: ['card', 'scroll-fade', 'message', 'avatar', 'button', 'badge', 'input'],
-		files: ['AiChat/AiChat.tsx'],
+const WORKOUT_MESSAGES: ChatMessage[] = [
+	{ id: 8, kind: 'message', sender: 'user', text: 'Can you put together a push day routine for me?' },
+	{
+		id: 9, kind: 'message', sender: 'ai',
+		text: \`A simple push/pull/legs split spread across the week looks like this:\\n\\n\${toMarkdownTable(WORKOUT_SPLIT_TABLE)}\`,
+		toolCalls: [
+			{ id: 'w1', kind: 'search', title: 'Web search', detail: '"balanced push pull legs split for beginners"', links: WORKOUT_SEARCH_LINKS },
+		],
+	},
+	{ id: 10, kind: 'message', sender: 'user', text: 'What should my bench press progress look like over the next few months?' },
+	{
+		id: 11, kind: 'message', sender: 'ai',
+		text: \`Here's what a realistic bench press progression over a few months could look like:\\n\\n\\\`\\\`\\\`lineplot\\n\${JSON.stringify(BENCH_PRESS_LINEPLOT)}\\n\\\`\\\`\\\`\`,
+		toolCalls: [
+			{ id: 'w2', kind: 'thought', title: 'Thinking', detail: 'No existing log was shared — build an illustrative progression instead of guessing at real numbers.' },
+		],
+	},
+	{ id: 16, kind: 'message', sender: 'user', text: 'Quick one — how do I calculate my BMI?' },
+	{
+		id: 17, kind: 'message', sender: 'ai',
+		text: 'Body Mass Index is your weight divided by your height squared:\\n\\n$$BMI = \\\\frac{weight_{kg}}{height_m^2}$$\\n\\nFor example, at 80 kg and 1.8 m, that\\'s $80 / 1.8^2 \\\\approx 24.7$ — solidly in the "normal weight" range (18.5–24.9). It\\'s a rough screening number, not a fitness metric — it doesn\\'t account for muscle mass.',
+	},
+];
+
+const READING_MESSAGES: ChatMessage[] = [
+	{ id: 12, kind: 'message', sender: 'user', text: 'Any book recommendations for this fall?' },
+	{
+		id: 13, kind: 'message', sender: 'ai',
+		text: \`A few worth picking up next:\\n\\n\${toMarkdownTable(READING_LIST_TABLE)}\`,
+		toolCalls: [
+			{ id: 'rd1', kind: 'search', title: 'Web search', detail: '"best-reviewed books 2025"', links: READING_SEARCH_LINKS },
+		],
+	},
+];
+
+const PLANNING_MESSAGES: ChatMessage[] = [
+	{ id: 14, kind: 'message', sender: 'user', text: 'Can you help me plan something new to try this week?' },
+	{
+		id: 15, kind: 'message', sender: 'ai',
+		text: 'Happy to help — first, what should we focus on?',
+		questionnaire: {
+			type:        'radio',
+			question:    'What should we focus on?',
+			description: 'Pick a direction, or describe something else.',
+			options: [
+				{ id: 'cooking', label: 'Cooking', description: 'A new recipe to try this week' },
+				{ id: 'gym',     label: 'Fitness',  description: 'A workout plan to follow' },
+				{ id: 'reading', label: 'Reading',  description: 'Something new to read' },
+			],
+			otherPlaceholder: 'Describe something else…',
+		},
+	},
+];
+
+interface CannedReply
+{
+	text:       string;
+	toolCalls?: ToolCallEntry[];
+}
+
+const CANNED_REPLIES: CannedReply[] = [
+	{
+		text: 'For fluffier rice, rinse it under cold water until it runs clear — that washes off the surface starch that makes grains clump.',
+	},
+	{
+		text: \`Here's a quick weeknight pasta you can have on the table in 20 minutes:\\n\\n\${toMarkdownTable(PASTA_TABLE)}\`,
+		toolCalls: [
+			{ id: 'r1', kind: 'search', title: 'Web search', detail: '"quick pasta aglio e olio recipe"', links: PASTA_SEARCH_LINKS },
+		],
+	},
+	{
+		text: 'Progressive overload doesn’t always mean adding weight — a slower tempo or one extra rep works just as well some weeks.',
+	},
+	{
+		text: \`Here's what a realistic bench press progression over a few months could look like:\\n\\n\\\`\\\`\\\`lineplot\\n\${JSON.stringify(BENCH_PRESS_LINEPLOT)}\\n\\\`\\\`\\\`\`,
+		toolCalls: [
+			{ id: 'r2', kind: 'thought', title: 'Thinking', detail: 'No existing log was shared — build an illustrative progression instead of guessing at real numbers.' },
+		],
+	},
+	{
+		text: \`A simple push/pull/legs split spread across the week looks like this:\\n\\n\${toMarkdownTable(WORKOUT_SPLIT_TABLE)}\`,
+		toolCalls: [
+			{ id: 'r3', kind: 'search', title: 'Web search', detail: '"balanced push pull legs split for beginners"', links: WORKOUT_SEARCH_LINKS },
+		],
+	},
+	{
+		text: 'If you want something short and sharp, Klara and the Sun is worth it — under 300 pages and hard to put down once you start.',
+	},
+	{
+		text: 'A squeeze of lime right before serving wakes up almost any braise — acid is the most under-used seasoning in a home kitchen.',
+	},
+	{
+		text: \`A few worth picking up next:\\n\\n\${toMarkdownTable(READING_LIST_TABLE)}\`,
+		toolCalls: [
+			{ id: 'r4', kind: 'search', title: 'Web search', detail: '"best-reviewed books 2025"', links: READING_SEARCH_LINKS },
+		],
+	},
+];
+
+const INITIAL_CHATS: ChatEntry[] = [
+	{ id: '1', title: 'Installing components',   messages: INSTALL_MESSAGES },
+	{ id: '2', title: 'Weeknight pasta ideas',   messages: PASTA_MESSAGES },
+	{ id: '3', title: 'Push day workout plan',   messages: WORKOUT_MESSAGES },
+	{ id: '4', title: 'Books to read this fall', messages: READING_MESSAGES },
+	{ id: '5', title: 'Something new this week', messages: PLANNING_MESSAGES },
+];
+
+const COMMANDS: CommandOption[] = [
+	{ name: 'compact',    description: 'Summarize this conversation to save space' },
+	{ name: 'clear',      description: 'Clear all messages in this chat' },
+	{ name: 'rename',     description: 'Rename this chat' },
+	{ name: 'plot',       description: 'Show a sample line chart: median home prices over the years' },
+	{ name: 'barchart',   description: 'Show a sample bar chart: npm downloads by month' },
+	{ name: 'areachart',  description: 'Show a sample area chart: pages read per week' },
+	{ name: 'donutchart', description: 'Show a sample donut chart: workout split breakdown' },
+	{ name: 'radarchart', description: 'Show a sample radar chart: fitness category scores' },
+	{ name: 'math',       description: 'Show a sample math block: plot a few equations' },
+	{ name: 'formula',    description: 'Show a sample math formula: the quadratic formula' },
+	{ name: 'image',      description: 'Generate a sample image (shows a loading skeleton first)' },
+	{ name: 'audio',      description: 'Generate a sample audio clip (shows a loading skeleton first)' },
+];
+
+const PlusIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<path d='M12 5v14M5 12h14' />
+	</svg>
+);
+
+const PencilIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<path d='M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z' />
+	</svg>
+);
+
+const TrashIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<path d='M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6' />
+	</svg>
+);
+
+const PaperclipIcon = () => (
+	<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<path d='m21.44 11.05-9.19 9.19a5.5 5.5 0 0 1-7.78-7.78l9.19-9.19a3.5 3.5 0 0 1 4.95 4.95L9.41 17.41a1.5 1.5 0 0 1-2.12-2.12l8.49-8.49' />
+	</svg>
+);
+
+const SendIcon = () => (
+	<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<path d='m22 2-7 20-4-9-9-4Z' />
+		<path d='M22 2 11 13' />
+	</svg>
+);
+
+const StopIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='currentColor' aria-hidden='true'>
+		<rect x='6' y='6' width='12' height='12' rx='2' />
+	</svg>
+);
+
+const CloseIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<path d='M18 6 6 18M6 6l12 12' />
+	</svg>
+);
+
+const randomReplyDelay = () => 600 + Math.random() * 300;
+
+const Divider = ({ label }: { label: string }) => (
+	<div className='flex items-center gap-3'>
+		<div className='h-0 flex-1 border-t border-dashed border-surface-border' />
+		<span className='shrink-0 text-xs font-medium text-text-muted'>{label}</span>
+		<div className='h-0 flex-1 border-t border-dashed border-surface-border' />
+	</div>
+);
+
+export const AiChat = () => {
+	const [chats, setChats] = useState<ChatEntry[]>(INITIAL_CHATS);
+	const [activeId, setActiveId] = useState<string | null>(INITIAL_CHATS[0].id);
+	const [editingId, setEditingId] = useState<string | null>(null);
+	const [draftTitle, setDraftTitle] = useState('');
+	const [draft, setDraft] = useState('');
+	const [attachedFile, setAttachedFile] = useState<File | null>(null);
+	const [typingChatId, setTypingChatId] = useState<string | null>(null);
+	const [streamingChatId, setStreamingChatId] = useState<string | null>(null);
+	const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
+	const [chatPendingDeletion, setChatPendingDeletion] = useState<ChatEntry | null>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const contentRef = useRef<HTMLDivElement>(null);
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const streamingRevealedRef = useRef(0);
+	const nextChatId = useRef(INITIAL_CHATS.length + 1);
+	const nextMessageId = useRef(
+		INSTALL_MESSAGES.length + PASTA_MESSAGES.length + WORKOUT_MESSAGES.length + READING_MESSAGES.length + PLANNING_MESSAGES.length + 1
+	);
+	const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+
+	const activeChat = chats.find((c) => c.id === activeId) ?? null;
+	const isTyping = typingChatId === activeId;
+	const isGenerating = isTyping || streamingChatId === activeId;
+
+	useEffect(() => {
+		const container = containerRef.current;
+		const content   = contentRef.current;
+		if(!container || !content) return;
+
+		const scrollToBottom = () => { container.scrollTop = container.scrollHeight; };
+		scrollToBottom();
+
+		// Content can still grow after this runs (favicon images, web fonts loading in),
+		// which would leave the view under-scrolled; re-snap to bottom for a short window
+		// while that settles. Bounded rather than kept open for the chat's whole lifetime,
+		// so a later manual resize (e.g. expanding a ToolCallTrace) doesn't yank the view
+		// back down.
+		const observer = new ResizeObserver(scrollToBottom);
+		observer.observe(content);
+		const settleTimeout = setTimeout(() => observer.disconnect(), 800);
+
+		return () => {
+			observer.disconnect();
+			clearTimeout(settleTimeout);
+		};
+	}, [chats, isTyping, activeId]);
+
+	useEffect(() => {
+		return () => clearTimeout(timeoutRef.current);
+	}, []);
+
+	const handleNewChat = () => {
+		const chat: ChatEntry = { id: String(nextChatId.current++), title: 'New chat', messages: [] };
+		setChats((prev) => [chat, ...prev]);
+		setActiveId(chat.id);
+		setDraft('');
+		setAttachedFile(null);
+	};
+
+	const handleSelectChat = (id: string) => {
+		setActiveId(id);
+		setDraft('');
+		setAttachedFile(null);
+	};
+
+	const handleStartEdit = (chat: ChatEntry) => {
+		setEditingId(chat.id);
+		setDraftTitle(chat.title);
+	};
+
+	const handleCommitEdit = () => {
+		const title = draftTitle.trim();
+		if(title) setChats((prev) => prev.map((c) => (c.id === editingId ? { ...c, title } : c)));
+		setEditingId(null);
+	};
+
+	const handleCancelEdit = () => setEditingId(null);
+
+	const handleEditKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+		if(e.key === 'Enter') { e.preventDefault(); handleCommitEdit(); }
+		if(e.key === 'Escape') { e.preventDefault(); handleCancelEdit(); }
+	};
+
+	const handleDelete = (id: string) => {
+		setChats((prev) => {
+			const next = prev.filter((c) => c.id !== id);
+			if(activeId === id) setActiveId(next[0]?.id ?? null);
+			return next;
+		});
+		if(editingId === id) setEditingId(null);
+	};
+
+	const handleDeleteOpenChange = (open: boolean) => {
+		if(!open) setChatPendingDeletion(null);
+	};
+
+	const handleConfirmDelete = () => {
+		if(!chatPendingDeletion) return;
+		handleDelete(chatPendingDeletion.id);
+		setChatPendingDeletion(null);
+	};
+
+	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if(file) setAttachedFile(file);
+		e.target.value = '';
+	};
+
+	const queueAiReply = (chatId: string) => {
+		setTypingChatId(chatId);
+		timeoutRef.current = setTimeout(() => {
+			const reply = CANNED_REPLIES[Math.floor(Math.random() * CANNED_REPLIES.length)];
+			setTypingChatId((prev) => (prev === chatId ? null : prev));
+			const aiMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'ai', text: reply.text, animate: true, toolCalls: reply.toolCalls };
+			setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, aiMessage] } : c)));
+			streamingRevealedRef.current = 0;
+			setStreamingChatId(chatId);
+			setStreamingMessageId(aiMessage.id);
+		}, randomReplyDelay());
+	};
+
+	const handleStop = () => {
+		if(typingChatId)
+		{
+			clearTimeout(timeoutRef.current);
+			setTypingChatId(null);
+			return;
+		}
+		if(streamingChatId && streamingMessageId !== null)
+		{
+			const chatId    = streamingChatId;
+			const messageId = streamingMessageId;
+			const revealed  = streamingRevealedRef.current;
+			setChats((prev) => prev.map((c) => (c.id !== chatId ? c : {
+				...c,
+				messages: c.messages.map((m) => (m.kind === 'message' && m.id === messageId
+					? { ...m, text: m.text.slice(0, revealed), animate: false }
+					: m
+				)),
+			})));
+			setStreamingChatId(null);
+			setStreamingMessageId(null);
+		}
+	};
+
+	const handleSubmit = (e: FormEvent) => {
+		e.preventDefault();
+		if(!activeChat || isGenerating) return;
+		const text = draft.trim();
+		if(!text && !attachedFile) return;
+
+		const chatId = activeChat.id;
+		const attachment: MessageAttachment | undefined = attachedFile
+			? { name: attachedFile.name, size: \`\${Math.max(1, Math.round(attachedFile.size / 1024))} KB\` }
+			: undefined;
+		const userMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'user', text, attachment };
+		setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, userMessage] } : c)));
+		setDraft('');
+		setAttachedFile(null);
+		queueAiReply(chatId);
+	};
+
+	const handleQuestionnaireAnswer = (messageId: number, value: string) => {
+		if(!activeChat || !value.trim()) return;
+		const chatId = activeChat.id;
+		const userMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'user', text: value };
+		setChats((prev) => prev.map((c) => {
+			if(c.id !== chatId) return c;
+			const updated = c.messages.map((m) => (m.kind === 'message' && m.id === messageId ? { ...m, questionnaireAnswer: value } : m));
+			return { ...c, messages: [...updated, userMessage] };
+		}));
+		queueAiReply(chatId);
+	};
+
+	const pushAiMessage = (chatId: string, text: string) => {
+		const message: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'ai', text };
+		setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, message] } : c)));
+	};
+
+	const pushGeneratingMessage = (chatId: string, generating: 'image' | 'audio', text: string, delay: number) => {
+		const id = nextMessageId.current++;
+		const message: ChatMessage = { id, kind: 'message', sender: 'ai', text: '', generating };
+		setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, message] } : c)));
+
+		setTimeout(() => {
+			setChats((prev) => prev.map((c) => (
+				c.id !== chatId ? c : {
+					...c,
+					messages: c.messages.map((m) => (m.kind === 'message' && m.id === id ? { ...m, generating: undefined, text } : m)),
+				}
+			)));
+		}, delay);
+	};
+
+	const handleCommand = (command: CommandOption) => {
+		if(!activeChat) return;
+		const chatId = activeChat.id;
+
+		const commandMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'user', text: \`/\${command.name}\` };
+		setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, commandMessage] } : c)));
+
+		switch(command.name)
+		{
+			case 'compact': {
+				const count = activeChat.messages.length;
+				if(count === 0) return;
+				const checkpoint: ChatMessage = {
+					id:    nextMessageId.current++,
+					kind:  'checkpoint',
+					label: \`Compacted · \${count} message\${count === 1 ? '' : 's'} summarized\`,
+				};
+				setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, checkpoint] } : c)));
+				break;
+			}
+
+			case 'clear':
+				setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [] } : c)));
+				break;
+
+			case 'rename':
+				handleStartEdit(activeChat);
+				break;
+
+			case 'plot':
+				pushAiMessage(chatId, \`Here's the trend in median home prices over the last several years:\\n\\n\\\`\\\`\\\`lineplot\\n\${JSON.stringify(HOME_PRICE_LINEPLOT)}\\n\\\`\\\`\\\`\`);
+				break;
+
+			case 'barchart':
+				pushAiMessage(chatId, \`Here's npm downloads by month:\\n\\n\\\`\\\`\\\`barchart\\n\${JSON.stringify(DOWNLOADS_BARCHART)}\\n\\\`\\\`\\\`\`);
+				break;
+
+			case 'areachart':
+				pushAiMessage(chatId, \`Here's pages read per week:\\n\\n\\\`\\\`\\\`areachart\\n\${JSON.stringify(READING_PACE_AREACHART)}\\n\\\`\\\`\\\`\`);
+				break;
+
+			case 'donutchart':
+				pushAiMessage(chatId, \`Here's how a weekly workout split breaks down:\\n\\n\\\`\\\`\\\`donutchart\\n\${JSON.stringify(WORKOUT_SPLIT_DONUTCHART)}\\n\\\`\\\`\\\`\`);
+				break;
+
+			case 'radarchart':
+				pushAiMessage(chatId, \`Here's a fitness category breakdown for this month:\\n\\n\\\`\\\`\\\`radarchart\\n\${JSON.stringify(FITNESS_RADARCHART)}\\n\\\`\\\`\\\`\`);
+				break;
+
+			case 'math':
+				pushAiMessage(chatId, \`Here are a few equations plotted together:\\n\\n\\\`\\\`\\\`math\\n\${JSON.stringify({ equations: SAMPLE_EQUATIONS })}\\n\\\`\\\`\\\`\`);
+				break;
+
+			case 'formula':
+				pushAiMessage(chatId, 'The quadratic formula, for solving $ax^2 + bx + c = 0$:\\n\\n$$x = \\\\frac{-b \\\\pm \\\\sqrt{b^2 - 4ac}}{2a}$$');
+				break;
+
+			case 'image':
+				pushGeneratingMessage(
+					chatId,
+					'image',
+					\`Here's the image:\\n\\n\\\`\\\`\\\`image\\n\${JSON.stringify(SAMPLE_IMAGE)}\\n\\\`\\\`\\\`\`,
+					1800
+				);
+				break;
+
+			case 'audio':
+				pushGeneratingMessage(
+					chatId,
+					'audio',
+					\`Here's the audio clip:\\n\\n\\\`\\\`\\\`audio\\n\${JSON.stringify(SAMPLE_AUDIO)}\\n\\\`\\\`\\\`\`,
+					1800
+				);
+				break;
+		}
+	};
+
+	return (
+		<div className='flex h-[32rem] w-full max-w-4xl overflow-hidden rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border'>
+			<Sidebar width='w-64' height='h-full'>
+				<SidebarHeader>
+					<Button variant='outlined' size='sm' className='w-full justify-center gap-1.5' onClick={handleNewChat}>
+						<PlusIcon />
+						New chat
+					</Button>
+				</SidebarHeader>
+				<SidebarSection label='Chats'>
+					{chats.map((chat) => (
+						editingId === chat.id ? (
+							<Input
+								key={chat.id}
+								autoFocus
+								value={draftTitle}
+								onChange={(e) => setDraftTitle(e.target.value)}
+								onBlur={handleCommitEdit}
+								onKeyDown={handleEditKeyDown}
+								aria-label='Chat title'
+							/>
+						) : (
+							<SidebarButton
+								key={chat.id}
+								isActive={activeId === chat.id}
+								onClick={() => handleSelectChat(chat.id)}
+								action={
+									<div className='flex items-center gap-0.5'>
+										<button
+											type='button'
+											aria-label={\`Rename \${chat.title}\`}
+											onClick={() => handleStartEdit(chat)}
+											className='flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-text-muted hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
+										>
+											<PencilIcon />
+										</button>
+										<button
+											type='button'
+											aria-label={\`Delete \${chat.title}\`}
+											onClick={() => setChatPendingDeletion(chat)}
+											className='flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-text-muted hover:bg-danger/10 hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
+										>
+											<TrashIcon />
+										</button>
+									</div>
+								}
+							>
+								{chat.title}
+							</SidebarButton>
+						)
+					))}
+					{chats.length === 0 && (
+						<p className='px-3 py-2 text-xs text-text-muted'>No chats yet.</p>
+					)}
+				</SidebarSection>
+			</Sidebar>
+
+			<div className='flex flex-1 flex-col'>
+				{activeChat ? (
+					<>
+						<div className='border-b-[length:var(--border-width)] border-surface-border px-4 py-3'>
+							<h3 className='text-base font-semibold text-text'>{activeChat.title}</h3>
+						</div>
+						<div className='relative flex min-h-0 flex-1 flex-col'>
+							<ScrollFade ref={containerRef} direction='vertical' className='h-full' wrapperClassName='min-h-0 flex-1'>
+								<div ref={contentRef} className='flex min-h-full shrink-0 flex-col gap-4 p-5 pb-28'>
+									{activeChat.messages.length === 0 ? (
+										<div className='flex flex-1 flex-col items-center justify-center gap-1.5 text-center'>
+											<p className='font-serif text-2xl italic text-text'>Welcome back</p>
+											<p className='text-sm text-text-muted'>Send a message to start the conversation.</p>
+										</div>
+									) : (
+										<>
+											<Divider label='Conversation starts here' />
+											{activeChat.messages.map((m) => {
+												if(m.kind === 'checkpoint') return <Divider key={m.id} label={m.label} />;
+												if(m.sender === 'user') {
+													return (
+														<div key={m.id} className='flex flex-col items-end gap-1.5'>
+															{m.attachment && <Attachment name={m.attachment.name} size={m.attachment.size} />}
+															{m.text && <Message variant='sent'>{m.text}</Message>}
+														</div>
+													);
+												}
+
+												return (
+													<div key={m.id} className='flex flex-col gap-1.5'>
+														{m.toolCalls && <ToolCallTrace toolCalls={m.toolCalls} />}
+														<Message variant='received' bubble={false}>
+															{m.generating === 'image' ? (
+																<SkeletonImage aspectRatio='4/3' className='w-full max-w-xs' />
+															) : m.generating === 'audio' ? (
+																<div className='flex w-56 items-center gap-2'>
+																	<Skeleton className='h-9 w-9 shrink-0 rounded-full' />
+																	<Skeleton className='h-2 flex-1 rounded-full' />
+																</div>
+															) : m.animate ? (
+																<Typewriter
+																	text={m.text}
+																	speed={18}
+																	onReveal={(n) => { if(m.id === streamingMessageId) streamingRevealedRef.current = n; }}
+																	onComplete={() => {
+																		if(m.id !== streamingMessageId) return;
+																		setStreamingChatId(null);
+																		setStreamingMessageId(null);
+																	}}
+																/>
+															) : (
+																<div className='flex flex-col gap-3'>
+																	{parseMessageSegments(m.text).map((seg, i) => renderSegment(seg, i))}
+																</div>
+															)}
+														</Message>
+														{m.questionnaire && (
+															<QuestionCard
+																step={m.questionnaire}
+																answer={m.questionnaireAnswer}
+																onAnswer={(value) => handleQuestionnaireAnswer(m.id, value)}
+															/>
+														)}
+													</div>
+												);
+											})}
+										</>
+									)}
+									{isTyping && (
+										<p className='text-xs text-text-muted'>Assistant is typing…</p>
+									)}
+								</div>
+							</ScrollFade>
+							<div className='absolute inset-x-0 bottom-0 p-4'>
+								<form onSubmit={handleSubmit} className='flex w-full flex-col items-center gap-2'>
+									{attachedFile && (
+										<div className='flex w-full max-w-md items-center gap-2'>
+											<Attachment name={attachedFile.name} size={\`\${Math.max(1, Math.round(attachedFile.size / 1024))} KB\`} />
+											<Button type='button' variant='ghost' size='icon-sm' aria-label='Remove attachment' onClick={() => setAttachedFile(null)}>
+												<CloseIcon />
+											</Button>
+										</div>
+									)}
+									<div className='flex w-full max-w-md items-center gap-1.5 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel p-1.5 shadow-[var(--shadow-lg)]'>
+										<input
+											ref={fileInputRef}
+											type='file'
+											onChange={handleFileChange}
+											className='hidden'
+											tabIndex={-1}
+											aria-hidden='true'
+										/>
+										<Button type='button' variant='ghost' size='icon' aria-label='Attach file' disabled={isGenerating} onClick={() => fileInputRef.current?.click()}>
+											<PaperclipIcon />
+										</Button>
+										<CommandInput
+											className='min-w-0 flex-1'
+											value={draft}
+											onChange={setDraft}
+											commands={COMMANDS}
+											onCommand={handleCommand}
+											placeholder='Message… (try /compact)'
+											aria-label='Message'
+											disabled={isGenerating}
+										/>
+										{isGenerating ? (
+											<Button type='button' size='icon' aria-label='Stop generating' onClick={handleStop}>
+												<StopIcon />
+											</Button>
+										) : (
+											<Button type='submit' size='icon' aria-label='Send message' disabled={!draft.trim() && !attachedFile}>
+												<SendIcon />
+											</Button>
+										)}
+									</div>
+								</form>
+							</div>
+						</div>
+					</>
+				) : (
+					<div className='flex flex-1 items-center justify-center p-6 text-center'>
+						<p className='text-sm text-text-muted'>Select or start a chat to begin.</p>
+					</div>
+				)}
+			</div>
+
+			<Modal open={chatPendingDeletion !== null} onOpenChange={handleDeleteOpenChange}>
+				<ModalClose />
+				<ModalHeader>
+					<ModalTitle>Delete chat</ModalTitle>
+				</ModalHeader>
+				<ModalContent>
+					{\`Delete "\${chatPendingDeletion?.title}"? This can't be undone.\`}
+				</ModalContent>
+				<ModalFooter>
+					<Button variant='secondary' onClick={() => setChatPendingDeletion(null)}>Cancel</Button>
+					<Button variant='destructive' onClick={handleConfirmDelete}>Delete</Button>
+				</ModalFooter>
+			</Modal>
+		</div>
+	);
+};
+
+export default AiChat;
+`,
+		dependencies: ['react-markdown', 'remark-gfm', 'remark-math'],
+		registryDependencies: ['sidebar', 'scroll-fade', 'message', 'typewriter', 'attachment', 'button', 'input', 'command-input', 'collapsible', 'timeline', 'modal', 'charts', 'function-plotter', 'table', 'date-picker', 'slider', 'formula', 'code-block', 'audioplayer', 'skeleton'],
+		files: ['AiChat/AiChat.tsx', 'AiChat/ToolCallTrace.tsx', 'AiChat/QuestionCard.tsx', 'AiChat/ChatMarkdown.tsx'],
+		promptSnippet: `Most of your reply can just be normal GitHub-flavored markdown — the chat already
+renders it: **bold**/*italic*, [links](https://example.com), \`inline code\`, fenced code blocks
+(\`\`\`js ... \`\`\`, any language), bullet/numbered lists, and pipe tables all render with this
+app's real UI components, not raw text. None of that needs special instructions; it's what
+you already produce for any markdown-aware client.
+
+Two things are NOT standard markdown and must be explained in the system prompt if you want
+the model to use them:
+
+1. Math formulas — inline with single dollars, block with double dollars, standard LaTeX:
+   Inline: The area is $\\pi r^2$.
+   Block:  $$x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$
+
+2. Charts — markdown has no chart syntax, so these stay a fenced code block convention.
+   When a visual would genuinely help (a trend, a comparison, a breakdown) — for a quick
+   fact, prefer prose or a markdown table instead — use a fenced block in one of these
+   languages, containing JSON in the exact shape shown. If the request needs real data you
+   don't already have, use a search or data tool first rather than inventing numbers:
+
+   - "lineplot"   — a trend over a continuous axis (time, distance, ...)
+     { "xKey": string, "series": [{ "key": string, "label": string }], "data": [{ ...one object per point, with an xKey field and a field per series key... }] }
+
+   - "barchart"   — comparing discrete categories. Same shape as lineplot, plus an optional "stacked": true to stack series instead of grouping them
+     { "xKey": string, "series": [...], "data": [...], "stacked"?: boolean }
+
+   - "areachart"  — volume or a cumulative total over time. Same shape as barchart (including optional "stacked")
+     { "xKey": string, "series": [...], "data": [...], "stacked"?: boolean }
+
+   - "radarchart" — comparing several categories against one another, optionally across more than one series. Same shape as lineplot
+     { "xKey": string, "series": [...], "data": [...] }
+
+   - "donutchart" — a simple part-to-whole breakdown. No xKey/series — just labeled slices
+     { "data": [{ "label": string, "value": number }] }
+
+   - "math"       — plotting one or more mathematical functions of x as a graph (not a formula — use $$...$$ for that)
+     { "equations": string[] }   // e.g. ["x^2 - 2", "sin(x)"] — plain math expressions in x, evaluated with mathjs syntax, no "y =" prefix
+
+3. Media — a generated image or audio clip also has no markdown syntax, so these are fenced
+   too. Only emit one once you actually have a real URL for it (e.g. after a generation
+   tool call resolves) — while that's in flight, the consuming app is expected to show its
+   own loading state, not you.
+
+   - "image" — a generated or fetched image
+     { "url": string, "alt": string }
+
+   - "audio" — a generated or fetched audio clip
+     { "src": string, "title"?: string }
+
+Example:
+
+User: How has the median home price changed over the last few years?
+Assistant: Here's the trend in median home prices over the last several years:
+
+\`\`\`lineplot
+{"xKey":"year","series":[{"key":"price","label":"Median home price"}],"data":[{"year":2019,"price":313000},{"year":2020,"price":329000},{"year":2021,"price":375000},{"year":2022,"price":395000},{"year":2023,"price":410000},{"year":2024,"price":426000}]}
+\`\`\`
+
+The chart/media fence conventions and the $...$/$$...$$ math delimiters aren't something
+the model already knows to use unprompted — this block must be included in the system
+prompt on every request, not just the first turn. Everything else above it is included
+for completeness, not because it needs teaching.`,
 	},
 	{
 		slug: 'team-management',
@@ -1128,6 +2111,1310 @@ export default function TeamManagement() {
 		dependencies: [],
 		registryDependencies: ['modal', 'card', 'select', 'badge', 'avatar', 'button', 'input'],
 		files: ['TeamManagement/TeamManagement.tsx'],
+	},
+	{
+		slug: 'project-hub',
+		name: 'Project hub',
+		category: 'Dashboards',
+		description: 'A projects workspace with an AiChat-style layout: a left sidebar (new-project button, an Overview link, and the project list) next to a main panel that shows either a portfolio-wide Overview (stats plus a pooled "All tasks" board across every project) or a selected project’s page, reached by clicking it in the sidebar or via its "Projects / {name}" breadcrumb: editable members and related links, plus the project’s own Kanban board, where clicking a card opens a Jira-style popup to edit its title, tag, and description, or delete it, persisted back onto the project. Includes an AI task drafter that turns a plain-language prompt into a suggested card, shown with a typewriter reveal, for you to review before it lands on the board. Simulated locally, no real model calls.',
+		usage: `'use client';
+
+import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
+import KanbanBoard, { type KanbanColumnData, type KanbanCardData } from '@/src/components/Kanban/Kanban';
+import { Sidebar, SidebarButton, SidebarHeader, SidebarSection } from '@/src/components/Sidebar/Sidebar';
+import { Select } from '@/src/components/Select/Select';
+import TextShimmer from '@/src/components/TextShimmer/TextShimmer';
+import Typewriter from '@/src/components/Typewriter/Typewriter';
+import DatePicker from '@/src/components/DatePicker/DatePicker';
+import Breadcrumb from '@/src/components/Breadcrumb/Breadcrumb';
+import Textarea from '@/src/components/Textarea/Textarea';
+import Checkbox from '@/src/components/Checkbox/Checkbox';
+import { Card, CardContent } from '@/src/components/Card/Card';
+import Progress from '@/src/components/Progress/Progress';
+import CountUp from '@/src/components/CountUp/CountUp';
+import Button from '@/src/components/Button/Button';
+import Badge from '@/src/components/Badge/Badge';
+import { useMemo, useRef, useState } from 'react';
+import Avatar from '@/src/components/Avatar/Avatar';
+import Input from '@/src/components/Input/Input';
+
+type Accent = 'brand' | 'success' | 'warning' | 'danger';
+
+interface ProjectLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
+interface ProjectData {
+  id: string;
+  name: string;
+  description: string;
+  accent: Accent;
+  members: string[];
+  dueDate: string;
+  links: ProjectLink[];
+  columns: KanbanColumnData[];
+}
+
+type AiStatus = 'idle' | 'thinking' | 'ready';
+
+interface AiSuggestion {
+  title: string;
+  description: string;
+  tag: string;
+}
+
+const ACCENTS: Accent[] = ['brand', 'success', 'warning', 'danger'];
+
+const ACCENT_DOT: Record<Accent, string> = {
+  brand: 'bg-brand',
+  success: 'bg-success',
+  warning: 'bg-warning',
+  danger: 'bg-danger',
+};
+
+const ACCENT_RING: Record<Accent, string> = {
+  brand: 'ring-brand',
+  success: 'ring-success',
+  warning: 'ring-warning',
+  danger: 'ring-danger',
+};
+
+const ACCENT_LABEL: Record<Accent, string> = {
+  brand: 'Blue',
+  success: 'Green',
+  warning: 'Amber',
+  danger: 'Red',
+};
+
+const PlusIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 5v14M5 12h14" />
+  </svg>
+);
+
+const CalendarIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="4" width="18" height="18" rx="2" />
+    <path d="M16 2v4M8 2v4M3 10h18" />
+  </svg>
+);
+
+const SparkleIcon = ({ className = '' }) => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+    <path d="M12 2.5c.4 3.6 1.1 6 2.2 7.3 1.2 1.2 3.7 2 7.3 2.2-3.6.4-6 1.1-7.3 2.2-1.2 1.2-2 3.7-2.2 7.3-.4-3.6-1.1-6-2.2-7.3C8.5 12.9 6 12.1 2.5 12c3.6-.4 6-1.1 7.3-2.2C10.9 8.5 11.6 6 12 2.5Z" />
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M18 6 6 18" />
+    <path d="m6 6 12 12" />
+  </svg>
+);
+
+const LinkIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+  </svg>
+);
+
+const GridIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="3" y="3" width="7" height="7" rx="1" />
+    <rect x="14" y="3" width="7" height="7" rx="1" />
+    <rect x="3" y="14" width="7" height="7" rx="1" />
+    <rect x="14" y="14" width="7" height="7" rx="1" />
+  </svg>
+);
+
+// KanbanCard ships no built-in edit form; this is this block's own, hand-rolled
+// for the fields its cards actually use (tag, description, due date, effort
+// points, and a subtask checklist).
+const POINTS_OPTIONS = [
+  { value: '', label: 'No estimate' },
+  { value: '1', label: '1' },
+  { value: '2', label: '2' },
+  { value: '3', label: '3' },
+  { value: '5', label: '5' },
+  { value: '8', label: '8' },
+];
+
+const ProjectCardDetails = ({ card, onUpdate, onDelete, onClose }) => {
+  const [draftTitle, setDraftTitle] = useState(card.title);
+  const [draftTag, setDraftTag] = useState(card.tag ?? '');
+  const [draftDescription, setDraftDescription] = useState(card.description ?? '');
+  const [draftDueDate, setDraftDueDate] = useState(card.dueDate ?? '');
+  const [draftPoints, setDraftPoints] = useState(card.points !== undefined ? String(card.points) : '');
+  const [draftSubtasks, setDraftSubtasks] = useState(card.subtasks ?? []);
+  const [newSubtaskLabel, setNewSubtaskLabel] = useState('');
+  const subtaskCounterRef = useRef(0);
+
+  const handleAddSubtask = () => {
+    const label = newSubtaskLabel.trim();
+    if (!label) return;
+    subtaskCounterRef.current += 1;
+    setDraftSubtasks((prev) => [...prev, { id: \`subtask-\${subtaskCounterRef.current}\`, label, done: false }]);
+    setNewSubtaskLabel('');
+  };
+
+  const toggleSubtask = (id) => {
+    setDraftSubtasks((prev) => prev.map((s) => s.id === id ? { ...s, done: !s.done } : s));
+  };
+
+  const removeSubtask = (id) => {
+    setDraftSubtasks((prev) => prev.filter((s) => s.id !== id));
+  };
+
+  const handleSave = () => {
+    const title = draftTitle.trim();
+    if (!title) return;
+    onUpdate({
+      ...card,
+      title,
+      tag: draftTag.trim() || undefined,
+      description: draftDescription.trim() || undefined,
+      dueDate: draftDueDate || undefined,
+      points: draftPoints ? Number(draftPoints) : undefined,
+      subtasks: draftSubtasks.length > 0 ? draftSubtasks : undefined,
+    });
+  };
+
+  return (
+    <>
+      <ModalClose />
+      <ModalHeader>
+        <ModalTitle>Edit card</ModalTitle>
+      </ModalHeader>
+      <ModalContent className="flex flex-col gap-4">
+        <Input
+          label="Title"
+          value={draftTitle}
+          onChange={(e) => setDraftTitle(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSave(); } }}
+        />
+        <Input label="Tag" placeholder="Optional" value={draftTag} onChange={(e) => setDraftTag(e.target.value)} />
+        <Textarea
+          label="Description"
+          placeholder="Optional"
+          rows={4}
+          value={draftDescription}
+          onChange={(e) => setDraftDescription(e.target.value)}
+        />
+
+        <div className="flex flex-col gap-4 sm:flex-row">
+          <div className="flex flex-1 flex-col gap-1.5">
+            <DatePicker
+              label="Due date"
+              value={draftDueDate ? new Date(draftDueDate) : null}
+              onChange={(date) => setDraftDueDate(date.toISOString())}
+            />
+            {draftDueDate && (
+              <button
+                type="button"
+                onClick={() => setDraftDueDate('')}
+                className="self-start text-xs text-text-muted hover:text-text focus:outline-none focus-visible:underline"
+              >
+                Clear due date
+              </button>
+            )}
+          </div>
+          <Select label="Points" options={POINTS_OPTIONS} value={draftPoints} onChange={setDraftPoints} className="flex-1" />
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <span className="text-sm font-medium text-text">Related items</span>
+
+          {draftSubtasks.length > 0 && (
+            <ul className="flex flex-col gap-1.5">
+              {draftSubtasks.map((subtask) => (
+                <li key={subtask.id} className="flex items-center gap-2">
+                  <Checkbox checked={subtask.done} onChange={() => toggleSubtask(subtask.id)} aria-label={subtask.label} />
+                  <span className={\`flex-1 text-sm \${subtask.done ? 'text-text-muted line-through' : 'text-text'}\`}>
+                    {subtask.label}
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={\`Remove \${subtask.label}\`}
+                    onClick={() => removeSubtask(subtask.id)}
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-text-muted hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring"
+                  >
+                    <CloseIcon />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="flex items-center gap-1.5">
+            <Input
+              value={newSubtaskLabel}
+              onChange={(e) => setNewSubtaskLabel(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddSubtask(); } }}
+              placeholder="Add a related item"
+              aria-label="Add a related item"
+              className="flex-1"
+            />
+            <Button size="icon-sm" variant="secondary" aria-label="Add related item" onClick={handleAddSubtask} disabled={!newSubtaskLabel.trim()}>
+              <PlusIcon />
+            </Button>
+          </div>
+        </div>
+      </ModalContent>
+      <ModalFooter>
+        <Button variant="destructive" size="sm" className="mr-auto" onClick={() => onDelete(card.id)}>Delete</Button>
+        <Button variant="secondary" size="sm" onClick={onClose}>Cancel</Button>
+        <Button size="sm" onClick={handleSave} disabled={!draftTitle.trim()}>Save</Button>
+      </ModalFooter>
+    </>
+  );
+};
+
+const TAG_KEYWORDS = [
+  { keywords: ['bug', 'fix', 'broken', 'crash'], tag: 'Bug' },
+  { keywords: ['design', 'ui', 'ux', 'layout'], tag: 'Design' },
+  { keywords: ['test', 'qa', 'coverage'], tag: 'QA' },
+  { keywords: ['doc', 'write', 'copy', 'content'], tag: 'Docs' },
+  { keywords: ['api', 'backend', 'server', 'database'], tag: 'Engineering' },
+];
+
+const pickTag = (prompt) => {
+  const lower = prompt.toLowerCase();
+  const match = TAG_KEYWORDS.find(({ keywords }) => keywords.some((word) => lower.includes(word)));
+  return match?.tag ?? 'Task';
+};
+
+const draftTaskFromPrompt = (prompt) => {
+  const trimmed = prompt.trim().replace(/[.?!]+$/, '');
+  const capitalized = trimmed.charAt(0).toUpperCase() + trimmed.slice(1);
+  const title = capitalized.length > 72 ? \`\${capitalized.slice(0, 69)}...\` : capitalized;
+
+  return {
+    title,
+    description: \`Drafted from your prompt: "\${prompt.trim()}". Review scope and assign before starting.\`,
+    tag: pickTag(prompt),
+  };
+};
+
+const getDefaultColumns = () => [
+  { id: 'todo', title: 'To do', cards: [] },
+  { id: 'in-progress', title: 'In progress', cards: [] },
+  { id: 'review', title: 'Review', cards: [] },
+  { id: 'done', title: 'Done', cards: [] },
+];
+
+const INITIAL_PROJECTS = [
+  {
+    id: 'marketing-site',
+    name: 'Marketing site redesign',
+    description: 'Refresh the public marketing site with the new brand system and a faster page-build pipeline.',
+    accent: 'brand',
+    members: ['Ava Thompson', 'Noah Martinez', 'Priya Sharma'],
+    dueDate: 'Sep 12',
+    links: [
+      { id: 'ms-link-1', label: 'Design file', url: 'https://www.figma.com' },
+      { id: 'ms-link-2', label: 'Staging site', url: 'https://vercel.com' },
+    ],
+    columns: [
+      { id: 'todo', title: 'To do', cards: [
+        { id: 'ms-1', title: 'Rewrite homepage hero copy', tag: 'Copy' },
+        { id: 'ms-2', title: 'Audit third-party scripts for perf', tag: 'Engineering' },
+      ] },
+      { id: 'in-progress', title: 'In progress', cards: [
+        {
+          id: 'ms-3', title: 'Build new pricing page layout', description: 'Match the updated tier structure from the pricing block.', tag: 'Design',
+          points: 5, dueDate: '2026-09-10T12:00:00.000Z',
+          subtasks: [
+            { id: 'ms-3-sub-1', label: 'Wire up new tier cards', done: true },
+            { id: 'ms-3-sub-2', label: 'Connect billing toggle', done: false },
+            { id: 'ms-3-sub-3', label: 'QA responsive breakpoints', done: false },
+          ],
+        },
+      ] },
+      { id: 'review', title: 'Review', cards: [
+        { id: 'ms-4', title: 'Dark mode pass on the docs shell', tag: 'Design', points: 3 },
+      ] },
+      { id: 'done', title: 'Done', cards: [
+        { id: 'ms-5', title: 'Migrate blog to the new CMS', tag: 'Engineering' },
+        { id: 'ms-6', title: 'Ship updated favicon & OG images', tag: 'Design' },
+      ] },
+    ],
+  },
+  {
+    id: 'mobile-app-v2',
+    name: 'Mobile app v2',
+    description: 'Native rebuild of the mobile app with offline support and a redesigned onboarding flow.',
+    accent: 'success',
+    members: ['Liam Chen', 'Sofia Rossi', 'Ethan Brooks', 'Maya Patel'],
+    dueDate: 'Aug 30',
+    links: [
+      { id: 'mv-link-1', label: 'Repo', url: 'https://github.com' },
+      { id: 'mv-link-2', label: 'Design file', url: 'https://www.figma.com' },
+    ],
+    columns: [
+      { id: 'todo', title: 'To do', cards: [
+        { id: 'mv-1', title: 'Wire up push notification opt-in', tag: 'Engineering' },
+      ] },
+      { id: 'in-progress', title: 'In progress', cards: [
+        {
+          id: 'mv-2', title: 'Offline sync for saved items', description: 'Cache last-known state and reconcile on reconnect.', tag: 'Engineering',
+          points: 8, dueDate: '2026-08-29T12:00:00.000Z',
+          subtasks: [
+            { id: 'mv-2-sub-1', label: 'Local cache write-through', done: true },
+            { id: 'mv-2-sub-2', label: 'Conflict resolution on reconnect', done: true },
+            { id: 'mv-2-sub-3', label: 'Offline banner UI', done: false },
+          ],
+        },
+      ] },
+      { id: 'review', title: 'Review', cards: [
+        { id: 'mv-3', title: 'New onboarding carousel', tag: 'Design' },
+      ] },
+      { id: 'done', title: 'Done', cards: [
+        { id: 'mv-4', title: 'Biometric login', tag: 'Engineering' },
+        { id: 'mv-5', title: 'Redesign tab bar icons', tag: 'Design' },
+        { id: 'mv-6', title: 'App store screenshots refresh', tag: 'Marketing' },
+      ] },
+    ],
+  },
+  {
+    id: 'q3-sprint',
+    name: 'Q3 growth sprint',
+    description: 'A focused two-week sprint to test onboarding and pricing experiments before the Q3 close.',
+    accent: 'warning',
+    members: ['Jordan Park', 'Riley Yu'],
+    dueDate: 'in 4 days',
+    links: [
+      { id: 'q3-link-1', label: 'Experiment doc', url: 'https://www.notion.so' },
+    ],
+    columns: [
+      { id: 'todo', title: 'To do', cards: [
+        { id: 'q3-1', title: 'Set up A/B test for signup flow', tag: 'Engineering' },
+        { id: 'q3-2', title: 'Draft experiment brief', tag: 'Docs' },
+        { id: 'q3-3', title: 'Segment churn-risk cohort', tag: 'Research' },
+      ] },
+      { id: 'in-progress', title: 'In progress', cards: [
+        { id: 'q3-4', title: 'Build referral incentive banner', tag: 'Design', points: 2, dueDate: '2026-08-30T12:00:00.000Z' },
+      ] },
+      { id: 'review', title: 'Review', cards: [] },
+      { id: 'done', title: 'Done', cards: [
+        { id: 'q3-5', title: 'Instrument funnel analytics', tag: 'Engineering' },
+      ] },
+    ],
+  },
+  {
+    id: 'api-migration',
+    name: 'API v3 migration',
+    description: 'Move all internal services off the deprecated v2 API before it sunsets at the end of the quarter.',
+    accent: 'danger',
+    members: ['Casey Diaz', 'Drew Nolan'],
+    dueDate: 'Overdue',
+    links: [
+      { id: 'am-link-1', label: 'Repo', url: 'https://github.com' },
+      { id: 'am-link-2', label: 'Runbook', url: 'https://www.notion.so' },
+    ],
+    columns: [
+      { id: 'todo', title: 'To do', cards: [
+        { id: 'am-1', title: 'Migrate billing service', tag: 'Bug' },
+        { id: 'am-2', title: 'Update webhook signature verification', tag: 'Bug' },
+      ] },
+      { id: 'in-progress', title: 'In progress', cards: [
+        {
+          id: 'am-3', title: 'Rewrite rate-limit middleware', tag: 'Engineering',
+          points: 13, dueDate: '2026-09-01T12:00:00.000Z',
+          subtasks: [
+            { id: 'am-3-sub-1', label: 'Design token-bucket algorithm', done: true },
+            { id: 'am-3-sub-2', label: 'Migrate existing callers', done: false },
+          ],
+        },
+      ] },
+      { id: 'review', title: 'Review', cards: [
+        { id: 'am-4', title: 'Deprecation notice for partner docs', tag: 'Docs' },
+      ] },
+      { id: 'done', title: 'Done', cards: [] },
+    ],
+  },
+];
+
+const getProjectStats = (project) => {
+  const totalTasks = project.columns.reduce((sum, col) => sum + col.cards.length, 0);
+  const doneTasks = project.columns.find((col) => col.id === 'done')?.cards.length ?? 0;
+  return { totalTasks, doneTasks };
+};
+
+const BOARD_COLUMN_DEFS = [
+  { id: 'todo', title: 'To do' },
+  { id: 'in-progress', title: 'In progress' },
+  { id: 'review', title: 'Review' },
+  { id: 'done', title: 'Done' },
+];
+
+function StatTile({ label, value, suffix = '', progress }) {
+  return (
+    <Card>
+      <CardContent className="flex flex-col gap-2">
+        <span className="text-xs text-text-muted">{label}</span>
+        <span className="text-2xl font-semibold text-text">
+          <CountUp value={value} suffix={suffix} duration={900} />
+        </span>
+        {progress !== undefined && <Progress value={progress} max={100} size="sm" />}
+      </CardContent>
+    </Card>
+  );
+}
+
+export default function ProjectHub() {
+  const [projects, setProjects] = useState(INITIAL_PROJECTS);
+  const [activeProjectId, setActiveProjectId] = useState(null);
+  const [boardKey, setBoardKey] = useState(0);
+
+  const [createOpen, setCreateOpen] = useState(false);
+  const [newProjectName, setNewProjectName] = useState('');
+  const [newProjectAccent, setNewProjectAccent] = useState('brand');
+
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [aiStatus, setAiStatus] = useState('idle');
+  const [aiSuggestion, setAiSuggestion] = useState(null);
+  const [aiTitleRevealed, setAiTitleRevealed] = useState(false);
+  const aiTimeoutRef = useRef(null);
+
+  const [newMemberName, setNewMemberName] = useState('');
+  const [newLinkLabel, setNewLinkLabel] = useState('');
+  const [newLinkUrl, setNewLinkUrl] = useState('');
+
+  const idCounterRef = useRef(0);
+  const nextId = (prefix) => {
+    idCounterRef.current += 1;
+    return \`\${prefix}-\${idCounterRef.current}\`;
+  };
+
+  const activeProject = projects.find((p) => p.id === activeProjectId) ?? null;
+
+  const overallStats = useMemo(() => {
+    const totalTasks = projects.reduce((sum, p) => sum + p.columns.reduce((s, col) => s + col.cards.length, 0), 0);
+    const doneTasks = projects.reduce((sum, p) => sum + (p.columns.find((col) => col.id === 'done')?.cards.length ?? 0), 0);
+    const completionRate = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
+    return { totalTasks, doneTasks, completionRate };
+  }, [projects]);
+
+  const allTasksColumns = useMemo(() => (
+    BOARD_COLUMN_DEFS.map(({ id, title }) => ({
+      id,
+      title,
+      // Cross-project view: swap each card's tag for its project name so it's
+      // clear at a glance which project a task belongs to once tasks are pooled.
+      cards: projects.flatMap((project) => {
+        const column = project.columns.find((col) => col.id === id);
+        return (column?.cards ?? []).map((card) => ({ ...card, tag: project.name }));
+      }),
+    }))
+  ), [projects]);
+
+  const resetAiComposer = () => {
+    if (aiTimeoutRef.current) {
+      clearTimeout(aiTimeoutRef.current);
+      aiTimeoutRef.current = null;
+    }
+    setAiPrompt('');
+    setAiStatus('idle');
+    setAiSuggestion(null);
+    setAiTitleRevealed(false);
+  };
+
+  const resetProjectEditors = () => {
+    setNewMemberName('');
+    setNewLinkLabel('');
+    setNewLinkUrl('');
+  };
+
+  const openProject = (id) => {
+    setActiveProjectId(id);
+    setBoardKey((k) => k + 1);
+    resetAiComposer();
+    resetProjectEditors();
+  };
+
+  const backToOverview = () => {
+    setActiveProjectId(null);
+    resetAiComposer();
+    resetProjectEditors();
+  };
+
+  const updateActiveProject = (updater) => {
+    if (!activeProjectId) return;
+    setProjects((prev) => prev.map((p) => p.id === activeProjectId ? updater(p) : p));
+  };
+
+  const handleAddMember = () => {
+    const name = newMemberName.trim();
+    if (!name) return;
+    updateActiveProject((p) => p.members.includes(name) ? p : { ...p, members: [...p.members, name] });
+    setNewMemberName('');
+  };
+
+  const handleRemoveMember = (name) => {
+    updateActiveProject((p) => ({ ...p, members: p.members.filter((m) => m !== name) }));
+  };
+
+  const handleAddLink = () => {
+    const label = newLinkLabel.trim();
+    const url = newLinkUrl.trim();
+    if (!label || !url) return;
+    updateActiveProject((p) => ({ ...p, links: [...p.links, { id: nextId('link'), label, url }] }));
+    setNewLinkLabel('');
+    setNewLinkUrl('');
+  };
+
+  const handleRemoveLink = (id) => {
+    updateActiveProject((p) => ({ ...p, links: p.links.filter((l) => l.id !== id) }));
+  };
+
+  const handleCreateOpenChange = (open) => {
+    setCreateOpen(open);
+    if (!open) {
+      setNewProjectName('');
+      setNewProjectAccent('brand');
+    }
+  };
+
+  const handleCreateProject = () => {
+    const name = newProjectName.trim();
+    if (!name) return;
+
+    const project = {
+      id: nextId('project'),
+      name,
+      description: 'A freshly created project. Add a description and start planning.',
+      accent: newProjectAccent,
+      members: [],
+      dueDate: 'No due date yet',
+      links: [],
+      columns: getDefaultColumns(),
+    };
+
+    setProjects((prev) => [project, ...prev]);
+    setBoardKey((k) => k + 1);
+    handleCreateOpenChange(false);
+  };
+
+  const handleGenerateTask = () => {
+    const prompt = aiPrompt.trim();
+    if (!prompt || aiStatus === 'thinking') return;
+
+    setAiStatus('thinking');
+    setAiSuggestion(null);
+    setAiTitleRevealed(false);
+
+    aiTimeoutRef.current = setTimeout(() => {
+      aiTimeoutRef.current = null;
+      setAiSuggestion(draftTaskFromPrompt(prompt));
+      setAiStatus('ready');
+    }, 1100);
+  };
+
+  const handleAddSuggestion = () => {
+    const targetProjectId = activeProjectId;
+    if (!aiSuggestion || !targetProjectId) return;
+
+    const card = { id: nextId('ai'), title: aiSuggestion.title, description: aiSuggestion.description, tag: aiSuggestion.tag };
+
+    setProjects((prev) => prev.map((p) => {
+      if (p.id !== targetProjectId) return p;
+      return { ...p, columns: p.columns.map((col, index) => index === 0 ? { ...col, cards: [card, ...col.cards] } : col) };
+    }));
+
+    // KanbanBoard owns its drag state internally once mounted; bumping the key
+    // remounts it with the updated columns so the new card actually appears.
+    setBoardKey((k) => k + 1);
+    resetAiComposer();
+  };
+
+  let mainContent;
+
+  if (activeProject) {
+    const { totalTasks, doneTasks } = getProjectStats(activeProject);
+
+    mainContent = (
+      <div className="flex flex-col gap-6 w-full">
+        <Breadcrumb items={[{ label: 'Projects', onClick: backToOverview }, { label: activeProject.name }]} />
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div className="flex flex-col gap-2 min-w-0">
+            <div className="flex items-center gap-2">
+              <span className={\`h-2.5 w-2.5 shrink-0 rounded-full \${ACCENT_DOT[activeProject.accent]}\`} aria-hidden="true" />
+              <h2 className="text-xl font-semibold text-text truncate">{activeProject.name}</h2>
+            </div>
+            <p className="text-sm text-text-muted max-w-lg">{activeProject.description}</p>
+          </div>
+          <div className="flex flex-col items-start gap-2 sm:items-end shrink-0">
+            <div className="flex flex-wrap items-center gap-1.5 sm:justify-end">
+              {activeProject.members.map((name) => (
+                <span key={name} className="inline-flex items-center gap-1.5 rounded-full border-[length:var(--border-width)] border-surface-border bg-surface-hover py-1 pl-1 pr-1.5">
+                  <Avatar name={name} size="sm" />
+                  <span className="text-xs text-text">{name}</span>
+                  <button type="button" aria-label={\`Remove \${name}\`} onClick={() => handleRemoveMember(name)}
+                    className="flex h-4 w-4 items-center justify-center rounded-full text-text-muted hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring">
+                    <CloseIcon />
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            <div className="flex items-center gap-1.5">
+              <Input value={newMemberName} onChange={(e) => setNewMemberName(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddMember(); } }}
+                placeholder="Add member" aria-label="Add a team member" className="w-32" />
+              <Button size="icon-sm" variant="secondary" aria-label="Add member" onClick={handleAddMember} disabled={!newMemberName.trim()}>
+                <PlusIcon />
+              </Button>
+            </div>
+
+            <span className="flex items-center gap-1.5 text-xs text-text-muted">
+              <CalendarIcon />
+              Due {activeProject.dueDate}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Progress value={doneTasks} max={Math.max(totalTasks, 1)} size="sm" className="max-w-xs" />
+          <span className="text-xs text-text-muted whitespace-nowrap">{doneTasks} of {totalTasks} done</span>
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel p-4">
+          <h3 className="text-sm font-semibold text-text">Related links</h3>
+
+          {activeProject.links.length > 0 && (
+            <ul className="flex flex-col gap-2">
+              {activeProject.links.map((link) => (
+                <li key={link.id} className="flex items-center justify-between gap-2">
+                  <a href={link.url} target="_blank" rel="noopener noreferrer"
+                    className="flex min-w-0 items-center gap-2 text-sm text-brand hover:underline focus:outline-none focus-visible:underline">
+                    <LinkIcon />
+                    <span className="truncate">{link.label}</span>
+                  </a>
+                  <button type="button" aria-label={\`Remove link \${link.label}\`} onClick={() => handleRemoveLink(link.id)}
+                    className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-text-muted hover:text-danger focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring">
+                    <CloseIcon />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input value={newLinkLabel} onChange={(e) => setNewLinkLabel(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddLink(); } }}
+              placeholder="Label, e.g. Figma file" aria-label="Link label" className="sm:flex-1" />
+            <Input value={newLinkUrl} onChange={(e) => setNewLinkUrl(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddLink(); } }}
+              placeholder="https://…" aria-label="Link URL" className="sm:flex-1" />
+            <Button size="sm" variant="secondary" onClick={handleAddLink} disabled={!newLinkLabel.trim() || !newLinkUrl.trim()}>
+              <PlusIcon />
+              Add
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-brand/25 bg-brand/5 p-4">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand/15 text-brand">
+              <SparkleIcon />
+            </span>
+            <h3 className="text-sm font-semibold text-text">Draft a task with AI</h3>
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Input value={aiPrompt} onChange={(e) => setAiPrompt(e.target.value)}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleGenerateTask(); } }}
+              placeholder='Describe a task, e.g. "add empty states to the billing page"'
+              aria-label="Describe a task for AI to draft" disabled={aiStatus === 'thinking'} className="flex-1" />
+            <Button size="sm" onClick={handleGenerateTask} loading={aiStatus === 'thinking'} disabled={!aiPrompt.trim() || aiStatus === 'thinking'}>
+              <SparkleIcon />
+              Generate task
+            </Button>
+          </div>
+
+          {aiStatus === 'thinking' && (
+            <div className="flex items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel px-3 py-2.5">
+              <span className="text-brand motion-safe:animate-pulse">
+                <SparkleIcon />
+              </span>
+              <TextShimmer className="text-sm">Drafting a task from your prompt…</TextShimmer>
+            </div>
+          )}
+
+          {aiStatus === 'ready' && aiSuggestion && (
+            <div className="flex flex-col gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel p-3">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline">{aiSuggestion.tag}</Badge>
+                <span className="text-xs text-text-muted">AI suggestion, adds to To do</span>
+              </div>
+              <p className="text-sm font-medium text-text">
+                <Typewriter text={aiSuggestion.title} speed={16} onComplete={() => setAiTitleRevealed(true)} />
+              </p>
+              <p className={\`text-xs text-text-muted motion-safe:transition-opacity motion-safe:duration-[var(--duration-base)] \${aiTitleRevealed ? 'opacity-100' : 'opacity-0'}\`}>
+                {aiSuggestion.description}
+              </p>
+              <div className="flex items-center gap-2 pt-1">
+                <Button size="sm" onClick={handleAddSuggestion}>Add to board</Button>
+                <Button size="sm" variant="ghost" onClick={resetAiComposer}>Discard</Button>
+              </div>
+            </div>
+          )}
+
+          <p className="text-[11px] text-text-subtle">Simulated locally, wire this up to your own model call.</p>
+        </div>
+
+        <KanbanBoard
+          key={boardKey}
+          initialColumns={activeProject.columns}
+          renderCardDetails={ProjectCardDetails}
+          onCardUpdate={(updated) => updateActiveProject((p) => ({
+            ...p,
+            columns: p.columns.map((col) => ({ ...col, cards: col.cards.map((c) => c.id === updated.id ? updated : c) })),
+          }))}
+          onCardDelete={(id) => updateActiveProject((p) => ({
+            ...p,
+            columns: p.columns.map((col) => ({ ...col, cards: col.cards.filter((c) => c.id !== id) })),
+          }))}
+        />
+      </div>
+    );
+  } else {
+    mainContent = (
+      <div className="flex flex-col gap-6 w-full">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl font-semibold text-text">Overview</h2>
+          <p className="text-sm text-text-muted">A snapshot across every project.</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatTile label="Active projects" value={projects.length} />
+          <StatTile label="Total tasks" value={overallStats.totalTasks} />
+          <StatTile label="Completed" value={overallStats.doneTasks} />
+          <StatTile label="Completion" value={overallStats.completionRate} suffix="%" progress={overallStats.completionRate} />
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-1">
+            <h3 className="text-sm font-semibold text-text uppercase tracking-wide">All tasks</h3>
+            <p className="text-xs text-text-muted">Every task across every project, tagged by project.</p>
+          </div>
+          <KanbanBoard key={\`all-\${boardKey}\`} initialColumns={allTasksColumns} renderCardDetails={ProjectCardDetails} />
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex w-full overflow-hidden rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border">
+      <Sidebar width="w-64" height="h-full">
+        <SidebarHeader>
+          <Button variant="outlined" size="sm" className="w-full justify-center gap-1.5" onClick={() => setCreateOpen(true)}>
+            <PlusIcon />
+            New project
+          </Button>
+        </SidebarHeader>
+
+        <SidebarSection label="Workspace">
+          <SidebarButton isActive={!activeProject} onClick={backToOverview} icon={<GridIcon />}>
+            Overview
+          </SidebarButton>
+        </SidebarSection>
+
+        <SidebarSection label="Projects">
+          {projects.map((project) => (
+            <SidebarButton key={project.id} isActive={project.id === activeProjectId} onClick={() => openProject(project.id)}
+              icon={<span className={\`h-2.5 w-2.5 rounded-full \${ACCENT_DOT[project.accent]}\`} />}>
+              {project.name}
+            </SidebarButton>
+          ))}
+        </SidebarSection>
+      </Sidebar>
+
+      <div className="min-w-0 flex-1 p-6">
+        {mainContent}
+      </div>
+
+      <Modal open={createOpen} onOpenChange={handleCreateOpenChange}>
+        <ModalClose />
+        <ModalHeader><ModalTitle>New project</ModalTitle></ModalHeader>
+        <ModalContent className="flex flex-col gap-4">
+          <Input label="Name" placeholder="Q3 marketing site" value={newProjectName}
+            onChange={(e) => setNewProjectName(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreateProject(); } }} />
+          <div className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-text">Accent color</span>
+            <div className="flex items-center gap-2">
+              {ACCENTS.map((accent) => (
+                <button key={accent} type="button" aria-label={\`\${ACCENT_LABEL[accent]} accent\`} aria-pressed={newProjectAccent === accent}
+                  onClick={() => setNewProjectAccent(accent)}
+                  className={[
+                    'h-6 w-6 rounded-full motion-safe:transition-transform motion-safe:duration-[var(--duration-fast)]',
+                    ACCENT_DOT[accent],
+                    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
+                    newProjectAccent === accent ? \`scale-110 ring-2 ring-offset-2 \${ACCENT_RING[accent]}\` : 'hover:scale-105',
+                  ].join(' ')} />
+              ))}
+            </div>
+          </div>
+        </ModalContent>
+        <ModalFooter>
+          <Button variant="secondary" onClick={() => handleCreateOpenChange(false)}>Cancel</Button>
+          <Button onClick={handleCreateProject} disabled={!newProjectName.trim()}>Create project</Button>
+        </ModalFooter>
+      </Modal>
+    </div>
+  );
+}`,
+		dependencies: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+		registryDependencies: ['modal', 'kanban', 'sidebar', 'badge', 'avatar', 'text-shimmer', 'typewriter', 'breadcrumb', 'card', 'progress', 'count-up', 'button', 'input'],
+		files: ['ProjectHub/ProjectHub.tsx'],
+	},
+	{
+		slug: 'job-application-tracker',
+		name: 'Job application tracker',
+		category: 'Dashboards',
+		description: 'A job search tracker with a Board / Table toggle — the table doubles as an editable grid (role, company, stage, work type, location, applied date, and salary all edit in place, no need to open the board). The header carries two search-wide actions next to the title: View CV opens a base resume in a new tab, and Tailor resume is a disabled placeholder for a future AI-assisted rewrite (marked "Coming soon" — no AI is wired up). The board groups applications into five drag-and-drop stages — Wishlist, Applied, Interviewing, Offer, Rejected — using a neutral, bespoke card (company avatar and role/company on the left, the work-type badge stacked over the applied date in the top-right corner, then location/salary/a resume indicator/the details button along the bottom, and a notes preview underneath) and a wide, three-column details modal (role, company, stage, work type, location, salary, applied date, contact, job posting URL, an uploadable per-application resume attachment, and notes) built specifically for this block, independent of the generic Kanban block’s card and popup. Installing it copies a folder, not a single file: JobApplicationTracker.tsx (the orchestrator, including the board’s drag-and-drop, its droppable columns, and the table’s inline-editable cells) plus two sibling pieces it imports directly, ApplicationCard.tsx (the draggable card face) and ApplicationDetailsModal.tsx (the shared modal used by both views for the fields that don’t fit inline, like notes and the resume).',
+		usage: `'use client';
+
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, KeyboardSensor, PointerSensor, closestCorners, useDroppable, useSensor, useSensors } from '@dnd-kit/core';
+import ApplicationCard, { type ApplicationStage, type ApplicationStatus, type JobApplication, STAGES } from '@/src/blocks/JobApplicationTracker/ApplicationCard';
+import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { ToggleGroup, ToggleGroupItem } from '@/src/components/ToggleGroup/ToggleGroup';
+import DataTable, { type ColumnDef } from '@/src/components/DataTable/DataTable';
+import ApplicationDetailsModal from '@/src/blocks/JobApplicationTracker/ApplicationDetailsModal';
+import { Select } from '@/src/components/Select/Select';
+import Button from '@/src/components/Button/Button';
+import Badge from '@/src/components/Badge/Badge';
+import Input from '@/src/components/Input/Input';
+import { useRef, useState } from 'react';
+
+// A single base CV shared across the whole search — distinct from the
+// per-application resume attached in each card's details modal.
+const MASTER_CV = {
+	name: 'Resume_MasterCopy.pdf',
+	url:  'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
+};
+
+const INITIAL_APPLICATIONS: JobApplication[] = [
+	{
+		id: 'job-1',
+		role: 'Frontend Engineer',
+		company: 'Notion',
+		status: 'wishlist',
+		workType: 'Remote',
+		location: 'Remote (US)',
+		notes: 'Referred by a former teammate — reaching out before applying.',
+	},
+	{
+		id: 'job-2',
+		role: 'Product Designer',
+		company: 'Linear',
+		status: 'wishlist',
+		workType: 'Remote',
+		location: 'Remote (US)',
+		notes: 'Strong portfolio fit, role posted this week.',
+	},
+	{
+		id: 'job-3',
+		role: 'Senior Frontend Engineer',
+		company: 'Stripe',
+		status: 'applied',
+		workType: 'Hybrid',
+		location: 'San Francisco, CA',
+		salary: '$170k–$210k',
+		appliedDate: '2026-08-15T00:00:00.000Z',
+		url: 'https://stripe.com/jobs',
+		contact: 'Jamie Lin (referral)',
+		notes: 'Applied through a referral.',
+		resume: { name: 'Resume_SFE_Stripe.pdf', size: '214 KB', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+	},
+	{
+		id: 'job-4',
+		role: 'Full Stack Engineer',
+		company: 'Vercel',
+		status: 'applied',
+		workType: 'Remote',
+		location: 'Remote (US)',
+		appliedDate: '2026-08-20T00:00:00.000Z',
+		notes: 'Applied via the careers page.',
+	},
+	{
+		id: 'job-5',
+		role: 'Frontend Engineer',
+		company: 'Figma',
+		status: 'interviewing',
+		workType: 'Onsite',
+		location: 'San Francisco, CA',
+		salary: '$160k–$195k',
+		appliedDate: '2026-08-05T00:00:00.000Z',
+		contact: 'Priya Shah (recruiter)',
+		notes: 'Onsite loop scheduled after two strong screens.',
+		resume: { name: 'Resume_FE_Figma.pdf', size: '198 KB', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+	},
+	{
+		id: 'job-6',
+		role: 'Product Engineer',
+		company: 'Ramp',
+		status: 'offer',
+		workType: 'Hybrid',
+		location: 'New York, NY',
+		salary: '$185k + equity',
+		appliedDate: '2026-07-28T00:00:00.000Z',
+		notes: 'Offer received, negotiating start date and equity.',
+	},
+	{
+		id: 'job-7',
+		role: 'Frontend Engineer',
+		company: 'Airbnb',
+		status: 'rejected',
+		workType: 'Onsite',
+		location: 'San Francisco, CA',
+		appliedDate: '2026-07-10T00:00:00.000Z',
+		notes: 'Passed after the final round — asked for feedback.',
+	},
+];
+
+type TrackerView = 'board' | 'table';
+
+const WORK_TYPE_OPTIONS = [
+	{ value: 'Remote', label: 'Remote' },
+	{ value: 'Hybrid', label: 'Hybrid' },
+	{ value: 'Onsite', label: 'Onsite' },
+];
+
+const STAGE_OPTIONS = STAGES.map((stage) => ({ value: stage.id, label: stage.title }));
+
+// ─── Inline table fields ──────────────────────────────────────────────────────
+// The table doubles as an editable grid using the same Input/Select components as
+// the details modal — no need to open the modal just to fix a role, stage, or
+// salary. At rest a cell reads as plain text; hovering or focusing it reveals the
+// component's normal bordered, editable look. The \`:not(:hover):not(:focus)\`
+// scoping (rather than fighting Input/Select's own hover/focus classes with more
+// \`!important\`) means those default styles apply completely untouched the moment
+// either state is true — no cascade tug-of-war with the component's own classes.
+const CLEAN_FIELD_CLASS = '!px-1.5 !py-1 [&:not(:hover):not(:focus)]:!border-transparent [&:not(:hover):not(:focus)]:!bg-transparent [&:not(:hover):not(:focus)]:!shadow-none';
+
+// Applied date is the one exception: there's no headless-friendly (no visible
+// label required) date component in the library yet, so it falls back to a
+// native date input — fully accessible on its own, styled to match the same
+// text-until-hover look via ordinary (non-important) Tailwind variants, since
+// there's no competing component style here to override.
+
+interface InlineDateFieldProps
+{
+	value:     string | undefined;
+	onChange:  (value: string | undefined) => void;
+	ariaLabel: string;
+}
+
+const InlineDateField = ({ value, onChange, ariaLabel }: InlineDateFieldProps) => (
+	<input
+		type='date'
+		value={value ? value.slice(0, 10) : ''}
+		aria-label={ariaLabel}
+		onChange={(e) => onChange(e.target.value ? new Date(e.target.value).toISOString() : undefined)}
+		className='w-full rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-transparent bg-transparent px-1.5 py-1 text-sm text-text shadow-none transition-colors duration-[var(--duration-fast)] hover:border-input-border hover:bg-surface hover:shadow-[var(--inner-shadow)] focus:border-input-border focus:bg-surface focus:outline-none focus-visible:shadow-[var(--input-focus-shadow)]'
+	/>
+);
+
+// ─── Header icons ─────────────────────────────────────────────────────────────
+
+const FileIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<path d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z' />
+		<path d='M14 2v4a2 2 0 0 0 2 2h4' />
+	</svg>
+);
+
+const SparkleIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='currentColor' aria-hidden='true'>
+		<path d='M9.94 15.5a2 2 0 0 0-1.44-1.44l-6.13-1.58a.5.5 0 0 1 0-.96l6.13-1.58A2 2 0 0 0 9.94 8.5l1.58-6.13a.5.5 0 0 1 .96 0l1.58 6.13a2 2 0 0 0 1.44 1.44l6.13 1.58a.5.5 0 0 1 0 .96l-6.13 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.13a.5.5 0 0 1-.96 0Z' />
+	</svg>
+);
+
+// ─── BoardColumn ──────────────────────────────────────────────────────────────
+// Its own droppable region (not just a SortableContext) so a column that's been
+// dragged empty can still be dropped back into.
+
+interface BoardColumnProps
+{
+	stage:        ApplicationStage;
+	applications: JobApplication[];
+	onOpen:       (application: JobApplication) => void;
+}
+
+const BoardColumn = ({ stage, applications, onOpen }: BoardColumnProps) =>
+{
+	const { setNodeRef } = useDroppable({ id: stage.id });
+
+	return (
+		<div
+			ref={setNodeRef}
+			className='flex flex-col gap-3 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-hover p-3 min-w-[240px] w-[240px]'
+		>
+			<div className='flex items-center justify-between px-1'>
+				<h3 className='text-xs font-semibold text-text uppercase tracking-wide'>{stage.title}</h3>
+				<Badge variant={stage.badgeVariant} className='text-[10px]'>{applications.length}</Badge>
+			</div>
+
+			<SortableContext items={applications.map((a) => a.id)} strategy={verticalListSortingStrategy}>
+				<div className='flex flex-col gap-2 min-h-[60px]'>
+					{applications.map((application) => (
+						<ApplicationCard key={application.id} application={application} onOpen={onOpen} />
+					))}
+				</div>
+			</SortableContext>
+		</div>
+	);
+};
+
+// ─── JobApplicationTracker ────────────────────────────────────────────────────
+
+export const JobApplicationTracker = () =>
+{
+	const [applications, setApplications] = useState<JobApplication[]>(INITIAL_APPLICATIONS);
+	const [view, setView]                 = useState<TrackerView>('board');
+	const [selectedId, setSelectedId]     = useState<string | null>(null);
+	const [pendingNewId, setPendingNewId] = useState<string | null>(null);
+	const [activeId, setActiveId]         = useState<string | null>(null);
+	const newApplicationCounter           = useRef(0);
+
+	const selectedApplication = applications.find((a) => a.id === selectedId) ?? null;
+	const activeApplication   = applications.find((a) => a.id === activeId) ?? null;
+
+	const openDetails = (application: JobApplication) => setSelectedId(application.id);
+
+	const handleViewCv = () => window.open(MASTER_CV.url, '_blank', 'noopener,noreferrer');
+
+	const updateApplication = (id: string, patch: Partial<JobApplication>) =>
+	{
+		setApplications((prev) => prev.map((a) => a.id === id ? { ...a, ...patch } : a));
+	};
+
+	const handleAddApplication = () =>
+	{
+		newApplicationCounter.current += 1;
+		const id = \`job-new-\${newApplicationCounter.current}\`;
+		setApplications((prev) => [...prev, { id, role: '', company: '', status: 'wishlist', workType: 'Remote' }]);
+		setPendingNewId(id);
+		setSelectedId(id);
+	};
+
+	const handleModalOpenChange = (open: boolean) =>
+	{
+		if(open) return;
+		if(pendingNewId)
+		{
+			setApplications((prev) => prev.filter((a) => a.id !== pendingNewId));
+			setPendingNewId(null);
+		}
+		setSelectedId(null);
+	};
+
+	const handleSaveApplication = (updated: JobApplication) =>
+	{
+		setApplications((prev) => prev.map((a) => a.id === updated.id ? updated : a));
+		setPendingNewId(null);
+	};
+
+	const handleDeleteApplication = (id: string) =>
+	{
+		setApplications((prev) => prev.filter((a) => a.id !== id));
+		if(pendingNewId === id) setPendingNewId(null);
+	};
+
+	const sensors = useSensors(
+		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+		useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+	);
+
+	const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string);
+
+	const handleDragOver = (event: DragOverEvent) =>
+	{
+		const { active, over } = event;
+		if(!over) return;
+
+		const activeApp = applications.find((a) => a.id === active.id);
+		if(!activeApp) return;
+
+		const overApp    = applications.find((a) => a.id === over.id);
+		const overStatus = overApp ? overApp.status : STAGES.some((s) => s.id === over.id) ? (over.id as ApplicationStatus) : null;
+		if(!overStatus || overStatus === activeApp.status) return;
+
+		setApplications((prev) => prev.map((a) => a.id === active.id ? { ...a, status: overStatus } : a));
+	};
+
+	const handleDragEnd = (event: DragEndEvent) =>
+	{
+		const { active, over } = event;
+		setActiveId(null);
+		if(!over || active.id === over.id) return;
+
+		const activeApp = applications.find((a) => a.id === active.id);
+		const overApp   = applications.find((a) => a.id === over.id);
+		if(!activeApp || !overApp || activeApp.status !== overApp.status) return;
+
+		setApplications((prev) =>
+		{
+			const oldIndex = prev.findIndex((a) => a.id === active.id);
+			const newIndex = prev.findIndex((a) => a.id === over.id);
+			return arrayMove(prev, oldIndex, newIndex);
+		});
+	};
+
+	const activeCount        = applications.filter((a) => a.status === 'applied' || a.status === 'interviewing' || a.status === 'offer').length;
+	const interviewingCount  = applications.filter((a) => a.status === 'interviewing').length;
+	const offerCount         = applications.filter((a) => a.status === 'offer').length;
+
+	const tableColumns: ColumnDef<JobApplication>[] = [
+		{
+			key: 'role',
+			header: 'Role',
+			sortable: true,
+			width: '170px',
+			render: (value, row) => <Input value={value as string} aria-label={\`Role for \${row.company || 'this application'}\`} onChange={(e) => updateApplication(row.id, { role: e.target.value })} className={CLEAN_FIELD_CLASS} />,
+		},
+		{
+			key: 'company',
+			header: 'Company',
+			sortable: true,
+			width: '150px',
+			render: (value, row) => <Input value={value as string} aria-label={\`Company for \${row.role || 'this application'}\`} onChange={(e) => updateApplication(row.id, { company: e.target.value })} className={CLEAN_FIELD_CLASS} />,
+		},
+		{
+			key: 'status',
+			header: 'Stage',
+			sortable: true,
+			width: '140px',
+			render: (value, row) => (
+				<Select
+					options={STAGE_OPTIONS}
+					value={value as string}
+					size='sm'
+					aria-label={\`Stage for \${row.role || 'this application'}\`}
+					onChange={(v) => updateApplication(row.id, { status: v as ApplicationStatus })}
+					triggerClassName={CLEAN_FIELD_CLASS}
+				/>
+			),
+		},
+		{
+			key: 'workType',
+			header: 'Work type',
+			width: '120px',
+			render: (value, row) => (
+				<Select
+					options={WORK_TYPE_OPTIONS}
+					value={value as string}
+					size='sm'
+					aria-label={\`Work type for \${row.role || 'this application'}\`}
+					onChange={(v) => updateApplication(row.id, { workType: v as JobApplication['workType'] })}
+					triggerClassName={CLEAN_FIELD_CLASS}
+				/>
+			),
+		},
+		{
+			key: 'location',
+			header: 'Location',
+			width: '150px',
+			render: (value, row) => <Input value={(value as string) ?? ''} placeholder='Optional' aria-label={\`Location for \${row.role || 'this application'}\`} onChange={(e) => updateApplication(row.id, { location: e.target.value })} className={CLEAN_FIELD_CLASS} />,
+		},
+		{
+			key: 'appliedDate',
+			header: 'Applied',
+			sortable: true,
+			width: '140px',
+			render: (value, row) => <InlineDateField value={value as string | undefined} ariaLabel={\`Applied date for \${row.role || 'this application'}\`} onChange={(v) => updateApplication(row.id, { appliedDate: v })} />,
+		},
+		{
+			key: 'salary',
+			header: 'Salary',
+			width: '130px',
+			render: (value, row) => <Input value={(value as string) ?? ''} placeholder='Optional' aria-label={\`Salary for \${row.role || 'this application'}\`} onChange={(e) => updateApplication(row.id, { salary: e.target.value })} className={CLEAN_FIELD_CLASS} />,
+		},
+		{
+			key: 'id',
+			header: '',
+			width: '84px',
+			render: (_value, row) => <Button variant='ghost' size='sm' onClick={() => openDetails(row)}>Details</Button>,
+		},
+	];
+
+	return (
+		<div className='flex flex-col gap-5 w-full'>
+			<div className='flex flex-col gap-3'>
+				<div className='flex flex-col gap-1'>
+					<div className='flex flex-wrap items-center justify-between gap-3'>
+						<h2 className='text-2xl font-semibold text-text'>Job search tracker</h2>
+						<div className='flex items-center gap-2'>
+							<Button size='sm' variant='outlined' onClick={handleViewCv}>
+								<FileIcon />
+								View CV
+							</Button>
+							<Button size='sm' variant='outlined' disabled>
+								<SparkleIcon />
+								Tailor resume
+								<Badge variant='outline' className='ml-1 text-[10px]'>Coming soon</Badge>
+							</Button>
+						</div>
+					</div>
+					<p className='text-sm text-text-muted'>Drag cards on the board, or edit properties directly in the table — both stay in sync.</p>
+				</div>
+
+				<div className='flex flex-wrap items-center justify-between gap-3'>
+					<div className='flex items-center gap-2'>
+						<Badge variant='default'>{activeCount} active</Badge>
+						<Badge variant='warning'>{interviewingCount} interviewing</Badge>
+						<Badge variant='success'>{offerCount} offer{offerCount === 1 ? '' : 's'}</Badge>
+					</div>
+
+					<div className='flex items-center gap-2'>
+						<ToggleGroup type='single' value={view} onValueChange={(value) => setView(value as TrackerView)} size='sm' aria-label='Board or table view'>
+							<ToggleGroupItem value='board'>Board</ToggleGroupItem>
+							<ToggleGroupItem value='table'>Table</ToggleGroupItem>
+						</ToggleGroup>
+						<Button size='sm' variant='secondary' onClick={handleAddApplication}>+ Add application</Button>
+					</div>
+				</div>
+			</div>
+
+			{view === 'board' ? (
+				<DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+					<div role='application' aria-label='Job application board' className='flex gap-4 overflow-x-auto pb-2'>
+						{STAGES.map((stage) => (
+							<BoardColumn key={stage.id} stage={stage} applications={applications.filter((a) => a.status === stage.id)} onOpen={openDetails} />
+						))}
+					</div>
+
+					<DragOverlay>
+						{activeApplication && (
+							<ApplicationCard application={activeApplication} isDragging className='rotate-1 shadow-[var(--shadow-lg)] opacity-95' />
+						)}
+					</DragOverlay>
+				</DndContext>
+			) : (
+				<DataTable data={applications} columns={tableColumns} keyField='id' pageSize={10} emptyMessage='No applications yet.' />
+			)}
+
+			<ApplicationDetailsModal
+				open={selectedId !== null}
+				application={selectedApplication}
+				onOpenChange={handleModalOpenChange}
+				onSave={handleSaveApplication}
+				onDelete={handleDeleteApplication}
+			/>
+		</div>
+	);
+};
+
+export default JobApplicationTracker;`,
+		dependencies: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+		registryDependencies: ['modal', 'select', 'date-picker', 'textarea', 'attachment', 'separator', 'input', 'button', 'avatar', 'badge', 'toggle-group', 'data-table'],
+		files: ['JobApplicationTracker/JobApplicationTracker.tsx', 'JobApplicationTracker/ApplicationCard.tsx', 'JobApplicationTracker/ApplicationDetailsModal.tsx'],
 	},
 
 	// ─── Block example variants (see blockExamples.tsx) ──────────────────────

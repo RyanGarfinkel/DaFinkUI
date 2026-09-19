@@ -126,6 +126,24 @@ const BlockPage = async (
           </div>
         )}
       </section>
+
+      {/* Prompt: copy-paste system-prompt text that teaches a real LLM the
+          conventions this block's renderer already knows how to handle (e.g.
+          the ```lineplot fence). Docs-only guidance — the block itself never
+          calls a model. */}
+      {entry.promptSnippet && (
+        <section className='flex flex-col gap-3'>
+          <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
+            Prompt
+          </h2>
+          <p className='text-sm text-text-muted leading-relaxed'>
+            This block&apos;s demo replies are canned — no model is called. To make a real
+            LLM produce content this block already knows how to render, add the following
+            to your own system prompt.
+          </p>
+          <CodeBlock code={entry.promptSnippet} />
+        </section>
+      )}
     </div>
   );
 };

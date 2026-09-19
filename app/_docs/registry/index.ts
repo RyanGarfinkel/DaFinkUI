@@ -28,6 +28,16 @@ export interface ComponentEntry {
    * behind LineChart/BarChart/AreaChart/DonutChart/RadarChart) without duplicating a
    * catalog page those already cover. */
   hidden?: boolean;
+  /** Overrides the primary demo's CodeBlock minHeight (default '200px'). Use for
+   * components whose preview content — an opened popup, an expanded panel — exceeds
+   * the default height and would otherwise get clipped by the preview's scroll container. */
+  previewMinHeight?: string;
+  /** Overrides the primary demo's CodeBlock align (default 'center'). Set to 'start' for
+   * components whose preview content can grow taller than the container at runtime (an
+   * opened popup, an expanded panel) — with 'center', vertical centering pushes the
+   * trigger (and anything it opens below itself) further down as minHeight grows, which
+   * only shrinks the overflow instead of eliminating it. */
+  previewAlign?: 'center' | 'start';
 }
 
 export const registry: ComponentEntry[] = [
@@ -615,6 +625,8 @@ export default function Example() {
       { name: 'size',        type: "'sm' | 'md'",                default: "'md'",       description: 'Trigger height and text size.' },
       { name: 'disabled',    type: 'boolean',                    default: 'false',      description: 'Prevents interaction.' },
       { name: 'className',   type: 'string',                     default: "''",         description: 'Additional classes on the root wrapper.' },
+      { name: 'triggerClassName', type: 'string',                default: "''",         description: 'Additional classes on the trigger button itself, for restyling the control (className only reaches the outer wrapper).' },
+      { name: 'aria-label',  type: 'string',                     default: 'undefined',  description: "Accessible name for the trigger when there's no visible label (e.g. a compact inline use like a table cell)." },
     ],
     dependencies:         [],
     registryDependencies: [],
@@ -1165,7 +1177,7 @@ export default function Example() {
     slug: 'sidebar',
     name: 'Sidebar',
     category: 'Navigation',
-    description: 'Vertical navigation sidebar with a header, footer, sections, links, dividers, and an optional collapse toggle.',
+    description: 'Vertical navigation sidebar with a header, footer, sections, links, event-driven buttons, dividers, and an optional collapse toggle.',
     usage: `import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider, Button } from '@components/ui';
 import { useState } from 'react';
 
@@ -1266,6 +1278,7 @@ export default function Example() {
           name: 'SidebarSection',
           children: [
             { name: 'SidebarLink' },
+            { name: 'SidebarButton', description: 'event-driven, no URL' },
           ],
         },
         { name: 'SidebarDivider' },
@@ -1299,9 +1312,9 @@ export default function Example() {
     props: [
       {
         name: 'items',
-        type: 'Array<{ label: string; href?: string }>',
+        type: 'Array<{ label: string; href?: string; onClick?: () => void }>',
         default: '-',
-        description: 'Ordered list of crumbs. The last item is the current page and should have no href.',
+        description: 'Ordered list of crumbs. The last item is the current page and should have no href. An item with onClick renders as a button (for in-page navigation) instead of a Link.',
       },
       {
         name: 'separator',
@@ -1779,43 +1792,81 @@ export default function Example() {
     slug: 'kanban',
     name: 'KanbanBoard',
     category: 'Drag & Drop',
-    description: 'A drag-and-drop Kanban board with keyboard support. Cards can be dragged between columns and reordered within columns.',
-    usage: `import { KanbanBoard } from '@components/ui';
+    description: 'A drag-and-drop Kanban board with keyboard support. Cards can be dragged between columns and reordered within columns. The card face (what gets dragged) ships a default template but can be fully replaced via renderCard. KanbanCard ships no built-in edit form: the details popup is entirely bring-your-own. Pass a renderCardDetails function to render whatever content you want inside the Modal that opens on click; omit it and the board is drag-only, no popup, no info button.',
+    usage: `import { KanbanBoard, ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose, Input, Textarea, Button } from '@components/ui';
+import { useState } from 'react';
 
 const initialColumns = [
   {
     id: 'todo',
     title: 'To Do',
     cards: [
-      { id: '1', title: 'Research competitors', tag: 'Research' },
-      { id: '2', title: 'Write spec', description: 'Define requirements for v2.' },
+      { id: 'k1', title: 'Research competitors', tag: 'Research' },
+      { id: 'k2', title: 'Write spec', description: 'Define requirements for v2.' },
     ],
   },
   {
     id: 'in-progress',
     title: 'In Progress',
     cards: [
-      { id: '3', title: 'Build prototype', tag: 'Engineering' },
+      { id: 'k3', title: 'Build prototype', tag: 'Engineering' },
+      { id: 'k4', title: 'Design review', description: 'Review mockups with the team.' },
     ],
   },
   {
     id: 'done',
     title: 'Done',
     cards: [
-      { id: '4', title: 'Kick-off meeting', description: 'Align on goals and timeline.' },
+      { id: 'k5', title: 'Kick-off meeting', description: 'Align on goals and timeline.' },
     ],
   },
 ];
 
+// A minimal, self-contained example of a details renderer: you own everything
+// shown here, down to which fields exist.
+function CardDetails({ card, onUpdate, onDelete, onClose }) {
+  const [title, setTitle] = useState(card.title);
+  const [tag, setTag] = useState(card.tag ?? '');
+  const [description, setDescription] = useState(card.description ?? '');
+
+  return (
+    <>
+      <ModalClose />
+      <ModalHeader>
+        <ModalTitle>Edit card</ModalTitle>
+      </ModalHeader>
+      <ModalContent className="flex flex-col gap-4">
+        <Input label="Title" value={title} onChange={(e) => setTitle(e.target.value)} />
+        <Input label="Tag" placeholder="Optional" value={tag} onChange={(e) => setTag(e.target.value)} />
+        <Textarea label="Description" placeholder="Optional" rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
+      </ModalContent>
+      <ModalFooter>
+        <Button variant="destructive" size="sm" className="mr-auto" onClick={() => onDelete(card.id)}>Delete</Button>
+        <Button variant="secondary" size="sm" onClick={onClose}>Cancel</Button>
+        <Button size="sm" onClick={() => onUpdate({ ...card, title, tag: tag || undefined, description: description || undefined })} disabled={!title.trim()}>Save</Button>
+      </ModalFooter>
+    </>
+  );
+}
+
 export default function Example() {
-  return <KanbanBoard initialColumns={initialColumns} />;
+  return (
+    <KanbanBoard
+      initialColumns={initialColumns}
+      renderCardDetails={CardDetails}
+    />
+  );
 }`,
     props: [
       { name: 'initialColumns', type: 'KanbanColumnData[]', default: '-', description: 'Initial column and card data. Column and card state is managed internally.' },
+      { name: 'onCardUpdate', type: '(card: KanbanCardData) => void', default: '-', description: 'Fired after a card is edited and saved in its details popup, with the updated card.' },
+      { name: 'onCardDelete', type: '(id: string) => void', default: '-', description: 'Fired after a card is deleted from its details popup, with the id of the deleted card.' },
+      { name: 'renderCardDetails', type: '(props: { card, onUpdate, onDelete, onClose }) => ReactNode', default: '-', description: 'Renders the content of the details Modal opened when a card is clicked. There is no built-in form — this is entirely bring-your-own. Omit it to disable the popup entirely: cards become drag-only, with no info button and no click behavior.' },
+      { name: 'renderCard', type: '(props: { card, isDragging, onViewDetails }) => ReactNode', default: '-', description: 'Renders the card face shown on the board and dragged. Omit it to use the default template (tag, title, description, points/due-date/subtasks meta row, and an info button when renderCardDetails is set). A custom face can call onViewDetails to open the details popup itself.' },
       { name: 'className', type: 'string', default: '""', description: 'Extra classes on the board container.' },
     ],
     dependencies: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
-    registryDependencies: [],
+    registryDependencies: ['modal'],
     files: ['Kanban/Kanban.tsx'],
     composition: {
       name: 'KanbanBoard',
@@ -1834,7 +1885,7 @@ export default function Example() {
     slug:        'workflow-builder',
     name:        'WorkflowBuilder',
     category:    'Drag & Drop',
-    description: 'Drag-and-drop graph editor for building typed workflows. Connects trigger, condition, action, transform, and output nodes. Outputs a serializable WorkflowGraph via onChange.',
+    description: 'Drag-and-drop graph editor for generic input/output nodes. Select a node to edit its title, description, and ports in the side panel. Outputs a serializable WorkflowGraph via onChange.',
     usage: `import { WorkflowBuilder } from '@components/ui';
 import type { WorkflowGraph } from '@components/ui';
 import { useState } from 'react';
@@ -1850,13 +1901,14 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'defaultGraph', type: 'WorkflowGraph',                   default: '-',     description: 'Pre-populated graph loaded on first render. Not reactive after mount; state is managed internally.' },
-      { name: 'onChange',     type: '(graph: WorkflowGraph) => void',  default: '-',     description: 'Fired after every change: node move, edge connection, label edit, or node add/delete.' },
-      { name: 'height',       type: 'number',                          default: '500',   description: 'Canvas height in pixels.' },
-      { name: 'className',    type: 'string',                          default: '""',    description: 'Additional classes on the root container.' },
+      { name: 'defaultGraph',     type: 'WorkflowGraph',                    default: '-',            description: 'Pre-populated graph loaded on first render. Not reactive after mount; state is managed internally.' },
+      { name: 'onChange',         type: '(graph: WorkflowGraph) => void',   default: '-',            description: 'Fired after every change: node move, edge connection, inspector panel edit (title/description/ports), or node add/delete.' },
+      { name: 'height',           type: 'number',                           default: '500',          description: 'Canvas height in pixels.' },
+      { name: 'className',        type: 'string',                           default: '""',           description: 'Additional classes on the root container.' },
+      { name: 'defaultDirection', type: "'horizontal' | 'vertical'",        default: "'horizontal'", description: 'Initial flow orientation. Not reactive after mount; the user can switch it live via the Layout toggle in the toolbar.' },
     ],
     dependencies:         ['@xyflow/react'],
-    registryDependencies: [],
+    registryDependencies: ['toggle-group'],
     files:                ['WorkflowBuilder/WorkflowBuilder.tsx'],
   },
   {
@@ -2128,6 +2180,12 @@ export default function Example() {
         description: 'Controls the indicator dot style. brand = filled brand color; muted = outlined neutral.',
       },
       {
+        name: 'spacing',
+        type: '"comfortable" | "compact"',
+        default: '"comfortable"',
+        description: 'Gap between items. comfortable is the generous default for standalone timelines; compact tightens it for timelines nested inside other content (a collapsible, a card, a sidebar).',
+      },
+      {
         name: 'className',
         type: 'string',
         default: '""',
@@ -2378,10 +2436,61 @@ export default function Example() {
     files: ['Combobox/Combobox.tsx'],
   },
   {
+    slug: 'command-input',
+    name: 'CommandInput',
+    category: 'Inputs',
+    description: 'A plain text input that also handles slash-style commands: typing the trigger character (/ by default) opens a filtered, keyboard-navigable command menu; typing anything else behaves like a normal text field.',
+    usage: `'use client';
+
+import { CommandInput, type CommandOption } from '@components/ui';
+import { useState } from 'react';
+
+const COMMANDS: CommandOption[] = [
+  { name: 'compact', description: 'Summarize the conversation to save space' },
+  { name: 'clear',   description: 'Clear all messages' },
+  { name: 'rename',  description: 'Rename this chat' },
+];
+
+export default function Example() {
+  const [value, setValue] = useState('');
+  const [lastCommand, setLastCommand] = useState<string | null>(null);
+
+  return (
+    <div className="flex flex-col gap-3 w-full max-w-sm">
+      <CommandInput
+        value={value}
+        onChange={setValue}
+        commands={COMMANDS}
+        onCommand={(command) => setLastCommand(command.name)}
+        placeholder="Type a message, or / for commands…"
+        menuSide="bottom"
+      />
+      {lastCommand && (
+        <p className="text-sm text-text-muted">Ran /{lastCommand}</p>
+      )}
+    </div>
+  );
+}`,
+    props: [
+      { name: 'value',      type: 'string',                          default: '-',          description: 'Controlled input value.' },
+      { name: 'onChange',   type: '(value: string) => void',         default: '-',          description: 'Called on every text change, including internal completions/clears.' },
+      { name: 'commands',   type: 'CommandOption[]',                 default: '-',          description: 'Array of { name, description?, icon? } objects available for autocomplete.' },
+      { name: 'onCommand',  type: '(command: CommandOption) => void', default: '-',         description: 'Called when a command is executed (Enter or pointer-select on a menu item).' },
+      { name: 'trigger',    type: 'string',                          default: "'/'",        description: 'Character that opens the command menu when it is the first character typed.' },
+      { name: 'menuSide',   type: "'top' | 'bottom'",                default: "'top'",      description: 'Which side of the input the menu opens on.' },
+      { name: 'className',  type: 'string',                          default: "''",         description: 'Additional classes on the root wrapper element.' },
+    ],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['CommandInput/CommandInput.tsx'],
+  },
+  {
     slug: 'date-picker',
     name: 'DatePicker',
     category: 'Inputs',
     description: 'A trigger button that opens a calendar popup for selecting a single date, with full keyboard navigation, min/max bounds, and no external date library.',
+    previewMinHeight: '620px',
+    previewAlign: 'start',
     usage: `'use client';
 
 import { useState } from 'react';
@@ -2389,6 +2498,8 @@ import { DatePicker } from '@components/ui';
 
 export default function Example() {
   const [date, setDate] = useState<Date | null>(null);
+  const [time, setTime] = useState<Date | null>(null);
+  const [dateTime, setDateTime] = useState<Date | null>(null);
 
   return (
     <div className="max-w-xs flex flex-col gap-4">
@@ -2399,6 +2510,35 @@ export default function Example() {
         onChange={setDate}
         hint="Arrow keys navigate the calendar grid."
       />
+      {date && (
+        <p className="text-sm text-text-muted">
+          Selected: <span className="font-medium text-text">{date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
+        </p>
+      )}
+      <DatePicker
+        label="Appointment date & time"
+        granularity="datetime"
+        value={dateTime}
+        onChange={setDateTime}
+        hint="Type digits or use arrow keys on the time segments."
+      />
+      {dateTime && (
+        <p className="text-sm text-text-muted">
+          Selected: <span className="font-medium text-text">{dateTime.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' })}</span>
+        </p>
+      )}
+      <DatePicker
+        label="Reminder time"
+        granularity="time"
+        value={time}
+        onChange={setTime}
+        hint="Time-only picker, no calendar grid."
+      />
+      {time && (
+        <p className="text-sm text-text-muted">
+          Selected: <span className="font-medium text-text">{time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' })}</span>
+        </p>
+      )}
       <DatePicker
         label="Disabled"
         value={null}
@@ -2412,6 +2552,7 @@ export default function Example() {
       { name: 'value',       type: 'Date | null',       default: 'undefined', description: 'The currently selected date (controlled).' },
       { name: 'onChange',    type: '(date: Date) => void', default: 'undefined', description: 'Called when the user selects a day.' },
       { name: 'placeholder', type: 'string',             default: "'Pick a date'", description: 'Text shown when no date is selected.' },
+      { name: 'granularity', type: "'date' | 'time' | 'datetime'", default: "'date'", description: 'Controls whether the popup shows a calendar grid, a time-entry row, or both.' },
       { name: 'min',         type: 'Date',               default: 'undefined', description: 'Earliest selectable date.' },
       { name: 'max',         type: 'Date',               default: 'undefined', description: 'Latest selectable date.' },
       { name: 'disabled',    type: 'boolean',            default: 'false',     description: 'Disables the trigger.' },
@@ -2422,7 +2563,7 @@ export default function Example() {
     ],
     dependencies: [],
     registryDependencies: [],
-    files: ['DatePicker/DatePicker.tsx'],
+    files: ['DatePicker/DatePicker.tsx', 'DatePicker/TimeField.tsx'],
   },
   {
     slug: 'data-table',
@@ -2480,22 +2621,26 @@ export default function Example() {
     slug: 'function-plotter',
     name: 'FunctionPlotter',
     category: 'Display',
-    description: 'An interactive 2D function plotter with pan, zoom, and support for multiple equations. Enter expressions like x^2 or 2*x+1 and see them graphed in real time.',
+    description: 'An interactive 2D function plotter with pan, zoom, and support for multiple equations. Enter expressions like x^2, sin(x), or e^x, then click a curve to select it and see its local minima/maxima plus its intersections with other curves marked as clickable points.',
     usage: `import { FunctionPlotter } from '@components/ui';
 
 export default function Example() {
   return (
     <FunctionPlotter
-      initialEquations={['x^2', '2*x + 1', 'Math.sin(x) * 5']}
+      initialEquations={['x^2 - 2', 'sin(x)', '0.5*x + 3']}
+      layout='side'
     />
   );
 }`,
     props: [
-      { name: 'initialEquations', type: 'string[]',  default: "['2*x + 1', 'x^2']", description: 'Equations to plot on mount. Supports +, -, *, /, ^, and Math.* functions.' },
+      { name: 'initialEquations', type: 'string[]',  default: "['2*x + 1', 'x^2']", description: 'Equations to plot on mount. Parsed and evaluated by mathjs, not eval — supports +, -, *, /, ^, and functions like sin/cos/tan/sqrt/exp/log.' },
       { name: 'height',           type: 'number',    default: '400',                 description: 'Canvas height in pixels. Width fills the container.' },
       { name: 'className',        type: 'string',    default: "''",                  description: 'Additional classes on the root wrapper.' },
+      { name: 'readOnly',         type: 'boolean',   default: 'false',               description: 'Hides the equation list/editor, leaving just the plot and zoom controls.' },
+      { name: 'tooltip',          type: 'boolean',   default: 'true',                description: 'Shows an (x, y) tooltip when hovering near a plotted curve.' },
+      { name: 'layout',           type: "'bottom' | 'side'", default: "'bottom'",    description: "'side' places the equation list beside the canvas as a panel once there's room; ignored when readOnly." },
     ],
-    dependencies: [],
+    dependencies: ['mathjs'],
     registryDependencies: [],
     files: ['FunctionPlotter/FunctionPlotter.tsx'],
   },
@@ -3078,15 +3223,24 @@ import {
   ModalClose,
   Button,
 } from '@components/ui';
+import type { ModalSize } from '@components/ui';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
+  const [size, setSize] = useState<ModalSize>('md');
+
+  const openWith = (s: ModalSize) => {
+    setSize(s);
+    setOpen(true);
+  };
 
   return (
-    <>
-      <Button onClick={() => setOpen(true)}>Open modal</Button>
+    <div className="flex flex-wrap gap-2 justify-center">
+      <Button variant="secondary" onClick={() => openWith('sm')}>Small</Button>
+      <Button variant="secondary" onClick={() => openWith('md')}>Medium</Button>
+      <Button variant="secondary" onClick={() => openWith('lg')}>Large</Button>
 
-      <Modal open={open} onOpenChange={setOpen}>
+      <Modal open={open} onOpenChange={setOpen} size={size}>
         <ModalClose />
         <ModalHeader>
           <ModalTitle>Delete project</ModalTitle>
@@ -3100,7 +3254,7 @@ export default function Example() {
           <Button variant="destructive" onClick={() => setOpen(false)}>Delete</Button>
         </ModalFooter>
       </Modal>
-    </>
+    </div>
   );
 }`,
     props: [
@@ -3115,6 +3269,12 @@ export default function Example() {
         type: '(open: boolean) => void',
         default: '-',
         description: 'Called with false when the user dismisses via Escape, backdrop click, or ModalClose.',
+      },
+      {
+        name: 'size',
+        type: "'sm' | 'md' | 'lg'",
+        default: "'md'",
+        description: 'Controls the panel max-width: sm (24rem), md (28rem), lg (48rem). Height is always content-driven; ModalContent scrolls internally if it overflows the viewport.',
       },
       {
         name: 'className',

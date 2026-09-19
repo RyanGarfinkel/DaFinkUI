@@ -89,7 +89,7 @@ const ComponentPage = async (
         <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
           {demosHeading}
         </h2>
-        <CodeBlock variant='example' label={slug} code={entry.usage}>
+        <CodeBlock variant='example' label={slug} code={entry.usage} minHeight={entry.previewMinHeight} align={entry.previewAlign}>
           <ComponentLivePreview slug={slug} />
         </CodeBlock>
 

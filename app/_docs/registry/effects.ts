@@ -320,6 +320,12 @@ export default function Example() {
         description: 'Called when all characters have been revealed.',
       },
       {
+        name: 'onReveal',
+        type: '(charsRevealed: number) => void',
+        default: '-',
+        description: 'Called with the running character count every time a new character is revealed. Lets a parent track (and later freeze) the current reveal position, e.g. for a "stop generating" control.',
+      },
+      {
         name: 'className',
         type: 'string',
         default: '""',

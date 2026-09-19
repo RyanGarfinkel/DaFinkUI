@@ -1,3 +1,5 @@
+import { EFFECT_CATEGORIES } from '@/app/_docs/registry/effectCategories';
+import { visibleEffects } from '@/app/_docs/registry/effects';
 import { CATEGORIES } from '@/app/_docs/registry/categories';
 import { blocks } from '@/app/_docs/registry/blocks';
 import { registry } from '@/app/_docs/registry';
@@ -19,6 +21,7 @@ export const TOP_NAV_PAGES: PageOrderEntry[] = [
 	{ href: '/reliability',  label: 'Reliability' },
 	{ href: '/playground',   label: 'Playground' },
 	{ href: '/blocks',       label: 'Blocks' },
+	{ href: '/effects',      label: 'Effects' },
 	{ href: '/changelog',    label: 'Changelog' },
 ];
 
@@ -29,9 +32,17 @@ export const getComponentsByCategory = () => CATEGORIES.reduce<Record<string, ty
 	return acc;
 }, {});
 
+export const getEffectsByCategory = () => EFFECT_CATEGORIES.reduce<Record<string, typeof visibleEffects>>((acc, category) =>
+{
+	const entries = visibleEffects.filter((entry) => entry.category === category);
+	if(entries.length > 0) acc[category] = entries;
+	return acc;
+}, {});
+
 export const getPageOrder = (): PageOrderEntry[] =>
 {
 	const byCategory = getComponentsByCategory();
+	const effectsByCategory = getEffectsByCategory();
 
 	const componentPages = CATEGORIES.filter((category) => byCategory[category]).flatMap((category) =>
 		byCategory[category].map((entry) => ({ href: `/components/${entry.slug}`, label: entry.name }))
@@ -39,9 +50,14 @@ export const getPageOrder = (): PageOrderEntry[] =>
 
 	const blockPages = blocks.map((entry) => ({ href: `/blocks/${entry.slug}`, label: entry.name }));
 
+	const effectPages = EFFECT_CATEGORIES.filter((category) => effectsByCategory[category]).flatMap((category) =>
+		effectsByCategory[category].map((entry) => ({ href: `/effects/${entry.slug}`, label: entry.name }))
+	);
+
 	return [
 		...TOP_NAV_PAGES,
 		...componentPages,
 		...blockPages,
+		...effectPages,
 	];
 };

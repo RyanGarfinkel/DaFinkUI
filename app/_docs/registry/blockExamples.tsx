@@ -1,5 +1,7 @@
 import { NotificationsPanelActionable } from '@/src/blocks/NotificationsPanelActionable/NotificationsPanelActionable';
 import { PricingSectionUsage } from '@/src/blocks/PricingSectionUsage/PricingSectionUsage';
+import { QuestionCardRowDemo } from '@/app/_docs/components/examples/QuestionCardRowDemo';
+import { ToolCallTraceDemo } from '@/app/_docs/components/examples/ToolCallTraceDemo';
 import { AuthFormMagicLink } from '@/src/blocks/AuthFormMagicLink/AuthFormMagicLink';
 import { ChartCardRadar } from '@/src/blocks/ChartCardRadar/ChartCardRadar';
 import { AuthFormSocial } from '@/src/blocks/AuthFormSocial/AuthFormSocial';
@@ -538,6 +540,94 @@ export default function Example() {
 }`,
 			preview: <NotificationsPanelActionable />,
 			slug:    'notifications-panel-actionable',
+		},
+	],
+	'ai-chat': [
+		{
+			id:    'tool-call-trace',
+			title: 'Thought / tool-call chain',
+			description: 'The collapsible summary line embedded above each assistant reply in the chat above, as its own reusable piece: takes a `toolCalls` array and expands into a small vertical timeline of each step — tool name, web search, or thought — with its result underneath. Lives at AiChat/ToolCallTrace.tsx alongside AiChat.tsx when the ai-chat block is installed, and is the exact file AiChat.tsx imports and renders per message, not a separate reimplementation.',
+			usage: `'use client';
+
+import { ToolCallTrace, Message } from '@components';
+
+const SEARCH_LINKS = [
+  { title: 'Installation — DaFink UI Docs', url: 'https://ui.ryangarfinkel.dev/installation' },
+  { title: 'dafink-ui — npm', url: 'https://www.npmjs.com/package/dafink-ui' },
+  { title: 'DaFink UI CLI source — GitHub', url: 'https://github.com/RyanGarfinkel/DaFinkUI/tree/main/packages/cli' },
+];
+
+const TOOL_CALLS = [
+  { id: 't1', kind: 'thought', title: 'Thinking', detail: 'The user wants the install command — check the CLI docs for the exact syntax before answering.' },
+  { id: 't2', kind: 'search', title: 'Web search', detail: '"dafink-ui cli install command"', links: SEARCH_LINKS },
+  { id: 't3', kind: 'tool', title: 'Read file', detail: 'packages/cli/src/commands/add.ts', result: 'Found the add command implementation' },
+];
+
+const REPLY_TEXT = 'Run npx dafink-ui add button in your project root; it copies the component source straight into your repo.';
+
+export default function ToolCallTraceExample() {
+  return (
+    <div className="flex w-full max-w-md flex-col gap-1.5">
+      <ToolCallTrace toolCalls={TOOL_CALLS} />
+      <Message variant="received" bubble={false}>{REPLY_TEXT}</Message>
+    </div>
+  );
+}`,
+			preview: <ToolCallTraceDemo />,
+			slug:    'tool-call-trace',
+		},
+		{
+			id:    'question-card',
+			title: 'Structured question card',
+			description: 'The single-question card embedded in chat messages above, as its own reusable piece: pass a `step` (radio, slider, number, or calendar), an optional `answer` to lock it into a read-only summary, and an `onAnswer` callback. Lives at AiChat/QuestionCard.tsx alongside AiChat.tsx when the ai-chat block is installed, and is the exact file AiChat.tsx imports and renders per message. Shown here side by side in three of its four control types \u2014 radio, slider, and calendar \u2014 to demonstrate the range; a \'number\' step renders the same way with an Input.',
+			usage: `'use client';
+
+import { QuestionCard } from '@components';
+import { useState } from 'react';
+
+const RADIO_STEP = {
+  type: 'radio',
+  question: 'What should the assistant help with next?',
+  description: 'Choose a direction or describe another task.',
+  options: [
+    { id: 'bugs', label: 'Bug triage', description: 'Find and explain what broke.' },
+    { id: 'feature', label: 'Feature planning', description: 'Sketch the next set of changes.' },
+    { id: 'review', label: 'Code review', description: 'Review a PR before it merges.' },
+  ],
+  otherPlaceholder: 'Describe another task…',
+};
+
+const SLIDER_STEP = {
+  type: 'slider',
+  question: 'How urgent is this?',
+  description: 'Drag to set a priority level from 1 (low) to 5 (high).',
+  min: 1,
+  max: 5,
+  step: 1,
+};
+
+const CALENDAR_STEP = {
+  type: 'calendar',
+  question: 'When do you need this by?',
+  description: 'Pick a target date.',
+};
+
+function QuestionCardColumn({ step }) {
+  const [answer, setAnswer] = useState(undefined);
+  return <QuestionCard step={step} answer={answer} onAnswer={setAnswer} className="w-full" />;
+}
+
+export default function QuestionCardExample() {
+  return (
+    <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-3">
+      <QuestionCardColumn step={RADIO_STEP} />
+      <QuestionCardColumn step={SLIDER_STEP} />
+      <QuestionCardColumn step={CALENDAR_STEP} />
+    </div>
+  );
+}`,
+			preview: <QuestionCardRowDemo />,
+			slug:    'question-card',
 		},
 	],
 };
