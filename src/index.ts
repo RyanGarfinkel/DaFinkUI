@@ -124,7 +124,7 @@ export type { SelectOption, SelectSize } from './components/Select/Select';
 export { default as Slider } from './components/Slider/Slider';
 export type { SliderProps } from './components/Slider/Slider';
 
-export { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from './components/Sidebar/Sidebar';
+export { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarButton, SidebarDivider } from './components/Sidebar/Sidebar';
 
 export { Skeleton, SkeletonCard, SkeletonInput, SkeletonTableRow, SkeletonForm, SkeletonImage } from './components/Skeleton/Skeleton';
 

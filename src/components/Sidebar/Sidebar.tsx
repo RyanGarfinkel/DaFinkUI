@@ -1,6 +1,6 @@
 'use client';
 
-import { Children, HTMLAttributes, KeyboardEvent, ReactNode, createContext, isValidElement, useContext, useEffect, useRef, useState } from 'react';
+import { ButtonHTMLAttributes, Children, HTMLAttributes, KeyboardEvent, ReactElement, ReactNode, createContext, isValidElement, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import ScrollFade from '../ScrollFade/ScrollFade';
 import { usePathname } from 'next/navigation';
 import Link, { LinkProps } from 'next/link';
@@ -9,6 +9,61 @@ import Tooltip from '../Tooltip/Tooltip';
 const SidebarCollapsedContext = createContext(false);
 
 export const useSidebarCollapsed = () => useContext(SidebarCollapsedContext);
+
+// Backs automatic hierarchy-aware active matching for SidebarLink: Sidebar
+// resolves the single longest href (among descendant SidebarLinks with no
+// explicit isActive) that matches the current pathname — exact beats prefix
+// beats no match — so a specific route wins over a general ancestor, but a
+// general link still lights up when no more specific sibling exists.
+const SidebarActiveLinkContext = createContext<{ activeHref: string | null }>({ activeHref: null });
+
+// Walks the children tree synchronously (during Sidebar's own render, not an
+// effect) so the very first render — including SSR — already has the right
+// answer. An effect-based registration scheme would leave every auto-matched
+// link inactive until the first post-hydration re-render, a visible flash.
+// Only plain SidebarLink elements with no explicit isActive contribute; a
+// consumer that wraps SidebarLink in its own component (as this repo's docs
+// site does) is expected to compute isActive itself, exactly like the
+// explicit-override path already requires.
+const collectAutoMatchHrefs = (node: ReactNode, hrefs: string[]): void =>
+{
+	Children.forEach(node, child =>
+	{
+		if(!isValidElement(child)) return;
+
+		if(child.type === SidebarLink)
+		{
+			const { href, isActive } = child.props as SidebarLinkProps;
+			if(isActive === undefined && typeof href === 'string') hrefs.push(href);
+			return;
+		}
+
+		const childProps = child.props as { children?: ReactNode };
+		if(childProps?.children) collectAutoMatchHrefs(childProps.children, hrefs);
+	});
+};
+
+// The matching rule itself, factored out as a pure function (no React, no
+// router) so it can be reused verbatim anywhere the real algorithm needs to
+// run against a path that isn't necessarily the live browser URL — e.g. a
+// docs demo simulating navigation without actually leaving the page.
+// Exact match always wins; otherwise the longest href that's an ancestor of
+// pathname wins, so a general link (e.g. "/projects") still lights up when no
+// more specific sibling (e.g. "/projects/overview") is present. "/" is never
+// treated as an ancestor of every route — it only matches pathname === "/".
+export const resolveSidebarActiveHref = (hrefs: string[], pathname: string | null): string | null =>
+{
+	if(pathname === null) return null;
+
+	let best: string | null = null;
+	for(const href of hrefs)
+	{
+		const matches = href === '/' ? pathname === '/' : pathname === href || pathname.startsWith(`${href}/`);
+		if(!matches) continue;
+		if(best === null || href.length > best.length) best = href;
+	}
+	return best;
+};
 
 // ─── Sidebar ────────────────────────────────────────────────────────────────
 
@@ -57,6 +112,15 @@ export const Sidebar = (
         onCollapsedChange?.(next);
     };
 
+    const activeHref = useMemo(() =>
+    {
+        const hrefs: string[] = [];
+        collectAutoMatchHrefs(children, hrefs);
+        return resolveSidebarActiveHref(hrefs, pathname);
+    }, [children, pathname]);
+
+    const activeLinkContextValue = useMemo(() => ({ activeHref }), [activeHref]);
+
     const childList   = Children.toArray(children);
     const headerChild = childList.find(child => isValidElement(child) && child.type === SidebarHeader);
     const footerChild = childList.find(child => isValidElement(child) && child.type === SidebarFooter);
@@ -65,8 +129,11 @@ export const Sidebar = (
     useEffect(() =>
     {
         if(!sidebarRef.current) return;
+        // [data-sidebar-item] covers both SidebarLink's <a> and SidebarButton's
+        // <button>, so URL navigation and event-triggering items share one
+        // roving-tabindex/arrow-key sequence.
         const links = Array.from(
-            sidebarRef.current.querySelectorAll<HTMLAnchorElement>('a[href]')
+            sidebarRef.current.querySelectorAll<HTMLElement>('[data-sidebar-item]')
         );
         // When more than one link shares aria-current (e.g. a parent "All X" link
         // plus the specific active child), prefer the most specific: last in DOM order.
@@ -101,9 +168,17 @@ export const Sidebar = (
         // with a trailing `action` wraps its <a> in an extra positioned container,
         // which would otherwise become the anchor's offsetParent and throw off
         // offsetTop. Rect math stays correct regardless of intermediate wrappers.
-        const containerRect = (indicator.offsetParent as HTMLElement ?? sidebar).getBoundingClientRect();
+        const container      = (indicator.offsetParent as HTMLElement) ?? sidebar;
+        const containerRect  = container.getBoundingClientRect();
         const activeRect     = active.getBoundingClientRect();
-        const top            = activeRect.top - containerRect.top;
+        // activeRect/containerRect are both viewport-relative, so their difference is
+        // only the offset within the container's *currently visible* scroll window —
+        // it silently loses however far the container has already scrolled. `top` is
+        // then used as `style.top` on an absolutely-positioned child, which is measured
+        // from the container's content box (unscrolled origin), so the container's own
+        // scrollTop has to be added back in or the indicator lands exactly that far off
+        // from the active link every time the list isn't scrolled to the very top.
+        const top            = activeRect.top - containerRect.top + container.scrollTop;
         const height         = activeRect.height;
 
         if(!initialized.current)
@@ -120,21 +195,25 @@ export const Sidebar = (
             indicator.style.top    = `${top}px`;
             indicator.style.height = `${height}px`;
         }
-    }, [pathname, isCollapsed]);
+    // `children` (not just pathname) drives this: a SidebarButton's isActive is
+    // consumer state, not the URL, so a button click never touches pathname —
+    // re-measuring on every children change is what lets the indicator follow
+    // event-driven selection, not just route changes.
+    }, [pathname, isCollapsed, children]);
 
     const handleKeyDown = (e: KeyboardEvent<HTMLElement>) =>
     {
         if(!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
 
         const links = Array.from(
-            e.currentTarget.querySelectorAll<HTMLAnchorElement>('a[href]')
+            e.currentTarget.querySelectorAll<HTMLElement>('[data-sidebar-item]')
         );
         if(!links.length) return;
 
         const index = links.findIndex(l => l === document.activeElement);
         e.preventDefault();
 
-        let next: HTMLAnchorElement;
+        let next: HTMLElement;
         if(e.key === 'ArrowDown')      next = links[(index + 1) % links.length];
         else if(e.key === 'ArrowUp')   next = links[(index - 1 + links.length) % links.length];
         else if(e.key === 'Home')      next = links[0];
@@ -151,6 +230,7 @@ export const Sidebar = (
 
     return (
         <SidebarCollapsedContext.Provider value={isCollapsed}>
+        <SidebarActiveLinkContext.Provider value={activeLinkContextValue}>
         <aside
             {...props}
             ref={sidebarRef}
@@ -241,6 +321,7 @@ export const Sidebar = (
                 )}
             </div>
         </aside>
+        </SidebarActiveLinkContext.Provider>
         </SidebarCollapsedContext.Provider>
     );
 };
@@ -294,6 +375,76 @@ export const SidebarSection = ({ label, className = '', children, ...props }: Si
 	);
 };
 
+// ─── Shared item chrome (SidebarLink + SidebarButton) ────────────────────────
+//
+// Both a URL-driven SidebarLink and an event-driven SidebarButton render as
+// the same pill, so the class list, the icon/label markup, and the
+// action-sibling/tooltip wrapping live here once instead of drifting between
+// two copies.
+
+interface SidebarItemClassNameOptions
+{
+	hideLabel:  boolean;
+	showAction: boolean;
+	isActive:   boolean;
+	className:  string;
+}
+
+const sidebarItemClassName = ({ hideLabel, showAction, isActive, className }: SidebarItemClassNameOptions) => [
+	'relative z-10 flex w-full items-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius)] px-3 py-1.5 text-sm',
+	'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
+	'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
+	hideLabel ? 'justify-center' : '',
+	showAction ? 'pr-9' : '',
+	isActive
+		? 'text-text font-medium'
+		: 'text-text-muted hover:bg-surface-hover hover:text-text',
+	className,
+].join(' ');
+
+interface SidebarItemLabelProps
+{
+	icon?:      ReactNode;
+	hideLabel:  boolean;
+	children?:  ReactNode;
+}
+
+const SidebarItemLabel = ({ icon, hideLabel, children }: SidebarItemLabelProps) => (
+	<>
+		{icon && <span aria-hidden='true' className='shrink-0 [&>svg]:h-4 [&>svg]:w-4'>{icon}</span>}
+		<span className={hideLabel ? 'sr-only' : 'truncate'}>{children}</span>
+	</>
+);
+
+interface WrapSidebarItemOptions
+{
+	hideLabel:  boolean;
+	showAction: boolean;
+	children?:  ReactNode;
+	action?:    ReactNode;
+}
+
+const wrapSidebarItem = (item: ReactElement<HTMLAttributes<HTMLElement>>, { hideLabel, showAction, children, action }: WrapSidebarItemOptions) =>
+{
+	if(hideLabel) return <Tooltip content={children} side='right' className='w-full'>{item}</Tooltip>;
+
+	// `action` renders as a sibling of the link/button, never a descendant: nesting
+	// a button inside an anchor is invalid HTML and breaks keyboard/screen-reader
+	// behavior. It's overlaid on top of the item via absolute positioning instead,
+	// so visually it still reads as one pill while staying two separate,
+	// independently-focusable controls — clicking it can't trigger navigation.
+	if(!showAction) return item;
+
+	return (
+		<div className='relative flex w-full items-center'>
+			{item}
+			<span className='absolute right-1.5 top-1/2 z-20 -translate-y-1/2 opacity-0 motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)] group-hover:opacity-100 focus-within:opacity-100 has-[:focus-visible]:opacity-100 [div:hover>&]:opacity-100'>
+				{action}
+			</span>
+		</div>
+	);
+};
+
 // ─── SidebarLink ─────────────────────────────────────────────────────────────
 
 export interface SidebarLinkProps extends LinkProps
@@ -305,8 +456,17 @@ export interface SidebarLinkProps extends LinkProps
 	children?:  ReactNode;
 }
 
-export const SidebarLink = ({ isActive = false, icon, action, className = '', children, ...props }: SidebarLinkProps) => {
-	const collapsed  = useSidebarCollapsed();
+export const SidebarLink = ({ isActive, icon, action, className = '', children, href, ...props }: SidebarLinkProps) => {
+	const collapsed = useSidebarCollapsed();
+	const { activeHref } = useContext(SidebarActiveLinkContext);
+
+	// Only a plain string href can be matched against the current pathname; a
+	// UrlObject href opts out of auto-matching the same way an explicit isActive does.
+	// Sidebar computes activeHref by reading this same href straight off this
+	// element's props (see collectAutoMatchHrefs), so no registration step is
+	// needed here — just compare against the answer it already resolved.
+	const hrefString = typeof href === 'string' ? href : undefined;
+	const active     = isActive !== undefined ? isActive : hrefString !== undefined && hrefString === activeHref;
 	const hideLabel  = collapsed && Boolean(icon);
 	const showAction = Boolean(action) && !hideLabel;
 
@@ -315,41 +475,59 @@ export const SidebarLink = ({ isActive = false, icon, action, className = '', ch
 	const link = (
 		<Link
 			{...props}
-			aria-current={isActive ? 'page' : undefined}
-			className={[
-				'relative z-10 flex w-full items-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius)] px-3 py-1.5 text-sm',
-				'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
-				'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
-				hideLabel ? 'justify-center' : '',
-				showAction ? 'pr-9' : '',
-				isActive
-					? 'text-text font-medium'
-					: 'text-text-muted hover:bg-surface-hover hover:text-text',
-				className,
-			].join(' ')}
+			href={href}
+			data-sidebar-item=''
+			aria-current={active ? 'page' : undefined}
+			className={sidebarItemClassName({ hideLabel, showAction, isActive: active, className })}
 		>
-			{icon && <span aria-hidden='true' className='shrink-0 [&>svg]:h-4 [&>svg]:w-4'>{icon}</span>}
-			<span className={hideLabel ? 'sr-only' : 'truncate'}>{children}</span>
+			<SidebarItemLabel icon={icon} hideLabel={hideLabel}>{children}</SidebarItemLabel>
 		</Link>
 	);
 
-	if(hideLabel) return <Tooltip content={children} side='right' className='w-full'>{link}</Tooltip>;
+	return wrapSidebarItem(link, { hideLabel, showAction, children, action });
+};
 
-	// `action` renders as a sibling of the <a>, never a descendant: nesting a
-	// button inside an anchor is invalid HTML and breaks keyboard/screen-reader
-	// behavior. It's overlaid on top of the link via absolute positioning instead,
-	// so visually it still reads as one pill while staying two separate,
-	// independently-focusable controls — clicking it can't trigger navigation.
-	if(!showAction) return link;
+// ─── SidebarButton ────────────────────────────────────────────────────────────
+//
+// Same pill as SidebarLink, but for sidebar items that swap content without
+// changing the URL (e.g. an inbox/drafts/sent switcher). `isActive` is fully
+// controlled by the consumer — there's no pathname to derive it from — so it
+// always defaults to false rather than auto-matching anything.
 
-	return (
-		<div className='relative flex w-full items-center'>
-			{link}
-			<span className='absolute right-1.5 top-1/2 z-20 -translate-y-1/2 opacity-0 motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)] group-hover:opacity-100 focus-within:opacity-100 has-[:focus-visible]:opacity-100 [div:hover>&]:opacity-100'>
-				{action}
-			</span>
-		</div>
+export interface SidebarButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'>
+{
+	isActive?:  boolean;
+	indicator?: boolean;
+	icon?:      ReactNode;
+	action?:    ReactNode;
+	className?: string;
+	children?:  ReactNode;
+}
+
+export const SidebarButton = ({ isActive = false, indicator = true, icon, action, className = '', children, ...props }: SidebarButtonProps) => {
+	const collapsed  = useSidebarCollapsed();
+	const hideLabel  = collapsed && Boolean(icon);
+	const showAction = Boolean(action) && !hideLabel;
+
+	if(collapsed && !icon) return null;
+
+	// `indicator` opts a button out of the sliding active-pill: still styles as
+	// active (bold text) when isActive, but never sets aria-current, so a button
+	// that isn't part of an exclusive "current view" group (e.g. a one-off
+	// "Compose" action) can't drag the shared indicator over to itself.
+	const button = (
+		<button
+			type='button'
+			{...props}
+			data-sidebar-item=''
+			aria-current={isActive && indicator ? 'page' : undefined}
+			className={sidebarItemClassName({ hideLabel, showAction, isActive, className })}
+		>
+			<SidebarItemLabel icon={icon} hideLabel={hideLabel}>{children}</SidebarItemLabel>
+		</button>
 	);
+
+	return wrapSidebarItem(button, { hideLabel, showAction, children, action });
 };
 
 // ─── SidebarDivider ───────────────────────────────────────────────────────────

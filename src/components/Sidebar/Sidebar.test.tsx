@@ -1,7 +1,21 @@
-import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from './Sidebar';
+import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarButton, SidebarDivider } from './Sidebar';
+import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
+import { usePathname } from 'next/navigation';
+
+vi.mock('next/navigation', () => ({
+	usePathname: vi.fn(() => null),
+}));
+
+// Next's usePathname() types its return as non-nullable string, but it's
+// actually null outside a router context (this test environment included);
+// cast once here rather than fighting that mismatch at every call site.
+const mockUsePathname = usePathname as unknown as Mock<(...args: never[]) => string | null>;
+
+beforeEach(() => {
+	mockUsePathname.mockReturnValue(null);
+});
 
 describe('Sidebar', () =>
 {
@@ -389,6 +403,165 @@ describe('SidebarLink', () =>
 			</Sidebar>
 		);
 		expect(screen.queryByRole('button', { name: 'star' })).toBeNull();
+	});
+});
+
+describe('SidebarLink automatic hierarchy matching', () =>
+{
+	it('marks a link active when its href exactly matches the current pathname', () =>
+	{
+		mockUsePathname.mockReturnValue('/chat/abc');
+		render(
+			<Sidebar>
+				<SidebarLink href='/chat/abc'>Chat</SidebarLink>
+				<SidebarLink href='/projects'>Projects</SidebarLink>
+			</Sidebar>
+		);
+		expect(screen.getByRole('link', { name: 'Chat' }).getAttribute('aria-current')).toBe('page');
+		expect(screen.getByRole('link', { name: 'Projects' }).getAttribute('aria-current')).toBeNull();
+	});
+
+	it('falls back to the closest ancestor link when no exact match is registered', () =>
+	{
+		mockUsePathname.mockReturnValue('/projects/overview');
+		render(
+			<Sidebar>
+				<SidebarLink href='/projects'>Projects</SidebarLink>
+			</Sidebar>
+		);
+		expect(screen.getByRole('link', { name: 'Projects' }).getAttribute('aria-current')).toBe('page');
+	});
+
+	it('prefers the most specific (longest) matching href over a shorter ancestor', () =>
+	{
+		mockUsePathname.mockReturnValue('/projects/overview');
+		render(
+			<Sidebar>
+				<SidebarLink href='/projects'>Projects</SidebarLink>
+				<SidebarLink href='/projects/overview'>Overview</SidebarLink>
+			</Sidebar>
+		);
+		expect(screen.getByRole('link', { name: 'Overview' }).getAttribute('aria-current')).toBe('page');
+		expect(screen.getByRole('link', { name: 'Projects' }).getAttribute('aria-current')).toBeNull();
+	});
+
+	it('does not treat href="/" as a prefix match for every route', () =>
+	{
+		mockUsePathname.mockReturnValue('/chat/abc');
+		render(
+			<Sidebar>
+				<SidebarLink href='/'>Home</SidebarLink>
+			</Sidebar>
+		);
+		expect(screen.getByRole('link', { name: 'Home' }).getAttribute('aria-current')).toBeNull();
+	});
+
+	it('respects an explicit isActive prop as an override, ignoring the pathname', () =>
+	{
+		mockUsePathname.mockReturnValue('/chat/abc');
+		render(
+			<Sidebar>
+				<SidebarLink href='/chat/abc' isActive={false}>Chat</SidebarLink>
+			</Sidebar>
+		);
+		expect(screen.getByRole('link', { name: 'Chat' }).getAttribute('aria-current')).toBeNull();
+	});
+});
+
+describe('SidebarButton', () =>
+{
+	it('renders as a button, not a link', () =>
+	{
+		render(<SidebarButton>Inbox</SidebarButton>);
+		expect(screen.getByRole('button', { name: 'Inbox' })).toBeTruthy();
+	});
+
+	it('calls onClick when clicked', async () =>
+	{
+		const user    = userEvent.setup();
+		const onClick = vi.fn();
+		render(<SidebarButton onClick={onClick}>Inbox</SidebarButton>);
+		await user.click(screen.getByRole('button', { name: 'Inbox' }));
+		expect(onClick).toHaveBeenCalledTimes(1);
+	});
+
+	it('applies active styles and aria-current when isActive', () =>
+	{
+		render(<SidebarButton isActive>Inbox</SidebarButton>);
+		const button = screen.getByRole('button', { name: 'Inbox' });
+		expect(button.className).toContain('text-text');
+		expect(button.className).toContain('font-medium');
+		expect(button.getAttribute('aria-current')).toBe('page');
+	});
+
+	it('omits aria-current when indicator is false, even while active', () =>
+	{
+		render(<SidebarButton isActive indicator={false}>Inbox</SidebarButton>);
+		const button = screen.getByRole('button', { name: 'Inbox' });
+		expect(button.className).toContain('font-medium');
+		expect(button.getAttribute('aria-current')).toBeNull();
+	});
+
+	it('drives the sliding indicator the same way an active SidebarLink does', () =>
+	{
+		const { container } = render(
+			<Sidebar>
+				<SidebarButton isActive>Inbox</SidebarButton>
+			</Sidebar>
+		);
+		const indicator = container.querySelector('.bg-surface-active') as HTMLElement;
+		expect(indicator.style.opacity).toBe('1');
+	});
+
+	it('hides the label as sr-only but keeps the icon when the parent Sidebar is collapsed', () =>
+	{
+		render(
+			<Sidebar collapsed>
+				<SidebarButton icon={<svg data-testid='icon' />}>Inbox</SidebarButton>
+			</Sidebar>
+		);
+		expect(screen.getByTestId('icon')).toBeTruthy();
+		expect(screen.getByText('Inbox').className).toContain('sr-only');
+	});
+
+	it('does not render at all when collapsed and no icon is provided', () =>
+	{
+		render(
+			<Sidebar collapsed>
+				<SidebarButton>Inbox</SidebarButton>
+			</Sidebar>
+		);
+		expect(screen.queryByRole('button', { name: 'Inbox' })).toBeNull();
+	});
+
+	it('renders the action as a sibling, never a descendant of the button', () =>
+	{
+		render(
+			<SidebarButton action={<button aria-label='Favorite'>star</button>}>
+				Inbox
+			</SidebarButton>
+		);
+		const button = screen.getByRole('button', { name: 'Inbox' });
+		const action = screen.getByRole('button', { name: 'Favorite' });
+		expect(button.contains(action)).toBe(false);
+	});
+
+	it('shares roving tabindex / arrow-key navigation with SidebarLink', async () =>
+	{
+		const user = userEvent.setup();
+		render(
+			<Sidebar>
+				<SidebarLink href='/home'>Home</SidebarLink>
+				<SidebarButton>Inbox</SidebarButton>
+			</Sidebar>
+		);
+		const link   = screen.getByRole('link', { name: 'Home' });
+		const button = screen.getByRole('button', { name: 'Inbox' });
+
+		link.focus();
+		await user.keyboard('{ArrowDown}');
+
+		expect(button).toHaveFocus();
 	});
 });
 
