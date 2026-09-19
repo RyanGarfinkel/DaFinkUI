@@ -217,9 +217,14 @@ export const BarChart = (
     }: BarChartProps
 ) => {
 	return (
-		<div className={`w-full ${className}`} style={{ height }} role='img' aria-label='Bar chart'>
+		<div className={`w-full ${className}`} style={{ height }}>
 			<ResponsiveContainer width='100%' height='100%'>
-				<RechartsBarChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: -16 }} barGap={4}>
+				<RechartsBarChart
+					data={data}
+					margin={{ top: 8, right: 8, bottom: 0, left: -16 }}
+					barGap={4}
+					title='Bar chart'
+				>
 					{showGrid && (
 						<CartesianGrid
 							strokeDasharray='3 3'
@@ -231,7 +236,9 @@ export const BarChart = (
 					<YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} />
 					<Tooltip
 						content={(props) => <ChartTooltip {...(props as unknown as Parameters<typeof ChartTooltip>[0])} />}
-						cursor={{ fill: 'var(--color-surface-hover)' }}
+						cursor={false}
+						shared
+						isAnimationActive={false}
 					/>
 					{showLegend && <Legend wrapperStyle={LEGEND_STYLE} iconType='circle' iconSize={8} />}
 					{series.map((s, i) => (
@@ -242,7 +249,8 @@ export const BarChart = (
 							fill={seriesColor(s, i)}
 							radius={stacked && i < series.length - 1 ? [0, 0, 0, 0] : [4, 4, 0, 0]}
 							stackId={stacked ? 'stack' : undefined}
-							maxBarSize={40}
+							barSize={40}
+							activeBar={{ fillOpacity: 0.8 }}
 							animationDuration={ANIMATION_DURATION}
 							animationEasing={ANIMATION_EASING}
 						/>
