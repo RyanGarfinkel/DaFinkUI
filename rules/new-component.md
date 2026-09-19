@@ -64,7 +64,7 @@ The `usage` field must be a complete, runnable code example, not a snippet. The 
 
 Every registry entry must explicitly declare its dependencies. Omitting them breaks the CLI installer for users.
 
-**`dependencies`**: npm packages the component imports that are not already in the base install (`react`, `react-dom`, `next`, `tailwindcss`). Example: a CalendarInput that uses `date-fns` must list `["date-fns"]`.
+**`dependencies`**: npm packages the component imports that are not already in the base install (`react`, `react-dom`, `next`, `tailwindcss`). Example: a CalendarInput that uses `date-fns` must list `["date-fns"]`. Before adding a new npm package to any component, ask the user first — do not introduce one unprompted, even if it would simplify the implementation. There is no blanket "stay dependency-free" rule; some components (e.g. the chart family) intentionally depend on packages like `recharts`. The decision is made case-by-case, with the user, at the time.
 
 **`registryDependencies`**: other components from this registry that must be present for this component to work. Use the slug (lowercase). Example: a Modal that renders a Button internally must list `["button"]`. The CLI resolves these transitively; declare only direct dependencies, not the full tree.
 
