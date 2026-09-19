@@ -207,7 +207,7 @@ const OTPInput = ({
 								<span
 									aria-hidden='true'
 									className={[
-										'dafink-otp-cursor absolute bottom-2.5 left-1/2 -translate-x-1/2 h-0.5 w-5 rounded-full',
+										'dafink-otp-cursor absolute bottom-2.5 left-1/2 -translate-x-1/2 h-0.5 w-4 rounded-full',
 										error ? 'bg-input-error-ring' : 'bg-input-ring',
 									].join(' ')}
 								/>
