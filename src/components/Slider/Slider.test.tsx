@@ -79,13 +79,26 @@ describe('Slider', () =>
 		expect(input.className).toContain('disabled:pointer-events-none');
 	});
 
-	it('has focus-visible ring classes', () =>
+	it('suppresses the default focus outline and applies the thumb-focus class', () =>
 	{
 		const { container } = render(<Slider value={50} onValueChange={() => {}} />);
 		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
-		expect(input.className).toContain('focus-visible:ring-2');
-		expect(input.className).toContain('focus-visible:ring-offset-2');
-		expect(input.className).toContain('focus-visible:ring-brand-ring');
+		expect(input.className).toContain('focus:outline-none');
+		expect(input.className).toContain('dafink-slider-thumb');
+	});
+
+	it('sets the brand ring CSS variable for the default tone', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		expect(input.style.getPropertyValue('--slider-ring')).toBe('var(--color-brand-ring)');
+	});
+
+	it('sets the currentColor ring variable for tone="current"', () =>
+	{
+		const { container } = render(<Slider value={50} onValueChange={() => {}} tone='current' />);
+		const input = container.querySelector('input[type="range"]') as HTMLInputElement;
+		expect(input.style.getPropertyValue('--slider-ring')).toBe('currentColor');
 	});
 
 	it('forwards className to the root element', () =>
@@ -93,7 +106,7 @@ describe('Slider', () =>
 		const { container } = render(
 			<Slider value={50} onValueChange={() => {}} className='my-custom-class' />
 		);
-		expect(container.firstElementChild?.className).toContain('my-custom-class');
+		expect(container.querySelector('.my-custom-class')).not.toBeNull();
 	});
 
 	it('links label to input via htmlFor and id', () =>
@@ -215,6 +228,6 @@ describe('Slider', () =>
 		expect(track.className).toContain('bg-current/20');
 		expect(fill?.className).toContain('bg-current');
 		expect(fill?.className).not.toContain('bg-brand');
-		expect(input.style.accentColor).toBe('currentcolor');
+		expect(input.style.getPropertyValue('--slider-thumb-color')).toBe('currentColor');
 	});
 });

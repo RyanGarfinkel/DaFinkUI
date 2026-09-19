@@ -142,7 +142,7 @@ describe('AudioPlayer', () =>
 		expect(playButton.className).not.toContain('bg-brand');
 
 		const seekSlider = screen.getByRole('slider', { name: 'Seek' });
-		expect(seekSlider.style.accentColor).toBe('currentcolor');
+		expect(seekSlider.style.getPropertyValue('--slider-thumb-color')).toBe('currentColor');
 	});
 
 	it('renders only play and seek in compact size, omitting skip/volume/speed', () =>
