@@ -4,8 +4,7 @@ import { KeyboardEvent, useLayoutEffect, useRef } from 'react';
 
 type ColumnKey = 'hour' | 'minute' | 'second' | 'meridiem';
 
-export interface TimeWheelProps
-{
+export interface TimeWheelProps {
 	hour:      number;
 	minute:    number;
 	second:    number;

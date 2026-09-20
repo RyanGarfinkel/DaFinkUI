@@ -1,11 +1,8 @@
 import { AnchorHTMLAttributes, ButtonHTMLAttributes, Children, HTMLAttributes, ReactElement, ReactNode, cloneElement, isValidElement } from 'react';
 
-// ─── Message ──────────────────────────────────────────────────────────────────
-
 export type MessageVariant = 'sent' | 'received';
 
-export interface MessageProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface MessageProps extends HTMLAttributes<HTMLDivElement> {
 	variant?: MessageVariant;
 	avatar?:  ReactNode;
 	/** Set false to render children without the bubble background/padding: for content that supplies its own chrome (an image, an AudioPlayer), so it isn't nested inside a second colored box. Alignment, max-width, and reaction placement are unaffected. */
@@ -53,10 +50,7 @@ export const Message = ({ variant = 'received', avatar, bubble = true, className
 	);
 };
 
-// ─── MessageReactions ─────────────────────────────────────────────────────────
-
-export interface MessageReactionsProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface MessageReactionsProps extends HTMLAttributes<HTMLDivElement> {
 	/** Maximum number of reaction chips shown before the rest collapse into a "+N" indicator: overlapped into a stack like AvatarGroup, rather than wrapping onto more rows. */
 	max?: number;
 }
@@ -95,10 +89,7 @@ export const MessageReactions = ({ className = '', children, max, 'aria-label': 
 	);
 };
 
-// ─── MessageReaction ──────────────────────────────────────────────────────────
-
-interface MessageReactionSharedProps
-{
+interface MessageReactionSharedProps {
 	/** Decorative glyph: emoji string or icon node. Always hidden from the accessibility tree. */
 	icon?:      ReactNode;
 	/** Visible text next to the icon: a count label, a footnote number, or a source name. */
@@ -110,20 +101,17 @@ interface MessageReactionSharedProps
 	className?: string;
 }
 
-export interface MessageReactionLinkProps extends MessageReactionSharedProps, Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children'>
-{
+export interface MessageReactionLinkProps extends MessageReactionSharedProps, Omit<AnchorHTMLAttributes<HTMLAnchorElement>, 'href' | 'children'> {
 	href: string;
 }
 
-export interface MessageReactionButtonProps extends MessageReactionSharedProps, Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'>
-{
+export interface MessageReactionButtonProps extends MessageReactionSharedProps, Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
 	href?: undefined;
 }
 
 export type MessageReactionProps = MessageReactionLinkProps | MessageReactionButtonProps;
 
-interface ReactionVisualProps
-{
+interface ReactionVisualProps {
 	icon?:   ReactNode;
 	label?:  ReactNode;
 	count?:  number;

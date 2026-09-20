@@ -1,16 +1,14 @@
 import { ReactNode } from 'react';
 import Link from 'next/link';
 
-export interface BreadcrumbItem
-{
+export interface BreadcrumbItem {
 	label: string;
 	href?: string;
 	/** When set, the item renders as a button that calls this instead of a Link, for crumbs that switch in-page state rather than navigate. Takes precedence over `href`. */
 	onClick?: () => void;
 }
 
-export interface BreadcrumbProps
-{
+export interface BreadcrumbProps {
 	items:      BreadcrumbItem[];
 	separator?: ReactNode;
 	className?: string;

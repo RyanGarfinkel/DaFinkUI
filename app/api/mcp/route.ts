@@ -9,8 +9,7 @@ import { registerPrompts } from './resources/prompts';
 import { getTokens } from './resources/tokens';
 import { z } from 'zod';
 
-const buildServer = (): McpServer =>
-{
+const buildServer = (): McpServer => {
 	const server = new McpServer({ name: 'dafink-ui', version: '1.0.0' });
 
 	server.resource('components', 'dafink://components', async () => ({
@@ -115,8 +114,7 @@ const buildServer = (): McpServer =>
 	return server;
 }
 
-const handle = async (req: Request): Promise<Response> =>
-{
+const handle = async (req: Request): Promise<Response> => {
 	const transport = new WebStandardStreamableHTTPServerTransport({ sessionIdGenerator: undefined });
 	await buildServer().connect(transport);
 	return transport.handleRequest(req);

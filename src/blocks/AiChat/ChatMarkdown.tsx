@@ -9,8 +9,7 @@ import Formula from '../../components/Formula/Formula';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 
-export interface ChatMarkdownProps
-{
+export interface ChatMarkdownProps {
 	text: string;
 }
 

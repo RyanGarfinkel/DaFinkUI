@@ -25,8 +25,7 @@ const PRINCIPLES = [
 	},
 ];
 
-const Home = () =>
-{
+const Home = () => {
 	return (
 		<div className='flex flex-col gap-14'>
 

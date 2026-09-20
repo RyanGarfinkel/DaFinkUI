@@ -6,8 +6,7 @@ import Button from '../../components/Button/Button';
 import Input from '../../components/Input/Input';
 import { ChangeEvent, useState } from 'react';
 
-export interface QuestionOption
-{
+export interface QuestionOption {
 	id:           string;
 	label:        string;
 	description?: string;
@@ -19,8 +18,7 @@ export type QuestionStep =
 	| { type: 'number';   question: string; description?: string; placeholder?: string }
 	| { type: 'calendar'; question: string; description?: string };
 
-export interface QuestionCardProps
-{
+export interface QuestionCardProps {
 	/** The question and its input control to render. */
 	step:       QuestionStep;
 	/** When set, the card renders as a locked "You answered: {answer}" summary instead of the input control. */
@@ -38,8 +36,7 @@ const CheckIcon = () => (
 	</svg>
 );
 
-interface RadioOptionCardProps
-{
+interface RadioOptionCardProps {
 	option:   QuestionOption;
 	letter:   string;
 	checked:  boolean;

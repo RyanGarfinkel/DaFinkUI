@@ -6,8 +6,7 @@ import Tooltip from '../Tooltip/Tooltip';
 
 export type CodeBlockVariant = 'code' | 'example';
 
-export interface CodeBlockProps
-{
+export interface CodeBlockProps {
 	/** The raw source code string shown in the code panel. */
 	code:             string;
 	/** Preview content for variant="example". */
@@ -41,8 +40,7 @@ const CheckIcon = () => (
 	</svg>
 );
 
-const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: boolean; onCodeChange?: (code: string) => void }) =>
-{
+const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: boolean; onCodeChange?: (code: string) => void }) => {
 	const [copied, setCopied] = useState(false);
 	const [isOverflowing, setIsOverflowing] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -64,8 +62,7 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 
 	const currentCode = () => editable && textareaRef.current ? textareaRef.current.value : code;
 
-	const handleCopy = async () =>
-	{
+	const handleCopy = async () => {
 		try
 		{
 			await navigator.clipboard.writeText(currentCode());
@@ -78,8 +75,7 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 		}
 	};
 
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) =>
-	{
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		if(e.key !== 'Tab') return;
 
 		e.preventDefault();
@@ -159,8 +155,7 @@ export const CodeBlock = (
 		editable,
 		onCodeChange,
 	}: CodeBlockProps
-) =>
-{
+) => {
 	const [tab, setTab] = useState<string>('preview');
 	const [liveCode, setLiveCode] = useState(code);
 	const [previewOverflowing, setPreviewOverflowing] = useState(false);
@@ -181,8 +176,7 @@ export const CodeBlock = (
 		return () => observer.disconnect();
 	}, [tab]);
 
-	const handleCodeChange = (value: string) =>
-	{
+	const handleCodeChange = (value: string) => {
 		setLiveCode(value);
 		onCodeChange?.(value);
 	};

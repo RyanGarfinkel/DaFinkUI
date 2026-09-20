@@ -5,7 +5,6 @@ import { createContext, useContext, useEffect, useRef, useState, useId, useSyncE
 import { Card, CardHeader, CardContent, CardFooter } from '../Card/Card';
 import { createPortal } from 'react-dom';
 
-// ─── Focusable-element selector ───────────────────────────────────────────────
 // SidePanel is non-modal (see below), so this is only used to focus the first
 // element on open; there is no Tab-trap, unlike Drawer/Modal.
 
@@ -18,11 +17,7 @@ const FOCUSABLE_SELECTOR = [
 	'[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
-// ─── Exit animation duration (matches --duration-fast) ───────────────────────
-
 const EXIT_DURATION_MS = 150;
-
-// ─── Side variants ────────────────────────────────────────────────────────────
 
 export type SidePanelSide = 'left' | 'right' | 'top' | 'bottom';
 
@@ -50,10 +45,7 @@ const STACK_OFFSET_TRANSFORM: Record<SidePanelSide, (px: number) => string> = {
 	bottom: (px) => `translateY(-${px}px)`,
 };
 
-// ─── SidePanel context ────────────────────────────────────────────────────────
-
-interface SidePanelContextValue
-{
+interface SidePanelContextValue {
 	titleId:      string;
 	requestClose: () => void;
 	isBlocked:    boolean;
@@ -61,8 +53,7 @@ interface SidePanelContextValue
 
 const SidePanelContext = createContext<SidePanelContextValue | null>(null);
 
-const useSidePanelContext = () =>
-{
+const useSidePanelContext = () => {
 	const ctx = useContext(SidePanelContext);
 	if(!ctx) throw new Error('SidePanel subcomponents must be used inside <SidePanel>');
 	return ctx;
@@ -73,15 +64,13 @@ const useSidePanelContext = () =>
  * to disable any custom close controls you build outside of `SidePanelClose`. */
 export const useSidePanelBlocked = (): boolean => useSidePanelContext().isBlocked;
 
-// ─── SidePanel ────────────────────────────────────────────────────────────────
 // Deliberately non-modal: unlike Modal/Dialog/Drawer, SidePanel never inerts the
 // rest of the page (no native <dialog>.showModal(), no focus trap, no backdrop).
 // It behaves like a docked panel: it stays open until Escape or an explicit
 // close action, so multiple independent SidePanels can be open at once, each
 // with its own trigger elsewhere on the page.
 
-export interface SidePanelProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface SidePanelProps extends HTMLAttributes<HTMLDivElement> {
 	open:         boolean;
 	onOpenChange: (open: boolean) => void;
 	side?:        SidePanelSide;
@@ -121,8 +110,7 @@ const SidePanel = (
 	const stackOffset = computeStackOffset(stack, panelId);
 	const isBlocked    = isBlockedInStack(stack, panelId);
 
-	const requestClose = () =>
-	{
+	const requestClose = () => {
 		if(isBlocked) return;
 		onOpenChange(false);
 	};
@@ -175,8 +163,7 @@ const SidePanel = (
 		return () => cancelAnimationFrame(frame);
 	}, [mounted]);
 
-	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) =>
-	{
+	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
 		if(e.key !== 'Escape') return;
 		e.stopPropagation();
 		requestClose();
@@ -197,8 +184,7 @@ const SidePanel = (
 		if(!mounted || !panelRef.current) return;
 		const el = panelRef.current;
 
-		const measure = () =>
-		{
+		const measure = () => {
 			const rect = el.getBoundingClientRect();
 			const size = side === 'left' || side === 'right' ? rect.width : rect.height;
 			reportStackEntrySize(side, panelId, size);
@@ -251,10 +237,7 @@ const SidePanel = (
 
 export default SidePanel;
 
-// ─── SidePanelHeader ──────────────────────────────────────────────────────────
-
-export interface SidePanelHeaderProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface SidePanelHeaderProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
@@ -266,10 +249,7 @@ export const SidePanelHeader = ({ className = '', children, ...props }: SidePane
 	);
 };
 
-// ─── SidePanelTitle ───────────────────────────────────────────────────────────
-
-export interface SidePanelTitleProps extends HTMLAttributes<HTMLHeadingElement>
-{
+export interface SidePanelTitleProps extends HTMLAttributes<HTMLHeadingElement> {
 	className?: string;
 }
 
@@ -283,10 +263,7 @@ export const SidePanelTitle = ({ className = '', children, ...props }: SidePanel
 	);
 };
 
-// ─── SidePanelContent ─────────────────────────────────────────────────────────
-
-export interface SidePanelContentProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface SidePanelContentProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
@@ -298,10 +275,7 @@ export const SidePanelContent = ({ className = '', children, ...props }: SidePan
 	);
 };
 
-// ─── SidePanelFooter ──────────────────────────────────────────────────────────
-
-export interface SidePanelFooterProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface SidePanelFooterProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
@@ -313,10 +287,7 @@ export const SidePanelFooter = ({ className = '', children, ...props }: SidePane
 	);
 };
 
-// ─── SidePanelClose ───────────────────────────────────────────────────────────
-
-export interface SidePanelCloseProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface SidePanelCloseProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	className?: string;
 }
 

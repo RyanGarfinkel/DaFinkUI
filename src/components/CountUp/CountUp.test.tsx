@@ -37,8 +37,7 @@ class MockIntersectionObserver
 	}
 }
 
-const stubMatchMedia = (matches: boolean) =>
-{
+const stubMatchMedia = (matches: boolean) => {
 	vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({
 		matches,
 		addEventListener:    vi.fn(),
@@ -47,8 +46,7 @@ const stubMatchMedia = (matches: boolean) =>
 };
 
 /** rAF stub that completes the animation in a single synchronous frame. */
-const stubInstantAnimationFrame = () =>
-{
+const stubInstantAnimationFrame = () => {
 	vi.spyOn(performance, 'now').mockReturnValue(0);
 	vi.stubGlobal('requestAnimationFrame', vi.fn((cb: FrameRequestCallback) =>
 	{

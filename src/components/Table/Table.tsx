@@ -5,38 +5,32 @@ import { createContext, useContext, TableHTMLAttributes, ThHTMLAttributes, TdHTM
 export type SortDirection = 'asc' | 'desc' | null;
 export type TableVariant = 'default' | 'minimal';
 
-export interface TableProps extends TableHTMLAttributes<HTMLTableElement>
-{
+export interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
 	striped?: boolean;
 	variant?: TableVariant;
 	className?: string;
 }
 
-export interface TableHeadProps extends HTMLAttributes<HTMLTableSectionElement>
-{
+export interface TableHeadProps extends HTMLAttributes<HTMLTableSectionElement> {
 	className?: string;
 }
 
-export interface TableBodyProps extends HTMLAttributes<HTMLTableSectionElement>
-{
+export interface TableBodyProps extends HTMLAttributes<HTMLTableSectionElement> {
 	className?: string;
 }
 
-export interface TableRowProps extends HTMLAttributes<HTMLTableRowElement>
-{
+export interface TableRowProps extends HTMLAttributes<HTMLTableRowElement> {
 	header?: boolean;
 	className?: string;
 }
 
-export interface TableHeaderProps extends ThHTMLAttributes<HTMLTableCellElement>
-{
+export interface TableHeaderProps extends ThHTMLAttributes<HTMLTableCellElement> {
 	sortDirection?: SortDirection;
 	onSort?: () => void;
 	className?: string;
 }
 
-export interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement>
-{
+export interface TableCellProps extends TdHTMLAttributes<HTMLTableCellElement> {
 	className?: string;
 }
 

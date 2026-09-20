@@ -3088,7 +3088,6 @@ const WORK_TYPE_OPTIONS = [
 
 const STAGE_OPTIONS = STAGES.map((stage) => ({ value: stage.id, label: stage.title }));
 
-// ─── Inline table fields ──────────────────────────────────────────────────────
 // The table doubles as an editable grid using the same Input/Select components as
 // the details modal — no need to open the modal just to fix a role, stage, or
 // salary. At rest a cell reads as plain text; hovering or focusing it reveals the
@@ -3121,8 +3120,6 @@ const InlineDateField = ({ value, onChange, ariaLabel }: InlineDateFieldProps) =
 	/>
 );
 
-// ─── Header icons ─────────────────────────────────────────────────────────────
-
 const FileIcon = () => (
 	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
 		<path d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z' />
@@ -3136,7 +3133,6 @@ const SparkleIcon = () => (
 	</svg>
 );
 
-// ─── BoardColumn ──────────────────────────────────────────────────────────────
 // Its own droppable region (not just a SortableContext) so a column that's been
 // dragged empty can still be dropped back into.
 
@@ -3171,8 +3167,6 @@ const BoardColumn = ({ stage, applications, onOpen }: BoardColumnProps) =>
 		</div>
 	);
 };
-
-// ─── JobApplicationTracker ────────────────────────────────────────────────────
 
 export const JobApplicationTracker = () =>
 {
@@ -3417,7 +3411,6 @@ export default JobApplicationTracker;`,
 		files: ['JobApplicationTracker/JobApplicationTracker.tsx', 'JobApplicationTracker/ApplicationCard.tsx', 'JobApplicationTracker/ApplicationDetailsModal.tsx'],
 	},
 
-	// ─── Block example variants (see blockExamples.tsx) ──────────────────────
 	// Registered so they're individually installable via the CLI and directly
 	// linkable at /blocks/{slug}, but `hidden: true` keeps them off the /blocks
 	// gallery: each is a variant of its parent block, not its own distinct block.

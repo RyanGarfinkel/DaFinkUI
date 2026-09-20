@@ -4,8 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import Confetti from './Confetti';
 
-const stubMatchMedia = (matches: boolean) =>
-{
+const stubMatchMedia = (matches: boolean) => {
 	vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches }));
 };
 

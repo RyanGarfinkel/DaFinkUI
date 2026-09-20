@@ -67,7 +67,6 @@ const CardDetails: KanbanCardDetailsRenderer = ({ card, onUpdate, onDelete, onCl
   );
 };
 
-// ─── jsdom stubs ──────────────────────────────────────────────────────────────
 // jsdom doesn't implement <dialog>.showModal()/close(), which the Modal used by
 // the card details popup relies on.
 

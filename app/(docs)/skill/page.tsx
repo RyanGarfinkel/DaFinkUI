@@ -35,8 +35,7 @@ const MOBILE_SECTIONS: { title: string; desc: string }[] = [
   { title: '9. Common Pitfalls', desc: 'Mistakes agents commonly make building mobile UI with this library.' },
 ];
 
-const SkillPage = () =>
-{
+const SkillPage = () => {
   return (
     <div className='flex flex-col gap-12'>
 

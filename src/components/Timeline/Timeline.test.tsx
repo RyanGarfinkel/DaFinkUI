@@ -4,7 +4,6 @@ import { describe, it, expect } from 'vitest';
 
 describe('Timeline', () =>
 {
-	// ── basic rendering ──────────────────────────────────────────────────────
 
 	it('renders without errors', () =>
 	{
@@ -92,8 +91,6 @@ describe('Timeline', () =>
 		expect(screen.getByText('Install dependencies')).toBeDefined();
 	});
 
-	// ── connector lines ───────────────────────────────────────────────────────
-
 	it('renders a connector for every item except the last (vertical)', () =>
 	{
 		const { container } = render(
@@ -121,8 +118,6 @@ describe('Timeline', () =>
 		expect(connectors.length).toBe(2);
 	});
 
-	// ── variant ───────────────────────────────────────────────────────────────
-
 	it('applies brand variant classes by default', () =>
 	{
 		const { container } = render(
@@ -142,8 +137,6 @@ describe('Timeline', () =>
 		);
 		expect(container.querySelector('.bg-surface-active')).not.toBeNull();
 	});
-
-	// ── spacing ───────────────────────────────────────────────────────────────
 
 	it('applies pb-8 to non-last items with the default comfortable spacing', () =>
 	{
@@ -196,8 +189,6 @@ describe('Timeline', () =>
 		expect(content?.className).not.toContain('pt-3');
 	});
 
-	// ── direction ─────────────────────────────────────────────────────────────
-
 	it('renders as flex-col by default (vertical)', () =>
 	{
 		const { container } = render(
@@ -219,8 +210,6 @@ describe('Timeline', () =>
 		const wrapper = container.querySelector('.flex-row');
 		expect(wrapper).not.toBeNull();
 	});
-
-	// ── animate ───────────────────────────────────────────────────────────────
 
 	it('renders a <style> tag when animate="stagger"', () =>
 	{
@@ -287,8 +276,6 @@ describe('Timeline', () =>
 		const item = container.querySelector<HTMLElement>('.flex.gap-4');
 		expect(item?.style.animation ?? '').toBe('');
 	});
-
-	// ── className forwarding ──────────────────────────────────────────────────
 
 	it('forwards className to the wrapper div', () =>
 	{

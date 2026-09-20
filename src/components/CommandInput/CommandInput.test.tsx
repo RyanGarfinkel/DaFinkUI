@@ -24,8 +24,6 @@ const Harness = (
 	);
 };
 
-// ─── Rendering ────────────────────────────────────────────────────────────────
-
 describe('CommandInput: rendering', () =>
 {
 	it('renders the input with placeholder', () =>
@@ -40,8 +38,6 @@ describe('CommandInput: rendering', () =>
 		expect(screen.queryByRole('listbox')).not.toBeInTheDocument();
 	});
 });
-
-// ─── Open / close ─────────────────────────────────────────────────────────────
 
 describe('CommandInput: open/close', () =>
 {
@@ -88,8 +84,6 @@ describe('CommandInput: open/close', () =>
 	});
 });
 
-// ─── Filtering ────────────────────────────────────────────────────────────────
-
 describe('CommandInput: filtering', () =>
 {
 	it('filters commands by case-insensitive prefix match', () =>
@@ -111,8 +105,6 @@ describe('CommandInput: filtering', () =>
 		expect(screen.queryByRole('option')).not.toBeInTheDocument();
 	});
 });
-
-// ─── Keyboard behavior ────────────────────────────────────────────────────────
 
 describe('CommandInput: keyboard behavior', () =>
 {
@@ -160,8 +152,6 @@ describe('CommandInput: keyboard behavior', () =>
 	});
 });
 
-// ─── Pointer selection ────────────────────────────────────────────────────────
-
 describe('CommandInput: pointer selection', () =>
 {
 	it('calls onCommand and clears the input when an option is pointer-selected', () =>
@@ -175,8 +165,6 @@ describe('CommandInput: pointer selection', () =>
 		expect(input).toHaveValue('');
 	});
 });
-
-// ─── ARIA ─────────────────────────────────────────────────────────────────────
 
 describe('CommandInput: ARIA', () =>
 {
@@ -207,8 +195,6 @@ describe('CommandInput: ARIA', () =>
 		expect(screen.getByRole('combobox')).not.toHaveAttribute('aria-activedescendant');
 	});
 });
-
-// ─── Disabled / forwarded props ───────────────────────────────────────────────
 
 describe('CommandInput: disabled and forwarded props', () =>
 {

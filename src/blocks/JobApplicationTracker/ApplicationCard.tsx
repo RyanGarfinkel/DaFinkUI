@@ -5,19 +5,15 @@ import Avatar from '../../components/Avatar/Avatar';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type ApplicationStatus = 'wishlist' | 'applied' | 'interviewing' | 'offer' | 'rejected';
 
-export interface ResumeAttachment
-{
+export interface ResumeAttachment {
 	name: string;
 	size: string;
 	url:  string;
 }
 
-export interface JobApplication
-{
+export interface JobApplication {
 	id:           string;
 	role:         string;
 	company:      string;
@@ -32,8 +28,7 @@ export interface JobApplication
 	resume?:      ResumeAttachment;
 }
 
-export interface ApplicationStage
-{
+export interface ApplicationStage {
 	id:           ApplicationStatus;
 	title:        string;
 	badgeVariant: BadgeVariant;
@@ -52,8 +47,6 @@ export const STAGES: ApplicationStage[] = [
 export const getStage = (status: ApplicationStatus): ApplicationStage => STAGES.find((stage) => stage.id === status) ?? STAGES[0];
 
 export const formatAppliedDate = (iso: string): string => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-
-// ─── Icons ────────────────────────────────────────────────────────────────────
 
 const PinIcon = () => (
 	<svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
@@ -81,18 +74,14 @@ const ChevronIcon = () => (
 	</svg>
 );
 
-// ─── ApplicationCard ──────────────────────────────────────────────────────────
-
-export interface ApplicationCardProps
-{
+export interface ApplicationCardProps {
 	application: JobApplication;
 	isDragging?: boolean;
 	className?:  string;
 	onOpen?:     (application: JobApplication) => void;
 }
 
-export const ApplicationCard = ({ application, isDragging = false, className = '', onOpen }: ApplicationCardProps) =>
-{
+export const ApplicationCard = ({ application, isDragging = false, className = '', onOpen }: ApplicationCardProps) => {
 	const { attributes, listeners, setNodeRef, transform, transition, isDragging: isSortableDragging } = useSortable({ id: application.id });
 
 	const style = {

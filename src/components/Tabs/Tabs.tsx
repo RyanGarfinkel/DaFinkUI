@@ -2,23 +2,20 @@
 
 import { createContext, useContext, useRef, useEffect, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 
-interface TabsContextValue
-{
+interface TabsContextValue {
 	value: string;
 	onValueChange: (v: string) => void;
 }
 
 const TabsContext = createContext<TabsContextValue | null>(null);
 
-const useTabsContext = () =>
-{
+const useTabsContext = () => {
 	const ctx = useContext(TabsContext);
 	if(!ctx) throw new Error('Tabs subcomponents must be used inside <Tabs>');
 	return ctx;
 };
 
-export interface TabsProps
-{
+export interface TabsProps {
 	value: string;
 	onValueChange: (v: string) => void;
 	children: React.ReactNode;
@@ -35,8 +32,7 @@ export const Tabs = ({ value, onValueChange, children, className = '' }: TabsPro
 	);
 };
 
-export interface TabsListProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface TabsListProps extends HTMLAttributes<HTMLDivElement> {
 	children: React.ReactNode;
 	className?: string;
 }
@@ -89,8 +85,7 @@ export const TabsList = ({ children, className = '', ...props }: TabsListProps) 
 	);
 };
 
-export interface TabsTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface TabsTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	value: string;
 	children: React.ReactNode;
 	className?: string;
@@ -121,8 +116,7 @@ export const TabsTrigger = ({ value, children, className = '', disabled, ...prop
 	);
 };
 
-export interface TabsContentProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface TabsContentProps extends HTMLAttributes<HTMLDivElement> {
 	value: string;
 	children: React.ReactNode;
 	className?: string;

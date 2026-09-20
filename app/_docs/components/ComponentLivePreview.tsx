@@ -122,8 +122,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
 
     case 'otp-input': {
-      const OTPPreview = () =>
-      {
+      const OTPPreview = () => {
         const [code, setCode] = useState('');
         return (
           <div className='flex flex-col gap-6'>
@@ -979,8 +978,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         { value: 'haskell', label: 'Haskell'    },
       ];
 
-      const ComboboxPreview = () =>
-      {
+      const ComboboxPreview = () => {
         const [single, setSingle] = useState('');
         const [multi, setMulti]   = useState<string[]>(['ts', 'py']);
         return (
@@ -1016,8 +1014,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         { name: 'rename',  description: 'Rename this chat' },
       ];
 
-      const CommandInputPreview = () =>
-      {
+      const CommandInputPreview = () => {
         const [value, setValue] = useState('');
         const [lastCommand, setLastCommand] = useState<string | null>(null);
 
@@ -1160,8 +1157,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         { value: 'minimal',  label: 'Minimal'  },
       ];
 
-      const DataTablePreview = () =>
-      {
+      const DataTablePreview = () => {
         const [selected, setSelected] = useState<DemoEmployee[]>([]);
         const [variant,  setVariant]  = useState<PaginatorVariant>('default');
         return (
@@ -1275,13 +1271,11 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
 
     case 'modal': {
-      const ModalPreview = () =>
-      {
+      const ModalPreview = () => {
         const [open, setOpen] = useState(false);
         const [size, setSize] = useState<ModalSize>('md');
 
-        const openWith = (s: ModalSize) =>
-        {
+        const openWith = (s: ModalSize) => {
           setSize(s);
           setOpen(true);
         };
@@ -1313,13 +1307,11 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
     }
 
     case 'drawer': {
-      const DrawerPreview = () =>
-      {
+      const DrawerPreview = () => {
         const [open, setOpen] = useState(false);
         const [side, setSide] = useState<DrawerSide>('right');
 
-        const openFrom = (s: DrawerSide) =>
-        {
+        const openFrom = (s: DrawerSide) => {
           setSide(s);
           setOpen(true);
         };
@@ -1350,13 +1342,11 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
     }
 
     case 'side-panel': {
-      const SidePanelPreview = () =>
-      {
+      const SidePanelPreview = () => {
         const [open, setOpen] = useState(false);
         const [side, setSide] = useState<SidePanelSide>('right');
 
-        const openFrom = (s: SidePanelSide) =>
-        {
+        const openFrom = (s: SidePanelSide) => {
           setSide(s);
           setOpen(true);
         };

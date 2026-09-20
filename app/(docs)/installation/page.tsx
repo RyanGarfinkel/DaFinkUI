@@ -1,4 +1,5 @@
 'use client';
+
 import { ToggleGroup, ToggleGroupItem } from '@/src/components/ToggleGroup/ToggleGroup';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
 import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';

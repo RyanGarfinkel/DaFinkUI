@@ -19,8 +19,7 @@ const WORK_TYPE_OPTIONS: SelectOption[] = [
 
 const STAGE_OPTIONS: SelectOption[] = STAGES.map((stage) => ({ value: stage.id, label: stage.title }));
 
-const formatFileSize = (bytes: number): string =>
-{
+const formatFileSize = (bytes: number): string => {
 	if(bytes < 1024) return `${bytes} B`;
 	if(bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
 	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -33,8 +32,7 @@ const CloseIcon = () => (
 	</svg>
 );
 
-export interface ApplicationDetailsModalProps
-{
+export interface ApplicationDetailsModalProps {
 	open:         boolean;
 	application:  JobApplication | null;
 	onOpenChange: (open: boolean) => void;
@@ -42,8 +40,7 @@ export interface ApplicationDetailsModalProps
 	onDelete:     (id: string) => void;
 }
 
-export const ApplicationDetailsModal = ({ open, application, onOpenChange, onSave, onDelete }: ApplicationDetailsModalProps) =>
-{
+export const ApplicationDetailsModal = ({ open, application, onOpenChange, onSave, onDelete }: ApplicationDetailsModalProps) => {
 	const [draft, setDraft] = useState<JobApplication | null>(application);
 	const resumeInputRef    = useRef<HTMLInputElement>(null);
 
@@ -57,23 +54,20 @@ export const ApplicationDetailsModal = ({ open, application, onOpenChange, onSav
 
 	const updateDraft = (patch: Partial<JobApplication>) => setDraft((prev) => prev ? { ...prev, ...patch } : prev);
 
-	const handleResumeSelect = (e: ChangeEvent<HTMLInputElement>) =>
-	{
+	const handleResumeSelect = (e: ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		e.target.value = '';
 		if(!file) return;
 		updateDraft({ resume: { name: file.name, size: formatFileSize(file.size), url: URL.createObjectURL(file) } });
 	};
 
-	const handleSave = () =>
-	{
+	const handleSave = () => {
 		if(!draft || !draft.role.trim() || !draft.company.trim()) return;
 		onSave({ ...draft, role: draft.role.trim(), company: draft.company.trim() });
 		onOpenChange(false);
 	};
 
-	const handleDelete = () =>
-	{
+	const handleDelete = () => {
 		if(!draft) return;
 		onDelete(draft.id);
 		onOpenChange(false);

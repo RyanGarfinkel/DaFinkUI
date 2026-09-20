@@ -2,8 +2,6 @@
 
 import { createContext, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent, DialogHTMLAttributes } from 'react';
 
-// ─── Focus trap selector ──────────────────────────────────────────────────────
-
 const FOCUSABLE_SELECTOR = [
 	'a[href]',
 	'button:not([disabled])',
@@ -13,11 +11,7 @@ const FOCUSABLE_SELECTOR = [
 	'[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
-// ─── Exit animation duration (matches --duration-fast) ───────────────────────
-
 const EXIT_DURATION_MS = 150;
-
-// ─── Side variants ────────────────────────────────────────────────────────────
 
 export type DrawerSide = 'left' | 'right' | 'top' | 'bottom';
 
@@ -35,27 +29,20 @@ const SIDE_HIDDEN_CLASSES: Record<DrawerSide, string> = {
 	bottom: 'translate-y-full',
 };
 
-// ─── Drawer context ───────────────────────────────────────────────────────────
-
-interface DrawerContextValue
-{
+interface DrawerContextValue {
 	titleId:      string;
 	requestClose: () => void;
 }
 
 const DrawerContext = createContext<DrawerContextValue | null>(null);
 
-const useDrawerContext = () =>
-{
+const useDrawerContext = () => {
 	const ctx = useContext(DrawerContext);
 	if(!ctx) throw new Error('Drawer subcomponents must be used inside <Drawer>');
 	return ctx;
 };
 
-// ─── Drawer ───────────────────────────────────────────────────────────────────
-
-export interface DrawerProps extends DialogHTMLAttributes<HTMLDialogElement>
-{
+export interface DrawerProps extends DialogHTMLAttributes<HTMLDialogElement> {
 	open:         boolean;
 	onOpenChange: (open: boolean) => void;
 	side?:        DrawerSide;
@@ -146,8 +133,7 @@ const Drawer = (
 	{
 		const dialog = dialogRef.current;
 		if(!dialog) return;
-		const onCancel = (e: Event) =>
-		{
+		const onCancel = (e: Event) => {
 			e.preventDefault();
 			requestClose();
 		};
@@ -155,8 +141,7 @@ const Drawer = (
 		return () => dialog.removeEventListener('cancel', onCancel);
 	});
 
-	const handleKeyDown = (e: KeyboardEvent<HTMLDialogElement>) =>
-	{
+	const handleKeyDown = (e: KeyboardEvent<HTMLDialogElement>) => {
 		if(e.key === 'Escape')
 		{
 			e.stopPropagation();
@@ -194,8 +179,7 @@ const Drawer = (
 		}
 	};
 
-	const handleBackdropPointerDown = (e: PointerEvent<HTMLDialogElement>) =>
-	{
+	const handleBackdropPointerDown = (e: PointerEvent<HTMLDialogElement>) => {
 		if(e.target === e.currentTarget) requestClose();
 	};
 
@@ -252,10 +236,7 @@ const Drawer = (
 
 export default Drawer;
 
-// ─── DrawerHeader ─────────────────────────────────────────────────────────────
-
-export interface DrawerHeaderProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface DrawerHeaderProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
@@ -267,10 +248,7 @@ export const DrawerHeader = ({ className = '', children, ...props }: DrawerHeade
 	);
 };
 
-// ─── DrawerTitle ──────────────────────────────────────────────────────────────
-
-export interface DrawerTitleProps extends HTMLAttributes<HTMLHeadingElement>
-{
+export interface DrawerTitleProps extends HTMLAttributes<HTMLHeadingElement> {
 	className?: string;
 }
 
@@ -284,10 +262,7 @@ export const DrawerTitle = ({ className = '', children, ...props }: DrawerTitleP
 	);
 };
 
-// ─── DrawerContent ────────────────────────────────────────────────────────────
-
-export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface DrawerContentProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
@@ -299,10 +274,7 @@ export const DrawerContent = ({ className = '', children, ...props }: DrawerCont
 	);
 };
 
-// ─── DrawerFooter ─────────────────────────────────────────────────────────────
-
-export interface DrawerFooterProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface DrawerFooterProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
@@ -314,10 +286,7 @@ export const DrawerFooter = ({ className = '', children, ...props }: DrawerFoote
 	);
 };
 
-// ─── DrawerClose ──────────────────────────────────────────────────────────────
-
-export interface DrawerCloseProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface DrawerCloseProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	className?: string;
 }
 

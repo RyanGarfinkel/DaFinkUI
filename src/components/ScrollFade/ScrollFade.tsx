@@ -4,8 +4,7 @@ import { HTMLAttributes, ReactNode, UIEvent, forwardRef, useCallback, useEffect,
 
 export type ScrollFadeDirection = 'vertical' | 'horizontal';
 
-export interface ScrollFadeProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'>
-{
+export interface ScrollFadeProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 	direction?:        ScrollFadeDirection;
 	fadeSize?:         string;
 	fadeFrom?:         string;
@@ -46,15 +45,13 @@ export const ScrollFade = forwardRef<HTMLDivElement, ScrollFadeProps>(
 			return () => observer.disconnect();
 		}, [updateFades]);
 
-		const setRefs = (node: HTMLDivElement | null) =>
-		{
+		const setRefs = (node: HTMLDivElement | null) => {
 			scrollRef.current = node;
 			if(typeof forwardedRef === 'function') forwardedRef(node);
 			else if(forwardedRef) (forwardedRef as { current: HTMLDivElement | null }).current = node;
 		};
 
-		const handleScroll = (e: UIEvent<HTMLDivElement>) =>
-		{
+		const handleScroll = (e: UIEvent<HTMLDivElement>) => {
 			updateFades();
 			onScroll?.(e);
 		};

@@ -2,15 +2,13 @@ import { HTMLAttributes } from 'react';
 
 export type CardVariant = 'default' | 'elevated' | 'outline';
 
-export interface CardProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 	variant?: CardVariant;
 	interactive?: boolean;
 	className?: string;
 }
 
-export interface CardSectionProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface CardSectionProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 

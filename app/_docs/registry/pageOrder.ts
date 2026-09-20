@@ -4,8 +4,7 @@ import { CATEGORIES } from '@/app/_docs/registry/categories';
 import { blocks } from '@/app/_docs/registry/blocks';
 import { registry } from '@/app/_docs/registry';
 
-export interface PageOrderEntry
-{
+export interface PageOrderEntry {
 	href:  string;
 	label: string;
 }
@@ -39,8 +38,7 @@ export const getEffectsByCategory = () => EFFECT_CATEGORIES.reduce<Record<string
 	return acc;
 }, {});
 
-export const getPageOrder = (): PageOrderEntry[] =>
-{
+export const getPageOrder = (): PageOrderEntry[] => {
 	const byCategory = getComponentsByCategory();
 	const effectsByCategory = getEffectsByCategory();
 

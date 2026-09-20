@@ -108,7 +108,6 @@ const WORK_TYPE_OPTIONS = [
 
 const STAGE_OPTIONS = STAGES.map((stage) => ({ value: stage.id, label: stage.title }));
 
-// ─── Inline table fields ──────────────────────────────────────────────────────
 // The table doubles as an editable grid using the same Input/Select components as
 // the details modal — no need to open the modal just to fix a role, stage, or
 // salary. At rest a cell reads as plain text; hovering or focusing it reveals the
@@ -124,8 +123,7 @@ const CLEAN_FIELD_CLASS = '!px-1.5 !py-1 [&:not(:hover):not(:focus)]:!border-tra
 // text-until-hover look via ordinary (non-important) Tailwind variants, since
 // there's no competing component style here to override.
 
-interface InlineDateFieldProps
-{
+interface InlineDateFieldProps {
 	value:     string | undefined;
 	onChange:  (value: string | undefined) => void;
 	ariaLabel: string;
@@ -141,8 +139,6 @@ const InlineDateField = ({ value, onChange, ariaLabel }: InlineDateFieldProps) =
 	/>
 );
 
-// ─── Header icons ─────────────────────────────────────────────────────────────
-
 const FileIcon = () => (
 	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
 		<path d='M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z' />
@@ -156,19 +152,16 @@ const SparkleIcon = () => (
 	</svg>
 );
 
-// ─── BoardColumn ──────────────────────────────────────────────────────────────
 // Its own droppable region (not just a SortableContext) so a column that's been
 // dragged empty can still be dropped back into.
 
-interface BoardColumnProps
-{
+interface BoardColumnProps {
 	stage:        ApplicationStage;
 	applications: JobApplication[];
 	onOpen:       (application: JobApplication) => void;
 }
 
-const BoardColumn = ({ stage, applications, onOpen }: BoardColumnProps) =>
-{
+const BoardColumn = ({ stage, applications, onOpen }: BoardColumnProps) => {
 	const { setNodeRef } = useDroppable({ id: stage.id });
 
 	return (
@@ -192,10 +185,7 @@ const BoardColumn = ({ stage, applications, onOpen }: BoardColumnProps) =>
 	);
 };
 
-// ─── JobApplicationTracker ────────────────────────────────────────────────────
-
-export const JobApplicationTracker = () =>
-{
+export const JobApplicationTracker = () => {
 	const [applications, setApplications] = useState<JobApplication[]>(INITIAL_APPLICATIONS);
 	const [view, setView]                 = useState<TrackerView>('board');
 	const [selectedId, setSelectedId]     = useState<string | null>(null);
@@ -210,13 +200,11 @@ export const JobApplicationTracker = () =>
 
 	const handleViewCv = () => window.open(MASTER_CV.url, '_blank', 'noopener,noreferrer');
 
-	const updateApplication = (id: string, patch: Partial<JobApplication>) =>
-	{
+	const updateApplication = (id: string, patch: Partial<JobApplication>) => {
 		setApplications((prev) => prev.map((a) => a.id === id ? { ...a, ...patch } : a));
 	};
 
-	const handleAddApplication = () =>
-	{
+	const handleAddApplication = () => {
 		newApplicationCounter.current += 1;
 		const id = `job-new-${newApplicationCounter.current}`;
 		setApplications((prev) => [...prev, { id, role: '', company: '', status: 'wishlist', workType: 'Remote' }]);
@@ -224,8 +212,7 @@ export const JobApplicationTracker = () =>
 		setSelectedId(id);
 	};
 
-	const handleModalOpenChange = (open: boolean) =>
-	{
+	const handleModalOpenChange = (open: boolean) => {
 		if(open) return;
 		if(pendingNewId)
 		{
@@ -235,14 +222,12 @@ export const JobApplicationTracker = () =>
 		setSelectedId(null);
 	};
 
-	const handleSaveApplication = (updated: JobApplication) =>
-	{
+	const handleSaveApplication = (updated: JobApplication) => {
 		setApplications((prev) => prev.map((a) => a.id === updated.id ? updated : a));
 		setPendingNewId(null);
 	};
 
-	const handleDeleteApplication = (id: string) =>
-	{
+	const handleDeleteApplication = (id: string) => {
 		setApplications((prev) => prev.filter((a) => a.id !== id));
 		if(pendingNewId === id) setPendingNewId(null);
 	};
@@ -254,8 +239,7 @@ export const JobApplicationTracker = () =>
 
 	const handleDragStart = (event: DragStartEvent) => setActiveId(event.active.id as string);
 
-	const handleDragOver = (event: DragOverEvent) =>
-	{
+	const handleDragOver = (event: DragOverEvent) => {
 		const { active, over } = event;
 		if(!over) return;
 
@@ -269,8 +253,7 @@ export const JobApplicationTracker = () =>
 		setApplications((prev) => prev.map((a) => a.id === active.id ? { ...a, status: overStatus } : a));
 	};
 
-	const handleDragEnd = (event: DragEndEvent) =>
-	{
+	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
 		setActiveId(null);
 		if(!over || active.id === over.id) return;

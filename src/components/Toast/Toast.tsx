@@ -2,15 +2,12 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type ToastVariant  = 'default' | 'success' | 'warning' | 'danger';
 export type ToastPosition =
 	| 'top-left'    | 'top-center'    | 'top-right'
 	| 'bottom-left' | 'bottom-center' | 'bottom-right';
 
-export interface ToastOptions
-{
+export interface ToastOptions {
 	title?:       string;
 	description?: string;
 	variant?:     ToastVariant;
@@ -18,19 +15,15 @@ export interface ToastOptions
 	action?:      { label: string; onClick: () => void };
 }
 
-interface ToastItem extends Required<Omit<ToastOptions, 'title' | 'action'>>
-{
+interface ToastItem extends Required<Omit<ToastOptions, 'title' | 'action'>> {
 	id:      string;
 	title?:  string;
 	action?: ToastOptions['action'];
 }
 
-interface ToastContextValue
-{
+interface ToastContextValue {
 	toast: (opts: ToastOptions) => void;
 }
-
-// ─── Context ──────────────────────────────────────────────────────────────────
 
 const ToastContext = createContext<ToastContextValue | null>(null);
 
@@ -40,8 +33,6 @@ export const useToast = () => {
 	return ctx;
 };
 
-// ─── Position ─────────────────────────────────────────────────────────────────
-
 const POSITION_CLASSES: Record<ToastPosition, string> = {
 	'top-left':      'top-4 left-4 items-start',
 	'top-center':    'top-4 left-1/2 -translate-x-1/2 items-center',
@@ -50,8 +41,6 @@ const POSITION_CLASSES: Record<ToastPosition, string> = {
 	'bottom-center': 'bottom-4 left-1/2 -translate-x-1/2 items-center',
 	'bottom-right':  'bottom-4 right-4 items-end',
 };
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const VARIANT_STYLES: Record<ToastVariant, { wrapper: string; icon: string; path: string }> = {
 	default: {
@@ -167,10 +156,7 @@ const ToastCard = (
 	);
 };
 
-// ─── Provider ─────────────────────────────────────────────────────────────────
-
-export interface ToastProviderProps
-{
+export interface ToastProviderProps {
 	children:  React.ReactNode;
 	position?: ToastPosition;
 }

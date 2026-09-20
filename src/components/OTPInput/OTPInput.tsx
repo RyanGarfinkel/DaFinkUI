@@ -4,8 +4,7 @@ import { ClipboardEvent, KeyboardEvent, useEffect, useRef, useState } from 'reac
 
 export type OTPCharset = 'numeric' | 'alphanumeric' | 'alphabetic' | 'any';
 
-export interface OTPInputProps
-{
+export interface OTPInputProps {
 	length?:    number;
 	value?:     string;
 	onChange?:  (value: string) => void;
@@ -34,8 +33,7 @@ const OTPInput = ({
 	hint,
 	disabled,
 	className = '',
-}: OTPInputProps) =>
-{
+}: OTPInputProps) => {
 	const inputId = label?.toLowerCase().replace(/\s+/g, '-') ?? 'otp';
 	const refs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -54,8 +52,7 @@ const OTPInput = ({
 
 	const { filter, inputMode, pattern } = CHARSET_CONFIG[charset];
 
-	const emit = (newSlots: string[]) =>
-	{
+	const emit = (newSlots: string[]) => {
 		const joined = newSlots.join('');
 		lastEmitted.current = joined;
 		onChange?.(joined);
@@ -123,8 +120,7 @@ const OTPInput = ({
 		}
 	};
 
-	const handlePaste = (e: ClipboardEvent<HTMLInputElement>) =>
-	{
+	const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
 		e.preventDefault();
 		const pasted = filter(e.clipboardData.getData('text')).slice(0, length);
 		if(!pasted) return;

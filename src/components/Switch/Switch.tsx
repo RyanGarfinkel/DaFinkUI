@@ -1,4 +1,5 @@
-'use client';;
+'use client';
+
 const TRACK_BASE = [
 	'relative inline-flex h-6 w-10 shrink-0 cursor-pointer items-center rounded-full',
 	'transition-colors duration-200 ease-out',
@@ -12,8 +13,7 @@ const THUMB_BASE = [
 	'transition-transform duration-200 ease-out',
 ].join(' ');
 
-export interface SwitchProps
-{
+export interface SwitchProps {
 	checked: boolean;
 	onCheckedChange: (checked: boolean) => void;
 	label?: string;

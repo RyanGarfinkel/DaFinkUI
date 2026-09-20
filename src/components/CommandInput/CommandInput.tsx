@@ -2,10 +2,7 @@
 
 import { ChangeEvent, InputHTMLAttributes, KeyboardEvent, ReactNode, useEffect, useId, useRef, useState } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface CommandOption
-{
+export interface CommandOption {
 	name:         string;
 	description?: string;
 	icon?:        ReactNode;
@@ -13,8 +10,7 @@ export interface CommandOption
 
 export type CommandInputMenuSide = 'top' | 'bottom';
 
-export interface CommandInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onKeyDown'>
-{
+export interface CommandInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onKeyDown'> {
 	value:      string;
 	onChange:   (value: string) => void;
 	commands:   CommandOption[];
@@ -23,8 +19,6 @@ export interface CommandInputProps extends Omit<InputHTMLAttributes<HTMLInputEle
 	menuSide?:  CommandInputMenuSide;
 	className?: string;
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const highlightPrefix = (name: string, query: string) => {
 	if(!query) return <span>{name}</span>;
@@ -39,8 +33,6 @@ const highlightPrefix = (name: string, query: string) => {
 		</span>
 	);
 };
-
-// ─── CommandInput ─────────────────────────────────────────────────────────────
 
 export const CommandInput = (
 	{

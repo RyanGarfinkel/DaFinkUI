@@ -2,8 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import ThemeToggle from './ThemeToggle';
 
-const stubMatchMedia = (matches: boolean) =>
-{
+const stubMatchMedia = (matches: boolean) => {
 	vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({
 		matches,
 		addEventListener:    vi.fn(),

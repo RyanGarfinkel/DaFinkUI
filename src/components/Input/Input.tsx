@@ -4,8 +4,7 @@ import { InputHTMLAttributes, forwardRef, useState } from 'react';
 
 export type InputVariant = 'default' | 'floating';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement>
-{
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 	label?:   string;
 	error?:   string;
 	hint?:    string;
@@ -86,20 +85,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 			? 'border-input-error focus:border-input-error-ring'
 			: 'border-input-border focus:border-input-ring';
 
-		const handleFocus = (e: React.FocusEvent<HTMLInputElement>) =>
-		{
+		const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
 			setIsFocused(true);
 			onFocus?.(e);
 		};
 
-		const handleBlur = (e: React.FocusEvent<HTMLInputElement>) =>
-		{
+		const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
 			setIsFocused(false);
 			onBlur?.(e);
 		};
 
-		const handleChange = (e: React.ChangeEvent<HTMLInputElement>) =>
-		{
+		const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 			if(!isControlled) setLocalValue(e.target.value);
 			onChange?.(e);
 		};

@@ -5,14 +5,12 @@ import { Timeline, TimelineItem } from '../../components/Timeline/Timeline';
 import ScrollFade from '../../components/ScrollFade/ScrollFade';
 import { useState } from 'react';
 
-export interface ToolCallLink
-{
+export interface ToolCallLink {
 	title: string;
 	url:   string;
 }
 
-export interface ToolCallEntry
-{
+export interface ToolCallEntry {
 	id:      string;
 	kind:    'tool' | 'search' | 'thought';
 	title:   string;
@@ -21,8 +19,7 @@ export interface ToolCallEntry
 	links?:  ToolCallLink[];
 }
 
-export interface ToolCallTraceProps
-{
+export interface ToolCallTraceProps {
 	toolCalls: ToolCallEntry[];
 }
 

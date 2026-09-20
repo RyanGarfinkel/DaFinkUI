@@ -2,8 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef, createContext, useContext, Children, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 
-interface CarouselContextValue
-{
+interface CarouselContextValue {
 	currentIndex:  number;
 	count:         number;
 	canScrollPrev: boolean;
@@ -16,15 +15,13 @@ interface CarouselContextValue
 
 const CarouselContext = createContext<CarouselContextValue | null>(null);
 
-const useCarouselContext = () =>
-{
+const useCarouselContext = () => {
 	const ctx = useContext(CarouselContext);
 	if(!ctx) throw new Error('Carousel subcomponents must be used inside <Carousel>');
 	return ctx;
 };
 
-export interface CarouselProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface CarouselProps extends HTMLAttributes<HTMLDivElement> {
 	loop?:     boolean;
 	autoPlay?: boolean;
 	interval?: number;
@@ -39,8 +36,7 @@ export const Carousel = (
 		children,
 		...props
 	}: CarouselProps
-) =>
-{
+) => {
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [count, setCount]               = useState(0);
 	const intervalRef                     = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -126,21 +122,18 @@ const DRAG_ACTIVATION_PX = 5;
 const DRAG_SNAP_RATIO    = 0.2;
 const DRAG_FALLBACK_PX   = 50;
 
-interface DragState
-{
+interface DragState {
 	pointerId: number;
 	startX:    number;
 	delta:     number;
 	dragging:  boolean;
 }
 
-export interface CarouselContentProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface CarouselContentProps extends HTMLAttributes<HTMLDivElement> {
 	children: React.ReactNode;
 }
 
-export const CarouselContent = ({ children, className = '', ...props }: CarouselContentProps) =>
-{
+export const CarouselContent = ({ children, className = '', ...props }: CarouselContentProps) => {
 	const { currentIndex, registerCount, scrollPrev, scrollNext } = useCarouselContext();
 	const slideCount   = Children.count(children);
 	const trackRef     = useRef<HTMLDivElement>(null);
@@ -154,15 +147,13 @@ export const CarouselContent = ({ children, className = '', ...props }: Carousel
 		registerCount(slideCount);
 	}, [slideCount, registerCount]);
 
-	const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) =>
-	{
+	const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
 		if(dragRef.current) return;
 		if(e.pointerType === 'mouse' && e.button !== 0) return;
 		dragRef.current = { pointerId: e.pointerId, startX: e.clientX, delta: 0, dragging: false };
 	};
 
-	const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) =>
-	{
+	const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
 		const drag = dragRef.current;
 		if(!drag || drag.pointerId !== e.pointerId) return;
 
@@ -182,8 +173,7 @@ export const CarouselContent = ({ children, className = '', ...props }: Carousel
 		setDragOffset(drag.delta);
 	};
 
-	const endDrag = (e: React.PointerEvent<HTMLDivElement>) =>
-	{
+	const endDrag = (e: React.PointerEvent<HTMLDivElement>) => {
 		const drag = dragRef.current;
 		if(!drag || drag.pointerId !== e.pointerId) return;
 
@@ -201,8 +191,7 @@ export const CarouselContent = ({ children, className = '', ...props }: Carousel
 		setDragOffset(0);
 	};
 
-	const onClickCapture = (e: React.MouseEvent<HTMLDivElement>) =>
-	{
+	const onClickCapture = (e: React.MouseEvent<HTMLDivElement>) => {
 		if(!draggedRef.current) return;
 		e.preventDefault();
 		e.stopPropagation();
@@ -229,8 +218,7 @@ export const CarouselContent = ({ children, className = '', ...props }: Carousel
 	);
 };
 
-export interface CarouselItemProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface CarouselItemProps extends HTMLAttributes<HTMLDivElement> {
 	children: React.ReactNode;
 }
 
@@ -249,8 +237,7 @@ const NAV_BASE = 'absolute top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-cent
 
 export type CarouselPreviousProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
-export const CarouselPrevious = ({ className = '', ...props }: CarouselPreviousProps) =>
-{
+export const CarouselPrevious = ({ className = '', ...props }: CarouselPreviousProps) => {
 	const { scrollPrev, canScrollPrev } = useCarouselContext();
 
 	return (
@@ -270,8 +257,7 @@ export const CarouselPrevious = ({ className = '', ...props }: CarouselPreviousP
 
 export type CarouselNextProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
-export const CarouselNext = ({ className = '', ...props }: CarouselNextProps) =>
-{
+export const CarouselNext = ({ className = '', ...props }: CarouselNextProps) => {
 	const { scrollNext, canScrollNext } = useCarouselContext();
 
 	return (
@@ -291,8 +277,7 @@ export const CarouselNext = ({ className = '', ...props }: CarouselNextProps) =>
 
 export type CarouselDotsProps = HTMLAttributes<HTMLDivElement>;
 
-export const CarouselDots = ({ className = '', ...props }: CarouselDotsProps) =>
-{
+export const CarouselDots = ({ className = '', ...props }: CarouselDotsProps) => {
 	const { currentIndex, count, scrollTo } = useCarouselContext();
 
 	if(count <= 1) return null;

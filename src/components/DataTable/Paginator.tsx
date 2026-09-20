@@ -2,8 +2,7 @@
 
 export type PaginatorVariant = 'default' | 'numbered' | 'minimal' | 'compact';
 
-export interface PaginatorProps
-{
+export interface PaginatorProps {
 	page:         number;
 	totalPages:   number;
 	onPageChange: (page: number) => void;
@@ -13,8 +12,6 @@ export interface PaginatorProps
 	variant?:     PaginatorVariant;
 	className?:   string;
 }
-
-// ─── Shared styles ────────────────────────────────────────────────────────────
 
 const BTN_BASE = [
 	'inline-flex items-center justify-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border',
@@ -30,8 +27,6 @@ const BTN_TEXT  = 'px-3 py-1.5';
 const BTN_ICON  = 'w-8 h-8';
 const BTN_CURRENT = 'bg-brand text-brand-fg border-brand hover:bg-brand-hover hover:border-brand-hover hover:text-brand-fg';
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-
 const ChevronLeft = () => (
 	<svg width='16' height='16' viewBox='0 0 16 16' fill='none' aria-hidden='true'>
 		<path d='M10 12L6 8l4-4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
@@ -44,10 +39,7 @@ const ChevronRight = () => (
 	</svg>
 );
 
-// ─── Page number generation ───────────────────────────────────────────────────
-
-const getPageNumbers = (page: number, totalPages: number): (number | '...')[] =>
-{
+const getPageNumbers = (page: number, totalPages: number): (number | '...')[] => {
 	if(totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i);
 
 	const items: (number | '...')[] = [0];
@@ -63,8 +55,6 @@ const getPageNumbers = (page: number, totalPages: number): (number | '...')[] =>
 	return items;
 };
 
-// ─── Paginator ────────────────────────────────────────────────────────────────
-
 export const Paginator = (
 	{
 		page,
@@ -76,8 +66,7 @@ export const Paginator = (
 		variant   = 'default',
 		className = '',
 	}: PaginatorProps
-) =>
-{
+) => {
 	const hasPrev = page > 0;
 	const hasNext = page < totalPages - 1;
 

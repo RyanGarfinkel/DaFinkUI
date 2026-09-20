@@ -1,13 +1,11 @@
 'use client';
+
 import { Paginator, type PaginatorVariant } from './Paginator';
 import { useState, useCallback, useMemo, useId } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type { PaginatorVariant };
 
-export interface ColumnDef<T>
-{
+export interface ColumnDef<T> {
 	key:       keyof T & string;
 	header:    string;
 	sortable?: boolean;
@@ -16,8 +14,7 @@ export interface ColumnDef<T>
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface DataTableProps<T extends Record<string, any>>
-{
+export interface DataTableProps<T extends Record<string, any>> {
 	data:               T[];
 	columns:            ColumnDef<T>[];
 	keyField:           keyof T & string;
@@ -33,8 +30,6 @@ export interface DataTableProps<T extends Record<string, any>>
 }
 
 type SortDir = 'asc' | 'desc' | null;
-
-// ─── Sort icons ───────────────────────────────────────────────────────────────
 
 const SortAscIcon = () => (
 	<svg aria-hidden='true' width='12' height='12' viewBox='0 0 12 12' fill='none'>
@@ -55,18 +50,14 @@ const SortNeutralIcon = () => (
 	</svg>
 );
 
-const SortIcon = ({ direction }: { direction: SortDir }) =>
-{
+const SortIcon = ({ direction }: { direction: SortDir }) => {
 	if(direction === 'asc')  return <SortAscIcon />;
 	if(direction === 'desc') return <SortDescIcon />;
 	return <SortNeutralIcon />;
 };
 
-// ─── Sort helper ──────────────────────────────────────────────────────────────
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sortRows = <T extends Record<string, any>>(data: T[], key: keyof T, dir: SortDir) =>
-{
+const sortRows = <T extends Record<string, any>>(data: T[], key: keyof T, dir: SortDir) => {
 	if(!dir) return data;
 	return [...data].sort((a, b) =>
 	{
@@ -77,8 +68,6 @@ const sortRows = <T extends Record<string, any>>(data: T[], key: keyof T, dir: S
 		return dir === 'asc' ? (less ? -1 : 1) : (less ? 1 : -1);
 	});
 };
-
-// ─── DataTable ────────────────────────────────────────────────────────────────
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const DataTable = <T extends Record<string, any>>(
@@ -95,8 +84,7 @@ const DataTable = <T extends Record<string, any>>(
 		onPageChange,
 		paginatorVariant  = 'default',
 	}: DataTableProps<T>
-) =>
-{
+) => {
 	const uid = useId();
 
 	const [sortKey, setSortKey]   = useState<(keyof T & string) | null>(null);

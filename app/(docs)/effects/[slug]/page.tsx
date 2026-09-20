@@ -11,8 +11,7 @@ import type { Metadata } from 'next';
 
 export const generateMetadata = async (
 	{ params }: { params: Promise<{ slug: string }> }
-): Promise<Metadata> =>
-{
+): Promise<Metadata> => {
 	const { slug } = await params;
 	const entry = getEffect(slug);
 

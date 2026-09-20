@@ -1433,7 +1433,6 @@ export default function Example() {
     files:                ['TableOfContents/TableOfContents.tsx'],
   },
 
-  // ─── Charts ──────────────────────────────────────────────────────────────
   {
     slug: 'charts',
     name: 'Charts',

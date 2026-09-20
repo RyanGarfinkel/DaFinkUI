@@ -26,8 +26,7 @@ const CLAUDE_CODE_CONFIG = `{
   }
 }`;
 
-const McpPage = () =>
-{
+const McpPage = () => {
   return (
     <div className='flex flex-col gap-12'>
 

@@ -4,8 +4,7 @@ import { getPageOrder } from '@/app/_docs/registry/pageOrder';
 import Button from '@/src/components/Button/Button';
 import { usePathname } from 'next/navigation';
 
-export const PageNav = () =>
-{
+export const PageNav = () => {
 	const pathname  = usePathname();
 	const pageOrder = getPageOrder();
 	const currentIndex = pageOrder.findIndex((page) => page.href === pathname);

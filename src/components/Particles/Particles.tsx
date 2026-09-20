@@ -2,8 +2,6 @@
 
 import { HTMLAttributes, useMemo } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface ParticlesProps extends HTMLAttributes<HTMLDivElement> {
 	/** Number of floating dots to render. Defaults to 30. */
 	quantity?:  number;
@@ -18,8 +16,6 @@ interface Dot {
 	delay:    number;
 	duration: number;
 }
-
-// ─── Internals ────────────────────────────────────────────────────────────────
 
 const mulberry32 = (seed: number) => {
 	return () => {
@@ -43,8 +39,6 @@ const createDots = (quantity: number): Dot[] => {
 		duration: 4000 + random() * 4000,
 	}));
 };
-
-// ─── Particles ────────────────────────────────────────────────────────────────
 
 /**
  * A purely decorative ambient background of small floating dots, gently

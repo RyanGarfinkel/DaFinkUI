@@ -4,20 +4,15 @@ import { cloneElement, isValidElement, useCallback, useEffect, useId, useRef, us
 import type { HTMLAttributes, ReactElement, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type TooltipSide = 'top' | 'right' | 'bottom' | 'left';
 
-export interface TooltipProps
-{
+export interface TooltipProps {
 	content:    ReactNode;
 	children:   ReactElement<HTMLAttributes<HTMLElement>>;
 	side?:      TooltipSide;
 	delay?:     number;
 	className?: string;
 }
-
-// ─── Tooltip ──────────────────────────────────────────────────────────────────
 
 export const Tooltip = (
     {

@@ -10,8 +10,6 @@ const OPTIONS = [
 	{ value: 'go',     label: 'Go',  disabled: true },
 ];
 
-// ─── Rendering ────────────────────────────────────────────────────────────────
-
 describe('Combobox: rendering', () =>
 {
 	it('renders the input with placeholder', () =>
@@ -47,8 +45,6 @@ describe('Combobox: rendering', () =>
 	});
 });
 
-// ─── Dropdown open / close ────────────────────────────────────────────────────
-
 describe('Combobox: dropdown open/close', () =>
 {
 	it('opens the listbox when input receives focus', () =>
@@ -78,8 +74,6 @@ describe('Combobox: dropdown open/close', () =>
 	});
 });
 
-// ─── Filtering ────────────────────────────────────────────────────────────────
-
 describe('Combobox: filtering', () =>
 {
 	it('filters options by typed query (case-insensitive substring)', () =>
@@ -103,8 +97,6 @@ describe('Combobox: filtering', () =>
 		expect(screen.getByRole('option', { name: 'No options' })).toBeInTheDocument();
 	});
 });
-
-// ─── Single select ────────────────────────────────────────────────────────────
 
 describe('Combobox: single select', () =>
 {
@@ -133,8 +125,6 @@ describe('Combobox: single select', () =>
 		expect(tsOpt).toHaveAttribute('aria-selected', 'false');
 	});
 });
-
-// ─── Multi select ─────────────────────────────────────────────────────────────
 
 describe('Combobox: multi select', () =>
 {
@@ -218,8 +208,6 @@ describe('Combobox: multi select', () =>
 	});
 });
 
-// ─── Keyboard navigation ──────────────────────────────────────────────────────
-
 describe('Combobox: keyboard navigation', () =>
 {
 	it('ArrowDown moves active option to the next enabled option', () =>
@@ -281,8 +269,6 @@ describe('Combobox: keyboard navigation', () =>
 	});
 });
 
-// ─── Disabled options ─────────────────────────────────────────────────────────
-
 describe('Combobox: disabled options', () =>
 {
 	it('renders disabled options with aria-disabled=true', () =>
@@ -303,8 +289,6 @@ describe('Combobox: disabled options', () =>
 	});
 });
 
-// ─── Disabled component ───────────────────────────────────────────────────────
-
 describe('Combobox: disabled component', () =>
 {
 	it('does not open when disabled', () =>
@@ -320,8 +304,6 @@ describe('Combobox: disabled component', () =>
 		expect(screen.getByRole('combobox').className).toContain('opacity-50');
 	});
 });
-
-// ─── ARIA ─────────────────────────────────────────────────────────────────────
 
 describe('Combobox: ARIA', () =>
 {

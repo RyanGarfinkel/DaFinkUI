@@ -1,4 +1,5 @@
 'use client';
+
 import {
 	Area,
 	AreaChart as RechartsAreaChart,
@@ -24,22 +25,17 @@ import {
 } from 'recharts';
 import { useState } from 'react';
 
-// ─── Shared types ─────────────────────────────────────────────────────────────
-
-export interface ChartDataPoint
-{
+export interface ChartDataPoint {
 	[key: string]: string | number;
 }
 
-export interface ChartSeries
-{
+export interface ChartSeries {
 	key:    string;
 	label:  string;
 	color?: string;
 }
 
-interface BaseChartProps
-{
+interface BaseChartProps {
 	data:        ChartDataPoint[];
 	xKey:        string;
 	series:      ChartSeries[];
@@ -48,8 +44,6 @@ interface BaseChartProps
 	showGrid?:   boolean;
 	className?:  string;
 }
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const DEFAULT_COLORS = [
 	'var(--color-brand)',
@@ -141,8 +135,6 @@ const ChartTooltip = (
 	);
 };
 
-// ─── LineChart ────────────────────────────────────────────────────────────────
-
 export type LineChartProps = BaseChartProps;
 
 export const LineChart = (
@@ -197,10 +189,7 @@ export const LineChart = (
 	);
 };
 
-// ─── BarChart ─────────────────────────────────────────────────────────────────
-
-export interface BarChartProps extends BaseChartProps
-{
+export interface BarChartProps extends BaseChartProps {
 	stacked?: boolean;
 }
 
@@ -261,10 +250,7 @@ export const BarChart = (
 	);
 };
 
-// ─── AreaChart ────────────────────────────────────────────────────────────────
-
-export interface AreaChartProps extends BaseChartProps
-{
+export interface AreaChartProps extends BaseChartProps {
 	stacked?: boolean;
 }
 
@@ -334,10 +320,7 @@ export const AreaChart = (
 	);
 };
 
-// ─── DonutChart ───────────────────────────────────────────────────────────────
-
-interface ActiveSectorProps
-{
+interface ActiveSectorProps {
 	cx:          number;
 	cy:          number;
 	startAngle:  number;
@@ -345,15 +328,13 @@ interface ActiveSectorProps
 	fill?:       string;
 }
 
-export interface DonutSlice
-{
+export interface DonutSlice {
 	label:  string;
 	value:  number;
 	color?: string;
 }
 
-export interface DonutChartProps
-{
+export interface DonutChartProps {
 	data:         DonutSlice[];
 	innerRadius?: number;
 	height?:      number;
@@ -428,8 +409,6 @@ export const DonutChart = (
 		</div>
 	);
 };
-
-// ─── RadarChart ───────────────────────────────────────────────────────────────
 
 export type RadarChartProps = BaseChartProps;
 

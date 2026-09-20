@@ -4,8 +4,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 
-// ─── jsdom stubs ──────────────────────────────────────────────────────────────
-
 beforeEach(() =>
 {
 	HTMLDialogElement.prototype.showModal = vi.fn(function(this: HTMLDialogElement)
@@ -18,20 +16,15 @@ beforeEach(() =>
 	});
 });
 
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
-
-interface HarnessProps
-{
+interface HarnessProps {
 	onOpenChange?: (open: boolean) => void;
 	side?:         DrawerSide;
 }
 
-const DrawerHarness = ({ onOpenChange, side }: HarnessProps) =>
-{
+const DrawerHarness = ({ onOpenChange, side }: HarnessProps) => {
 	const [open, setOpen] = useState(false);
 
-	const handleChange = (next: boolean) =>
-	{
+	const handleChange = (next: boolean) => {
 		setOpen(next);
 		onOpenChange?.(next);
 	};
@@ -56,8 +49,7 @@ const DrawerHarness = ({ onOpenChange, side }: HarnessProps) =>
 	);
 };
 
-const renderControlled = (open: boolean, side?: DrawerSide, onOpenChange = vi.fn()) =>
-{
+const renderControlled = (open: boolean, side?: DrawerSide, onOpenChange = vi.fn()) => {
 	const result = render(
 		<Drawer open={open} onOpenChange={onOpenChange} side={side}>
 			<DrawerClose />
@@ -76,14 +68,11 @@ const renderControlled = (open: boolean, side?: DrawerSide, onOpenChange = vi.fn
 	return { ...result, onOpenChange };
 };
 
-const waitForFocusInside = async () =>
-{
+const waitForFocusInside = async () => {
 	await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Close')));
 };
 
 const getPanel = () => screen.getByRole('dialog').querySelector<HTMLElement>('[data-state]')!;
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('Drawer', () =>
 {

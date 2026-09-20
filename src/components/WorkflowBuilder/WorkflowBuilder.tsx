@@ -6,18 +6,14 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import ToggleGroup, { ToggleGroupItem } from '../ToggleGroup/ToggleGroup';
 import '@xyflow/react/dist/style.css';
 
-// ─── Public types ──────────────────────────────────────────────────────────────
-
 export type WorkflowDirection = 'horizontal' | 'vertical';
 
-export interface WorkflowPort
-{
+export interface WorkflowPort {
 	id:    string;
 	label: string;
 }
 
-export interface WorkflowGraph
-{
+export interface WorkflowGraph {
 	nodes: {
 		id:           string;
 		label:        string;
@@ -29,8 +25,7 @@ export interface WorkflowGraph
 	edges: { id: string; source: string; target: string; sourceHandle: string; targetHandle: string }[];
 }
 
-export interface WorkflowBuilderProps
-{
+export interface WorkflowBuilderProps {
 	defaultGraph?:     WorkflowGraph;
 	onChange?:         (graph: WorkflowGraph) => void;
 	height?:           number;
@@ -38,20 +33,15 @@ export interface WorkflowBuilderProps
 	defaultDirection?: WorkflowDirection;
 }
 
-// ─── Internal RF types ─────────────────────────────────────────────────────────
-
 type WFData = { label: string; description: string; inputs: WorkflowPort[]; outputs: WorkflowPort[] };
 type WFNode = Node<WFData>;
 type WFEdge = Edge;
 type PortKind = 'inputs' | 'outputs';
 
-// ─── Run animation context ─────────────────────────────────────────────────────
-
 type NodeRunState = 'idle' | 'active' | 'completed';
 type RunPhase     = 'idle' | 'running' | 'complete';
 
-interface RunContextValue
-{
+interface RunContextValue {
 	runPhase:             RunPhase;
 	nodeRunStates:        Map<string, NodeRunState>;
 	animatingEdgeIds:     Set<string>;
@@ -69,7 +59,6 @@ const RunContext = createContext<RunContextValue>({
 	direction:            'horizontal',
 });
 
-// ─── Built-in demo graph ───────────────────────────────────────────────────────
 // A node with zero inputs is an entry point; a node with zero outputs is terminal.
 // n2 (2 outputs) and n5 (2 inputs) demonstrate branching/merging via real multi-port nodes.
 
@@ -89,7 +78,6 @@ const DEMO_EDGES: WFEdge[] = [
 	{ id: 'e5', type: 'animated', source: 'n4', target: 'n5', sourceHandle: 'out',  targetHandle: 'b' },
 ];
 
-// ─── Run animation timing ───────────────────────────────────────────────────────
 // Named so AnimatedEdge's travel duration always matches the wave delay in
 // runAnimation below — they must stay in lockstep, not just visually similar.
 
@@ -99,13 +87,10 @@ const NODE_DWELL_MS          = 200; // active-node hold before advancing to the 
 const COMPLETE_HOLD_MS       = 900; // "complete" hold before auto-reset
 const REDUCED_MOTION_HOLD_MS = 400; // reduced-motion equivalent of COMPLETE_HOLD_MS
 
-// ─── AnimatedEdge ─────────────────────────────────────────────────────────────
-
 const AnimatedEdge = ({
 	id, sourceX, sourceY, targetX, targetY,
 	sourcePosition, targetPosition, markerEnd, style,
-}: EdgeProps) =>
-{
+}: EdgeProps) => {
 	const { animatingEdgeIds, completedEdgeIds, prefersReducedMotion } = useContext(RunContext);
 	const isAnimating = animatingEdgeIds.has(id);
 	const isCompleted = completedEdgeIds.has(id);
@@ -173,14 +158,12 @@ const HANDLE_STYLE = {
 // grid you see is the grid nodes actually snap to.
 const GRID_SIZE = 20;
 
-// ─── WorkflowNode ──────────────────────────────────────────────────────────────
 // Every node is the same shape: some inputs, a title + optional description
 // ("the logic"), and some outputs. A node with no inputs is an entry point;
 // one with no outputs is terminal. All editing happens in the inspector panel
 // (rendered by WorkflowBuilder) — nodes here are display + drag + select + delete only.
 
-const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) =>
-{
+const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) => {
 	const { setNodes, setEdges }                 = useReactFlow();
 	const { runPhase, nodeRunStates, direction } = useContext(RunContext);
 	const { label, description, inputs, outputs } = data;
@@ -193,8 +176,7 @@ const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) =>
 	const isRunActive  = nodeRunState === 'active';
 	const isRunDone    = nodeRunState === 'completed';
 
-	const deleteNode = () =>
-	{
+	const deleteNode = () => {
 		setNodes(ns => ns.filter(n => n.id !== id));
 		setEdges(es => es.filter(edge => edge.source !== id && edge.target !== id));
 	};
@@ -214,8 +196,7 @@ const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) =>
 
 	const activeRingStyle = isRunActive ? { boxShadow: '0 0 0 2px var(--color-brand)' } : undefined;
 
-	const renderPort = (port: WorkflowPort, kind: 'input' | 'output') =>
-	{
+	const renderPort = (port: WorkflowPort, kind: 'input' | 'output') => {
 		const isInput     = kind === 'input';
 		const handleType  = isInput ? 'target' : 'source';
 		const position    = isHorizontal
@@ -289,8 +270,6 @@ const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) =>
 
 const NODE_TYPES = { workflow: WorkflowNode };
 
-// ─── Graph conversion helpers ──────────────────────────────────────────────────
-
 const toRFNodes = (nodes: WorkflowGraph['nodes']): WFNode[] =>
 	nodes.map(n => ({
 		id:       n.id,
@@ -314,7 +293,6 @@ const toWorkflowGraph = (nodes: WFNode[], edges: WFEdge[]): WorkflowGraph => ({
 	edges: edges.map(e => ({ id: e.id, source: e.source, target: e.target, sourceHandle: e.sourceHandle ?? '', targetHandle: e.targetHandle ?? '' })),
 });
 
-// ─── Auto-layout ────────────────────────────────────────────────────────────────
 // Arranges nodes into levels via BFS from entry nodes (nodes with no inputs — or,
 // failing that, nodes with no incoming edges), then lays levels out along the flow
 // axis and spreads siblings across the cross axis. Used on direction toggle so
@@ -323,8 +301,7 @@ const toWorkflowGraph = (nodes: WFNode[], edges: WFEdge[]): WorkflowGraph => ({
 const LEVEL_SPACING   = 260;
 const SIBLING_SPACING = 220;
 
-const computeLayeredLayout = (nds: WFNode[], eds: WFEdge[], direction: WorkflowDirection): WFNode[] =>
-{
+const computeLayeredLayout = (nds: WFNode[], eds: WFEdge[], direction: WorkflowDirection): WFNode[] => {
 	const outgoing = new Map<string, string[]>();
 	eds.forEach(e =>
 	{
@@ -387,10 +364,7 @@ const computeLayeredLayout = (nds: WFNode[], eds: WFEdge[], direction: WorkflowD
 	return nds.map(n => ({ ...n, position: positions.get(n.id) ?? n.position }));
 };
 
-// ─── WorkflowBuilder ──────────────────────────────────────────────────────────
-
-const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '', defaultDirection }: WorkflowBuilderProps) =>
-{
+const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '', defaultDirection }: WorkflowBuilderProps) => {
 	const initialDirection: WorkflowDirection = defaultDirection ?? 'horizontal';
 
 	const initialNodes = defaultGraph
@@ -432,8 +406,7 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 		setEdges(eds => addEdge({ ...params, id: `e-${Date.now()}`, type: 'animated' }, eds));
 	}, [setEdges]);
 
-	const addNode = () =>
-	{
+	const addNode = () => {
 		const id       = `n${++nodeCounter.current}`;
 		const inputId  = `p${++portCounter.current}`;
 		const outputId = `p${++portCounter.current}`;
@@ -456,20 +429,17 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 		]);
 	};
 
-	const deselectAll = () =>
-	{
+	const deselectAll = () => {
 		setNodes(nds => nds.map(n => n.selected ? { ...n, selected: false } : n));
 	};
 
-	const updateSelectedNode = (patch: Partial<WFData>) =>
-	{
+	const updateSelectedNode = (patch: Partial<WFData>) => {
 		if(!selectedNode) return;
 		const nodeId = selectedNode.id;
 		setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, ...patch } } : n));
 	};
 
-	const addPort = (kind: PortKind) =>
-	{
+	const addPort = (kind: PortKind) => {
 		if(!selectedNode) return;
 		const newPort: WorkflowPort = { id: `p${++portCounter.current}`, label: kind === 'inputs' ? 'in' : 'out' };
 
@@ -477,16 +447,14 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 		else                  updateSelectedNode({ outputs: [...selectedNode.data.outputs, newPort] });
 	};
 
-	const renamePort = (kind: PortKind, portId: string, label: string) =>
-	{
+	const renamePort = (kind: PortKind, portId: string, label: string) => {
 		if(!selectedNode) return;
 
 		if(kind === 'inputs') updateSelectedNode({ inputs: selectedNode.data.inputs.map(p => p.id === portId ? { ...p, label } : p) });
 		else                  updateSelectedNode({ outputs: selectedNode.data.outputs.map(p => p.id === portId ? { ...p, label } : p) });
 	};
 
-	const removePort = (kind: PortKind, portId: string) =>
-	{
+	const removePort = (kind: PortKind, portId: string) => {
 		if(!selectedNode) return;
 		const nodeId = selectedNode.id;
 
@@ -502,8 +470,7 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 		}
 	};
 
-	const handleDirectionChange = (next: WorkflowDirection) =>
-	{
+	const handleDirectionChange = (next: WorkflowDirection) => {
 		if(next === direction || runPhase !== 'idle') return;
 
 		setDirection(next);
@@ -515,8 +482,7 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 		});
 	};
 
-	const resetAnimation = () =>
-	{
+	const resetAnimation = () => {
 		runGenRef.current++;
 		setRunPhase('idle');
 		setNodeRunStates(new Map());
@@ -524,8 +490,7 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 		setCompletedEdgeIds(new Set());
 	};
 
-	const runAnimation = async () =>
-	{
+	const runAnimation = async () => {
 		if(runPhase !== 'idle') return;
 
 		const gen   = ++runGenRef.current;
@@ -563,8 +528,7 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 		const doneEdges = new Set<string>();
 		const claimed   = new Set<string>(entryIds);
 
-		const activateNode = async (nodeId: string, dwellMs: number): Promise<void> =>
-		{
+		const activateNode = async (nodeId: string, dwellMs: number): Promise<void> => {
 			if(!prefersReducedMotion) await go(dwellMs);
 			if(!alive()) return;
 

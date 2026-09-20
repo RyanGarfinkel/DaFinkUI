@@ -1,10 +1,10 @@
-'use client';;
+'use client';
+
 import { createContext, useContext, useState, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 
 export type AccordionType = 'single' | 'multiple';
 
-interface AccordionContextValue
-{
+interface AccordionContextValue {
 	type: AccordionType;
 	openItems: Set<string>;
 	toggle: (value: string) => void;
@@ -13,30 +13,26 @@ interface AccordionContextValue
 
 const AccordionContext = createContext<AccordionContextValue | null>(null);
 
-const useAccordionContext = () =>
-{
+const useAccordionContext = () => {
 	const ctx = useContext(AccordionContext);
 	if(!ctx) throw new Error('Accordion subcomponents must be used inside <Accordion>');
 	return ctx;
 };
 
-interface AccordionItemContextValue
-{
+interface AccordionItemContextValue {
 	value: string;
 	isOpen: boolean;
 }
 
 const AccordionItemContext = createContext<AccordionItemContextValue | null>(null);
 
-const useAccordionItemContext = () =>
-{
+const useAccordionItemContext = () => {
 	const ctx = useContext(AccordionItemContext);
 	if(!ctx) throw new Error('AccordionTrigger and AccordionContent must be used inside <AccordionItem>');
 	return ctx;
 };
 
-export interface AccordionProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface AccordionProps extends HTMLAttributes<HTMLDivElement> {
 	type?: AccordionType;
 	defaultValue?: string | string[];
 	collapsible?: boolean;
@@ -59,8 +55,7 @@ const Accordion = (
 
 	const [openItems, setOpenItems] = useState<Set<string>>(initial);
 
-	const toggle = (value: string) =>
-	{
+	const toggle = (value: string) => {
 		setOpenItems((prev) =>
 		{
 			const next = new Set(prev);
@@ -89,8 +84,7 @@ const Accordion = (
 
 export default Accordion;
 
-export interface AccordionItemProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface AccordionItemProps extends HTMLAttributes<HTMLDivElement> {
 	value: string;
 	className?: string;
 }
@@ -108,8 +102,7 @@ export const AccordionItem = ({ value, className = '', children, ...props }: Acc
 	);
 };
 
-export interface AccordionTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface AccordionTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	className?: string;
 }
 
@@ -145,8 +138,7 @@ export const AccordionTrigger = ({ className = '', children, disabled, ...props 
 	);
 };
 
-export interface AccordionContentProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface AccordionContentProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 

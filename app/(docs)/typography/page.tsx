@@ -30,8 +30,7 @@ const CSS_SNIPPET = `@layer base {
   small      { @apply text-xs text-text-muted; }
 }`;
 
-const TypographyPage = () =>
-{
+const TypographyPage = () => {
 	return (
 		<div className='flex flex-col gap-10'>
 

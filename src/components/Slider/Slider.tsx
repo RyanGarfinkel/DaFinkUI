@@ -5,8 +5,7 @@ import { useId, useState } from 'react';
 export type SliderSize = 'default' | 'sm';
 export type SliderTone = 'brand' | 'current';
 
-export interface SliderProps
-{
+export interface SliderProps {
 	value: number;
 	onValueChange: (value: number) => void;
 	min?: number;
@@ -64,8 +63,7 @@ const Slider = ({
 	ariaLabel,
 	ariaValueText,
 	className = '',
-}: SliderProps) =>
-{
+}: SliderProps) => {
 	const uid = useId();
 	const inputId = label ? `slider-${uid}` : undefined;
 	const hintId  = hint  ? `slider-hint-${uid}` : undefined;

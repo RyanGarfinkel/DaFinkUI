@@ -6,8 +6,7 @@ import TextScramble from './TextScramble';
 
 let rafCallbacks: FrameRequestCallback[] = [];
 
-const stubRaf = () =>
-{
+const stubRaf = () => {
 	rafCallbacks = [];
 	vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) =>
 	{
@@ -17,8 +16,7 @@ const stubRaf = () =>
 	vi.stubGlobal('cancelAnimationFrame', vi.fn());
 };
 
-const flushFrame = (now: number) =>
-{
+const flushFrame = (now: number) => {
 	const callbacks = rafCallbacks;
 	rafCallbacks = [];
 	act(() =>
@@ -27,8 +25,7 @@ const flushFrame = (now: number) =>
 	});
 };
 
-const stubMatchMedia = (matches: boolean) =>
-{
+const stubMatchMedia = (matches: boolean) => {
 	vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches }));
 };
 

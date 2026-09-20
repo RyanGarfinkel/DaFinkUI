@@ -1,32 +1,27 @@
 import { HTMLAttributes } from 'react';
 
-export interface SkeletonProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface SkeletonProps extends HTMLAttributes<HTMLDivElement> {
 	width?:     string;
 	height?:    string;
 	className?: string;
 }
 
-export interface SkeletonInputProps
-{
+export interface SkeletonInputProps {
 	label?:     boolean;
 	className?: string;
 }
 
-export interface SkeletonCardProps
-{
+export interface SkeletonCardProps {
 	lines?:     number;
 	className?: string;
 }
 
-export interface SkeletonTableRowProps
-{
+export interface SkeletonTableRowProps {
 	columns?:   number;
 	className?: string;
 }
 
-export interface SkeletonFormProps
-{
+export interface SkeletonFormProps {
 	fields?:    number;
 	className?: string;
 }
@@ -94,14 +89,12 @@ export const SkeletonForm = ({ fields = 3, className = '' }: SkeletonFormProps) 
 	);
 };
 
-export interface SkeletonImageProps
-{
+export interface SkeletonImageProps {
 	aspectRatio?: string;
 	className?:   string;
 }
 
-export const SkeletonImage = ({ aspectRatio = '16/9', className = '' }: SkeletonImageProps) =>
-{
+export const SkeletonImage = ({ aspectRatio = '16/9', className = '' }: SkeletonImageProps) => {
 	return (
 		<div
 			className={`animate-pulse bg-surface-active rounded-[var(--radius-sm)] flex items-center justify-center ${className}`}

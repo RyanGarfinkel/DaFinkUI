@@ -18,8 +18,7 @@ const FIXED_RECT = {
 
 const getInner = (root: HTMLElement) => root.firstElementChild as HTMLElement;
 
-const stubMatchMedia = (matches: boolean) =>
-{
+const stubMatchMedia = (matches: boolean) => {
 	vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches }));
 };
 

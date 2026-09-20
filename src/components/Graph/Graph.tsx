@@ -4,21 +4,18 @@ import { forceSimulation, forceLink, forceManyBody, forceCenter, forceCollide } 
 import type { SimulationNodeDatum, SimulationLinkDatum } from 'd3-force';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-export interface GraphNode
-{
+export interface GraphNode {
 	id:     string;
 	label:  string;
 	group?: string;
 }
 
-export interface GraphEdge
-{
+export interface GraphEdge {
 	source: string;
 	target: string;
 }
 
-export interface GraphProps
-{
+export interface GraphProps {
 	nodes:           GraphNode[];
 	edges:           GraphEdge[];
 	width?:          number;
@@ -27,15 +24,13 @@ export interface GraphProps
 	onNodeSelect?:   (node: GraphNode) => void;
 }
 
-interface NodePos
-{
+interface NodePos {
 	id: string;
 	x:  number;
 	y:  number;
 }
 
-interface Transform
-{
+interface Transform {
 	x:     number;
 	y:     number;
 	scale: number;
@@ -47,13 +42,11 @@ const MIN_SCALE  = 0.2;
 const MAX_SCALE  = 4;
 const TICK_COUNT = 300;
 
-interface SimNode extends SimulationNodeDatum
-{
+interface SimNode extends SimulationNodeDatum {
 	id: string;
 }
 
-const buildPositions = (nodes: GraphNode[], edges: GraphEdge[], w: number, h: number): NodePos[] =>
-{
+const buildPositions = (nodes: GraphNode[], edges: GraphEdge[], w: number, h: number): NodePos[] => {
 	if(nodes.length === 0) return [];
 
 	const simNodes: SimNode[] = nodes.map(n => ({ id: n.id, x: w / 2, y: h / 2 }));
@@ -71,8 +64,7 @@ const buildPositions = (nodes: GraphNode[], edges: GraphEdge[], w: number, h: nu
 	return simNodes.map(n => ({ id: n.id, x: n.x ?? w / 2, y: n.y ?? h / 2 }));
 };
 
-const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelect }: GraphProps) =>
-{
+const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelect }: GraphProps) => {
 	const [positions,    setPositions]    = useState<NodePos[]>([]);
 	const [hoveredId,    setHoveredId]    = useState<string | null>(null);
 	const [selectedId,   setSelectedId]   = useState<string | null>(null);
@@ -105,15 +97,13 @@ const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelec
 
 	const showLabels = nodes.length <= 50;
 
-	const handleNodePointerDown = (e: React.PointerEvent, nodeId: string) =>
-	{
+	const handleNodePointerDown = (e: React.PointerEvent, nodeId: string) => {
 		e.stopPropagation();
 		(e.target as Element).setPointerCapture(e.pointerId);
 		dragRef.current = { nodeId, startX: e.clientX, startY: e.clientY };
 	};
 
-	const handlePointerMove = (e: React.PointerEvent) =>
-	{
+	const handlePointerMove = (e: React.PointerEvent) => {
 		if(dragRef.current)
 		{
 			const { nodeId } = dragRef.current;
@@ -132,36 +122,31 @@ const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelec
 		}
 	};
 
-	const handlePointerUp = () =>
-	{
+	const handlePointerUp = () => {
 		dragRef.current = null;
 		panRef.current  = null;
 		setIsPanning(false);
 	};
 
-	const handleSvgPointerDown = (e: React.PointerEvent) =>
-	{
+	const handleSvgPointerDown = (e: React.PointerEvent) => {
 		if((e.target as Element).closest('[data-node]')) return;
 		panRef.current = { startX: e.clientX, startY: e.clientY, origX: transform.x, origY: transform.y };
 		setIsPanning(true);
 	};
 
-	const handleWheel = (e: React.WheelEvent) =>
-	{
+	const handleWheel = (e: React.WheelEvent) => {
 		e.preventDefault();
 		const delta = e.deltaY > 0 ? -ZOOM_STEP : ZOOM_STEP;
 		setTransform(prev => ({ ...prev, scale: Math.min(MAX_SCALE, Math.max(MIN_SCALE, prev.scale + delta)) }));
 	};
 
-	const selectNode = (node: GraphNode) =>
-	{
+	const selectNode = (node: GraphNode) => {
 		setSelectedId(node.id);
 		setAnnouncement(`Selected: ${node.label}`);
 		onNodeSelect?.(node);
 	};
 
-	const handleNodeKeyDown = (e: React.KeyboardEvent, node: GraphNode) =>
-	{
+	const handleNodeKeyDown = (e: React.KeyboardEvent, node: GraphNode) => {
 		if(e.key === 'Enter' || e.key === ' ')
 		{
 			e.preventDefault();
@@ -175,8 +160,7 @@ const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelec
 		}
 	};
 
-	const handleSvgKeyDown = (e: React.KeyboardEvent) =>
-	{
+	const handleSvgKeyDown = (e: React.KeyboardEvent) => {
 		if(nodes.length === 0) return;
 
 		if(e.key === 'ArrowRight' || e.key === 'ArrowDown')
@@ -226,8 +210,7 @@ const Graph = ({ nodes, edges, width = 600, height = 400, className, onNodeSelec
 		if(e.key === 'ArrowUp')    setTransform(prev => ({ ...prev, y: prev.y + PAN_STEP }));
 	};
 
-	const edgeDim = (e: GraphEdge) =>
-	{
+	const edgeDim = (e: GraphEdge) => {
 		if(!hoveredId) return false;
 		return !connectedEdges.includes(e);
 	};

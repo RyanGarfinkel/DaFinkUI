@@ -2,8 +2,6 @@
 
 import { HTMLAttributes } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface RippleProps extends HTMLAttributes<HTMLDivElement> {
 	/** Number of concentric rings. Defaults to 4. */
 	count?:     number;
@@ -12,8 +10,6 @@ export interface RippleProps extends HTMLAttributes<HTMLDivElement> {
 	children?:  React.ReactNode;
 	className?: string;
 }
-
-// ─── Ripple ───────────────────────────────────────────────────────────────────
 
 /**
  * Decorative concentric rings expanding outward and fading out, staggered so

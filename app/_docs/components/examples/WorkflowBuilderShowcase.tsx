@@ -23,8 +23,7 @@ const ONBOARDING_GRAPH: WorkflowGraph = {
 	],
 };
 
-export const WorkflowBuilderShowcase = () =>
-{
+export const WorkflowBuilderShowcase = () => {
 	const [graph, setGraph] = useState<WorkflowGraph | null>(null);
 
 	return (

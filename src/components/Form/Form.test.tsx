@@ -251,8 +251,7 @@ const zodTestSchema = z.object({
 	email: z.email('Enter a valid email address.'),
 });
 
-const ZodTestForm = ({ onSubmit }: { onSubmit: (values: z.infer<typeof zodTestSchema>) => void }) =>
-{
+const ZodTestForm = ({ onSubmit }: { onSubmit: (values: z.infer<typeof zodTestSchema>) => void }) => {
 	const form = useZodForm(zodTestSchema);
 
 	return (

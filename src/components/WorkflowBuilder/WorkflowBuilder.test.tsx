@@ -2,7 +2,6 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import WorkflowBuilder, { type WorkflowGraph } from './WorkflowBuilder';
 import { render, screen, fireEvent } from '@testing-library/react';
 
-// ─── Mock @xyflow/react ────────────────────────────────────────────────────────
 // React Flow relies on ResizeObserver, SVG measurements, and complex DOM APIs
 // that are unavailable in jsdom. We mock the library so we can test the
 // WorkflowBuilder's own logic without involving React Flow internals.
@@ -32,8 +31,7 @@ vi.mock('@xyflow/react', async () =>
 		onConnect?: (connection: unknown) => void;
 		onNodesChange?: (changes: MockNodeChange[]) => void;
 		nodeTypes?: Record<string, MockNodeComponent>;
-	}) =>
-	{
+	}) => {
 		const WorkflowNode = nodeTypes?.workflow;
 		return (
 			<div data-testid='react-flow'>
@@ -61,11 +59,9 @@ vi.mock('@xyflow/react', async () =>
 	const Position   = { Left: 'left', Right: 'right', Top: 'top', Bottom: 'bottom' };
 	const addEdge    = (params: MockEdge, edges: MockEdge[]) => [...edges, { ...params, id: params.id ?? 'new-edge' }];
 
-	const useNodesState = (initial: MockNode[]) =>
-	{
+	const useNodesState = (initial: MockNode[]) => {
 		const [nodes, setNodes] = useState(initial);
-		const onNodesChange = (changes: MockNodeChange[]) =>
-		{
+		const onNodesChange = (changes: MockNodeChange[]) => {
 			setNodes(nds => nds.map(n =>
 			{
 				const change = changes.find(c => c.id === n.id);
@@ -75,8 +71,7 @@ vi.mock('@xyflow/react', async () =>
 		return [nodes, setNodes, onNodesChange] as const;
 	};
 
-	const useEdgesState = (initial: MockEdge[]) =>
-	{
+	const useEdgesState = (initial: MockEdge[]) => {
 		const [edges, setEdges] = useState(initial);
 		return [edges, setEdges, () => {}] as const;
 	};
@@ -86,8 +81,6 @@ vi.mock('@xyflow/react', async () =>
 	return { ReactFlow, Panel, Background, Controls, Handle, Position, addEdge, useNodesState, useEdgesState, useReactFlow };
 });
 
-// ─── Setup ─────────────────────────────────────────────────────────────────────
-
 beforeEach(() =>
 {
 	vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({
@@ -96,8 +89,6 @@ beforeEach(() =>
 		removeEventListener: vi.fn(),
 	}));
 });
-
-// ─── Tests ─────────────────────────────────────────────────────────────────────
 
 describe('WorkflowBuilder', () =>
 {
@@ -178,8 +169,6 @@ describe('WorkflowBuilder', () =>
 	});
 });
 
-// ─── WorkflowNode ports ─────────────────────────────────────────────────────────
-
 describe('WorkflowNode ports', () =>
 {
 	it('renders one target handle per input port and one source handle per output port', () =>
@@ -196,8 +185,6 @@ describe('WorkflowNode ports', () =>
 		expect(screen.queryByRole('button', { name: /edit label/i })).toBeNull();
 	});
 });
-
-// ─── Node inspector panel ───────────────────────────────────────────────────────
 
 describe('WorkflowBuilder node inspector panel', () =>
 {
@@ -271,8 +258,6 @@ describe('WorkflowBuilder node inspector panel', () =>
 	});
 });
 
-// ─── Layout direction toggle ───────────────────────────────────────────────────
-
 describe('WorkflowBuilder layout direction', () =>
 {
 	it('shows a Horizontal/Vertical layout toggle with Horizontal active by default', () =>
@@ -309,7 +294,6 @@ describe('WorkflowBuilder layout direction', () =>
 	});
 });
 
-// ─── Run animation dependency gating ────────────────────────────────────────────
 // Regression coverage: a node with multiple connected inputs must wait for ALL of
 // them, not activate as soon as the first one arrives. This graph has a fast
 // 1-hop branch and a slow 2-hop branch both feeding "merge" — under the old

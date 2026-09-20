@@ -6,8 +6,7 @@ import TimeWheel from './TimeWheel';
 type SegmentKey = 'hour' | 'minute' | 'second' | 'meridiem';
 type DigitSegment = 'hour' | 'minute' | 'second';
 
-interface TimeFieldProps
-{
+interface TimeFieldProps {
 	hour:            number;
 	minute:          number;
 	second:          number;

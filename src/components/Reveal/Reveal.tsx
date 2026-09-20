@@ -2,8 +2,6 @@
 
 import { Children, isValidElement, cloneElement, useEffect, useRef, useState, HTMLAttributes } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type RevealEffect = 'fade' | 'slide-up' | 'slide-left' | 'slide-right' | 'scale';
 
 export interface RevealProps extends HTMLAttributes<HTMLDivElement> {
@@ -30,8 +28,6 @@ export interface RevealGroupProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
-// ─── Internals ────────────────────────────────────────────────────────────────
-
 const HIDDEN_CLASSES: Record<RevealEffect, string> = {
 	'fade':        'opacity-0',
 	'slide-up':    'opacity-0 translate-y-4',
@@ -43,8 +39,6 @@ const HIDDEN_CLASSES: Record<RevealEffect, string> = {
 const SHOWN_CLASSES = 'opacity-100 translate-x-0 translate-y-0 scale-100';
 
 type RevealStatus = 'idle' | 'hidden' | 'shown';
-
-// ─── Reveal ───────────────────────────────────────────────────────────────────
 
 /**
  * Scroll-triggered entrance animation. Progressive enhancement: content is
@@ -120,8 +114,6 @@ export const Reveal = (
 		</div>
 	);
 };
-
-// ─── RevealGroup ──────────────────────────────────────────────────────────────
 
 /**
  * Cascades staggered delays onto child <Reveal> items. Children that set

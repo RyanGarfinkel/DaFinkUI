@@ -3,10 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 
-// ─── Fixture ──────────────────────────────────────────────────────────────────
-
-interface RenderOptions
-{
+interface RenderOptions {
 	open?:      boolean;
 	onClose?:   () => void;
 	onSelectA?: () => void;
@@ -46,8 +43,6 @@ const renderPalette = (
 		</CommandPalette>
 	);
 };
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('CommandPalette', () =>
 {

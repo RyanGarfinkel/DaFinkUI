@@ -5,8 +5,7 @@ import { useEffect, useState, type ButtonHTMLAttributes } from 'react';
 const TRANSITION_CLASS = 'theme-transition';
 const TRANSITION_MS    = 300; // mirrors --duration-slow in app/globals.css
 
-export interface ThemeToggleProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface ThemeToggleProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	className?: string;
 }
 
@@ -28,8 +27,7 @@ const ThemeToggle = (
 		className = '',
 		...props
 	}: ThemeToggleProps
-) =>
-{
+) => {
 	const [isDark, setIsDark] = useState(false);
 
 	useEffect(() =>
@@ -46,8 +44,7 @@ const ThemeToggle = (
 		document.cookie = `theme=${dark ? 'dark' : 'light'}; path=/; max-age=31536000; SameSite=Lax`;
 	}, []);
 
-	const toggleTheme = () =>
-	{
+	const toggleTheme = () => {
 		const root  = document.documentElement;
 		const going = root.classList.contains('dark') ? 'light' : 'dark';
 

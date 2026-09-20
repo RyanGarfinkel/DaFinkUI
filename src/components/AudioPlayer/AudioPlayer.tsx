@@ -6,8 +6,7 @@ import Button from '../Button/Button';
 
 export type AudioPlayerSize = 'default' | 'compact';
 
-export interface AudioPlayerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'>
-{
+export interface AudioPlayerProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
 	src:       string;
 	title?:    string;
 	subtitle?: string;
@@ -16,8 +15,7 @@ export interface AudioPlayerProps extends Omit<HTMLAttributes<HTMLDivElement>, '
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2] as const;
 
-const fmt = (s: number): string =>
-{
+const fmt = (s: number): string => {
 	if(!isFinite(s) || s < 0) return '0:00';
 	const m  = Math.floor(s / 60);
 	const ss = Math.floor(s % 60);
@@ -36,8 +34,7 @@ const PauseIcon = ({ className = 'w-5 h-5' }: { className?: string }) => (
 	</svg>
 );
 
-const VolumeIcon = ({ muted, volume }: { muted: boolean; volume: number }) =>
-{
+const VolumeIcon = ({ muted, volume }: { muted: boolean; volume: number }) => {
 	if(muted || volume === 0)
 		return (
 			<svg viewBox='0 0 24 24' fill='currentColor' className='w-4 h-4' aria-hidden='true'>
@@ -78,8 +75,7 @@ const AudioPlayer = ({
 	size = 'default',
 	className = '',
 	...props
-}: AudioPlayerProps) =>
-{
+}: AudioPlayerProps) => {
 	const isCompact = size === 'compact';
 
 	const audioRef = useRef<HTMLAudioElement>(null);
@@ -127,8 +123,7 @@ const AudioPlayer = ({
 		const audio = audioRef.current;
 		if(!audio) return;
 
-		const onEmptied = () =>
-		{
+		const onEmptied = () => {
 			setPlaying(false);
 			setCurrentTime(0);
 			setDuration(0);
@@ -152,31 +147,27 @@ const AudioPlayer = ({
 		if(audio) audio.muted = muted;
 	}, [muted]);
 
-	const togglePlay = () =>
-	{
+	const togglePlay = () => {
 		const audio = audioRef.current;
 		if(!audio) return;
 		if(playing) audio.pause();
 		else audio.play().catch(() => {});
 	};
 
-	const skip = (delta: number) =>
-	{
+	const skip = (delta: number) => {
 		const audio = audioRef.current;
 		if(!audio) return;
 		audio.currentTime = Math.max(0, Math.min(duration, audio.currentTime + delta));
 	};
 
-	const seek = (value: number) =>
-	{
+	const seek = (value: number) => {
 		const audio = audioRef.current;
 		if(!audio) return;
 		audio.currentTime = value;
 		setCurrentTime(value);
 	};
 
-	const changeVolume = (value: number) =>
-	{
+	const changeVolume = (value: number) => {
 		const audio = audioRef.current;
 		if(!audio) return;
 		audio.volume = value;

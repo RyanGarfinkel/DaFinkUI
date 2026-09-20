@@ -18,14 +18,12 @@ import Button from '../../components/Button/Button';
 import Input from '../../components/Input/Input';
 import ChatMarkdown from './ChatMarkdown';
 
-interface MessageAttachment
-{
+interface MessageAttachment {
 	name: string;
 	size: string;
 }
 
-interface ChatTextMessage
-{
+interface ChatTextMessage {
 	id:                 number;
 	kind:               'message';
 	sender:             'user' | 'ai';
@@ -38,8 +36,7 @@ interface ChatTextMessage
 	questionnaireAnswer?: string;
 }
 
-interface ChatCheckpoint
-{
+interface ChatCheckpoint {
 	id:    number;
 	kind:  'checkpoint';
 	label: string;
@@ -47,42 +44,35 @@ interface ChatCheckpoint
 
 type ChatMessage = ChatTextMessage | ChatCheckpoint;
 
-interface ChartSpec
-{
+interface ChartSpec {
 	xKey:   string;
 	series: ChartSeries[];
 	data:   Record<string, string | number>[];
 }
 
-interface StackableChartSpec extends ChartSpec
-{
+interface StackableChartSpec extends ChartSpec {
 	stacked?: boolean;
 }
 
-interface DonutSpec
-{
+interface DonutSpec {
 	data: DonutSlice[];
 }
 
-interface MathSpec
-{
+interface MathSpec {
 	equations: string[];
 }
 
-interface ImageSpec
-{
+interface ImageSpec {
 	url: string;
 	alt: string;
 }
 
-interface AudioSpec
-{
+interface AudioSpec {
 	src:    string;
 	title?: string;
 }
 
-interface TableSpec
-{
+interface TableSpec {
 	columns: { key: string; label: string }[];
 	rows:    Record<string, string | number>[];
 }
@@ -171,8 +161,7 @@ const renderSegment = (seg: MessageSegment, index: number) => {
 	}
 };
 
-interface ChatEntry
-{
+interface ChatEntry {
 	id:       string;
 	title:    string;
 	messages: ChatMessage[];
@@ -409,8 +398,7 @@ const PLANNING_MESSAGES: ChatMessage[] = [
 	},
 ];
 
-interface CannedReply
-{
+interface CannedReply {
 	text:       string;
 	toolCalls?: ToolCallEntry[];
 }

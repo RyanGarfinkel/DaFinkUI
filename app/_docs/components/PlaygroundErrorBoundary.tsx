@@ -3,15 +3,13 @@
 import { Alert } from '@/src/components/Alert/Alert';
 import { Component, type ReactNode } from 'react';
 
-interface PlaygroundErrorBoundaryProps
-{
+interface PlaygroundErrorBoundaryProps {
 	children: ReactNode;
 	/** Bump this when the evaluated code changes so a fixed error clears on the next attempt. */
 	resetKey: string | number;
 }
 
-interface PlaygroundErrorBoundaryState
-{
+interface PlaygroundErrorBoundaryState {
 	error: Error | null;
 }
 

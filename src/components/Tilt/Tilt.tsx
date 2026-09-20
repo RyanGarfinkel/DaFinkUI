@@ -2,8 +2,7 @@
 
 import { useRef, type MouseEvent, type ReactNode } from 'react';
 
-export interface TiltProps
-{
+export interface TiltProps {
 	children: ReactNode;
 	max?: number;
 	scale?: number;
@@ -17,12 +16,10 @@ const Tilt = ({
 	scale = 1.05,
 	perspective = 1000,
 	className = '',
-}: TiltProps) =>
-{
+}: TiltProps) => {
 	const ref = useRef<HTMLDivElement>(null);
 
-	const handleMouseMove = (e: MouseEvent<HTMLDivElement>) =>
-	{
+	const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
 		const el = ref.current;
 		if(!el) return;
 
@@ -37,8 +34,7 @@ const Tilt = ({
 		el.style.transition = 'transform 0.1s ease-out';
 	};
 
-	const handleMouseLeave = () =>
-	{
+	const handleMouseLeave = () => {
 		const el = ref.current;
 		if(!el) return;
 

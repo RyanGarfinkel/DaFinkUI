@@ -6,8 +6,7 @@ import { createRef } from 'react';
 const setScrollMetrics = (
 	el: HTMLElement,
 	{ scrollTop = 0, scrollLeft = 0, scrollHeight = 100, scrollWidth = 100, clientHeight = 100, clientWidth = 100 }: Partial<Record<'scrollTop' | 'scrollLeft' | 'scrollHeight' | 'scrollWidth' | 'clientHeight' | 'clientWidth', number>>
-) =>
-{
+) => {
 	Object.defineProperty(el, 'scrollTop',    { configurable: true, value: scrollTop });
 	Object.defineProperty(el, 'scrollLeft',   { configurable: true, value: scrollLeft });
 	Object.defineProperty(el, 'scrollHeight', { configurable: true, value: scrollHeight });

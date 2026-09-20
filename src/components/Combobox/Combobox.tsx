@@ -1,10 +1,8 @@
-'use client';;
+'use client';
+
 import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface ComboboxOption
-{
+export interface ComboboxOption {
 	value:     string;
 	label:     string;
 	disabled?: boolean;
@@ -12,8 +10,7 @@ export interface ComboboxOption
 
 export type ComboboxSize = 'sm' | 'md';
 
-export interface ComboboxSingleProps
-{
+export interface ComboboxSingleProps {
 	options:      ComboboxOption[];
 	value?:       string;
 	onChange?:    (value: string) => void;
@@ -27,8 +24,7 @@ export interface ComboboxSingleProps
 	className?:   string;
 }
 
-export interface ComboboxMultiProps
-{
+export interface ComboboxMultiProps {
 	options:      ComboboxOption[];
 	value?:       string[];
 	onChange?:    (value: string[]) => void;
@@ -43,8 +39,6 @@ export interface ComboboxMultiProps
 }
 
 export type ComboboxProps = ComboboxSingleProps | ComboboxMultiProps;
-
-// ─── Size maps ────────────────────────────────────────────────────────────────
 
 const INPUT_SIZE: Record<ComboboxSize, string> = {
 	sm: 'px-2.5 py-1 text-xs',
@@ -83,8 +77,6 @@ const highlightMatch = (label: string, query: string) => {
 		</span>
 	);
 };
-
-// ─── Combobox ─────────────────────────────────────────────────────────────────
 
 export const Combobox = (props: ComboboxProps) => {
     const {

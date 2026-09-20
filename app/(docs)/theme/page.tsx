@@ -30,8 +30,7 @@ const SWATCH_LABELS: Record<string, string> = {
 
 const SWATCH_TOKENS = ['--color-brand', '--color-surface', '--color-surface-border', '--color-text-muted'] as const;
 
-interface StyleDetail
-{
+interface StyleDetail {
 	traits:    string;
 	a11y:      string;
 	a11yTone:  'strong' | 'caution' | 'note';
@@ -106,8 +105,7 @@ import { oceanTheme } from '@/src/themes/ocean';
   <YourApp />
 </div>`;
 
-const InlineCode = ({ children }: { children: string }) =>
-{
+const InlineCode = ({ children }: { children: string }) => {
 	return (
 		<code className='font-mono text-sm text-text bg-surface-active rounded px-1.5 py-0.5'>
 			{children}
@@ -115,8 +113,7 @@ const InlineCode = ({ children }: { children: string }) =>
 	);
 };
 
-const TraitRow = ({ label, children }: { label: string; children: React.ReactNode }) =>
-{
+const TraitRow = ({ label, children }: { label: string; children: React.ReactNode }) => {
 	return (
 		<div className='flex flex-col gap-1'>
 			<span className='text-xs font-semibold uppercase tracking-wide text-text-muted'>{label}</span>
@@ -125,8 +122,7 @@ const TraitRow = ({ label, children }: { label: string; children: React.ReactNod
 	);
 };
 
-const ThemePage = () =>
-{
+const ThemePage = () => {
 	return (
 		<div className='flex flex-col gap-10'>
 

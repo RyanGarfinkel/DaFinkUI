@@ -7,8 +7,7 @@ import { PageNav } from '@/app/_docs/components/PageNav';
 import { Footer } from '@/app/_docs/components/Footer';
 import { useState } from 'react';
 
-interface DocsShellProps
-{
+interface DocsShellProps {
 	children: React.ReactNode;
 }
 

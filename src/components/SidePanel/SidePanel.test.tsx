@@ -4,20 +4,15 @@ import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { useState } from 'react';
 
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
-
-interface HarnessProps
-{
+interface HarnessProps {
 	onOpenChange?: (open: boolean) => void;
 	side?:         SidePanelSide;
 }
 
-const SidePanelHarness = ({ onOpenChange, side }: HarnessProps) =>
-{
+const SidePanelHarness = ({ onOpenChange, side }: HarnessProps) => {
 	const [open, setOpen] = useState(false);
 
-	const handleChange = (next: boolean) =>
-	{
+	const handleChange = (next: boolean) => {
 		setOpen(next);
 		onOpenChange?.(next);
 	};
@@ -42,8 +37,7 @@ const SidePanelHarness = ({ onOpenChange, side }: HarnessProps) =>
 	);
 };
 
-const renderControlled = (open: boolean, side?: SidePanelSide, onOpenChange = vi.fn()) =>
-{
+const renderControlled = (open: boolean, side?: SidePanelSide, onOpenChange = vi.fn()) => {
 	const result = render(
 		<SidePanel open={open} onOpenChange={onOpenChange} side={side}>
 			<SidePanelClose />
@@ -62,15 +56,12 @@ const renderControlled = (open: boolean, side?: SidePanelSide, onOpenChange = vi
 	return { ...result, onOpenChange };
 };
 
-const waitForFocusInside = async () =>
-{
+const waitForFocusInside = async () => {
 	await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Close')));
 };
 
 const getPanel = () => screen.getByRole('dialog');
 const getPanelCard = () => getPanel().firstElementChild as HTMLElement;
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('SidePanel', () =>
 {
@@ -379,8 +370,7 @@ describe('SidePanel', () =>
 
 	it('shifts an earlier panel on the same side toward the center when a second one opens', async () =>
 	{
-		const StackHarness = () =>
-		{
+		const StackHarness = () => {
 			const [first, setFirst] = useState(false);
 			const [second, setSecond] = useState(false);
 
@@ -435,8 +425,7 @@ describe('SidePanel', () =>
 	{
 		const onOpenChangeB = vi.fn();
 
-		const StackHarness = () =>
-		{
+		const StackHarness = () => {
 			const [second, setSecond] = useState(true);
 
 			return (
@@ -470,8 +459,7 @@ describe('SidePanel', () =>
 	{
 		const onOpenChangeA = vi.fn();
 
-		const StackHarness = () =>
-		{
+		const StackHarness = () => {
 			const [first, setFirst]   = useState(true);
 			const [second, setSecond] = useState(true);
 
@@ -509,8 +497,7 @@ describe('SidePanel', () =>
 
 	it('re-enables the earlier panel\'s SidePanelClose once the panel in front of it closes', async () =>
 	{
-		const StackHarness = () =>
-		{
+		const StackHarness = () => {
 			const [first, setFirst]   = useState(true);
 			const [second, setSecond] = useState(true);
 

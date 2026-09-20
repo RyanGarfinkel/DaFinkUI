@@ -3,8 +3,7 @@ import DataTable, { type ColumnDef } from './DataTable';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 
-interface Person
-{
+interface Person {
 	id:     number;
 	name:   string;
 	role:   string;

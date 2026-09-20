@@ -2,16 +2,12 @@
 
 import { HTMLAttributes, useRef, useState, type PointerEvent } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface SpotlightProps extends HTMLAttributes<HTMLDivElement> {
 	/** Diameter of the glow in pixels. Defaults to 400. */
 	size?:      number;
 	children:   React.ReactNode;
 	className?: string;
 }
-
-// ─── Spotlight ────────────────────────────────────────────────────────────────
 
 /**
  * Wraps content in a container with a soft radial glow that follows the

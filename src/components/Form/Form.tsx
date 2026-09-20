@@ -5,46 +5,39 @@ import { FormHTMLAttributes, HTMLAttributes, LabelHTMLAttributes, ReactNode } fr
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 
-export interface FormProps extends FormHTMLAttributes<HTMLFormElement>
-{
+export interface FormProps extends FormHTMLAttributes<HTMLFormElement> {
 	className?: string;
 }
 
-export interface FormSectionProps
-{
+export interface FormSectionProps {
 	title?:       string;
 	description?: string;
 	className?:   string;
 	children:     ReactNode;
 }
 
-export interface FormFieldProps
-{
+export interface FormFieldProps {
 	className?: string;
 	children:   ReactNode;
 }
 
-export interface FormLabelProps extends LabelHTMLAttributes<HTMLLabelElement>
-{
+export interface FormLabelProps extends LabelHTMLAttributes<HTMLLabelElement> {
 	required?:  boolean;
 	htmlFor?:   string;
 	className?: string;
 }
 
-export interface FormControlProps
-{
+export interface FormControlProps {
 	className?: string;
 	children:   ReactNode;
 }
 
-export interface FormDescriptionProps
-{
+export interface FormDescriptionProps {
 	className?: string;
 	children:   ReactNode;
 }
 
-export interface FormMessageProps extends HTMLAttributes<HTMLParagraphElement>
-{
+export interface FormMessageProps extends HTMLAttributes<HTMLParagraphElement> {
 	className?: string;
 	children?:  ReactNode;
 }

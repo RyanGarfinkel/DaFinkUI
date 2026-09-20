@@ -5,18 +5,15 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
-const readJson = (relPath) =>
-{
+const readJson = (relPath) => {
 	return JSON.parse(readFileSync(join(ROOT, relPath), 'utf8'));
 }
 
-const camelToKebab = (str) =>
-{
+const camelToKebab = (str) => {
 	return str.replace(/([A-Z])/g, m => `-${m.toLowerCase()}`);
 }
 
-const tokenPathToCssVar = (segments) =>
-{
+const tokenPathToCssVar = (segments) => {
 	const processed = segments.map(camelToKebab);
 
 	if(processed[0] === 'color')
@@ -36,8 +33,7 @@ const tokenPathToCssVar = (segments) =>
 	return `--${processed.join('-')}`;
 }
 
-const flattenTokens = (obj, prefix = []) =>
-{
+const flattenTokens = (obj, prefix = []) => {
 	const result = [];
 
 	for(const [key, val] of Object.entries(obj))
@@ -57,8 +53,7 @@ const flattenTokens = (obj, prefix = []) =>
 	return result;
 }
 
-const buildCssVarMap = (tokens) =>
-{
+const buildCssVarMap = (tokens) => {
 	const map = {};
 	for(const { path, value } of tokens)
 	{
@@ -79,8 +74,7 @@ const CSS_COMMENTS = {
 	input:   '/* Input */',
 };
 
-const buildThemeBlock = (lightTokens, motionTokens) =>
-{
+const buildThemeBlock = (lightTokens, motionTokens) => {
 	const motionVars = buildCssVarMap(motionTokens);
 	const colorVars  = buildCssVarMap(lightTokens);
 
@@ -113,16 +107,14 @@ const buildThemeBlock = (lightTokens, motionTokens) =>
 	return `@theme {\n\t/* Motion */\n${motionLines}\n\n${colorLines}\n}`;
 }
 
-const buildDarkBlock = (darkTokens) =>
-{
+const buildDarkBlock = (darkTokens) => {
 	const vars    = buildCssVarMap(darkTokens);
 	const maxLen  = Math.max(...Object.keys(vars).map(k => k.length));
 	const lines   = Object.entries(vars).map(([k, v]) => `\t${(k + ':').padEnd(maxLen + 1)} ${v};`).join('\n');
 	return `.dark {\n${lines}\n}`;
 }
 
-const buildThemeTs = (name, varName, lightTokens, darkTokens, meta) =>
-{
+const buildThemeTs = (name, varName, lightTokens, darkTokens, meta) => {
 	const lightVars = buildCssVarMap(lightTokens);
 	const darkVars  = buildCssVarMap(darkTokens);
 
@@ -162,8 +154,7 @@ ${darkLines}
 `;
 }
 
-const buildColorsTs = (lightTokens, darkTokens) =>
-{
+const buildColorsTs = (lightTokens, darkTokens) => {
 	const light = lightTokens.filter(t => t.path[0] === 'color');
 	const dark  = darkTokens.filter(t => t.path[0] === 'color');
 
@@ -213,8 +204,7 @@ ${groupBlocks.join('\n')}
 `;
 }
 
-const updateGlobalsCss = (themeBlock, darkBlock) =>
-{
+const updateGlobalsCss = (themeBlock, darkBlock) => {
 	const cssPath = join(ROOT, 'app/globals.css');
 	let   css     = readFileSync(cssPath, 'utf8');
 

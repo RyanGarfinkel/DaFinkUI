@@ -2,10 +2,7 @@
 
 import { useEffect, useRef, useState, HTMLAttributes } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface TextScrambleProps extends HTMLAttributes<HTMLSpanElement>
-{
+export interface TextScrambleProps extends HTMLAttributes<HTMLSpanElement> {
 	/** The final text to resolve to. */
 	text:        string;
 	/** Total duration of the scramble-to-resolve animation in milliseconds. */
@@ -14,8 +11,6 @@ export interface TextScrambleProps extends HTMLAttributes<HTMLSpanElement>
 	characters?: string;
 	className?:  string;
 }
-
-// ─── Internals ────────────────────────────────────────────────────────────────
 
 const DEFAULT_CHARACTERS = '!<>-_\\/[]{}—=+*^?#';
 
@@ -35,8 +30,6 @@ const buildScrambled = (
 			return randomCharacter(characters);
 		})
 		.join('');
-
-// ─── TextScramble ─────────────────────────────────────────────────────────────
 
 /**
  * Reveals text left-to-right by cycling through random filler characters

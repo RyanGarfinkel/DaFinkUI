@@ -4,8 +4,7 @@ export type SeparatorOrientation = 'horizontal' | 'vertical';
 export type SeparatorLabelPosition = 'start' | 'center' | 'end';
 export type SeparatorVariant = 'solid' | 'dashed' | 'dotted';
 
-export interface SeparatorProps extends Omit<HTMLAttributes<HTMLElement>, 'children'>
-{
+export interface SeparatorProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
 	orientation?:   SeparatorOrientation;
 	/** Position of the label along the line: start/center/end of the line's own axis (top-to-bottom when vertical). Only applies when children is set. */
 	labelPosition?: SeparatorLabelPosition;

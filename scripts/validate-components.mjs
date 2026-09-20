@@ -38,8 +38,6 @@ const CATALOGS = [
 	},
 ];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
 const errors   = [];
 const warnings = [];
 
@@ -49,8 +47,7 @@ const warn = (msg) => warnings.push(`  ⚠ ${msg}`);
 // Properties in registry entries are indented with 4 spaces. Props inside
 // the props array are deeper (8+), so anchoring to exactly 4 spaces prevents
 // false matches from nested objects.
-const parseRegistry = (registryText) =>
-{
+const parseRegistry = (registryText) => {
 	const slugs       = [...registryText.matchAll(/^ {4}slug:\s*'([^']+)'/gm)].map(m => m[1]);
 	const names       = [...registryText.matchAll(/^ {4}name:\s*'([^']+)'/gm)].map(m => m[1]);
 	const filesBlocks = [...registryText.matchAll(/^ {4}files:\s*\[([^\]]*)\]/gm)].map(m =>
@@ -70,8 +67,7 @@ const parseRegistry = (registryText) =>
 // Rather than parsing template literals (which breaks on escaped backticks),
 // slice the registry text between each entry's slug line and the next one.
 // This gives us the full text of each entry to search for JSX usage.
-const buildEntryRegions = (registryText) =>
-{
+const buildEntryRegions = (registryText) => {
 	const regions = {};
 	const slugPositions = [...registryText.matchAll(/^ {4}slug:\s*'([^']+)'/gm)];
 
@@ -86,8 +82,7 @@ const buildEntryRegions = (registryText) =>
 	return regions;
 };
 
-const getCaseBlock = (previewText, slug) =>
-{
+const getCaseBlock = (previewText, slug) => {
 	const start = previewText.indexOf(`case '${slug}':`);
 	if(start === -1) return null;
 
@@ -96,8 +91,6 @@ const getCaseBlock = (previewText, slug) =>
 	const endMatch = rest.match(/\n\s+case\s+'|\n\s+default:/);
 	return endMatch ? rest.slice(0, endMatch.index) : rest;
 };
-
-// ─── Parse both catalogs ───────────────────────────────────────────────────
 
 for(const catalog of CATALOGS)
 {
@@ -121,13 +114,9 @@ for(const catalog of CATALOGS)
 
 const allEntries = CATALOGS.flatMap(c => c.entries);
 
-// ─── Collect component directories ───────────────────────────────────────────
-
 const compDirs = readdirSync(COMP_DIR).filter(name =>
 	statSync(join(COMP_DIR, name)).isDirectory()
 );
-
-// ─── Check 1: Required files in each component directory ─────────────────────
 
 console.log('\nChecking required files…');
 
@@ -145,8 +134,6 @@ for(const dir of compDirs)
 		fail(`${dir}/ missing spec.md`);
 }
 
-// ─── Check 2: Every component source file appears in a registry ──────────────
-
 console.log('Checking registry coverage…');
 
 const allRegistryFiles = new Set(allEntries.flatMap(e => e.files));
@@ -157,8 +144,6 @@ for(const dir of compDirs)
 	if(!allRegistryFiles.has(relPath))
 		fail(`${dir}/${dir}.tsx not listed in any registry entry's files array`);
 }
-
-// ─── Check 3: Every registry file exists on disk ──────────────────────────────
 
 console.log('Checking registry file paths…');
 
@@ -171,8 +156,6 @@ for(const entry of allEntries)
 			fail(`Registry '${entry.slug}': file '${file}' does not exist`);
 	}
 }
-
-// ─── Checks 4-6: per-catalog live preview coverage and JSX alignment ─────────
 
 console.log('Checking live preview coverage…');
 console.log('Checking usage code contains JSX…');
@@ -213,8 +196,6 @@ for(const catalog of CATALOGS)
 	}
 }
 
-// ─── Check 7: Every component directory has a CLI registry entry ──────────────
-
 console.log('Checking CLI registry coverage…');
 
 const CLI_REGISTRY_FILE = join(ROOT, 'packages/cli/src/lib/registry.ts');
@@ -232,8 +213,6 @@ for(const dir of compDirs)
 	if(!cliFiles.has(`${dir}/${dir}.tsx`))
 		fail(`${dir}/${dir}.tsx is missing from packages/cli/src/lib/registry.ts`);
 }
-
-// ─── Report ───────────────────────────────────────────────────────────────────
 
 console.log('');
 

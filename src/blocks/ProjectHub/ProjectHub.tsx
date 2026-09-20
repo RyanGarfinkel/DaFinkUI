@@ -20,19 +20,15 @@ import Badge from '../../components/Badge/Badge';
 import Input from '../../components/Input/Input';
 import type { ReactNode } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 type Accent = 'brand' | 'success' | 'warning' | 'danger';
 
-interface ProjectLink
-{
+interface ProjectLink {
 	id:    string;
 	label: string;
 	url:   string;
 }
 
-interface ProjectData
-{
+interface ProjectData {
 	id:          string;
 	name:        string;
 	description: string;
@@ -45,14 +41,11 @@ interface ProjectData
 
 type AiStatus = 'idle' | 'thinking' | 'ready';
 
-interface AiSuggestion
-{
+interface AiSuggestion {
 	title:       string;
 	description: string;
 	tag:         string;
 }
-
-// ─── Accent maps ──────────────────────────────────────────────────────────────
 
 const ACCENTS: Accent[] = ['brand', 'success', 'warning', 'danger'];
 
@@ -76,8 +69,6 @@ const ACCENT_LABEL: Record<Accent, string> = {
 	warning: 'Amber',
 	danger:  'Red',
 };
-
-// ─── Icons ────────────────────────────────────────────────────────────────────
 
 const PlusIcon = () => (
 	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
@@ -121,7 +112,6 @@ const GridIcon = () => (
 	</svg>
 );
 
-// ─── Kanban card details ──────────────────────────────────────────────────────
 // KanbanCard ships no built-in edit form; this is this block's own, hand-rolled
 // for the fields its cards actually use (tag, description, due date, effort
 // points, and a subtask checklist).
@@ -265,8 +255,6 @@ const ProjectCardDetails: KanbanCardDetailsRenderer = ({ card, onUpdate, onDelet
 	);
 };
 
-// ─── Fake AI task drafting ────────────────────────────────────────────────────
-
 const TAG_KEYWORDS: { keywords: string[]; tag: string }[] = [
 	{ keywords: ['bug', 'fix', 'broken', 'crash'],      tag: 'Bug' },
 	{ keywords: ['design', 'ui', 'ux', 'layout'],        tag: 'Design' },
@@ -292,8 +280,6 @@ const draftTaskFromPrompt = (prompt: string): AiSuggestion => {
 		tag: pickTag(prompt),
 	};
 };
-
-// ─── Seed data ────────────────────────────────────────────────────────────────
 
 const getDefaultColumns = (): KanbanColumnData[] => [
 	{ id: 'todo',        title: 'To do',       cards: [] },
@@ -475,10 +461,7 @@ const BOARD_COLUMN_DEFS: { id: string; title: string }[] = [
 	{ id: 'done',        title: 'Done' },
 ];
 
-// ─── StatTile ─────────────────────────────────────────────────────────────────
-
-interface StatTileProps
-{
+interface StatTileProps {
 	label:     string;
 	value:     number;
 	suffix?:   string;
@@ -496,8 +479,6 @@ const StatTile = ({ label, value, suffix = '', progress }: StatTileProps) => (
 		</CardContent>
 	</Card>
 );
-
-// ─── ProjectHub ───────────────────────────────────────────────────────────────
 
 export const ProjectHub = () => {
 	const [projects, setProjects] = useState<ProjectData[]>(INITIAL_PROJECTS);

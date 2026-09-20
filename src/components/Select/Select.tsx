@@ -2,18 +2,14 @@
 
 import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface SelectOption
-{
+export interface SelectOption {
 	value: string;
 	label: string;
 }
 
 export type SelectSize = 'sm' | 'md';
 
-export interface SelectProps
-{
+export interface SelectProps {
 	options:      SelectOption[];
 	value?:       string;
 	onChange?:    (value: string) => void;
@@ -30,14 +26,10 @@ export interface SelectProps
 	'aria-label'?: string;
 }
 
-// ─── Size map ─────────────────────────────────────────────────────────────────
-
 const SIZE: Record<SelectSize, string> = {
 	sm: 'px-2.5 py-1 text-xs gap-1.5',
 	md: 'px-3 py-2 text-sm gap-2',
 };
-
-// ─── Select ───────────────────────────────────────────────────────────────────
 
 export const Select = (
     {

@@ -3,10 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { create, all } from 'mathjs';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface FunctionPlotterProps
-{
+export interface FunctionPlotterProps {
 	initialEquations?: string[];
 	height?:           number;
 	className?:        string;
@@ -15,23 +12,20 @@ export interface FunctionPlotterProps
 	layout?:           'bottom' | 'side';
 }
 
-interface Viewport
-{
+interface Viewport {
 	cx:    number;
 	cy:    number;
 	scale: number;
 }
 
-interface Equation
-{
+interface Equation {
 	id:    string;
 	expr:  string;
 	color: string;
 	error: boolean;
 }
 
-interface HoverPoint
-{
+interface HoverPoint {
 	sx:    number;
 	sy:    number;
 	x:     number;
@@ -39,8 +33,7 @@ interface HoverPoint
 	color: string;
 }
 
-interface MarkerPoint
-{
+interface MarkerPoint {
 	eqIds: string[];
 	sx:    number;
 	sy:    number;
@@ -50,8 +43,6 @@ interface MarkerPoint
 	label: string;
 	color: string;
 }
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const COLORS         = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b', '#a855f7', '#ec4899'];
 const GRID_STEPS     = [0.25, 0.5, 1, 2, 5, 10, 25, 50, 100];
@@ -75,7 +66,6 @@ const formatCoord = (n: number) => Math.abs(n) < ZERO_EPSILON ? '0' : parseFloat
 let _idCounter = 0;
 const nextId = () => `eq-${++_idCounter}`;
 
-// ─── Expression parser ────────────────────────────────────────────────────────
 //
 // Equations come from free-text user input, so they're parsed and evaluated by
 // mathjs' expression parser rather than `new Function`/`eval` — mathjs never
@@ -107,8 +97,7 @@ mathInstance.import({
 	reviver:    disableFn('reviver'),
 }, { override: true });
 
-const compileExpr = (expr: string): ((x: number) => number) | null =>
-{
+const compileExpr = (expr: string): ((x: number) => number) | null => {
 	if(expr.trim() === '') return null;
 
 	try
@@ -133,8 +122,7 @@ const compileExpr = (expr: string): ((x: number) => number) | null =>
 // Refines a rough local extremum into a precise one via ternary search — works
 // for any unimodal (single min or max) window, which a narrow few-pixel range
 // around a detected slope-sign change reliably is for a smooth plotted curve.
-const ternarySearch = (fn: (x: number) => number, lo: number, hi: number, findMax: boolean): { x: number; y: number } =>
-{
+const ternarySearch = (fn: (x: number) => number, lo: number, hi: number, findMax: boolean): { x: number; y: number } => {
 	let a = lo;
 	let b = hi;
 
@@ -152,8 +140,7 @@ const ternarySearch = (fn: (x: number) => number, lo: number, hi: number, findMa
 
 // Finds a root of `diffFn` (the difference between two curves, so a root is an
 // intersection) within a window already known to bracket a sign change.
-const bisectRoot = (diffFn: (x: number) => number, lo: number, hi: number): number =>
-{
+const bisectRoot = (diffFn: (x: number) => number, lo: number, hi: number): number => {
 	let a  = lo;
 	let b  = hi;
 	let fa = diffFn(a);
@@ -168,8 +155,6 @@ const bisectRoot = (diffFn: (x: number) => number, lo: number, hi: number): numb
 	return (a + b) / 2;
 }
 
-// ─── FunctionPlotter ──────────────────────────────────────────────────────────
-
 const FunctionPlotter = ({
 	initialEquations = ['2*x + 1', 'x^2'],
 	height = 400,
@@ -177,8 +162,7 @@ const FunctionPlotter = ({
 	readOnly = false,
 	tooltip = true,
 	layout = 'bottom',
-}: FunctionPlotterProps) =>
-{
+}: FunctionPlotterProps) => {
 	const canvasRef   = useRef<HTMLCanvasElement>(null);
 	const wrapperRef  = useRef<HTMLDivElement>(null);
 	const viewportRef = useRef<Viewport>({ ...DEFAULT_VP });
@@ -200,8 +184,6 @@ const FunctionPlotter = ({
 	const [hover, setHover]       = useState<HoverPoint | null>(null);
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const [popup, setPopup]       = useState<MarkerPoint | null>(null);
-
-	// ── Draw ──────────────────────────────────────────────────────────────────
 
 	const draw = useCallback(() =>
 	{
@@ -241,8 +223,6 @@ const FunctionPlotter = ({
 		const originSX = toScreenX(0);
 		const originSY = toScreenY(0);
 
-		// ── Grid lines ────────────────────────────────────────────────────────
-
 		ctx.strokeStyle = borderColor;
 		ctx.lineWidth   = 1;
 
@@ -266,8 +246,6 @@ const FunctionPlotter = ({
 			ctx.stroke();
 		}
 
-		// ── Axes ──────────────────────────────────────────────────────────────
-
 		ctx.strokeStyle = axisColor;
 		ctx.lineWidth   = 1.5;
 
@@ -280,8 +258,6 @@ const FunctionPlotter = ({
 		ctx.moveTo(0, originSY);
 		ctx.lineTo(w, originSY);
 		ctx.stroke();
-
-		// ── Tick labels ───────────────────────────────────────────────────────
 
 		ctx.fillStyle = labelColor;
 		ctx.font      = '10px system-ui, sans-serif';
@@ -308,8 +284,6 @@ const FunctionPlotter = ({
 		}
 
 		ctx.textBaseline = 'alphabetic';
-
-		// ── Curves ────────────────────────────────────────────────────────────
 
 		const markers: MarkerPoint[] = [];
 		const compiledEqs: Array<{ eq: Equation; fn: (x: number) => number; samples: Float64Array }> = [];
@@ -372,7 +346,6 @@ const FunctionPlotter = ({
 					ctx.lineTo(sx, sy);
 				}
 
-				// ── Local extrema (active equation only) ─────────────────────────
 				// Numeric, not symbolic: mathjs' `derivative` is disabled (see above),
 				// so a sign change in the discrete slope between samples is refined
 				// into a precise extremum via ternary search over that narrow window.
@@ -431,7 +404,6 @@ const FunctionPlotter = ({
 
 		ctx.globalAlpha = 1;
 
-		// ── Intersections (active equation only, like extrema) ────────────────
 		// Only pairs that include the active equation are checked — nothing
 		// shows until a curve is selected, same as extrema.
 		// Same numeric approach as extrema, but on the difference of two curves:
@@ -513,16 +485,13 @@ const FunctionPlotter = ({
 		markersRef.current = markers;
 	}, [equations, activeId]);
 
-	// ── Canvas size / DPR ─────────────────────────────────────────────────────
-
 	useEffect(() =>
 	{
 		const canvas  = canvasRef.current;
 		const wrapper = wrapperRef.current;
 		if(!canvas || !wrapper) return;
 
-		const resize = () =>
-		{
+		const resize = () => {
 			const dpr = window.devicePixelRatio || 1;
 			const w   = wrapper.clientWidth;
 			canvas.width         = w * dpr;
@@ -550,8 +519,7 @@ const FunctionPlotter = ({
 	{
 		if(!popup) return;
 
-		const onKeyDown = (e: KeyboardEvent) =>
-		{
+		const onKeyDown = (e: KeyboardEvent) => {
 			if(e.key === 'Escape') setPopup(null);
 		};
 
@@ -559,10 +527,7 @@ const FunctionPlotter = ({
 		return () => window.removeEventListener('keydown', onKeyDown);
 	}, [popup]);
 
-	// ── Hit testing ───────────────────────────────────────────────────────────
-
-	const findNearestCurve = (px: number, py: number, w: number, h: number) =>
-	{
+	const findNearestCurve = (px: number, py: number, w: number, h: number) => {
 		const { cx, cy, scale } = viewportRef.current;
 		const worldX = cx + (px - w / 2) / scale;
 
@@ -591,8 +556,7 @@ const FunctionPlotter = ({
 		return nearest;
 	};
 
-	const handleCanvasClick = (e: React.PointerEvent<HTMLCanvasElement>) =>
-	{
+	const handleCanvasClick = (e: React.PointerEvent<HTMLCanvasElement>) => {
 		const canvas = canvasRef.current;
 		if(!canvas) return;
 
@@ -631,10 +595,7 @@ const FunctionPlotter = ({
 		setActiveId(hit ? hit.eq.id : null);
 	};
 
-	// ── Pointer events (pan / select / click) ────────────────────────────────
-
-	const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) =>
-	{
+	const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
 		e.currentTarget.setPointerCapture(e.pointerId);
 		isDragging.current = true;
 		hasMoved.current   = false;
@@ -648,8 +609,7 @@ const FunctionPlotter = ({
 		};
 	};
 
-	const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) =>
-	{
+	const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
 		if(isDragging.current)
 		{
 			const dxPx = e.nativeEvent.offsetX - dragStart.current.x;
@@ -683,8 +643,7 @@ const FunctionPlotter = ({
 		setHover(hit ? { sx: px, sy: hit.sy, x: hit.worldX, y: hit.worldY, color: hit.eq.color } : null);
 	};
 
-	const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) =>
-	{
+	const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
 		const wasClick = isDragging.current && !hasMoved.current;
 		isDragging.current = false;
 		setDragging(false);
@@ -692,18 +651,14 @@ const FunctionPlotter = ({
 		if(wasClick) handleCanvasClick(e);
 	};
 
-	const onPointerLeave = () =>
-	{
+	const onPointerLeave = () => {
 		isDragging.current = false;
 		hasMoved.current   = false;
 		setDragging(false);
 		setHover(null);
 	};
 
-	// ── Wheel (zoom) ──────────────────────────────────────────────────────────
-
-	const onWheel = (e: React.WheelEvent<HTMLCanvasElement>) =>
-	{
+	const onWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
 		e.preventDefault();
 		const { cx, cy, scale } = viewportRef.current;
 		const canvas = canvasRef.current;
@@ -724,33 +679,25 @@ const FunctionPlotter = ({
 		draw();
 	};
 
-	// ── Zoom buttons ──────────────────────────────────────────────────────────
-
-	const zoomIn = () =>
-	{
+	const zoomIn = () => {
 		viewportRef.current.scale = Math.min(5000, viewportRef.current.scale * 1.5);
 		setPopup(null);
 		draw();
 	};
 
-	const zoomOut = () =>
-	{
+	const zoomOut = () => {
 		viewportRef.current.scale = Math.max(5, viewportRef.current.scale / 1.5);
 		setPopup(null);
 		draw();
 	};
 
-	const resetView = () =>
-	{
+	const resetView = () => {
 		viewportRef.current = { ...DEFAULT_VP };
 		setPopup(null);
 		draw();
 	};
 
-	// ── Equation editing ──────────────────────────────────────────────────────
-
-	const updateExpr = (id: string, expr: string) =>
-	{
+	const updateExpr = (id: string, expr: string) => {
 		setEquations(prev => prev.map(eq =>
 		{
 			if(eq.id !== id) return eq;
@@ -762,28 +709,23 @@ const FunctionPlotter = ({
 		setPopup(prev => (prev && prev.eqIds.includes(id)) ? null : prev);
 	};
 
-	const activateEquation = (id: string) =>
-	{
+	const activateEquation = (id: string) => {
 		setActiveId(id);
 		setPopup(null);
 	};
 
-	const addEquation = () =>
-	{
+	const addEquation = () => {
 		if(equations.length >= MAX_EQ) return;
 		const color = COLORS[equations.length % COLORS.length];
 		setEquations(prev => [...prev, { id: nextId(), expr: '', color, error: false }]);
 	};
 
-	const removeEquation = (id: string) =>
-	{
+	const removeEquation = (id: string) => {
 		if(equations.length <= 1) return;
 		setEquations(prev => prev.filter(eq => eq.id !== id));
 		setActiveId(prev => (prev === id ? null : prev));
 		setPopup(prev => (prev && prev.eqIds.includes(id)) ? null : prev);
 	};
-
-	// ── Render ────────────────────────────────────────────────────────────────
 
 	const sideLayout = layout === 'side' && !readOnly;
 
@@ -971,15 +913,11 @@ const FunctionPlotter = ({
 	);
 };
 
-// ─── ZoomButton ───────────────────────────────────────────────────────────────
-
-interface ZoomButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>
-{
+interface ZoomButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 	children: React.ReactNode;
 }
 
-const ZoomButton = ({ children, ...props }: ZoomButtonProps) =>
-{
+const ZoomButton = ({ children, ...props }: ZoomButtonProps) => {
 	return (
 		<button
 			type='button'

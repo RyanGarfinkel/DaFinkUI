@@ -1,8 +1,8 @@
-'use client';;
+'use client';
+
 import { createContext, useContext, useRef, useState, useCallback, useEffect, useId, ReactNode, KeyboardEvent } from 'react';
 
-interface TreeContextValue
-{
+interface TreeContextValue {
 	focusedId: string | null;
 	setFocusedId: (id: string | null) => void;
 	registerItem: (id: string, el: HTMLElement) => void;
@@ -15,15 +15,13 @@ interface TreeContextValue
 
 const TreeContext = createContext<TreeContextValue | null>(null);
 
-const useTreeContext = () =>
-{
+const useTreeContext = () => {
 	const ctx = useContext(TreeContext);
 	if(!ctx) throw new Error('TreeItem must be used inside <Tree>');
 	return ctx;
 };
 
-export interface TreeProps
-{
+export interface TreeProps {
 	children: ReactNode;
 	className?: string;
 	terminalIcon?: ReactNode;
@@ -52,8 +50,7 @@ const Tree = ({ children, className = '', terminalIcon, nonTerminalIcon, selecta
 	{
 		const map = itemsRef.current;
 
-		const visible = (el: HTMLElement) =>
-		{
+		const visible = (el: HTMLElement) => {
 			let node: HTMLElement | null = el.parentElement;
 			while(node)
 			{
@@ -131,8 +128,7 @@ const Tree = ({ children, className = '', terminalIcon, nonTerminalIcon, selecta
 
 export default Tree;
 
-interface TreeItemContextValue
-{
+interface TreeItemContextValue {
 	depth: number;
 	isOpen: boolean;
 	setOpen: (open: boolean) => void;
@@ -143,8 +139,7 @@ const TreeItemContext = createContext<TreeItemContextValue | null>(null);
 
 const useTreeItemContext = () => useContext(TreeItemContext);
 
-export interface TreeItemProps
-{
+export interface TreeItemProps {
 	label: ReactNode;
 	children?: ReactNode;
 	defaultOpen?: boolean;

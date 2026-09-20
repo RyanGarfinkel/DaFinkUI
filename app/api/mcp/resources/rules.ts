@@ -8,8 +8,7 @@ export const listRules = () =>
 		.filter(f => f.endsWith('.md'))
 		.map(f => f.replace(/\.md$/, ''));
 
-export const getRule = (name: string) =>
-{
+export const getRule = (name: string) => {
 	const p = join(RULES_DIR, `${name}.md`);
 	if(existsSync(p)) return readFileSync(p, 'utf-8');
 	const available = listRules();

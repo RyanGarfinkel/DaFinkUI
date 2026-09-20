@@ -2,10 +2,7 @@
 
 import { useEffect, useRef, useState, type HTMLAttributes, type MouseEventHandler } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface ConfettiProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface ConfettiProps extends HTMLAttributes<HTMLDivElement> {
 	/** Content to wrap, typically a button. Clicking it triggers the burst. */
 	children:       React.ReactNode;
 	/** Number of confetti pieces rendered per burst. Defaults to 60. */
@@ -17,8 +14,7 @@ export interface ConfettiProps extends HTMLAttributes<HTMLDivElement>
 	className?:     string;
 }
 
-interface Piece
-{
+interface Piece {
 	id:     number;
 	color:  string;
 	width:  number;
@@ -29,15 +25,12 @@ interface Piece
 	dy:     number;
 }
 
-interface Burst
-{
+interface Burst {
 	id:     number;
 	x:      number;
 	y:      number;
 	pieces: Piece[];
 }
-
-// ─── Internals ────────────────────────────────────────────────────────────────
 
 const DEFAULT_COLORS = ['#f43f5e', '#fb923c', '#facc15', '#4ade80', '#38bdf8', '#a78bfa'];
 
@@ -52,8 +45,6 @@ const buildPieces = (particleCount: number, colors: string[]): Piece[] =>
 		dx:     (Math.random() - 0.5) * 200,
 		dy:     100 + Math.random() * 150,
 	}));
-
-// ─── ConfettiBurst ────────────────────────────────────────────────────────────
 
 const ConfettiBurst = (
 	{ x, y, pieces, duration }: { x: number; y: number; pieces: Piece[]; duration: number }
@@ -93,8 +84,6 @@ const ConfettiBurst = (
 		</span>
 	);
 };
-
-// ─── Confetti ─────────────────────────────────────────────────────────────────
 
 /**
  * Wraps content, typically a button, and bursts colorful confetti pieces

@@ -44,8 +44,7 @@ const GITLAB_WORKFLOW_YAML = `dafink-audit:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'`;
 
-const ReliabilityPage = () =>
-{
+const ReliabilityPage = () => {
 	return (
 		<div className='flex flex-col gap-12'>
 

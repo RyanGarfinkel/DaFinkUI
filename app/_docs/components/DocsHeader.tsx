@@ -1,4 +1,5 @@
 'use client';
+
 import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
 import { MenuBar, MenuBarActions } from '@/src/components/MenuBar/MenuBar';
 import { visibleEffects as effects } from '@/app/_docs/registry/effects';
@@ -15,13 +16,11 @@ import { blocks } from '@/app/_docs/registry/blocks';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-interface DocsHeaderProps
-{
+interface DocsHeaderProps {
 	collapsed?: boolean;
 }
 
-export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
-{
+export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) => {
 	const [paletteOpen, setPaletteOpen] = useState(false);
 	const [activeTheme, setActiveTheme] = useState<Theme>(themes[0]);
 	const [activeStyle, setActiveStyle] = useState<Style>(styles[0]);
@@ -30,8 +29,7 @@ export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
 
 	const sortedComponents = useMemo(() => [...registry].sort((a, b) => a.name.localeCompare(b.name)), []);
 
-	const applyTheme = (theme: Theme) =>
-	{
+	const applyTheme = (theme: Theme) => {
 		let styleEl = document.getElementById('theme-override') as HTMLStyleElement | null;
 
 		if(theme.name === 'default')
@@ -64,16 +62,13 @@ export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
 		}
 	}, []);
 
-	const handleThemeChange = (theme: Theme) =>
-	{
+	const handleThemeChange = (theme: Theme) => {
 		setActiveTheme(theme);
 		localStorage.setItem('design-system', theme.name);
 		applyTheme(theme);
 	};
 
-	// ─── Surface style (orthogonal to the color palette) ──────────────────────
-	const applyStyle = (style: Style) =>
-	{
+	const applyStyle = (style: Style) => {
 		let styleEl = document.getElementById('style-override') as HTMLStyleElement | null;
 
 		if(style.name === 'minimal')
@@ -106,21 +101,18 @@ export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
 		}
 	}, []);
 
-	const handleStyleChange = (style: Style) =>
-	{
+	const handleStyleChange = (style: Style) => {
 		setActiveStyle(style);
 		localStorage.setItem('design-style', style.name);
 		applyStyle(style);
 	};
 
-	const goTo = (href: string) =>
-	{
+	const goTo = (href: string) => {
 		router.push(href);
 		setPaletteOpen(false);
 	};
 
-	const goToExternal = (href: string) =>
-	{
+	const goToExternal = (href: string) => {
 		window.open(href, '_blank', 'noopener,noreferrer');
 		setPaletteOpen(false);
 	};
@@ -298,10 +290,7 @@ export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) =>
 	);
 };
 
-// ─── Global keyboard shortcuts ────────────────────────────────────────────────
-
-const GlobalShortcuts = ({ onOpen }: { onOpen: () => void }) =>
-{
+const GlobalShortcuts = ({ onOpen }: { onOpen: () => void }) => {
 	const ref = useRef(onOpen);
 
 	useEffect(() =>
@@ -311,8 +300,7 @@ const GlobalShortcuts = ({ onOpen }: { onOpen: () => void }) =>
 
 	useEffect(() =>
 	{
-		const handler = (e: KeyboardEvent) =>
-		{
+		const handler = (e: KeyboardEvent) => {
 			const active = document.activeElement;
 			const inInput = active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement || (active instanceof HTMLElement && active.isContentEditable);
 

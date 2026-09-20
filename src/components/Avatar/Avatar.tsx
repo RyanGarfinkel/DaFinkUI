@@ -2,8 +2,6 @@
 
 import { Children, isValidElement, cloneElement, useState, HTMLAttributes } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type AvatarSize  = 'sm' | 'md' | 'lg';
 export type AvatarShape = 'circle' | 'square';
 
@@ -39,8 +37,6 @@ export interface AvatarGroupProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
-// ─── Internals ────────────────────────────────────────────────────────────────
-
 const SIZE_CLASSES: Record<AvatarSize, string> = {
 	sm: 'h-7 w-7 text-[10px]',
 	md: 'h-9 w-9 text-xs',
@@ -69,8 +65,6 @@ const PersonGlyph = ({ className = '' }: { className?: string }) => (
 		<path d='M12 12a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9Zm0 2.25c-3.9 0-7.5 2.1-7.5 5.05 0 1.05.85 1.7 1.9 1.7h11.2c1.05 0 1.9-.65 1.9-1.7 0-2.95-3.6-5.05-7.5-5.05Z' />
 	</svg>
 );
-
-// ─── Avatar ───────────────────────────────────────────────────────────────────
 
 export const Avatar = (
 	{
@@ -138,8 +132,6 @@ export const Avatar = (
 		</span>
 	);
 };
-
-// ─── AvatarGroup ──────────────────────────────────────────────────────────────
 
 export const AvatarGroup = (
 	{

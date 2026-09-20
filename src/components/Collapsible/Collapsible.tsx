@@ -2,8 +2,7 @@
 
 import { createContext, useContext, useState, HTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
 
-interface CollapsibleContextValue
-{
+interface CollapsibleContextValue {
 	isOpen:   boolean;
 	toggle:   () => void;
 	disabled: boolean;
@@ -11,15 +10,13 @@ interface CollapsibleContextValue
 
 const CollapsibleContext = createContext<CollapsibleContextValue | null>(null);
 
-const useCollapsibleContext = () =>
-{
+const useCollapsibleContext = () => {
 	const ctx = useContext(CollapsibleContext);
 	if(!ctx) throw new Error('CollapsibleTrigger and CollapsibleContent must be used inside <Collapsible>');
 	return ctx;
 };
 
-export interface CollapsibleProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface CollapsibleProps extends HTMLAttributes<HTMLDivElement> {
 	open?:           boolean;
 	defaultOpen?:    boolean;
 	onOpenChange?:   (open: boolean) => void;
@@ -43,8 +40,7 @@ const Collapsible = (
 	const isControlled = open !== undefined;
 	const isOpen = isControlled ? open! : internalOpen;
 
-	const toggle = () =>
-	{
+	const toggle = () => {
 		if(disabled) return;
 		const next = !isOpen;
 		if(!isControlled) setInternalOpen(next);
@@ -66,8 +62,7 @@ const Collapsible = (
 
 export default Collapsible;
 
-export interface CollapsibleTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface CollapsibleTriggerProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	className?: string;
 	children:   ReactNode;
 }
@@ -105,8 +100,7 @@ export const CollapsibleTrigger = (
 	);
 };
 
-export interface CollapsibleContentProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface CollapsibleContentProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 

@@ -16,8 +16,7 @@ const FIXED_RECT = {
 	toJSON: () => {},
 } as DOMRect;
 
-const stubMatchMedia = (matches: boolean) =>
-{
+const stubMatchMedia = (matches: boolean) => {
 	vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({ matches }));
 };
 

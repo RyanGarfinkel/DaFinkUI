@@ -6,8 +6,7 @@ export const metadata: Metadata = {
 	description: 'Version history for the dafink-ui package.',
 };
 
-const formatDate = (date: string | null) =>
-{
+const formatDate = (date: string | null) => {
 	if(!date) return null;
 
 	return new Date(`${date}T00:00:00`).toLocaleDateString('en-US', {
@@ -19,8 +18,7 @@ const formatDate = (date: string | null) =>
 
 const formatVersion = (version: string) => version === 'Unreleased' ? version : `v${version}`;
 
-const ChangelogPage = () =>
-{
+const ChangelogPage = () => {
 	return (
 		<div className='flex flex-col gap-10'>
 			<div className='flex flex-col gap-2'>

@@ -13,10 +13,7 @@ import {
 } from 'react';
 import ScrollFade from '../ScrollFade/ScrollFade';
 
-// ─── Item registry entry ──────────────────────────────────────────────────────
-
-interface ItemEntry
-{
+interface ItemEntry {
 	id:       string;
 	groupId:  string;
 	value:    string;
@@ -24,10 +21,7 @@ interface ItemEntry
 	onSelect: () => void;
 }
 
-// ─── Palette context ──────────────────────────────────────────────────────────
-
-interface PaletteCtx
-{
+interface PaletteCtx {
 	query:        string;
 	activeId:     string | null;
 	setActiveId:  (id: string | null) => void;
@@ -46,28 +40,21 @@ const usePaletteContext = () => {
 	return ctx;
 };
 
-// ─── Group context ────────────────────────────────────────────────────────────
-
 const GroupContext = createContext<string>('');
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface CommandPaletteProps
-{
+export interface CommandPaletteProps {
 	open:         boolean;
 	onClose:      () => void;
 	placeholder?: string;
 	children:     ReactNode;
 }
 
-export interface CommandGroupProps
-{
+export interface CommandGroupProps {
 	label?:   string;
 	children: ReactNode;
 }
 
-export interface CommandItemProps
-{
+export interface CommandItemProps {
 	onSelect:  () => void;
 	value:     string;
 	disabled?: boolean;
@@ -75,8 +62,6 @@ export interface CommandItemProps
 	shortcut?: string;
 	children:  ReactNode;
 }
-
-// ─── Focus trap selector ──────────────────────────────────────────────────────
 
 const FOCUSABLE_SELECTOR = [
 	'a[href]',
@@ -103,8 +88,6 @@ const highlightMatch = (text: string, query: string) => {
 		</>
 	);
 };
-
-// ─── CommandPalette ───────────────────────────────────────────────────────────
 
 export const CommandPalette = (
     {
@@ -425,8 +408,6 @@ export const CommandPalette = (
 	);
 };
 
-// ─── CommandGroup ─────────────────────────────────────────────────────────────
-
 export const CommandGroup = ({ label, children }: CommandGroupProps) => {
 	const ctx     = useContext(PaletteContext);
 	const groupId = useId();
@@ -451,8 +432,6 @@ export const CommandGroup = ({ label, children }: CommandGroupProps) => {
 		</GroupContext.Provider>
 	);
 };
-
-// ─── CommandItem ──────────────────────────────────────────────────────────────
 
 export const CommandItem = (
     {

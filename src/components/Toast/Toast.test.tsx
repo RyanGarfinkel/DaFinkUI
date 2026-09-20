@@ -6,15 +6,13 @@ import { ToastProvider, useToast } from './Toast';
 import { describe, it, expect, vi } from 'vitest';
 import { useEffect } from 'react';
 
-const Trigger = ({ opts }: { opts: Parameters<ReturnType<typeof useToast>['toast']>[0] }) =>
-{
+const Trigger = ({ opts }: { opts: Parameters<ReturnType<typeof useToast>['toast']>[0] }) => {
 	const { toast } = useToast();
 	useEffect(() => { toast(opts); }, []);
 	return null;
 };
 
-const renderWithProvider = (opts: Parameters<ReturnType<typeof useToast>['toast']>[0]) =>
-{
+const renderWithProvider = (opts: Parameters<ReturnType<typeof useToast>['toast']>[0]) => {
 	return render(
 		<ToastProvider>
 			<Trigger opts={opts} />
@@ -45,8 +43,7 @@ describe('useToast', () =>
 {
 	it('throws when used outside ToastProvider', () =>
 	{
-		const Bad = () =>
-		{
+		const Bad = () => {
 			useToast();
 			return null;
 		};

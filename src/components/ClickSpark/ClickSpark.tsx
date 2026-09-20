@@ -2,10 +2,7 @@
 
 import { useEffect, useRef, useState, type HTMLAttributes, type MouseEventHandler } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface ClickSparkProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface ClickSparkProps extends HTMLAttributes<HTMLDivElement> {
 	/** Content to wrap. Clicks anywhere within trigger a burst at the click point. */
 	children:     React.ReactNode;
 	/** Number of spark lines rendered per burst. Defaults to 8. */
@@ -17,14 +14,11 @@ export interface ClickSparkProps extends HTMLAttributes<HTMLDivElement>
 	className?:   string;
 }
 
-interface Burst
-{
+interface Burst {
 	id: number;
 	x:  number;
 	y:  number;
 }
-
-// ─── ClickSpark ───────────────────────────────────────────────────────────────
 
 /**
  * Wraps content and spawns a brief burst of thin spark lines radiating

@@ -24,8 +24,6 @@ import { HTMLAttributes, ReactNode, useId, useState } from 'react';
 import { CSS } from '@dnd-kit/utilities';
 import Modal from '../Modal/Modal';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface KanbanSubtask {
   id: string;
   label: string;
@@ -47,8 +45,6 @@ export interface KanbanColumnData {
   title: string;
   cards: KanbanCardData[];
 }
-
-// ─── KanbanCard ───────────────────────────────────────────────────────────────
 
 const InfoIcon = () => (
   <svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
@@ -76,7 +72,6 @@ const ChecklistIcon = () => (
 
 const formatDueDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
 
-// ─── KanbanCard ───────────────────────────────────────────────────────────────
 // The details popup is bring-your-own: KanbanCard has no built-in edit form. Pass
 // a `renderCardDetails` function to render whatever content you want inside the
 // Modal that opens on click; omit it and the card is drag-only, no popup at all.
@@ -246,8 +241,6 @@ export const KanbanCard = ({ card, isDragging = false, className = '', onUpdate,
   );
 };
 
-// ─── KanbanColumn ─────────────────────────────────────────────────────────────
-
 export interface KanbanColumnProps extends HTMLAttributes<HTMLDivElement> {
   column: KanbanColumnData;
   className?: string;
@@ -290,8 +283,6 @@ export const KanbanColumn = ({ column, className = '', onCardUpdate, onCardDelet
     </div>
   );
 };
-
-// ─── KanbanBoard ──────────────────────────────────────────────────────────────
 
 export interface KanbanBoardProps {
   initialColumns: KanbanColumnData[];

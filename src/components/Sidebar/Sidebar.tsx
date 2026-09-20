@@ -25,8 +25,7 @@ const SidebarActiveLinkContext = createContext<{ activeHref: string | null }>({ 
 // consumer that wraps SidebarLink in its own component (as this repo's docs
 // site does) is expected to compute isActive itself, exactly like the
 // explicit-override path already requires.
-const collectAutoMatchHrefs = (node: ReactNode, hrefs: string[]): void =>
-{
+const collectAutoMatchHrefs = (node: ReactNode, hrefs: string[]): void => {
 	Children.forEach(node, child =>
 	{
 		if(!isValidElement(child)) return;
@@ -51,8 +50,7 @@ const collectAutoMatchHrefs = (node: ReactNode, hrefs: string[]): void =>
 // pathname wins, so a general link (e.g. "/projects") still lights up when no
 // more specific sibling (e.g. "/projects/overview") is present. "/" is never
 // treated as an ancestor of every route — it only matches pathname === "/".
-export const resolveSidebarActiveHref = (hrefs: string[], pathname: string | null): string | null =>
-{
+export const resolveSidebarActiveHref = (hrefs: string[], pathname: string | null): string | null => {
 	if(pathname === null) return null;
 
 	let best: string | null = null;
@@ -65,8 +63,6 @@ export const resolveSidebarActiveHref = (hrefs: string[], pathname: string | nul
 	return best;
 };
 
-// ─── Sidebar ────────────────────────────────────────────────────────────────
-
 export type SidebarTogglePosition = 'top' | 'middle' | 'bottom';
 
 const TOGGLE_POSITION_CLASSES: Record<SidebarTogglePosition, string> = {
@@ -77,8 +73,7 @@ const TOGGLE_POSITION_CLASSES: Record<SidebarTogglePosition, string> = {
 	bottom: 'bottom-6',
 };
 
-export interface SidebarProps extends HTMLAttributes<HTMLElement>
-{
+export interface SidebarProps extends HTMLAttributes<HTMLElement> {
 	width?:             string;
 	height?:            string;
 	collapsedWidth?:    string;
@@ -105,8 +100,7 @@ export const Sidebar = (
     const isControlled = collapsed !== undefined;
     const isCollapsed  = isControlled ? collapsed : uncontrolledCollapsed;
 
-    const toggleCollapsed = () =>
-    {
+    const toggleCollapsed = () => {
         const next = !isCollapsed;
         if(!isControlled) setUncontrolledCollapsed(next);
         onCollapsedChange?.(next);
@@ -201,8 +195,7 @@ export const Sidebar = (
     // event-driven selection, not just route changes.
     }, [pathname, isCollapsed, children]);
 
-    const handleKeyDown = (e: KeyboardEvent<HTMLElement>) =>
-    {
+    const handleKeyDown = (e: KeyboardEvent<HTMLElement>) => {
         if(!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
 
         const links = Array.from(
@@ -326,8 +319,6 @@ export const Sidebar = (
     );
 };
 
-// ─── SidebarHeader ────────────────────────────────────────────────────────────
-
 export type SidebarHeaderProps = HTMLAttributes<HTMLDivElement>;
 
 export const SidebarHeader = ({ className = '', children, ...props }: SidebarHeaderProps) => {
@@ -337,8 +328,6 @@ export const SidebarHeader = ({ className = '', children, ...props }: SidebarHea
 		</div>
 	);
 };
-
-// ─── SidebarFooter ────────────────────────────────────────────────────────────
 
 export type SidebarFooterProps = HTMLAttributes<HTMLDivElement>;
 
@@ -350,10 +339,7 @@ export const SidebarFooter = ({ className = '', children, ...props }: SidebarFoo
 	);
 };
 
-// ─── SidebarSection ───────────────────────────────────────────────────────────
-
-export interface SidebarSectionProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface SidebarSectionProps extends HTMLAttributes<HTMLDivElement> {
 	label?: string;
 }
 
@@ -375,15 +361,13 @@ export const SidebarSection = ({ label, className = '', children, ...props }: Si
 	);
 };
 
-// ─── Shared item chrome (SidebarLink + SidebarButton) ────────────────────────
 //
 // Both a URL-driven SidebarLink and an event-driven SidebarButton render as
 // the same pill, so the class list, the icon/label markup, and the
 // action-sibling/tooltip wrapping live here once instead of drifting between
 // two copies.
 
-interface SidebarItemClassNameOptions
-{
+interface SidebarItemClassNameOptions {
 	hideLabel:  boolean;
 	showAction: boolean;
 	isActive:   boolean;
@@ -402,8 +386,7 @@ const sidebarItemClassName = ({ hideLabel, showAction, isActive, className }: Si
 	className,
 ].join(' ');
 
-interface SidebarItemLabelProps
-{
+interface SidebarItemLabelProps {
 	icon?:      ReactNode;
 	hideLabel:  boolean;
 	children?:  ReactNode;
@@ -416,16 +399,14 @@ const SidebarItemLabel = ({ icon, hideLabel, children }: SidebarItemLabelProps) 
 	</>
 );
 
-interface WrapSidebarItemOptions
-{
+interface WrapSidebarItemOptions {
 	hideLabel:  boolean;
 	showAction: boolean;
 	children?:  ReactNode;
 	action?:    ReactNode;
 }
 
-const wrapSidebarItem = (item: ReactElement<HTMLAttributes<HTMLElement>>, { hideLabel, showAction, children, action }: WrapSidebarItemOptions) =>
-{
+const wrapSidebarItem = (item: ReactElement<HTMLAttributes<HTMLElement>>, { hideLabel, showAction, children, action }: WrapSidebarItemOptions) => {
 	if(hideLabel) return <Tooltip content={children} side='right' className='w-full'>{item}</Tooltip>;
 
 	// `action` renders as a sibling of the link/button, never a descendant: nesting
@@ -445,10 +426,7 @@ const wrapSidebarItem = (item: ReactElement<HTMLAttributes<HTMLElement>>, { hide
 	);
 };
 
-// ─── SidebarLink ─────────────────────────────────────────────────────────────
-
-export interface SidebarLinkProps extends LinkProps
-{
+export interface SidebarLinkProps extends LinkProps {
 	isActive?:  boolean;
 	icon?:      ReactNode;
 	action?:    ReactNode;
@@ -487,15 +465,13 @@ export const SidebarLink = ({ isActive, icon, action, className = '', children, 
 	return wrapSidebarItem(link, { hideLabel, showAction, children, action });
 };
 
-// ─── SidebarButton ────────────────────────────────────────────────────────────
 //
 // Same pill as SidebarLink, but for sidebar items that swap content without
 // changing the URL (e.g. an inbox/drafts/sent switcher). `isActive` is fully
 // controlled by the consumer — there's no pathname to derive it from — so it
 // always defaults to false rather than auto-matching anything.
 
-export interface SidebarButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'>
-{
+export interface SidebarButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {
 	isActive?:  boolean;
 	indicator?: boolean;
 	icon?:      ReactNode;
@@ -529,8 +505,6 @@ export const SidebarButton = ({ isActive = false, indicator = true, icon, action
 
 	return wrapSidebarItem(button, { hideLabel, showAction, children, action });
 };
-
-// ─── SidebarDivider ───────────────────────────────────────────────────────────
 
 export const SidebarDivider = ({ className = '', ...props }: HTMLAttributes<HTMLHRElement>) => {
 	return (

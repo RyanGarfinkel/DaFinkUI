@@ -2,8 +2,6 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent, DialogHTMLAttributes } from 'react';
 
-// ─── Focus trap selector ──────────────────────────────────────────────────────
-
 const FOCUSABLE_SELECTOR = [
 	'a[href]',
 	'button:not([disabled])',
@@ -13,28 +11,20 @@ const FOCUSABLE_SELECTOR = [
 	'[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
-// ─── Exit animation duration (matches --duration-fast) ───────────────────────
-
 const EXIT_DURATION_MS = 150;
 
-// ─── Modal context ────────────────────────────────────────────────────────────
-
-interface ModalContextValue
-{
+interface ModalContextValue {
 	titleId:      string;
 	requestClose: () => void;
 }
 
 const ModalContext = createContext<ModalContextValue | null>(null);
 
-const useModalContext = () =>
-{
+const useModalContext = () => {
 	const ctx = useContext(ModalContext);
 	if(!ctx) throw new Error('Modal subcomponents must be used inside <Modal>');
 	return ctx;
 };
-
-// ─── Modal size ───────────────────────────────────────────────────────────────
 
 export type ModalSize = 'sm' | 'md' | 'lg';
 
@@ -44,10 +34,7 @@ const sizeClasses: Record<ModalSize, string> = {
 	lg: 'max-w-3xl',
 };
 
-// ─── Modal ────────────────────────────────────────────────────────────────────
-
-export interface ModalProps extends DialogHTMLAttributes<HTMLDialogElement>
-{
+export interface ModalProps extends DialogHTMLAttributes<HTMLDialogElement> {
 	open:         boolean;
 	onOpenChange: (open: boolean) => void;
 	size?:        ModalSize;
@@ -138,8 +125,7 @@ const Modal = (
 	{
 		const dialog = dialogRef.current;
 		if(!dialog) return;
-		const onCancel = (e: Event) =>
-		{
+		const onCancel = (e: Event) => {
 			e.preventDefault();
 			requestClose();
 		};
@@ -147,8 +133,7 @@ const Modal = (
 		return () => dialog.removeEventListener('cancel', onCancel);
 	}, [requestClose]);
 
-	const handleKeyDown = (e: KeyboardEvent<HTMLDialogElement>) =>
-	{
+	const handleKeyDown = (e: KeyboardEvent<HTMLDialogElement>) => {
 		if(e.key === 'Escape')
 		{
 			e.stopPropagation();
@@ -186,8 +171,7 @@ const Modal = (
 		}
 	};
 
-	const handleBackdropPointerDown = (e: PointerEvent<HTMLDialogElement>) =>
-	{
+	const handleBackdropPointerDown = (e: PointerEvent<HTMLDialogElement>) => {
 		if(e.target === e.currentTarget) requestClose();
 	};
 
@@ -242,10 +226,7 @@ const Modal = (
 
 export default Modal;
 
-// ─── ModalHeader ──────────────────────────────────────────────────────────────
-
-export interface ModalHeaderProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface ModalHeaderProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
@@ -257,10 +238,7 @@ export const ModalHeader = ({ className = '', children, ...props }: ModalHeaderP
 	);
 };
 
-// ─── ModalTitle ───────────────────────────────────────────────────────────────
-
-export interface ModalTitleProps extends HTMLAttributes<HTMLHeadingElement>
-{
+export interface ModalTitleProps extends HTMLAttributes<HTMLHeadingElement> {
 	className?: string;
 }
 
@@ -274,10 +252,7 @@ export const ModalTitle = ({ className = '', children, ...props }: ModalTitlePro
 	);
 };
 
-// ─── ModalContent ─────────────────────────────────────────────────────────────
-
-export interface ModalContentProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface ModalContentProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
@@ -289,10 +264,7 @@ export const ModalContent = ({ className = '', children, ...props }: ModalConten
 	);
 };
 
-// ─── ModalFooter ──────────────────────────────────────────────────────────────
-
-export interface ModalFooterProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface ModalFooterProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
@@ -304,10 +276,7 @@ export const ModalFooter = ({ className = '', children, ...props }: ModalFooterP
 	);
 };
 
-// ─── ModalClose ───────────────────────────────────────────────────────────────
-
-export interface ModalCloseProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface ModalCloseProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	className?: string;
 }
 

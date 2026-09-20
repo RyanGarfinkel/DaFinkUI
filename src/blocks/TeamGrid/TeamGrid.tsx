@@ -4,8 +4,7 @@ import Badge, { type BadgeVariant } from '../../components/Badge/Badge';
 import { Card, CardContent } from '../../components/Card/Card';
 import Avatar from '../../components/Avatar/Avatar';
 
-interface TeamMember
-{
+interface TeamMember {
 	name:       string;
 	role:       string;
 	department: string;

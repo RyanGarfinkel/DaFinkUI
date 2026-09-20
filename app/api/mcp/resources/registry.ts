@@ -1,12 +1,10 @@
 import { registry, ComponentEntry } from '@/app/_docs/registry/index';
 
-export const getFullRegistry = () =>
-{
+export const getFullRegistry = () => {
 	return registry;
 };
 
-export const getRegistryEntry = (name: string): string =>
-{
+export const getRegistryEntry = (name: string): string => {
 	const lower = name.toLowerCase();
 	const entry = registry.find(
 		(e) => e.slug.toLowerCase() === lower || e.name.toLowerCase() === lower
@@ -21,8 +19,7 @@ export const getRegistryEntry = (name: string): string =>
 	return JSON.stringify(entry);
 };
 
-export const listByCategory = (category?: string): string =>
-{
+export const listByCategory = (category?: string): string => {
 	if(category)
 	{
 		const lower = category.toLowerCase();
@@ -40,8 +37,7 @@ export const listByCategory = (category?: string): string =>
 	return JSON.stringify(grouped);
 };
 
-export const searchComponents = (query: string): string =>
-{
+export const searchComponents = (query: string): string => {
 	const lower = query.toLowerCase();
 
 	const nameMatches: ComponentEntry[] = [];

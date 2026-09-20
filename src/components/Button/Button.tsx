@@ -7,8 +7,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'outlined' | 'ghost' | 'li
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'icon' | 'icon-sm';
 export type ButtonShape = 'default' | 'circle';
 
-export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	variant?: ButtonVariant;
 	size?: ButtonSize;
 	shape?: ButtonShape;
@@ -16,7 +15,6 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement>
 	href?: string;
 }
 
-// ─── Arrow icons ───────────────────────────────────────────────────────────────
 // Exported so they can be used standalone; internally consumed by arrowleft/arrowright variants.
 // group/btn is set on the button element by those variants, driving the translate on hover/focus.
 
@@ -56,8 +54,6 @@ export const ArrowRight = () => (
 	</svg>
 );
 
-// ─── Styles ────────────────────────────────────────────────────────────────────
-
 const ARROW_BASE = 'group/btn bg-surface text-text border-[length:var(--border-width)] border-surface-border shadow-[var(--shadow-sm)] hover:bg-surface-hover hover:border-surface-border-hover active:bg-surface-active focus-visible:border-transparent focus-visible:ring-brand-ring';
 
 const variantClasses: Record<ButtonVariant, string> = {
@@ -87,8 +83,6 @@ const shapeClasses: Record<ButtonShape, string> = {
 
 const BASE = 'inline-flex items-center justify-center gap-2 font-medium tracking-tight transition-all duration-150 focus:outline-none focus-visible:ring-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-40';
 
-// ─── Spinner ───────────────────────────────────────────────────────────────────
-
 const Spinner = () => (
 	<svg
 		className='animate-spin'
@@ -102,8 +96,6 @@ const Spinner = () => (
 		<path d='M12 2a10 10 0 0 1 10 10' stroke='currentColor' strokeWidth='3' strokeLinecap='round' className='opacity-75' />
 	</svg>
 );
-
-// ─── Button ────────────────────────────────────────────────────────────────────
 
 const Button = (
 	{

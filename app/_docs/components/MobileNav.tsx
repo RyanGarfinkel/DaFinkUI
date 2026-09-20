@@ -1,4 +1,5 @@
 'use client';
+
 import { HomeIcon, InstallationIcon, ThemeIcon, TypographyIcon, ComponentsIcon, BlocksIcon, EffectsIcon, PlaygroundIcon, McpIcon, SkillIcon, ReliabilityIcon, ChangelogIcon, GithubIcon, PackageIcon } from '@/app/_docs/components/NavIcons';
 import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerClose } from '@/src/components/Drawer/Drawer';
 import { SidebarSection, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
@@ -10,8 +11,7 @@ import { blocks } from '@/app/_docs/registry/blocks';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-export const MobileNav = () =>
-{
+export const MobileNav = () => {
 	const [open, setOpen] = useState(false);
 
 	const pathname = usePathname();

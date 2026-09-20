@@ -1,7 +1,6 @@
-'use client';;
-import { HTMLAttributes, useCallback, useEffect, useRef, useState } from 'react';
+'use client';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+import { HTMLAttributes, useCallback, useEffect, useRef, useState } from 'react';
 
 export type CanvasTool = 'pen' | 'eraser';
 
@@ -19,8 +18,6 @@ export interface CanvasProps extends HTMLAttributes<HTMLDivElement> {
   className?: string;
 }
 
-// ─── Stroke ───────────────────────────────────────────────────────────────────
-
 interface Point { x: number; y: number }
 interface Stroke {
   points: Point[];
@@ -28,8 +25,6 @@ interface Stroke {
   width: number;
   tool: CanvasTool;
 }
-
-// ─── Palette ──────────────────────────────────────────────────────────────────
 
 const PALETTE = [
   { label: 'Black',  value: '#18181b' },
@@ -44,8 +39,6 @@ const PALETTE = [
 ];
 
 const STROKE_WIDTHS = [2, 4, 8, 14];
-
-// ─── Canvas component ─────────────────────────────────────────────────────────
 
 export const Canvas = (
   {
@@ -324,8 +317,6 @@ export const Canvas = (
     </div>
   );
 };
-
-// ─── ToolButton ───────────────────────────────────────────────────────────────
 
 interface ToolButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   active?: boolean;

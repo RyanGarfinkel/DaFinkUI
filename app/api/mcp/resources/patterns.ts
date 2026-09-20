@@ -8,8 +8,7 @@ export const listPatterns = () =>
 		.filter(f => f.endsWith('.mdx') || f.endsWith('.md'))
 		.map(f => f.replace(/\.mdx?$/, ''));
 
-export const getPattern = (name: string) =>
-{
+export const getPattern = (name: string) => {
 	for(const ext of ['.mdx', '.md'])
 	{
 		const p = join(PATTERNS_DIR, `${name}${ext}`);

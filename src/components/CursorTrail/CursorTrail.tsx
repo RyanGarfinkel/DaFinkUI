@@ -2,8 +2,6 @@
 
 import { HTMLAttributes, useEffect, useRef, type PointerEvent } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface CursorTrailProps extends HTMLAttributes<HTMLDivElement> {
 	/** Number of dots in the trail. Defaults to 6. */
 	trailLength?: number;
@@ -17,8 +15,6 @@ interface Position {
 	x: number;
 	y: number;
 }
-
-// ─── CursorTrail ──────────────────────────────────────────────────────────────
 
 /**
  * Wraps content in a container; as the pointer moves within it, a short

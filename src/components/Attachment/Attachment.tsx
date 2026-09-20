@@ -2,8 +2,6 @@
 
 import { Children, HTMLAttributes, MouseEvent, ReactNode, isValidElement } from 'react';
 
-// ─── Icon Inference ───────────────────────────────────────────────────────────
-
 export type AttachmentIcon = 'file' | 'image' | 'video' | 'audio' | 'archive' | 'code';
 
 const EXTENSION_ICONS: Record<string, AttachmentIcon> = {
@@ -18,8 +16,6 @@ const inferIcon = (name: string): AttachmentIcon => {
 	const extension = name.split('.').pop()?.toLowerCase() ?? '';
 	return EXTENSION_ICONS[extension] ?? 'file';
 };
-
-// ─── Glyphs ───────────────────────────────────────────────────────────────────
 
 const FileGlyph = () => (
 	<svg width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
@@ -75,10 +71,7 @@ const ICON_GLYPHS: Record<AttachmentIcon, () => ReactNode> = {
 	code:    CodeGlyph,
 };
 
-// ─── Attachment ───────────────────────────────────────────────────────────────
-
-export interface AttachmentProps extends Omit<HTMLAttributes<HTMLElement>, 'onClick'>
-{
+export interface AttachmentProps extends Omit<HTMLAttributes<HTMLElement>, 'onClick'> {
 	name:          string;
 	href?:         string;
 	target?:       string;
@@ -159,8 +152,6 @@ export const Attachment = (
 };
 
 export default Attachment;
-
-// ─── AttachmentGroup ──────────────────────────────────────────────────────────
 
 export type AttachmentGroupProps = HTMLAttributes<HTMLUListElement>;
 

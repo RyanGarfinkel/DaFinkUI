@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState, HTMLAttributes } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type SlideInDirection = 'left' | 'right' | 'bottom';
 
 export interface SlideInProps extends HTMLAttributes<HTMLDivElement> {
@@ -17,8 +15,6 @@ export interface SlideInProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
-// ─── Internals ────────────────────────────────────────────────────────────────
-
 const hiddenTransform = (direction: SlideInDirection, distance: number): string => {
 	if(direction === 'left')  return `translateX(-${distance}px)`;
 	if(direction === 'right') return `translateX(${distance}px)`;
@@ -26,8 +22,6 @@ const hiddenTransform = (direction: SlideInDirection, distance: number): string 
 };
 
 type SlideInStatus = 'idle' | 'hidden' | 'shown';
-
-// ─── SlideIn ──────────────────────────────────────────────────────────────────
 
 /**
  * A small, fixed-distance jump-and-fade entrance triggered by

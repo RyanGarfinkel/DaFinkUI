@@ -2,8 +2,6 @@
 
 import { Children, cloneElement, isValidElement, HTMLAttributes } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type TimelineVariant   = 'brand' | 'muted';
 export type TimelineDirection = 'vertical' | 'horizontal';
 export type TimelineAnimate   = 'stagger' | 'none';
@@ -48,8 +46,6 @@ export interface TimelineItemProps extends HTMLAttributes<HTMLDivElement> {
 	/** Injected by <Timeline>: do not set manually. */
 	_spacing?:    TimelineSpacing;
 }
-
-// ─── TimelineItem ─────────────────────────────────────────────────────────────
 
 export const TimelineItem = (
     {
@@ -126,8 +122,6 @@ export const TimelineItem = (
 		);
 	}
 
-	// ── vertical (default) ────────────────────────────────────────────────────
-
 	return (
 		<div
 			{...props}
@@ -164,8 +158,6 @@ export const TimelineItem = (
 		</div>
 	);
 };
-
-// ─── Timeline ─────────────────────────────────────────────────────────────────
 
 export const Timeline = (
     {

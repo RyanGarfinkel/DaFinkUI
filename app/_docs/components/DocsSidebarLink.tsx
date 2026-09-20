@@ -3,8 +3,7 @@
 import { SidebarLink } from '@/src/components/Sidebar/Sidebar';
 import { usePathname } from 'next/navigation';
 
-interface DocsSidebarLinkProps
-{
+interface DocsSidebarLinkProps {
 	href:       string;
 	icon?:      React.ReactNode;
 	className?: string;

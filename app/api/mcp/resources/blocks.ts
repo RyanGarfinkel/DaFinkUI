@@ -1,12 +1,10 @@
 import { blocks, BlockEntry } from '@/app/_docs/registry/blocks';
 
-export const getFullBlockRegistry = () =>
-{
+export const getFullBlockRegistry = () => {
 	return blocks;
 };
 
-export const getBlockRegistryEntry = (name: string): string =>
-{
+export const getBlockRegistryEntry = (name: string): string => {
 	const lower = name.toLowerCase();
 	const entry = blocks.find(
 		(e) => e.slug.toLowerCase() === lower || e.name.toLowerCase() === lower
@@ -21,8 +19,7 @@ export const getBlockRegistryEntry = (name: string): string =>
 	return JSON.stringify(entry);
 };
 
-export const listBlocksByCategory = (category?: string): string =>
-{
+export const listBlocksByCategory = (category?: string): string => {
 	if(category)
 	{
 		const lower = category.toLowerCase();
@@ -40,8 +37,7 @@ export const listBlocksByCategory = (category?: string): string =>
 	return JSON.stringify(grouped);
 };
 
-export const searchBlocks = (query: string): string =>
-{
+export const searchBlocks = (query: string): string => {
 	const lower = query.toLowerCase();
 
 	const nameMatches: BlockEntry[] = [];

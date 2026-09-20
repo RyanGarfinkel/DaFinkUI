@@ -5,8 +5,7 @@ import { createContext, useContext, useRef, useEffect, useState, ButtonHTMLAttri
 export type ToggleGroupType = 'single' | 'multiple';
 export type ToggleGroupSize = 'sm' | 'md' | 'lg';
 
-interface ToggleGroupContextValue
-{
+interface ToggleGroupContextValue {
 	type:           ToggleGroupType;
 	value:          string | string[];
 	onValueChange:  (value: string | string[]) => void;
@@ -18,15 +17,13 @@ interface ToggleGroupContextValue
 
 const ToggleGroupContext = createContext<ToggleGroupContextValue | null>(null);
 
-const useToggleGroupContext = () =>
-{
+const useToggleGroupContext = () => {
 	const ctx = useContext(ToggleGroupContext);
 	if(!ctx) throw new Error('ToggleGroupItem must be used inside a ToggleGroup');
 	return ctx;
 };
 
-export interface ToggleGroupProps
-{
+export interface ToggleGroupProps {
 	type:               ToggleGroupType;
 	value:              string | string[];
 	onValueChange:      (value: string | string[]) => void;
@@ -38,8 +35,7 @@ export interface ToggleGroupProps
 	'aria-labelledby'?: string;
 }
 
-export interface ToggleGroupItemProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface ToggleGroupItemProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	value:      string;
 	disabled?:  boolean;
 	children:   React.ReactNode;
@@ -62,8 +58,7 @@ export const ToggleGroupItem = (
 		className = '',
 		...props
 	}: ToggleGroupItemProps
-) =>
-{
+) => {
 	const ctx = useToggleGroupContext();
 
 	const isActive = ctx.type === 'single'
@@ -72,8 +67,7 @@ export const ToggleGroupItem = (
 
 	const isDisabled = disabled || ctx.disabled;
 
-	const handleClick = () =>
-	{
+	const handleClick = () => {
 		if(isDisabled) return;
 
 		ctx.setRovingValue(value);
@@ -137,8 +131,7 @@ export const ToggleGroup = (
 		'aria-label':      ariaLabel,
 		'aria-labelledby': ariaLabelledBy,
 	}: ToggleGroupProps
-) =>
-{
+) => {
 	const groupRef     = useRef<HTMLDivElement>(null);
 	const indicatorRef = useRef<HTMLDivElement>(null);
 	const initialized  = useRef(false);
@@ -196,8 +189,7 @@ export const ToggleGroup = (
 		}
 	}, [value, type]);
 
-	const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) =>
-	{
+	const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
 		const buttons = Array.from(
 			groupRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)') ?? []
 		);

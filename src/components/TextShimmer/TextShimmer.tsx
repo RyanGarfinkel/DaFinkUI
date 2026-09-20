@@ -2,16 +2,12 @@
 
 import { HTMLAttributes } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface TextShimmerProps extends HTMLAttributes<HTMLSpanElement> {
 	/** Duration of one shimmer sweep in milliseconds. Defaults to 8× --duration-slow (2400ms). */
 	duration?:  number;
 	children:   React.ReactNode;
 	className?: string;
 }
-
-// ─── TextShimmer ──────────────────────────────────────────────────────────────
 
 /**
  * Text with a looping gradient shimmer (background-clip: text). The gradient

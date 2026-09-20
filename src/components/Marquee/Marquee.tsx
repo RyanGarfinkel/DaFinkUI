@@ -2,8 +2,6 @@
 
 import { HTMLAttributes } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type MarqueeDirection = 'left' | 'right';
 
 export interface MarqueeProps extends HTMLAttributes<HTMLDivElement> {
@@ -18,8 +16,6 @@ export interface MarqueeProps extends HTMLAttributes<HTMLDivElement> {
 	children:      React.ReactNode;
 	className?:    string;
 }
-
-// ─── Marquee ──────────────────────────────────────────────────────────────────
 
 /**
  * Infinite horizontal scrolling strip of content. Renders the children twice

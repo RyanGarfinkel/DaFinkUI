@@ -4,13 +4,10 @@ import { KeyboardEvent, FocusEvent, useCallback, useEffect, useId, useRef, useSt
 import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type PopoverSide  = 'top' | 'right' | 'bottom' | 'left';
 export type PopoverAlign = 'start' | 'center' | 'end';
 
-export interface PopoverProps
-{
+export interface PopoverProps {
 	trigger:           ReactNode;
 	children:          ReactNode;
 	side?:             PopoverSide;
@@ -30,8 +27,6 @@ const FOCUSABLE = [
 	'textarea:not([disabled])',
 	'[tabindex]:not([tabindex="-1"])',
 ].join(', ');
-
-// ─── Popover ──────────────────────────────────────────────────────────────────
 
 export const Popover = (
     {

@@ -10,8 +10,7 @@ import { blocks } from '@/app/_docs/registry/blocks';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 
-interface DocsSidebarProps
-{
+interface DocsSidebarProps {
 	collapsed:         boolean;
 	onCollapsedChange: (collapsed: boolean) => void;
 }
@@ -39,8 +38,7 @@ const BrandLink = () => {
 	);
 };
 
-interface ExternalFooterLinkProps
-{
+interface ExternalFooterLinkProps {
 	href:     string;
 	icon:     React.ReactNode;
 	children: React.ReactNode;
@@ -67,8 +65,7 @@ const ExternalFooterLink = ({ href, icon, children }: ExternalFooterLinkProps) =
 	return collapsed ? <Tooltip content={children} side='right' className='w-full'>{link}</Tooltip> : link;
 };
 
-interface FooterLinkProps
-{
+interface FooterLinkProps {
 	href:     string;
 	icon:     React.ReactNode;
 	children: React.ReactNode;

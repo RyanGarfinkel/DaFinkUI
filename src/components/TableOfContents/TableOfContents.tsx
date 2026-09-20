@@ -3,15 +3,13 @@
 import { HTMLAttributes, MouseEvent, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
-interface TocHeading
-{
+interface TocHeading {
 	id:    string;
 	text:  string;
 	level: 2 | 3;
 }
 
-export interface TableOfContentsProps extends Omit<HTMLAttributes<HTMLElement>, 'children'>
-{
+export interface TableOfContentsProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
 	containerId?: string;
 	label?:       string;
 	className?:   string;
@@ -88,8 +86,7 @@ const TableOfContents = (
 		const TRIGGER_OFFSET = 96;
 		let ticking = false;
 
-		const updateActive = () =>
-		{
+		const updateActive = () => {
 			// If the last section's content is shorter than the viewport, its heading
 			// can never physically reach TRIGGER_OFFSET even at max scroll; treat
 			// "scrolled to the bottom of the page" as "on the last section".
@@ -110,8 +107,7 @@ const TableOfContents = (
 			ticking = false;
 		};
 
-		const onScroll = () =>
-		{
+		const onScroll = () => {
 			if(ticking) return;
 			ticking = true;
 			requestAnimationFrame(updateActive);

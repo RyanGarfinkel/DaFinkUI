@@ -4,8 +4,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { useState } from 'react';
 
-// ─── jsdom stubs ──────────────────────────────────────────────────────────────
-
 beforeEach(() =>
 {
 	HTMLDialogElement.prototype.showModal = vi.fn(function(this: HTMLDialogElement)
@@ -18,20 +16,15 @@ beforeEach(() =>
 	});
 });
 
-// ─── Fixtures ─────────────────────────────────────────────────────────────────
-
-interface HarnessProps
-{
+interface HarnessProps {
 	onOpenChange?: (open: boolean) => void;
 	defaultOpen?:  boolean;
 }
 
-const ModalHarness = ({ onOpenChange, defaultOpen = false }: HarnessProps) =>
-{
+const ModalHarness = ({ onOpenChange, defaultOpen = false }: HarnessProps) => {
 	const [open, setOpen] = useState(defaultOpen);
 
-	const handleChange = (next: boolean) =>
-	{
+	const handleChange = (next: boolean) => {
 		setOpen(next);
 		onOpenChange?.(next);
 	};
@@ -56,8 +49,7 @@ const ModalHarness = ({ onOpenChange, defaultOpen = false }: HarnessProps) =>
 	);
 };
 
-const renderControlled = (open: boolean, onOpenChange = vi.fn()) =>
-{
+const renderControlled = (open: boolean, onOpenChange = vi.fn()) => {
 	const result = render(
 		<Modal open={open} onOpenChange={onOpenChange}>
 			<ModalClose />
@@ -76,14 +68,11 @@ const renderControlled = (open: boolean, onOpenChange = vi.fn()) =>
 	return { ...result, onOpenChange };
 };
 
-const waitForFocusInside = async () =>
-{
+const waitForFocusInside = async () => {
 	await waitFor(() => expect(document.activeElement).toBe(screen.getByLabelText('Close')));
 };
 
 const getPanel = () => screen.getByRole('dialog').querySelector<HTMLElement>('[data-state]')!;
-
-// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('Modal', () =>
 {

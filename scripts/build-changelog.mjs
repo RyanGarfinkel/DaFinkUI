@@ -21,8 +21,7 @@ const CATEGORY_ORDER = ['Added', 'Fixed', 'Changed', 'Docs'];
 
 const git = (args) => execFileSync('git', args, { cwd: ROOT, encoding: 'utf8' }).trim();
 
-const parseCommit = (line) =>
-{
+const parseCommit = (line) => {
 	const [hash, ...rest] = line.split('\x1f');
 	const subject = rest.join('\x1f');
 	const match = subject.match(/^(\w+)(?:\([^)]*\))?:\s*(.+)$/);
@@ -37,8 +36,7 @@ const parseCommit = (line) =>
 	return { hash, label, message: message.charAt(0).toUpperCase() + message.slice(1) };
 }
 
-const commitsInRange = (range) =>
-{
+const commitsInRange = (range) => {
 	const log = git(['log', '--reverse', '--format=%H\x1f%s', range]);
 
 	if(!log) return [];
@@ -46,8 +44,7 @@ const commitsInRange = (range) =>
 	return log.split('\n').map(parseCommit).filter(Boolean);
 }
 
-const groupByCategory = (commits) =>
-{
+const groupByCategory = (commits) => {
 	const groups = {};
 
 	for(const commit of commits)

@@ -8,8 +8,7 @@ export const listComponents = () =>
 		.filter(d => d.isDirectory())
 		.map(d => d.name);
 
-export const getComponentSpec = (name: string) =>
-{
+export const getComponentSpec = (name: string) => {
 	const specPath = join(COMPONENTS_DIR, name, 'spec.md');
 	if(!existsSync(specPath))
 		throw new Error(`No spec found for component: ${name}`);

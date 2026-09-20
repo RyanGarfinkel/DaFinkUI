@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState, HTMLAttributes } from 'react';
 
-export interface TypewriterProps extends HTMLAttributes<HTMLSpanElement>
-{
+export interface TypewriterProps extends HTMLAttributes<HTMLSpanElement> {
 	/** The full text to type out. */
 	text:             string;
 	/** Milliseconds between each character. Default: 50. */
@@ -34,8 +33,7 @@ export const Typewriter = (
 		style,
 		...props
 	}: TypewriterProps
-) =>
-{
+) => {
 	const [displayedChars, setDisplayedChars] = useState(0);
 	const onCompleteRef = useRef(onComplete);
 	const onRevealRef = useRef(onReveal);

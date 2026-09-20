@@ -1,10 +1,7 @@
 import { createContext, useContext, useRef, useEffect, useState, HTMLAttributes, ButtonHTMLAttributes } from 'react';
 import { DropdownMenu, DropdownMenuItem } from '../DropdownMenu/DropdownMenu';
 
-// ─── MenuBar ──────────────────────────────────────────────────────────────────
-
-export interface MenuBarProps extends HTMLAttributes<HTMLElement>
-{
+export interface MenuBarProps extends HTMLAttributes<HTMLElement> {
 	height?: string;
 }
 
@@ -26,8 +23,6 @@ export const MenuBar = ({ height = 'h-14', className = '', children, ...props }:
 	);
 };
 
-// ─── MenuBarBrand ─────────────────────────────────────────────────────────────
-
 export type MenuBarBrandProps = HTMLAttributes<HTMLDivElement>;
 
 export const MenuBarBrand = ({ className = '', children, ...props }: MenuBarBrandProps) => {
@@ -37,8 +32,6 @@ export const MenuBarBrand = ({ className = '', children, ...props }: MenuBarBran
 		</div>
 	);
 };
-
-// ─── MenuBarActions ───────────────────────────────────────────────────────────
 
 export type MenuBarActionsProps = HTMLAttributes<HTMLDivElement>;
 
@@ -50,10 +43,7 @@ export const MenuBarActions = ({ className = '', children, ...props }: MenuBarAc
 	);
 };
 
-// ─── MenuBarNav ───────────────────────────────────────────────────────────────
-
-interface MenuBarNavContextValue
-{
+interface MenuBarNavContextValue {
 	value:          string;
 	onValueChange:  (value: string) => void;
 	rovingValue:    string | null;
@@ -62,15 +52,13 @@ interface MenuBarNavContextValue
 
 const MenuBarNavContext = createContext<MenuBarNavContextValue | null>(null);
 
-const useMenuBarNavContext = () =>
-{
+const useMenuBarNavContext = () => {
 	const ctx = useContext(MenuBarNavContext);
 	if(!ctx) throw new Error('MenuBarNavItem and MenuBarNavMore must be used inside a MenuBarNav');
 	return ctx;
 };
 
-export interface MenuBarNavProps
-{
+export interface MenuBarNavProps {
 	value:              string;
 	onValueChange:      (value: string) => void;
 	className?:         string;
@@ -176,10 +164,7 @@ export const MenuBarNav = ({ value, onValueChange, className = '', children, 'ar
 	);
 };
 
-// ─── MenuBarNavItem ───────────────────────────────────────────────────────────
-
-export interface MenuBarNavItemProps extends ButtonHTMLAttributes<HTMLButtonElement>
-{
+export interface MenuBarNavItemProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 	value:      string;
 	children:   React.ReactNode;
 	className?: string;
@@ -216,16 +201,12 @@ export const MenuBarNavItem = ({ value, disabled = false, children, className = 
 	);
 };
 
-// ─── MenuBarNavMore ───────────────────────────────────────────────────────────
-
-export interface MenuBarNavMoreItem extends Omit<DropdownMenuItem, 'onSelect'>
-{
+export interface MenuBarNavMoreItem extends Omit<DropdownMenuItem, 'onSelect'> {
 	value:     string;
 	onSelect?: () => void;
 }
 
-export interface MenuBarNavMoreProps
-{
+export interface MenuBarNavMoreProps {
 	value:      string;
 	items:      MenuBarNavMoreItem[];
 	children:   React.ReactNode;

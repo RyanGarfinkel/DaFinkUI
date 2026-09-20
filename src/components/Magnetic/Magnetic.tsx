@@ -2,10 +2,7 @@
 
 import { useEffect, useRef, type HTMLAttributes, type PointerEvent, type ReactElement } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface MagneticProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface MagneticProps extends HTMLAttributes<HTMLDivElement> {
 	/** Single interactive child (e.g. a <Button>) that follows the cursor. */
 	children:   ReactElement;
 	/** Multiplier applied to the cursor offset, 0–1. Defaults to 0.3. */
@@ -14,8 +11,6 @@ export interface MagneticProps extends HTMLAttributes<HTMLDivElement>
 	range?:     number;
 	className?: string;
 }
-
-// ─── Magnetic ─────────────────────────────────────────────────────────────────
 
 /**
  * Wraps a single interactive child and subtly translates it toward the

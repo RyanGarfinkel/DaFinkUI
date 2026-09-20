@@ -4,27 +4,22 @@ import { KeyboardEvent, useCallback, useEffect, useId, useRef, useState } from '
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type DropdownMenuSide  = 'top' | 'right' | 'bottom' | 'left';
 export type DropdownMenuAlign = 'start' | 'center' | 'end';
 
-export interface DropdownMenuItem
-{
+export interface DropdownMenuItem {
 	label:     string;
 	onSelect?: () => void;
 	disabled?: boolean;
 }
 
-export interface DropdownMenuSeparator
-{
+export interface DropdownMenuSeparator {
 	separator: true;
 }
 
 export type DropdownMenuEntry = DropdownMenuItem | DropdownMenuSeparator;
 
-export interface DropdownMenuProps
-{
+export interface DropdownMenuProps {
 	items:             DropdownMenuEntry[];
 	trigger:           ReactNode;
 	side?:             DropdownMenuSide;
@@ -39,8 +34,6 @@ export interface DropdownMenuProps
 
 const isSeparator = (entry: DropdownMenuEntry): entry is DropdownMenuSeparator =>
 	'separator' in entry;
-
-// ─── DropdownMenu ─────────────────────────────────────────────────────────────
 
 export const DropdownMenu = (
     {

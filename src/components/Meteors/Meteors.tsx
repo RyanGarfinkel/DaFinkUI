@@ -2,8 +2,6 @@
 
 import { HTMLAttributes, useMemo } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface MeteorsProps extends HTMLAttributes<HTMLDivElement> {
 	/** Number of meteor streaks rendered. Defaults to 10. */
 	count?:     number;
@@ -18,8 +16,6 @@ interface Meteor {
 	duration: number;
 	delay:    number;
 }
-
-// ─── Internals ────────────────────────────────────────────────────────────────
 
 const mulberry32 = (seed: number) => {
 	return () => {
@@ -43,8 +39,6 @@ const buildMeteors = (count: number): Meteor[] => {
 		delay:    random() * 8,
 	}));
 };
-
-// ─── Meteors ──────────────────────────────────────────────────────────────────
 
 /**
  * Purely decorative ambient background of diagonal "shooting star" streaks

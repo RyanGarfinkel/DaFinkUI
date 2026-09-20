@@ -11,10 +11,7 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-export interface MosaicTileLayout
-{
+export interface MosaicTileLayout {
 	id:      string;
 	col:     number;
 	row:     number;
@@ -22,18 +19,14 @@ export interface MosaicTileLayout
 	rowSpan: number;
 }
 
-export interface MosaicTileSize
-{
+export interface MosaicTileSize {
 	colSpan: number;
 	rowSpan: number;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 // When no explicit `rows` prop is given, derive the grid height from the layout
 // so dragging can never create new rows beyond what already exists.
-const effectiveRowCount = (rows: number | undefined, layout: MosaicTileLayout[]): number =>
-{
+const effectiveRowCount = (rows: number | undefined, layout: MosaicTileLayout[]): number => {
 	if(rows !== undefined) return rows;
 	return Math.max(1, ...layout.map(t => t.row + t.rowSpan - 1));
 };
@@ -48,8 +41,7 @@ const snapToGrid = (
 	colWidth:  number,
 	rowHeight: number,
 	gap:       number,
-): { col: number; row: number } =>
-{
+): { col: number; row: number } => {
 	const col = Math.max(1, Math.min(cols - colSpan + 1, Math.round(x / (colWidth + gap)) + 1));
 	const row = Math.max(1, Math.min(rows - rowSpan + 1, Math.round(y / (rowHeight + gap)) + 1));
 	return { col, row };
@@ -62,8 +54,7 @@ const findOverlapping = (
 	colSpan: number,
 	rowSpan: number,
 	exclude: string,
-): MosaicTileLayout[] =>
-{
+): MosaicTileLayout[] => {
 	return tiles.filter(t =>
 	{
 		if(t.id === exclude) return false;
@@ -72,8 +63,7 @@ const findOverlapping = (
 	});
 };
 
-const hasOverlaps = (layout: MosaicTileLayout[]): boolean =>
-{
+const hasOverlaps = (layout: MosaicTileLayout[]): boolean => {
 	for(let i = 0; i < layout.length; i++)
 		for(let j = i + 1; j < layout.length; j++)
 		{
@@ -96,10 +86,8 @@ const findDisplacementPos = (
 	activeColSpan: number,
 	activeRowSpan: number,
 	cols:          number,
-): { col: number; row: number } | null =>
-{
-	const fits = (c: number): boolean =>
-	{
+): { col: number; row: number } | null => {
+	const fits = (c: number): boolean => {
 		if(c < 1 || c + displaced.colSpan - 1 > cols) return false;
 		const clearActive = c + displaced.colSpan <= targetCol ||
 		                    targetCol + activeColSpan <= c ||
@@ -136,10 +124,8 @@ const findDisplacementPosVertical = (
 	activeColSpan: number,
 	activeRowSpan: number,
 	rows:          number,
-): { col: number; row: number } | null =>
-{
-	const fits = (r: number): boolean =>
-	{
+): { col: number; row: number } | null => {
+	const fits = (r: number): boolean => {
 		if(r < 1 || r + displaced.rowSpan - 1 > rows) return false;
 		const clearActive = r + displaced.rowSpan <= targetRow ||
 		                    targetRow + activeRowSpan <= r ||
@@ -172,8 +158,7 @@ const computePreview = (
 	row:      number,
 	cols:     number,
 	rows:     number,
-): MosaicTileLayout[] | null =>
-{
+): MosaicTileLayout[] | null => {
 	const active = layout.find(t => t.id === activeId);
 	if(!active) return null;
 	if(active.col === col && active.row === row) return null;
@@ -196,8 +181,7 @@ const computePreview = (
 		const fallback    = movingVertically ? findDisplacementPos : findDisplacementPosVertical;
 		const fallbackArg = movingVertically ? cols : rows;
 
-		const place = (finder: typeof primary, arg: number): boolean =>
-		{
+		const place = (finder: typeof primary, arg: number): boolean => {
 			for(const d of overlapping)
 			{
 				const pos = finder(others, d, col, row, active.colSpan, active.rowSpan, arg);
@@ -237,13 +221,11 @@ const findBestCell = (
 	colWidth:  number,
 	rowHeight: number,
 	gap:       number,
-): { col: number; row: number } =>
-{
+): { col: number; row: number } => {
 	const active = layout.find(t => t.id === activeId);
 	if(!active) return { col: targetCol, row: targetRow };
 
-	const distSq = (col: number, row: number): number =>
-	{
+	const distSq = (col: number, row: number): number => {
 		const dx = (col - targetCol) * (colWidth + gap);
 		const dy = (row - targetRow) * (rowHeight + gap);
 		return dx * dx + dy * dy;
@@ -266,10 +248,7 @@ const findBestCell = (
 	return { col: bestCol, row: bestRow };
 };
 
-// ─── Context ──────────────────────────────────────────────────────────────────
-
-interface GridCtx
-{
+interface GridCtx {
 	layout:        MosaicTileLayout[];
 	previewLayout: MosaicTileLayout[] | null;
 	cols:          number;
@@ -287,17 +266,13 @@ interface GridCtx
 
 const GridContext = createContext<GridCtx | null>(null);
 
-const useGrid = () =>
-{
+const useGrid = () => {
 	const ctx = useContext(GridContext);
 	if(!ctx) throw new Error('MosaicTile must be used inside Mosaic');
 	return ctx;
 };
 
-// ─── SizePicker ───────────────────────────────────────────────────────────────
-
-interface SizePickerProps
-{
+interface SizePickerProps {
 	pickerCols: number;
 	pickerRows: number;
 	minCol:     number;
@@ -309,8 +284,7 @@ interface SizePickerProps
 
 const SizePicker = (
 	{ pickerCols, pickerRows, minCol, minRow, currentCol, currentRow, onSelect }: SizePickerProps
-) =>
-{
+) => {
 	const [hoverCol, setHoverCol] = useState(currentCol);
 	const [hoverRow, setHoverRow] = useState(currentRow);
 
@@ -363,10 +337,7 @@ const SizePicker = (
 	);
 };
 
-// ─── Mosaic ───────────────────────────────────────────────────────────────────
-
-export interface MosaicProps extends HTMLAttributes<HTMLDivElement>
-{
+export interface MosaicProps extends HTMLAttributes<HTMLDivElement> {
 	layout:         MosaicTileLayout[];
 	onLayoutChange: (layout: MosaicTileLayout[]) => void;
 	cols?:          number;
@@ -397,8 +368,7 @@ export const Mosaic = (
 		children,
 		...props
 	}: MosaicProps
-) =>
-{
+) => {
 	const dndId = useId();
 	const gridRef = useRef<HTMLDivElement>(null);
 	const [colWidth, setColWidth]     = useState(0);
@@ -436,8 +406,7 @@ export const Mosaic = (
 	useEffect(() =>
 	{
 		if(!gridRef.current) return;
-		const compute = () =>
-		{
+		const compute = () => {
 			if(!gridRef.current) return;
 			const w = gridRef.current.offsetWidth;
 			setColWidth((w - (colsRef.current - 1) * gapRef.current) / colsRef.current);
@@ -618,10 +587,7 @@ export const Mosaic = (
 	);
 };
 
-// ─── MosaicTile ───────────────────────────────────────────────────────────────
-
-export interface MosaicTileProps
-{
+export interface MosaicTileProps {
 	id:           string;
 	minColSpan?:  number;
 	maxColSpan?:  number;
@@ -643,8 +609,7 @@ export const MosaicTile = (
 		className = '',
 		children,
 	}: MosaicTileProps
-) =>
-{
+) => {
 	const {
 		layout, previewLayout, cols, rows, colWidth, rowHeight, gap,
 		activeId,
@@ -689,8 +654,7 @@ export const MosaicTile = (
 	useEffect(() =>
 	{
 		if(!showPicker) return;
-		const close = (e: MouseEvent) =>
-		{
+		const close = (e: MouseEvent) => {
 			if(pickerRef.current && !pickerRef.current.contains(e.target as Node))
 				setShowPicker(false);
 		};
@@ -706,8 +670,6 @@ export const MosaicTile = (
 		return () => document.removeEventListener('keydown', onKey);
 	}, [showPicker]);
 
-	// ── Resize drag ─────────────────────────────────────────────────────────────
-
 	const resizeStart = useRef<{
 		x:    number;
 		y:    number;
@@ -718,8 +680,7 @@ export const MosaicTile = (
 		mode: ResizeMode;
 	} | null>(null);
 
-	const onResizeDown = (e: React.PointerEvent, mode: ResizeMode) =>
-	{
+	const onResizeDown = (e: React.PointerEvent, mode: ResizeMode) => {
 		e.preventDefault();
 		e.stopPropagation();
 		(e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
@@ -732,8 +693,7 @@ export const MosaicTile = (
 		};
 	};
 
-	const onResizeMove = (e: React.PointerEvent) =>
-	{
+	const onResizeMove = (e: React.PointerEvent) => {
 		const start = resizeStart.current;
 		if(!start) return;
 
@@ -797,27 +757,21 @@ export const MosaicTile = (
 		}
 	};
 
-	const onResizeUp = () =>
-	{
+	const onResizeUp = () => {
 		if(!resizeStart.current) return;
 		isResizing.current  = false;
 		resizeStart.current = null;
 		onTileChange(id, localTileCol, localTileRow, localCol, localRow);
 	};
 
-	const handlePickerSelect = (col: number, row: number) =>
-	{
+	const handlePickerSelect = (col: number, row: number) => {
 		setShowPicker(false);
 		setLocalCol(col);
 		setLocalRow(row);
 		onTileChange(id, localTileCol, localTileRow, col, row);
 	};
 
-	// ── useDraggable ─────────────────────────────────────────────────────────────
-
 	const { attributes, listeners, setNodeRef, isDragging } = useDraggable({ id });
-
-	// ── Displacement from preview layout ─────────────────────────────────────────
 
 	const isActiveDrag = activeId !== null;
 	const isThisActive = activeId === id;
@@ -840,8 +794,6 @@ export const MosaicTile = (
 		transition: isActiveDrag && !isThisActive ? 'transform 200ms cubic-bezier(0.2, 0, 0, 1)' : undefined,
 		opacity:    isDragging ? 0 : 1,
 	};
-
-	// ── Resize range bounds ───────────────────────────────────────────────────────
 
 	let effectiveMaxCol = Math.min(maxCol, cols - tileCol + 1);
 	for(const other of layout)

@@ -1,13 +1,11 @@
-'use client';;
+'use client';
+
 import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
 import TimeField from './TimeField';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 type Granularity = 'date' | 'time' | 'datetime';
 
-export interface DatePickerProps
-{
+export interface DatePickerProps {
 	value?:        Date | null;
 	onChange?:     (date: Date) => void;
 	placeholder?:  string;
@@ -20,8 +18,6 @@ export interface DatePickerProps
 	error?:        string;
 	className?:    string;
 }
-
-// ─── DatePicker ───────────────────────────────────────────────────────────────
 
 export const DatePicker = (
     {
@@ -578,8 +574,6 @@ const ChevronRight = () => {
 	);
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 const MONTHS = [
 	'January', 'February', 'March', 'April', 'May', 'June',
 	'July', 'August', 'September', 'October', 'November', 'December',
@@ -607,8 +601,7 @@ const DIALOG_LABEL_BY_GRANULARITY: Record<Granularity, string> = {
 	datetime: 'Date and time picker',
 };
 
-interface CalendarCell
-{
+interface CalendarCell {
 	day:            number;
 	month:          number;
 	year:           number;

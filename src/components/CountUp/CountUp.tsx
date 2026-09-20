@@ -2,8 +2,6 @@
 
 import { useEffect, useRef, useState, HTMLAttributes } from 'react';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export interface CountUpProps extends HTMLAttributes<HTMLSpanElement> {
 	/** Final value to count up to. */
 	value:      number;
@@ -21,8 +19,6 @@ export interface CountUpProps extends HTMLAttributes<HTMLSpanElement> {
 	separator?: string;
 	className?: string;
 }
-
-// ─── Internals ────────────────────────────────────────────────────────────────
 
 /**
  * Cubic-bezier evaluator for the --ease-standard token curve:
@@ -64,8 +60,6 @@ const formatValue = (
 	const sign = negative ? '-' : '';
 	return `${prefix}${sign}${grouped}${fraction ? `.${fraction}` : ''}${suffix}`;
 };
-
-// ─── CountUp ──────────────────────────────────────────────────────────────────
 
 /**
  * Animates a number from `start` to `value` when scrolled into view.

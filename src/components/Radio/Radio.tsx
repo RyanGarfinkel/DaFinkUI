@@ -2,8 +2,7 @@
 
 import { createContext, useContext, type KeyboardEvent, type ReactNode } from 'react';
 
-interface RadioContextValue
-{
+interface RadioContextValue {
 	name: string;
 	value: string;
 	onValueChange: (v: string) => void;
@@ -17,8 +16,7 @@ const useRadioContext = () => {
 	return ctx;
 };
 
-export interface RadioGroupProps
-{
+export interface RadioGroupProps {
 	value: string;
 	onValueChange: (v: string) => void;
 	name: string;
@@ -36,8 +34,7 @@ export const RadioGroup = ({ value, onValueChange, name, className = '', childre
 	);
 };
 
-export interface RadioItemProps
-{
+export interface RadioItemProps {
 	value: string;
 	label: string;
 	hint?: string;
@@ -50,8 +47,7 @@ export const RadioItem = ({ value, label, hint, disabled = false, className = ''
 	const checked = ctx.value === value;
 	const id = `${ctx.name}-${value}`;
 
-	const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) =>
-	{
+	const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
 		if(e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === 'ArrowUp' || e.key === 'ArrowLeft')
 		{
 			e.preventDefault();
