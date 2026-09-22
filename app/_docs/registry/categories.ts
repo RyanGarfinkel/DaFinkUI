@@ -6,6 +6,7 @@ export const CATEGORIES = [
 	'Display',
 	'Feedback',
 	'Navigation',
+	'Layout',
 	'Disclosure',
 	'Forms',
 	'Overlay',

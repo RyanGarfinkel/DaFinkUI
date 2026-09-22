@@ -74,6 +74,7 @@ export const REGISTRY: RegistryEntry[] = [
 	{ name: 'Tilt', slug: 'tilt', files: ['Tilt/Tilt.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'Separator', slug: 'separator', files: ['Separator/Separator.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'ThemeToggle', slug: 'theme-toggle', files: ['ThemeToggle/ThemeToggle.tsx'], deps: [], registryDependencies: [] },
+	{ name: 'Resizable', slug: 'resizable', files: ['Resizable/Resizable.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'ScrollFade', slug: 'scroll-fade', files: ['ScrollFade/ScrollFade.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'Reveal', slug: 'reveal', files: ['Reveal/Reveal.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'SlideIn', slug: 'slide-in', files: ['SlideIn/SlideIn.tsx'], deps: [], registryDependencies: [] },
