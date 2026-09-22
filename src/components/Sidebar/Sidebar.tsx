@@ -368,18 +368,29 @@ export const SidebarSection = ({ label, className = '', children, ...props }: Si
 // two copies.
 
 interface SidebarItemClassNameOptions {
-	hideLabel:  boolean;
-	showAction: boolean;
-	isActive:   boolean;
-	className:  string;
+	hideLabel:    boolean;
+	showAction:   boolean;
+	isActive:     boolean;
+	// How much trailing space to reserve for `action`. `action` is an arbitrary
+	// ReactNode absolutely-positioned over the pill's trailing edge (see
+	// wrapSidebarItem below), so its real width can't be measured from here — this
+	// is a caller-supplied guess. Default 'pr-9' fits one icon-sized control; pass a
+	// wider class (e.g. 'pr-16') when `action` renders more than one, or the label
+	// truncates too late and ends up under the action instead of before it.
+	actionGutter: string;
+	className:    string;
 }
 
-const sidebarItemClassName = ({ hideLabel, showAction, isActive, className }: SidebarItemClassNameOptions) => [
-	'relative z-10 flex w-full items-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius)] px-3 py-1.5 text-sm',
+const sidebarItemClassName = ({ hideLabel, showAction, isActive, actionGutter, className }: SidebarItemClassNameOptions) => [
+	// min-w-0: this element is itself a flex item (of wrapSidebarItem's wrapping row when
+	// an action is present). Without it, its own min-width:auto — driven by its nowrap text
+	// content — overrides w-full and lets it grow to fit the full label, which is what let
+	// the label's own truncate never actually trigger.
+	'relative z-10 flex w-full min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius)] px-3 py-1.5 text-sm',
 	'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 	'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 	hideLabel ? 'justify-center' : '',
-	showAction ? 'pr-9' : '',
+	showAction ? actionGutter : '',
 	isActive
 		? 'text-text font-medium'
 		: 'text-text-muted hover:bg-surface-hover hover:text-text',
@@ -395,7 +406,10 @@ interface SidebarItemLabelProps {
 const SidebarItemLabel = ({ icon, hideLabel, children }: SidebarItemLabelProps) => (
 	<>
 		{icon && <span aria-hidden='true' className='shrink-0 [&>svg]:h-4 [&>svg]:w-4'>{icon}</span>}
-		<span className={hideLabel ? 'sr-only' : 'truncate'}>{children}</span>
+		{/* min-w-0 is required for truncate to take effect on a flex child: without it,
+		    a flex item's default min-width:auto keeps it at its full text width instead
+		    of shrinking, so the ellipsis never applies and the label just overflows. */}
+		<span className={hideLabel ? 'sr-only' : 'min-w-0 flex-1 truncate'}>{children}</span>
 	</>
 );
 
@@ -427,14 +441,16 @@ const wrapSidebarItem = (item: ReactElement<HTMLAttributes<HTMLElement>>, { hide
 };
 
 export interface SidebarLinkProps extends LinkProps {
-	isActive?:  boolean;
-	icon?:      ReactNode;
-	action?:    ReactNode;
-	className?: string;
-	children?:  ReactNode;
+	isActive?:      boolean;
+	icon?:          ReactNode;
+	action?:        ReactNode;
+	/** Trailing space reserved for `action`, as a Tailwind `pr-*` class. Default `'pr-9'` fits one icon-sized control; widen it (e.g. `'pr-16'`) when `action` renders more than one. */
+	actionGutter?:  string;
+	className?:     string;
+	children?:      ReactNode;
 }
 
-export const SidebarLink = ({ isActive, icon, action, className = '', children, href, ...props }: SidebarLinkProps) => {
+export const SidebarLink = ({ isActive, icon, action, actionGutter = 'pr-9', className = '', children, href, ...props }: SidebarLinkProps) => {
 	const collapsed = useSidebarCollapsed();
 	const { activeHref } = useContext(SidebarActiveLinkContext);
 
@@ -456,7 +472,7 @@ export const SidebarLink = ({ isActive, icon, action, className = '', children, 
 			href={href}
 			data-sidebar-item=''
 			aria-current={active ? 'page' : undefined}
-			className={sidebarItemClassName({ hideLabel, showAction, isActive: active, className })}
+			className={sidebarItemClassName({ hideLabel, showAction, isActive: active, actionGutter, className })}
 		>
 			<SidebarItemLabel icon={icon} hideLabel={hideLabel}>{children}</SidebarItemLabel>
 		</Link>
@@ -472,15 +488,17 @@ export const SidebarLink = ({ isActive, icon, action, className = '', children, 
 // always defaults to false rather than auto-matching anything.
 
 export interface SidebarButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {
-	isActive?:  boolean;
-	indicator?: boolean;
-	icon?:      ReactNode;
-	action?:    ReactNode;
-	className?: string;
-	children?:  ReactNode;
+	isActive?:      boolean;
+	indicator?:     boolean;
+	icon?:          ReactNode;
+	action?:        ReactNode;
+	/** Trailing space reserved for `action`, as a Tailwind `pr-*` class. Default `'pr-9'` fits one icon-sized control; widen it (e.g. `'pr-16'`) when `action` renders more than one. */
+	actionGutter?:  string;
+	className?:     string;
+	children?:      ReactNode;
 }
 
-export const SidebarButton = ({ isActive = false, indicator = true, icon, action, className = '', children, ...props }: SidebarButtonProps) => {
+export const SidebarButton = ({ isActive = false, indicator = true, icon, action, actionGutter = 'pr-9', className = '', children, ...props }: SidebarButtonProps) => {
 	const collapsed  = useSidebarCollapsed();
 	const hideLabel  = collapsed && Boolean(icon);
 	const showAction = Boolean(action) && !hideLabel;
@@ -497,7 +515,7 @@ export const SidebarButton = ({ isActive = false, indicator = true, icon, action
 			{...props}
 			data-sidebar-item=''
 			aria-current={isActive && indicator ? 'page' : undefined}
-			className={sidebarItemClassName({ hideLabel, showAction, isActive, className })}
+			className={sidebarItemClassName({ hideLabel, showAction, isActive, actionGutter, className })}
 		>
 			<SidebarItemLabel icon={icon} hideLabel={hideLabel}>{children}</SidebarItemLabel>
 		</button>

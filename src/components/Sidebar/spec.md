@@ -50,6 +50,7 @@ A vertical navigation sidebar composed of seven sub-components: `Sidebar`, `Side
 | isActive  | boolean     | *auto*      | Highlights the link as the current page. When omitted (the normal case), the link derives its own active state from the current pathname — see "Automatic Active Matching" below. Pass an explicit `true`/`false` to override that entirely, e.g. for a custom match rule the automatic one can't express. |
 | icon      | ReactNode   | -           | Optional leading icon (16×16). When set and the parent `Sidebar` is collapsed, the text label is visually hidden (`sr-only`) and only the icon shows. |
 | action    | ReactNode   | -           | Optional trailing interactive element (e.g. a `Button` with `size="icon-sm"`) rendered inside the same pill, for a row-level action like favoriting or a quick menu. Hidden when the parent `Sidebar` is collapsed to an icon rail (there's no room for it). See "Row Actions" below. |
+| actionGutter | string   | `'pr-9'`    | Trailing space reserved for `action`, as a Tailwind `pr-*` class. `action`'s real width can't be measured (it's absolutely positioned), so this is a guess sized for one icon-sized control by default — widen it (e.g. `'pr-16'`) when `action` renders more than one, or the label truncates too late and ends up under the action instead of before it. |
 | className | string      | `""`        | Additional CSS classes merged onto the link.         |
 | children  | ReactNode   | -           | Link label text or elements.                         |
 
@@ -63,6 +64,7 @@ The event-driven counterpart to `SidebarLink`: same pill, same icon/action/colla
 | indicator | boolean     | `true`    | Whether an active button participates in the shared sliding indicator (sets `aria-current="page"`). Set `false` for a button that shouldn't drag the indicator to itself — e.g. a one-off action like "Compose" that can still look active (bold text) without being part of an exclusive "current view" group. |
 | icon      | ReactNode   | -         | Optional leading icon (16×16). Same collapsed-rail behavior as `SidebarLink`'s `icon`. |
 | action    | ReactNode   | -         | Optional trailing interactive element, identical treatment to `SidebarLink`'s `action`. |
+| actionGutter | string   | `'pr-9'`  | Same as `SidebarLink`'s `actionGutter` — widen it when `action` renders more than one control. |
 | className | string      | `""`      | Additional CSS classes merged onto the button.       |
 | children  | ReactNode   | -         | Button label text or elements.                       |
 
@@ -134,6 +136,10 @@ Pass `action` to render a secondary control (typically a `Button` with `size="ic
 **Why it's not nested inside the `<a>`:** a button cannot be a descendant of an anchor — it's invalid HTML and produces ambiguous keyboard/screen-reader behavior (activating the outer link and the inner button becomes indistinguishable). `SidebarLink` instead renders the action as a DOM **sibling** of the `<a>`, both inside a shared wrapper `<div>`, with the action absolutely positioned over the pill's trailing edge (`z-20`, above the link's `z-10`). Visually it reads as one pill; structurally it's two independent, independently-focusable controls. Clicking the action can never trigger navigation, because it was never inside the anchor to begin with — no `stopPropagation`/`preventDefault` workaround needed.
 
 The action fades in on hover or focus-within and stays hidden otherwise, matching the rest of the design system's subtle-motion default. Tab order visits the link, then the action (plain DOM order); the action is a normal tab stop and does **not** participate in the sidebar's roving-tabindex/arrow-key navigation, which only tracks elements marked `data-sidebar-item` (every `SidebarLink` and `SidebarButton`) — arrow keys move strictly between links/buttons, Tab reaches both them and any actions. `SidebarButton` renders the same action pattern identically.
+
+When `action` is present, the pill reserves trailing padding (`actionGutter`, default `pr-9`) so the action never overlaps the label. That default fits exactly one icon-sized control; `action` content wider than that — e.g. AiChat's rename-and-delete pair — needs a wider `actionGutter` (e.g. `pr-16`) passed explicitly, or the label truncates too late and the ellipsis lands under the action instead of before it, since `action`'s real rendered width can't be measured from here (it's absolutely positioned, see below).
+
+Truncation itself needs `min-w-0` at **two** nested levels, not one: the label span (`min-w-0 flex-1 truncate`) so it can shrink within the pill, and the pill itself (`w-full min-w-0`) so it can't grow past its container to begin with — the pill is a flex item of `action`'s wrapping row, and without its own `min-w-0`, its `min-width: auto` default (driven by its own nowrap text) lets it expand to fit the full label regardless of `w-full`, which means the label never runs out of room to truncate against. With both in place — and `actionGutter` sized to the actual `action` content — a long title always ends in an ellipsis before the reserved space, never running under the action.
 
 ---
 

@@ -922,35 +922,34 @@ export default function ChartCard() {
 		slug: 'ai-chat',
 		name: 'AI chat',
 		category: 'AI',
-		description: 'A full ChatGPT-style chat app: a chat-history sidebar (new chat, inline rename, delete) on the left, and a conversation panel on the right where sent messages render as bubbles, assistant replies render as plain bubble-less text, and a floating composer bar (attach, message, send) sits below the thread. Seeded with a fake, predefined conversation and canned streamed replies. No real model calls. Installing it copies a folder, not a single file: AiChat.tsx (the orchestrator) plus two sibling pieces it imports directly, ToolCallTrace.tsx (the collapsible thought/tool-call summary above a reply) and QuestionCard.tsx (the structured question widget shown inside a reply) — see their own Demos below for their prop shapes.',
+		description: 'A full ChatGPT-style chat app: a chat-history sidebar (new chat, inline rename, delete, search threads) on the left, and a conversation panel on the right where sent messages render as bubbles, assistant replies render as plain bubble-less text, and a floating composer bar (attach, message, send) sits below the thread. Any message — sent or received — can spawn a reply thread, a forked side conversation seeded from the history up to that message; an open thread renders as a persistent third column (never an overlay or Drawer) with its own composer and independent streaming state, while a message that already has a thread shows an always-visible reply-count badge and a command palette lets you search every thread across every chat and jump straight to one. The main chat pane and the thread panel sit inside a Resizable split (drag the handle between them, or focus it and use the arrow keys) so a reader can widen the thread panel for a long side conversation; the chat-history sidebar itself stays a fixed-width column, not resizable. Seeded with a fake, predefined conversation, canned streamed replies, and a couple of sample threads. No real model calls, and thread content is fetched from local sample data with a simulated delay, not a real endpoint. Installing it copies a folder, not a single file: AiChat.tsx (the orchestrator), ChatMarkdown.tsx, StreamingMessage.tsx, and ThreadPanel.tsx (the thread side panel), plus ToolCallTrace (the collapsible thought/tool-call summary above a reply) and Questionnaire (the structured question widget shown inside a reply), installed as standalone registry dependencies with their own docs pages at /components/tool-call-trace and /components/questionnaire. Live replies in the demo come from a real (docs-site-only) API route rather than being simulated inline.',
 		usage: `'use client';
 
-import { LineChart, BarChart, AreaChart, DonutChart, RadarChart, type ChartSeries, type DonutSlice } from '@/src/components/Charts/Charts';
+import StreamingMessage, { type ChartSpec, type StackableChartSpec, type DonutSpec, type ImageSpec, type AudioSpec, type TableSpec } from '@/src/blocks/AiChat/StreamingMessage';
 import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
+import ToolCallTrace, { type ToolCallEntry, type ToolCallLink } from '@/src/components/ToolCallTrace/ToolCallTrace';
+import CommandPalette, { CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
 import { Sidebar, SidebarButton, SidebarHeader, SidebarSection } from '@/src/components/Sidebar/Sidebar';
+import { ChangeEvent, FormEvent, KeyboardEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import { Resizable, ResizablePanel, ResizableHandle } from '@/src/components/Resizable/Resizable';
+import Questionnaire, { type QuestionStep } from '@/src/components/Questionnaire/Questionnaire';
 import CommandInput, { type CommandOption } from '@/src/components/CommandInput/CommandInput';
-import { ChangeEvent, FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
-import ToolCallTrace, { type ToolCallEntry, type ToolCallLink } from '@/src/blocks/AiChat/ToolCallTrace';
-import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
 import { Skeleton, SkeletonImage } from '@/src/components/Skeleton/Skeleton';
-import AudioPlayer from '@/src/components/AudioPlayer/AudioPlayer';
-import QuestionCard, { type QuestionStep } from '@/src/blocks/AiChat/QuestionCard';
 import ScrollFade from '@/src/components/ScrollFade/ScrollFade';
-import Typewriter from '@/src/components/Typewriter/Typewriter';
 import Attachment from '@/src/components/Attachment/Attachment';
 import Message from '@/src/components/Message/Message';
+import Tooltip from '@/src/components/Tooltip/Tooltip';
 import Button from '@/src/components/Button/Button';
+import Badge from '@/src/components/Badge/Badge';
 import Input from '@/src/components/Input/Input';
-import ChatMarkdown from '@/src/blocks/AiChat/ChatMarkdown';
+import ThreadPanel from '@/src/blocks/AiChat/ThreadPanel';
 
-interface MessageAttachment
-{
+interface MessageAttachment {
 	name: string;
 	size: string;
 }
 
-interface ChatTextMessage
-{
+export interface ChatTextMessage {
 	id:                 number;
 	kind:               'message';
 	sender:             'user' | 'ai';
@@ -963,144 +962,37 @@ interface ChatTextMessage
 	questionnaireAnswer?: string;
 }
 
-interface ChatCheckpoint
-{
+interface ChatCheckpoint {
 	id:    number;
 	kind:  'checkpoint';
 	label: string;
 }
 
-type ChatMessage = ChatTextMessage | ChatCheckpoint;
+export type ChatMessage = ChatTextMessage | ChatCheckpoint;
 
-interface ChartSpec
-{
-	xKey:   string;
-	series: ChartSeries[];
-	data:   Record<string, string | number>[];
+export interface ThreadRef {
+	id:            string;
+	rootMessageId: number;
+	snippet:       string;
+	createdAt:     string;
+	replyCount:    number;
 }
 
-interface StackableChartSpec extends ChartSpec
-{
-	stacked?: boolean;
+interface ChatEntry {
+	id:         string;
+	title:      string;
+	messages:   ChatMessage[];
+	threadRefs: ThreadRef[];
 }
 
-interface DonutSpec
-{
-	data: DonutSlice[];
+export interface AiChatHistoryMessage {
+	role: 'user' | 'assistant';
+	text: string;
 }
 
-interface MathSpec
-{
-	equations: string[];
-}
-
-interface ImageSpec
-{
-	url: string;
-	alt: string;
-}
-
-interface AudioSpec
-{
-	src:    string;
-	title?: string;
-}
-
-interface TableSpec
-{
-	columns: { key: string; label: string }[];
-	rows:    Record<string, string | number>[];
-}
-
-const toMarkdownTable = ({ columns, rows }: TableSpec): string => {
-	const header  = \`| \${columns.map((c) => c.label).join(' | ')} |\`;
-	const divider = \`| \${columns.map(() => '---').join(' | ')} |\`;
-	const body    = rows.map((row) => \`| \${columns.map((c) => row[c.key]).join(' | ')} |\`).join('\\n');
-	return [header, divider, body].join('\\n');
-};
-
-type MessageSegment =
-	| { kind: 'text';       text: string }
-	| { kind: 'lineplot';   spec: ChartSpec }
-	| { kind: 'barchart';   spec: StackableChartSpec }
-	| { kind: 'areachart';  spec: StackableChartSpec }
-	| { kind: 'radarchart'; spec: ChartSpec }
-	| { kind: 'donutchart'; spec: DonutSpec }
-	| { kind: 'math';       spec: MathSpec }
-	| { kind: 'image';      spec: ImageSpec }
-	| { kind: 'audio';      spec: AudioSpec };
-
-const FENCE_PATTERN = /\`\`\`(\\w+)\\n([\\s\\S]*?)\`\`\`/g;
-
-const FENCE_LANGS = new Set(['lineplot', 'barchart', 'areachart', 'radarchart', 'donutchart', 'math', 'image', 'audio']);
-
-const parseMessageSegments = (text: string): MessageSegment[] => {
-	const segments: MessageSegment[] = [];
-	let lastIndex = 0;
-
-	FENCE_PATTERN.lastIndex = 0;
-	let match: RegExpExecArray | null;
-	while((match = FENCE_PATTERN.exec(text)) !== null)
-	{
-		const [full, lang, body] = match;
-		if(match.index > lastIndex) segments.push({ kind: 'text', text: text.slice(lastIndex, match.index) });
-
-		if(FENCE_LANGS.has(lang))
-		{
-			try { segments.push({ kind: lang, spec: JSON.parse(body) } as MessageSegment); }
-			catch { segments.push({ kind: 'text', text: full }); }
-		}
-		else segments.push({ kind: 'text', text: full });
-
-		lastIndex = match.index + full.length;
-	}
-
-	if(lastIndex < text.length) segments.push({ kind: 'text', text: text.slice(lastIndex) });
-	if(segments.length === 0) segments.push({ kind: 'text', text });
-
-	return segments;
-};
-
-const renderSegment = (seg: MessageSegment, index: number) => {
-	switch(seg.kind)
-	{
-		case 'lineplot':
-			return <LineChart key={index} data={seg.spec.data} xKey={seg.spec.xKey} series={seg.spec.series} height={180} />;
-
-		case 'barchart':
-			return <BarChart key={index} data={seg.spec.data} xKey={seg.spec.xKey} series={seg.spec.series} stacked={seg.spec.stacked} height={180} />;
-
-		case 'areachart':
-			return <AreaChart key={index} data={seg.spec.data} xKey={seg.spec.xKey} series={seg.spec.series} stacked={seg.spec.stacked} height={180} />;
-
-		case 'radarchart':
-			return <RadarChart key={index} data={seg.spec.data} xKey={seg.spec.xKey} series={seg.spec.series} height={220} />;
-
-		case 'donutchart':
-			return <DonutChart key={index} data={seg.spec.data} height={200} />;
-
-		case 'math':
-			return <FunctionPlotter key={index} initialEquations={seg.spec.equations} readOnly layout='bottom' height={220} />;
-
-		case 'image':
-			return (
-				// eslint-disable-next-line @next/next/no-img-element -- arbitrary generated-image URL, not a static asset
-				<img key={index} src={seg.spec.url} alt={seg.spec.alt} className='w-full max-w-xs rounded-[var(--radius-lg)]' />
-			);
-
-		case 'audio':
-			return <AudioPlayer key={index} size='compact' src={seg.spec.src} title={seg.spec.title} className='w-56' />;
-
-		case 'text':
-			return seg.text.trim() ? <ChatMarkdown key={index} text={seg.text.trim()} /> : null;
-	}
-};
-
-interface ChatEntry
-{
-	id:       string;
-	title:    string;
-	messages: ChatMessage[];
+export interface AiChatReply {
+	text:       string;
+	toolCalls?: ToolCallEntry[];
 }
 
 const HOME_PRICE_DATA: Record<string, string | number>[] = [
@@ -1273,7 +1165,7 @@ const PASTA_MESSAGES: ChatMessage[] = [
 	{ id: 6, kind: 'message', sender: 'user', text: 'What’s a good pasta recipe for a weeknight?' },
 	{
 		id: 7, kind: 'message', sender: 'ai',
-		text: \`Here's a quick weeknight pasta you can have on the table in 20 minutes:\\n\\n\${toMarkdownTable(PASTA_TABLE)}\`,
+		text: \`Here's a quick weeknight pasta you can have on the table in 20 minutes:\\n\\n\\\`\\\`\\\`table\\n\${JSON.stringify(PASTA_TABLE)}\\n\\\`\\\`\\\`\`,
 		toolCalls: [
 			{ id: 'p1', kind: 'search', title: 'Web search', detail: '"quick pasta aglio e olio recipe"', links: PASTA_SEARCH_LINKS },
 		],
@@ -1284,7 +1176,7 @@ const WORKOUT_MESSAGES: ChatMessage[] = [
 	{ id: 8, kind: 'message', sender: 'user', text: 'Can you put together a push day routine for me?' },
 	{
 		id: 9, kind: 'message', sender: 'ai',
-		text: \`A simple push/pull/legs split spread across the week looks like this:\\n\\n\${toMarkdownTable(WORKOUT_SPLIT_TABLE)}\`,
+		text: \`A simple push/pull/legs split spread across the week looks like this:\\n\\n\\\`\\\`\\\`table\\n\${JSON.stringify(WORKOUT_SPLIT_TABLE)}\\n\\\`\\\`\\\`\`,
 		toolCalls: [
 			{ id: 'w1', kind: 'search', title: 'Web search', detail: '"balanced push pull legs split for beginners"', links: WORKOUT_SEARCH_LINKS },
 		],
@@ -1308,7 +1200,7 @@ const READING_MESSAGES: ChatMessage[] = [
 	{ id: 12, kind: 'message', sender: 'user', text: 'Any book recommendations for this fall?' },
 	{
 		id: 13, kind: 'message', sender: 'ai',
-		text: \`A few worth picking up next:\\n\\n\${toMarkdownTable(READING_LIST_TABLE)}\`,
+		text: \`A few worth picking up next:\\n\\n\\\`\\\`\\\`table\\n\${JSON.stringify(READING_LIST_TABLE)}\\n\\\`\\\`\\\`\`,
 		toolCalls: [
 			{ id: 'rd1', kind: 'search', title: 'Web search', detail: '"best-reviewed books 2025"', links: READING_SEARCH_LINKS },
 		],
@@ -1334,57 +1226,44 @@ const PLANNING_MESSAGES: ChatMessage[] = [
 	},
 ];
 
-interface CannedReply
-{
-	text:       string;
-	toolCalls?: ToolCallEntry[];
-}
-
-const CANNED_REPLIES: CannedReply[] = [
-	{
-		text: 'For fluffier rice, rinse it under cold water until it runs clear — that washes off the surface starch that makes grains clump.',
-	},
-	{
-		text: \`Here's a quick weeknight pasta you can have on the table in 20 minutes:\\n\\n\${toMarkdownTable(PASTA_TABLE)}\`,
-		toolCalls: [
-			{ id: 'r1', kind: 'search', title: 'Web search', detail: '"quick pasta aglio e olio recipe"', links: PASTA_SEARCH_LINKS },
-		],
-	},
-	{
-		text: 'Progressive overload doesn’t always mean adding weight — a slower tempo or one extra rep works just as well some weeks.',
-	},
-	{
-		text: \`Here's what a realistic bench press progression over a few months could look like:\\n\\n\\\`\\\`\\\`lineplot\\n\${JSON.stringify(BENCH_PRESS_LINEPLOT)}\\n\\\`\\\`\\\`\`,
-		toolCalls: [
-			{ id: 'r2', kind: 'thought', title: 'Thinking', detail: 'No existing log was shared — build an illustrative progression instead of guessing at real numbers.' },
-		],
-	},
-	{
-		text: \`A simple push/pull/legs split spread across the week looks like this:\\n\\n\${toMarkdownTable(WORKOUT_SPLIT_TABLE)}\`,
-		toolCalls: [
-			{ id: 'r3', kind: 'search', title: 'Web search', detail: '"balanced push pull legs split for beginners"', links: WORKOUT_SEARCH_LINKS },
-		],
-	},
-	{
-		text: 'If you want something short and sharp, Klara and the Sun is worth it — under 300 pages and hard to put down once you start.',
-	},
-	{
-		text: 'A squeeze of lime right before serving wakes up almost any braise — acid is the most under-used seasoning in a home kitchen.',
-	},
-	{
-		text: \`A few worth picking up next:\\n\\n\${toMarkdownTable(READING_LIST_TABLE)}\`,
-		toolCalls: [
-			{ id: 'r4', kind: 'search', title: 'Web search', detail: '"best-reviewed books 2025"', links: READING_SEARCH_LINKS },
-		],
-	},
+const INSTALL_THREAD_REFS: ThreadRef[] = [
+	{ id: 'thread-install-1', rootMessageId: 3, snippet: 'Run this in your project root — it copies…', createdAt: '2 days ago', replyCount: 2 },
+	{ id: 'thread-install-2', rootMessageId: 5, snippet: 'Yes — every component is built on design t…', createdAt: '1 day ago', replyCount: 2 },
 ];
 
+const WORKOUT_THREAD_REFS: ThreadRef[] = [
+	{ id: 'thread-workout-1', rootMessageId: 9, snippet: 'A simple push/pull/legs split spread across…', createdAt: '3 hours ago', replyCount: 3 },
+];
+
+const THREAD_MESSAGES: Record<string, ChatMessage[]> = {
+	'thread-install-1': [
+		{ id: 201, kind: 'message', sender: 'user', text: 'Does the CLI work with pnpm or yarn too, or only npm?' },
+		{ id: 202, kind: 'message', sender: 'ai',   text: 'Yep — \`npx\` is just npm’s package runner; pnpm and yarn both ship an equivalent (\`pnpm dlx dafink-ui add button\`, \`yarn dlx dafink-ui add button\`), so pick whichever your project already uses.' },
+	],
+	'thread-install-2': [
+		{ id: 203, kind: 'message', sender: 'user', text: 'Can I swap the accent color without touching every component?' },
+		{ id: 204, kind: 'message', sender: 'ai',   text: 'Yes — change the \`--color-brand\` token in your \`globals.css\` and every component using \`bg-brand\`/\`text-brand\` picks it up automatically, no per-component edits needed.' },
+	],
+	'thread-workout-1': [
+		{ id: 205, kind: 'message', sender: 'user', text: 'How long should I rest between sets on push day?' },
+		{ id: 206, kind: 'message', sender: 'ai',   text: 'For compound lifts (bench, overhead press) aim for 2–3 minutes; for isolation work (lateral raises, triceps pushdowns) 60–90 seconds is plenty.' },
+		{ id: 207, kind: 'message', sender: 'user', text: 'Good to know, thanks.' },
+	],
+};
+
+const THREAD_FETCH_DELAY_MS = 600;
+
+const fetchThread = (threadId: string): Promise<ChatMessage[]> =>
+	new Promise((resolve) => {
+		setTimeout(() => resolve(THREAD_MESSAGES[threadId] ?? []), THREAD_FETCH_DELAY_MS);
+	});
+
 const INITIAL_CHATS: ChatEntry[] = [
-	{ id: '1', title: 'Installing components',   messages: INSTALL_MESSAGES },
-	{ id: '2', title: 'Weeknight pasta ideas',   messages: PASTA_MESSAGES },
-	{ id: '3', title: 'Push day workout plan',   messages: WORKOUT_MESSAGES },
-	{ id: '4', title: 'Books to read this fall', messages: READING_MESSAGES },
-	{ id: '5', title: 'Something new this week', messages: PLANNING_MESSAGES },
+	{ id: '1', title: 'Installing components',   messages: INSTALL_MESSAGES,  threadRefs: INSTALL_THREAD_REFS },
+	{ id: '2', title: 'Weeknight pasta ideas',   messages: PASTA_MESSAGES,    threadRefs: [] },
+	{ id: '3', title: 'Push day workout plan',   messages: WORKOUT_MESSAGES,  threadRefs: WORKOUT_THREAD_REFS },
+	{ id: '4', title: 'Books to read this fall', messages: READING_MESSAGES,  threadRefs: [] },
+	{ id: '5', title: 'Something new this week', messages: PLANNING_MESSAGES, threadRefs: [] },
 ];
 
 const COMMANDS: CommandOption[] = [
@@ -1427,7 +1306,18 @@ const PaperclipIcon = () => (
 );
 
 const SendIcon = () => (
-	<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+	<svg
+		width='16'
+		height='16'
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='currentColor'
+		strokeWidth='2'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+		aria-hidden='true'
+		className='motion-safe:transition-transform motion-safe:duration-[var(--duration-fast)] group-hover:-rotate-12'
+	>
 		<path d='m22 2-7 20-4-9-9-4Z' />
 		<path d='M22 2 11 13' />
 	</svg>
@@ -1445,7 +1335,53 @@ const CloseIcon = () => (
 	</svg>
 );
 
-const randomReplyDelay = () => 600 + Math.random() * 300;
+const ReplyIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<polyline points='9 14 4 9 9 4' />
+		<path d='M20 20v-7a4 4 0 0 0-4-4H4' />
+	</svg>
+);
+
+const CopyIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<rect width='14' height='14' x='8' y='8' rx='2' ry='2' />
+		<path d='M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2' />
+	</svg>
+);
+
+const CheckIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<polyline points='20 6 9 17 4 12' />
+	</svg>
+);
+
+const SearchIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<circle cx='11' cy='11' r='8' />
+		<path d='m21 21-4.35-4.35' />
+	</svg>
+);
+
+// Calls your own API route (or a direct call to your model provider) with the user's
+// message and the conversation history, and returns the assistant's reply. Everything
+// downstream (typing indicator, streaming reveal, tool-call trace, table/chart rendering)
+// keeps working unchanged as long as this keeps returning { text, toolCalls? }.
+const sendMessage = async (message: string, history: AiChatHistoryMessage[]): Promise<AiChatReply> => {
+	const res = await fetch('/api/ai-chat', {
+		method:  'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body:    JSON.stringify({ message, history }),
+	});
+	if(!res.ok) throw new Error('Failed to fetch AI reply');
+	return res.json();
+};
+
+const buildHistory = (messages: ChatMessage[]): AiChatHistoryMessage[] =>
+	messages
+		.filter((m): m is ChatTextMessage => m.kind === 'message')
+		.map((m) => ({ role: m.sender === 'user' ? 'user' as const : 'assistant' as const, text: m.text }));
+
+const NEAR_BOTTOM_THRESHOLD_PX = 80;
 
 const Divider = ({ label }: { label: string }) => (
 	<div className='flex items-center gap-3'>
@@ -1454,6 +1390,164 @@ const Divider = ({ label }: { label: string }) => (
 		<div className='h-0 flex-1 border-t border-dashed border-surface-border' />
 	</div>
 );
+
+interface ThreadIndicatorProps {
+	align:      'start' | 'end';
+	messageId:  number;
+	text:       string;
+	threadRef:  ThreadRef | undefined;
+	replyCount: number;
+	loading:    boolean;
+	onReply:    () => void;
+}
+
+const HOVER_ACTION_BUTTON_CLASSES = 'flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-text-muted opacity-0 motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)] group-hover:opacity-100 focus-visible:opacity-100 hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring';
+
+// Hover/focus-revealed, same reveal behavior as the reply trigger next to it regardless of
+// whether a thread exists yet — copying is a lightweight secondary action, not something
+// that needs to stay pinned open like the reply-count badge does.
+const CopyMessageButton = ({ text }: { text: string }) => {
+	const [copied, setCopied] = useState(false);
+
+	const handleCopy = async () => {
+		try
+		{
+			await navigator.clipboard.writeText(text);
+			setCopied(true);
+			setTimeout(() => setCopied(false), 2000);
+		}
+		catch
+		{
+			// clipboard unavailable, silently ignore
+		}
+	};
+
+	return (
+		<Tooltip content={copied ? 'Copied' : 'Copy'}>
+			<button
+				type='button'
+				aria-label={copied ? 'Copied' : 'Copy message'}
+				onClick={handleCopy}
+				className={HOVER_ACTION_BUTTON_CLASSES}
+			>
+				{copied ? <CheckIcon /> : <CopyIcon />}
+			</button>
+		</Tooltip>
+	);
+};
+
+// Hover/focus-revealed reply trigger on a message with no thread yet; an always-visible
+// reply-count badge once one exists. The trigger stays in the tab order (opacity-0, not
+// hidden), so it's reachable and reveals itself on its own focus-visible even though the
+// row wasn't hovered. Identified by a plain DOM id (not a ref) so closing a thread can
+// hand focus back with a simple document.getElementById lookup — the same approach
+// CommandPalette already uses for its active-option scroll-into-view.
+// The hover-only copy button always sits on the outside (away from the bubble), with the
+// reply control (badge or hover icon) flush against the bubble edge — otherwise the copy
+// button's reserved layout space (it's opacity-0, not hidden, to stay keyboard-reachable)
+// would push the reply control away from that edge whenever the row isn't hovered.
+const ThreadIndicator = ({ align, messageId, text, threadRef, replyCount, loading, onReply }: ThreadIndicatorProps) => {
+	const copyButton = <CopyMessageButton text={text} />;
+
+	// A thread with zero replies (just started, nobody's answered yet) has nothing worth
+	// badging — fall back to the same hover-revealed trigger a message with no thread gets.
+	const replyControl = threadRef && (loading || replyCount > 0) ? (
+		<button
+			id={\`thread-trigger-\${messageId}\`}
+			type='button'
+			onClick={onReply}
+			className='inline-flex items-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
+		>
+			<Badge variant='outline' className='gap-1 text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:border-surface-border-hover hover:text-text'>
+				<ReplyIcon />
+				{loading ? 'Loading…' : \`\${replyCount} message\${replyCount === 1 ? '' : 's'}\`}
+			</Badge>
+		</button>
+	) : (
+		<button
+			id={\`thread-trigger-\${messageId}\`}
+			type='button'
+			aria-label='Reply in thread'
+			onClick={onReply}
+			className={HOVER_ACTION_BUTTON_CLASSES}
+		>
+			<ReplyIcon />
+		</button>
+	);
+
+	return (
+		<div className={['flex w-full items-center gap-1', align === 'end' ? 'justify-end' : 'justify-start'].join(' ')}>
+			{align === 'end' ? (
+				<>
+					{copyButton}
+					{replyControl}
+				</>
+			) : (
+				<>
+					{replyControl}
+					{copyButton}
+				</>
+			)}
+		</div>
+	);
+};
+
+interface ChatMessageRowProps {
+	message:               ChatMessage;
+	onStreamComplete:      (messageId: number) => void;
+	onQuestionnaireAnswer: (messageId: number, value: string) => void;
+	renderTrailing?:       (m: ChatTextMessage) => ReactNode;
+}
+
+// Shared by the main pane and ThreadPanel: a thread is just another list of the same
+// ChatMessage shape, so the bubble/tool-call/questionnaire/streaming rendering only
+// needs to live once. The streaming-complete guard (is this still the active streaming
+// message?) lives in each pane's own onStreamComplete, since the main pane and an open
+// thread stream independently of each other. \`renderTrailing\` is only supplied by the
+// main pane, to slot the reply-in-thread trigger under each row.
+const ChatMessageRow = ({ message: m, onStreamComplete, onQuestionnaireAnswer, renderTrailing }: ChatMessageRowProps) => {
+	if(m.kind === 'checkpoint') return <Divider label={m.label} />;
+
+	if(m.sender === 'user') {
+		return (
+			<div className='group flex flex-col items-end gap-1.5'>
+				{m.attachment && <Attachment name={m.attachment.name} size={m.attachment.size} />}
+				{m.text && <Message variant='sent'>{m.text}</Message>}
+				{renderTrailing?.(m)}
+			</div>
+		);
+	}
+
+	return (
+		<div className='group flex flex-col gap-1.5'>
+			{m.toolCalls && <ToolCallTrace toolCalls={m.toolCalls} />}
+			<Message variant='received' bubble={false}>
+				{m.generating === 'image' ? (
+					<SkeletonImage aspectRatio='4/3' className='w-full max-w-xs' />
+				) : m.generating === 'audio' ? (
+					<div className='flex w-56 items-center gap-2'>
+						<Skeleton className='h-9 w-9 shrink-0 rounded-full' />
+						<Skeleton className='h-2 flex-1 rounded-full' />
+					</div>
+				) : (
+					<StreamingMessage
+						text={m.text}
+						streaming={!!m.animate}
+						onComplete={() => onStreamComplete(m.id)}
+					/>
+				)}
+			</Message>
+			{m.questionnaire && (
+				<Questionnaire
+					step={m.questionnaire}
+					answer={m.questionnaireAnswer}
+					onAnswer={(value) => onQuestionnaireAnswer(m.id, value)}
+				/>
+			)}
+			{renderTrailing?.(m)}
+		</div>
+	);
+};
 
 export const AiChat = () => {
 	const [chats, setChats] = useState<ChatEntry[]>(INITIAL_CHATS);
@@ -1466,49 +1560,72 @@ export const AiChat = () => {
 	const [streamingChatId, setStreamingChatId] = useState<string | null>(null);
 	const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
 	const [chatPendingDeletion, setChatPendingDeletion] = useState<ChatEntry | null>(null);
+	const [threadMessages, setThreadMessages] = useState<Record<string, ChatMessage[]>>({});
+	const [loadingThreadId, setLoadingThreadId] = useState<string | null>(null);
+	const [activeThread, setActiveThread] = useState<{ chatId: string; threadId: string; rootMessageId: number } | null>(null);
+	const [threadDraft, setThreadDraft] = useState('');
+	const [threadTypingId, setThreadTypingId] = useState<string | null>(null);
+	const [threadStreamingId, setThreadStreamingId] = useState<string | null>(null);
+	const [threadStreamingMessageId, setThreadStreamingMessageId] = useState<number | null>(null);
+	const [threadSearchOpen, setThreadSearchOpen] = useState(false);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const streamingRevealedRef = useRef(0);
 	const nextChatId = useRef(INITIAL_CHATS.length + 1);
+	const nextThreadId = useRef(1);
 	const nextMessageId = useRef(
 		INSTALL_MESSAGES.length + PASTA_MESSAGES.length + WORKOUT_MESSAGES.length + READING_MESSAGES.length + PLANNING_MESSAGES.length + 1
 	);
-	const timeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+	const pendingReplyRef = useRef(0);
+	const pendingThreadReplyRef = useRef(0);
+	// True as long as the user hasn't scrolled away from the bottom. Auto-scroll (below)
+	// only acts while this is true, so reading back through history — including while a
+	// reply is still streaming in — never gets yanked back down. Reset to true whenever
+	// the user does something that should re-anchor the view (send a message, switch chats).
+	const shouldAutoScrollRef = useRef(true);
 
 	const activeChat = chats.find((c) => c.id === activeId) ?? null;
 	const isTyping = typingChatId === activeId;
 	const isGenerating = isTyping || streamingChatId === activeId;
+	const isThreadGenerating = activeThread !== null && (threadTypingId === activeThread.threadId || threadStreamingId === activeThread.threadId);
+	const isThreadTyping = activeThread !== null && threadTypingId === activeThread.threadId;
 
 	useEffect(() => {
 		const container = containerRef.current;
 		const content   = contentRef.current;
 		if(!container || !content) return;
 
-		const scrollToBottom = () => { container.scrollTop = container.scrollHeight; };
+		const handleScroll = () => {
+			const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
+			shouldAutoScrollRef.current = distanceFromBottom < NEAR_BOTTOM_THRESHOLD_PX;
+		};
+		container.addEventListener('scroll', handleScroll, { passive: true });
+
+		const scrollToBottom = () => {
+			if(shouldAutoScrollRef.current) container.scrollTop = container.scrollHeight;
+		};
 		scrollToBottom();
 
-		// Content can still grow after this runs (favicon images, web fonts loading in),
-		// which would leave the view under-scrolled; re-snap to bottom for a short window
-		// while that settles. Bounded rather than kept open for the chat's whole lifetime,
-		// so a later manual resize (e.g. expanding a ToolCallTrace) doesn't yank the view
-		// back down.
+		// Content keeps growing for as long as a reply streams in (typewriter reveal, table
+		// rows appending, favicon images loading), so this stays observing for the effect's
+		// whole lifetime rather than a fixed window — safe to leave running indefinitely
+		// since scrollToBottom above already no-ops once the user has scrolled away.
 		const observer = new ResizeObserver(scrollToBottom);
 		observer.observe(content);
-		const settleTimeout = setTimeout(() => observer.disconnect(), 800);
 
 		return () => {
+			container.removeEventListener('scroll', handleScroll);
 			observer.disconnect();
-			clearTimeout(settleTimeout);
 		};
 	}, [chats, isTyping, activeId]);
 
 	useEffect(() => {
-		return () => clearTimeout(timeoutRef.current);
+		return () => { pendingReplyRef.current++; pendingThreadReplyRef.current++; };
 	}, []);
 
 	const handleNewChat = () => {
-		const chat: ChatEntry = { id: String(nextChatId.current++), title: 'New chat', messages: [] };
+		const chat: ChatEntry = { id: String(nextChatId.current++), title: 'New chat', messages: [], threadRefs: [] };
+		shouldAutoScrollRef.current = true;
 		setChats((prev) => [chat, ...prev]);
 		setActiveId(chat.id);
 		setDraft('');
@@ -1516,6 +1633,7 @@ export const AiChat = () => {
 	};
 
 	const handleSelectChat = (id: string) => {
+		shouldAutoScrollRef.current = true;
 		setActiveId(id);
 		setDraft('');
 		setAttachedFile(null);
@@ -1564,23 +1682,31 @@ export const AiChat = () => {
 		e.target.value = '';
 	};
 
-	const queueAiReply = (chatId: string) => {
+	const queueAiReply = (chatId: string, message: string, history: AiChatHistoryMessage[]) => {
 		setTypingChatId(chatId);
-		timeoutRef.current = setTimeout(() => {
-			const reply = CANNED_REPLIES[Math.floor(Math.random() * CANNED_REPLIES.length)];
-			setTypingChatId((prev) => (prev === chatId ? null : prev));
-			const aiMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'ai', text: reply.text, animate: true, toolCalls: reply.toolCalls };
-			setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, aiMessage] } : c)));
-			streamingRevealedRef.current = 0;
-			setStreamingChatId(chatId);
-			setStreamingMessageId(aiMessage.id);
-		}, randomReplyDelay());
+		const requestId = ++pendingReplyRef.current;
+
+		sendMessage(message, history)
+			.then((reply) => {
+				if(pendingReplyRef.current !== requestId) return;
+				setTypingChatId((prev) => (prev === chatId ? null : prev));
+				const aiMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'ai', text: reply.text, animate: true, toolCalls: reply.toolCalls };
+				setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, aiMessage] } : c)));
+				setStreamingChatId(chatId);
+				setStreamingMessageId(aiMessage.id);
+			})
+			.catch(() => {
+				if(pendingReplyRef.current !== requestId) return;
+				setTypingChatId((prev) => (prev === chatId ? null : prev));
+				const errorMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'ai', text: 'Something went wrong — try sending that again.' };
+				setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, errorMessage] } : c)));
+			});
 	};
 
 	const handleStop = () => {
 		if(typingChatId)
 		{
-			clearTimeout(timeoutRef.current);
+			pendingReplyRef.current++;
 			setTypingChatId(null);
 			return;
 		}
@@ -1588,11 +1714,10 @@ export const AiChat = () => {
 		{
 			const chatId    = streamingChatId;
 			const messageId = streamingMessageId;
-			const revealed  = streamingRevealedRef.current;
 			setChats((prev) => prev.map((c) => (c.id !== chatId ? c : {
 				...c,
 				messages: c.messages.map((m) => (m.kind === 'message' && m.id === messageId
-					? { ...m, text: m.text.slice(0, revealed), animate: false }
+					? { ...m, animate: false }
 					: m
 				)),
 			})));
@@ -1611,23 +1736,167 @@ export const AiChat = () => {
 		const attachment: MessageAttachment | undefined = attachedFile
 			? { name: attachedFile.name, size: \`\${Math.max(1, Math.round(attachedFile.size / 1024))} KB\` }
 			: undefined;
+		const history = buildHistory(activeChat.messages);
 		const userMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'user', text, attachment };
+		shouldAutoScrollRef.current = true;
 		setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: [...c.messages, userMessage] } : c)));
 		setDraft('');
 		setAttachedFile(null);
-		queueAiReply(chatId);
+		queueAiReply(chatId, text, history);
 	};
 
 	const handleQuestionnaireAnswer = (messageId: number, value: string) => {
 		if(!activeChat || !value.trim()) return;
 		const chatId = activeChat.id;
+		const history = buildHistory(activeChat.messages);
 		const userMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'user', text: value };
+		shouldAutoScrollRef.current = true;
 		setChats((prev) => prev.map((c) => {
 			if(c.id !== chatId) return c;
 			const updated = c.messages.map((m) => (m.kind === 'message' && m.id === messageId ? { ...m, questionnaireAnswer: value } : m));
 			return { ...c, messages: [...updated, userMessage] };
 		}));
-		queueAiReply(chatId);
+		queueAiReply(chatId, value, history);
+	};
+
+	const handleMainStreamComplete = (messageId: number) => {
+		if(messageId !== streamingMessageId) return;
+		setChats((prev) => prev.map((c) => (c.id !== streamingChatId ? c : {
+			...c,
+			messages: c.messages.map((msg) => (msg.kind === 'message' && msg.id === messageId ? { ...msg, animate: false } : msg)),
+		})));
+		setStreamingChatId(null);
+		setStreamingMessageId(null);
+	};
+
+	const getThreadRootHistory = (chatId: string, rootMessageId: number): ChatMessage[] => {
+		const chat = chats.find((c) => c.id === chatId);
+		if(!chat) return [];
+		const rootIndex = chat.messages.findIndex((m) => m.id === rootMessageId);
+		return rootIndex === -1 ? chat.messages : chat.messages.slice(0, rootIndex + 1);
+	};
+
+	// Display-only: the thread panel shows just the message the thread branched from, not
+	// the whole conversation up to that point. Reply generation still needs the full history
+	// (getThreadRootHistory above) so the assistant keeps that context.
+	const getThreadRootMessage = (chatId: string, rootMessageId: number): ChatMessage[] => {
+		const chat = chats.find((c) => c.id === chatId);
+		const rootMessage = chat?.messages.find((m) => m.id === rootMessageId);
+		return rootMessage ? [rootMessage] : [];
+	};
+
+	const handleOpenThread = (chatId: string, threadId: string, rootMessageId: number) => {
+		setActiveThread({ chatId, threadId, rootMessageId });
+		if(activeId !== chatId) setActiveId(chatId);
+		setThreadDraft('');
+		setThreadSearchOpen(false);
+		if(threadMessages[threadId]) return;
+		setLoadingThreadId(threadId);
+		fetchThread(threadId).then((messages) => {
+			setThreadMessages((prev) => ({ ...prev, [threadId]: messages }));
+			setLoadingThreadId((prev) => (prev === threadId ? null : prev));
+		});
+	};
+
+	const handleStartThread = (chatId: string, rootMessageId: number) => {
+		const chat = chats.find((c) => c.id === chatId);
+		const rootMessage = chat?.messages.find((m) => m.id === rootMessageId);
+		const snippet = rootMessage && rootMessage.kind === 'message' ? rootMessage.text.replace(/\\s+/g, ' ').trim().slice(0, 60) : 'New thread';
+		const threadId = \`thread-new-\${nextThreadId.current++}\`;
+		const threadRef: ThreadRef = { id: threadId, rootMessageId, snippet, createdAt: 'Just now', replyCount: 0 };
+		setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, threadRefs: [...c.threadRefs, threadRef] } : c)));
+		setThreadMessages((prev) => ({ ...prev, [threadId]: [] }));
+		setActiveThread({ chatId, threadId, rootMessageId });
+		setThreadDraft('');
+	};
+
+	const handleCloseThread = () => {
+		const rootMessageId = activeThread?.rootMessageId;
+		setActiveThread(null);
+		if(rootMessageId !== undefined) document.getElementById(\`thread-trigger-\${rootMessageId}\`)?.focus();
+	};
+
+	const queueThreadReply = (threadId: string, message: string, history: AiChatHistoryMessage[]) => {
+		setThreadTypingId(threadId);
+		const requestId = ++pendingThreadReplyRef.current;
+
+		sendMessage(message, history)
+			.then((reply) => {
+				if(pendingThreadReplyRef.current !== requestId) return;
+				setThreadTypingId((prev) => (prev === threadId ? null : prev));
+				const aiMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'ai', text: reply.text, animate: true, toolCalls: reply.toolCalls };
+				setThreadMessages((prev) => ({ ...prev, [threadId]: [...(prev[threadId] ?? []), aiMessage] }));
+				setThreadStreamingId(threadId);
+				setThreadStreamingMessageId(aiMessage.id);
+			})
+			.catch(() => {
+				if(pendingThreadReplyRef.current !== requestId) return;
+				setThreadTypingId((prev) => (prev === threadId ? null : prev));
+				const errorMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'ai', text: 'Something went wrong — try sending that again.' };
+				setThreadMessages((prev) => ({ ...prev, [threadId]: [...(prev[threadId] ?? []), errorMessage] }));
+			});
+	};
+
+	const handleThreadStop = () => {
+		if(!activeThread) return;
+		const { threadId } = activeThread;
+		if(threadTypingId === threadId)
+		{
+			pendingThreadReplyRef.current++;
+			setThreadTypingId(null);
+			return;
+		}
+		if(threadStreamingId === threadId && threadStreamingMessageId !== null)
+		{
+			const messageId = threadStreamingMessageId;
+			setThreadMessages((prev) => ({
+				...prev,
+				[threadId]: (prev[threadId] ?? []).map((m) => (m.kind === 'message' && m.id === messageId ? { ...m, animate: false } : m)),
+			}));
+			setThreadStreamingId(null);
+			setThreadStreamingMessageId(null);
+		}
+	};
+
+	const handleThreadSubmit = (e: FormEvent) => {
+		e.preventDefault();
+		if(!activeThread || isThreadGenerating) return;
+		const text = threadDraft.trim();
+		if(!text) return;
+
+		const { chatId, threadId, rootMessageId } = activeThread;
+		const rootHistory = getThreadRootHistory(chatId, rootMessageId);
+		const history = [...buildHistory(rootHistory), ...buildHistory(threadMessages[threadId] ?? [])];
+		const userMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'user', text };
+		setThreadMessages((prev) => ({ ...prev, [threadId]: [...(prev[threadId] ?? []), userMessage] }));
+		setThreadDraft('');
+		queueThreadReply(threadId, text, history);
+	};
+
+	const handleThreadStreamComplete = (messageId: number) => {
+		if(!activeThread || messageId !== threadStreamingMessageId) return;
+		const threadId = activeThread.threadId;
+		setThreadMessages((prev) => ({
+			...prev,
+			[threadId]: (prev[threadId] ?? []).map((m) => (m.kind === 'message' && m.id === messageId ? { ...m, animate: false } : m)),
+		}));
+		setThreadStreamingId(null);
+		setThreadStreamingMessageId(null);
+	};
+
+	const handleThreadQuestionnaireAnswer = (messageId: number, value: string) => {
+		if(!activeThread || !value.trim()) return;
+		const { chatId, threadId, rootMessageId } = activeThread;
+		const rootHistory = getThreadRootHistory(chatId, rootMessageId);
+		const existing = threadMessages[threadId] ?? [];
+		const history = [...buildHistory(rootHistory), ...buildHistory(existing)];
+		const userMessage: ChatMessage = { id: nextMessageId.current++, kind: 'message', sender: 'user', text: value };
+		setThreadMessages((prev) => {
+			const current = prev[threadId] ?? [];
+			const updated = current.map((m) => (m.kind === 'message' && m.id === messageId ? { ...m, questionnaireAnswer: value } : m));
+			return { ...prev, [threadId]: [...updated, userMessage] };
+		});
+		queueThreadReply(threadId, value, history);
 	};
 
 	const pushAiMessage = (chatId: string, text: string) => {
@@ -1727,187 +1996,206 @@ export const AiChat = () => {
 		}
 	};
 
+	const renderThreadMessage = (m: ChatMessage) => (
+		<ChatMessageRow
+			key={m.id}
+			message={m}
+			onStreamComplete={handleThreadStreamComplete}
+			onQuestionnaireAnswer={handleThreadQuestionnaireAnswer}
+		/>
+	);
+
 	return (
-		<div className='flex h-[32rem] w-full max-w-4xl overflow-hidden rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border'>
-			<Sidebar width='w-64' height='h-full'>
-				<SidebarHeader>
-					<Button variant='outlined' size='sm' className='w-full justify-center gap-1.5' onClick={handleNewChat}>
-						<PlusIcon />
-						New chat
-					</Button>
-				</SidebarHeader>
-				<SidebarSection label='Chats'>
-					{chats.map((chat) => (
-						editingId === chat.id ? (
-							<Input
-								key={chat.id}
-								autoFocus
-								value={draftTitle}
-								onChange={(e) => setDraftTitle(e.target.value)}
-								onBlur={handleCommitEdit}
-								onKeyDown={handleEditKeyDown}
-								aria-label='Chat title'
-							/>
-						) : (
-							<SidebarButton
-								key={chat.id}
-								isActive={activeId === chat.id}
-								onClick={() => handleSelectChat(chat.id)}
-								action={
-									<div className='flex items-center gap-0.5'>
-										<button
-											type='button'
-											aria-label={\`Rename \${chat.title}\`}
-											onClick={() => handleStartEdit(chat)}
-											className='flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-text-muted hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
-										>
-											<PencilIcon />
-										</button>
-										<button
-											type='button'
-											aria-label={\`Delete \${chat.title}\`}
-											onClick={() => setChatPendingDeletion(chat)}
-											className='flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-text-muted hover:bg-danger/10 hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
-										>
-											<TrashIcon />
-										</button>
-									</div>
-								}
-							>
-								{chat.title}
-							</SidebarButton>
-						)
-					))}
-					{chats.length === 0 && (
-						<p className='px-3 py-2 text-xs text-text-muted'>No chats yet.</p>
-					)}
-				</SidebarSection>
-			</Sidebar>
-
-			<div className='flex flex-1 flex-col'>
-				{activeChat ? (
-					<>
-						<div className='border-b-[length:var(--border-width)] border-surface-border px-4 py-3'>
-							<h3 className='text-base font-semibold text-text'>{activeChat.title}</h3>
+		<div>
+			<div className='flex h-[32rem] w-full max-w-6xl overflow-hidden rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border'>
+				<Sidebar width='w-64' height='h-full'>
+					<SidebarHeader>
+						<div className='flex w-full gap-1.5'>
+							<Button variant='outlined' size='sm' className='flex-1 justify-center gap-1.5' onClick={handleNewChat}>
+								<PlusIcon />
+								New chat
+							</Button>
+							<Button variant='outlined' size='icon' aria-label='Search threads' onClick={() => setThreadSearchOpen(true)}>
+								<SearchIcon />
+							</Button>
 						</div>
-						<div className='relative flex min-h-0 flex-1 flex-col'>
-							<ScrollFade ref={containerRef} direction='vertical' className='h-full' wrapperClassName='min-h-0 flex-1'>
-								<div ref={contentRef} className='flex min-h-full shrink-0 flex-col gap-4 p-5 pb-28'>
-									{activeChat.messages.length === 0 ? (
-										<div className='flex flex-1 flex-col items-center justify-center gap-1.5 text-center'>
-											<p className='font-serif text-2xl italic text-text'>Welcome back</p>
-											<p className='text-sm text-text-muted'>Send a message to start the conversation.</p>
+					</SidebarHeader>
+					<SidebarSection label='Chats'>
+						{chats.map((chat) => (
+							editingId === chat.id ? (
+								<Input
+									key={chat.id}
+									autoFocus
+									value={draftTitle}
+									onChange={(e) => setDraftTitle(e.target.value)}
+									onBlur={handleCommitEdit}
+									onKeyDown={handleEditKeyDown}
+									aria-label='Chat title'
+								/>
+							) : (
+								<SidebarButton
+									key={chat.id}
+									isActive={activeId === chat.id}
+									onClick={() => handleSelectChat(chat.id)}
+									actionGutter='pr-16'
+									action={
+										<div className='flex items-center gap-0.5'>
+											<button
+												type='button'
+												aria-label={\`Rename \${chat.title}\`}
+												onClick={() => handleStartEdit(chat)}
+												className='flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-text-muted hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
+											>
+												<PencilIcon />
+											</button>
+											<button
+												type='button'
+												aria-label={\`Delete \${chat.title}\`}
+												onClick={() => setChatPendingDeletion(chat)}
+												className='flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-text-muted hover:bg-danger/10 hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
+											>
+												<TrashIcon />
+											</button>
 										</div>
-									) : (
-										<>
-											<Divider label='Conversation starts here' />
-											{activeChat.messages.map((m) => {
-												if(m.kind === 'checkpoint') return <Divider key={m.id} label={m.label} />;
-												if(m.sender === 'user') {
-													return (
-														<div key={m.id} className='flex flex-col items-end gap-1.5'>
-															{m.attachment && <Attachment name={m.attachment.name} size={m.attachment.size} />}
-															{m.text && <Message variant='sent'>{m.text}</Message>}
-														</div>
-													);
-												}
+									}
+								>
+									{chat.title}
+								</SidebarButton>
+							)
+						))}
+						{chats.length === 0 && (
+							<p className='px-3 py-2 text-xs text-text-muted'>No chats yet.</p>
+						)}
+					</SidebarSection>
+				</Sidebar>
 
-												return (
-													<div key={m.id} className='flex flex-col gap-1.5'>
-														{m.toolCalls && <ToolCallTrace toolCalls={m.toolCalls} />}
-														<Message variant='received' bubble={false}>
-															{m.generating === 'image' ? (
-																<SkeletonImage aspectRatio='4/3' className='w-full max-w-xs' />
-															) : m.generating === 'audio' ? (
-																<div className='flex w-56 items-center gap-2'>
-																	<Skeleton className='h-9 w-9 shrink-0 rounded-full' />
-																	<Skeleton className='h-2 flex-1 rounded-full' />
-																</div>
-															) : m.animate ? (
-																<Typewriter
-																	text={m.text}
-																	speed={18}
-																	onReveal={(n) => { if(m.id === streamingMessageId) streamingRevealedRef.current = n; }}
-																	onComplete={() => {
-																		if(m.id !== streamingMessageId) return;
-																		setStreamingChatId(null);
-																		setStreamingMessageId(null);
-																	}}
-																/>
-															) : (
-																<div className='flex flex-col gap-3'>
-																	{parseMessageSegments(m.text).map((seg, i) => renderSegment(seg, i))}
-																</div>
-															)}
-														</Message>
-														{m.questionnaire && (
-															<QuestionCard
-																step={m.questionnaire}
-																answer={m.questionnaireAnswer}
-																onAnswer={(value) => handleQuestionnaireAnswer(m.id, value)}
-															/>
-														)}
+				<Resizable direction='horizontal' className='flex-1 min-w-0'>
+					<ResizablePanel minSize={280} className='flex'>
+						<div className='flex flex-1 flex-col'>
+							{activeChat ? (
+								<>
+									<div className='border-b-[length:var(--border-width)] border-surface-border px-4 py-3'>
+										<h3 className='text-base font-semibold text-text'>{activeChat.title}</h3>
+									</div>
+									<div className='relative flex min-h-0 flex-1 flex-col'>
+										<ScrollFade ref={containerRef} direction='vertical' className='h-full' wrapperClassName='min-h-0 flex-1'>
+											<div ref={contentRef} className='flex min-h-full shrink-0 flex-col gap-4 p-5 pb-28'>
+												{activeChat.messages.length === 0 ? (
+													<div className='flex flex-1 flex-col items-center justify-center gap-1.5 text-center'>
+														<p className='font-serif text-2xl italic text-text'>Welcome back</p>
+														<p className='text-sm text-text-muted'>Send a message to start the conversation.</p>
 													</div>
-												);
-											})}
-										</>
-									)}
-									{isTyping && (
-										<p className='text-xs text-text-muted'>Assistant is typing…</p>
-									)}
-								</div>
-							</ScrollFade>
-							<div className='absolute inset-x-0 bottom-0 p-4'>
-								<form onSubmit={handleSubmit} className='flex w-full flex-col items-center gap-2'>
-									{attachedFile && (
-										<div className='flex w-full max-w-md items-center gap-2'>
-											<Attachment name={attachedFile.name} size={\`\${Math.max(1, Math.round(attachedFile.size / 1024))} KB\`} />
-											<Button type='button' variant='ghost' size='icon-sm' aria-label='Remove attachment' onClick={() => setAttachedFile(null)}>
-												<CloseIcon />
-											</Button>
+												) : (
+													<>
+														<Divider label='Conversation starts here' />
+														{activeChat.messages.map((m) => (
+															<ChatMessageRow
+																key={m.id}
+																message={m}
+																onStreamComplete={handleMainStreamComplete}
+																onQuestionnaireAnswer={handleQuestionnaireAnswer}
+																renderTrailing={(msg) => {
+																	const threadRef = activeChat.threadRefs.find((t) => t.rootMessageId === msg.id);
+																	return (
+																		<ThreadIndicator
+																			align={msg.sender === 'user' ? 'end' : 'start'}
+																			messageId={msg.id}
+																			text={msg.text}
+																			threadRef={threadRef}
+																			replyCount={threadRef ? (threadMessages[threadRef.id]?.length ?? threadRef.replyCount) : 0}
+																			loading={threadRef ? loadingThreadId === threadRef.id : false}
+																			onReply={() => (threadRef
+																				? handleOpenThread(activeChat.id, threadRef.id, msg.id)
+																				: handleStartThread(activeChat.id, msg.id)
+																			)}
+																		/>
+																	);
+																}}
+															/>
+														))}
+													</>
+												)}
+												{isTyping && (
+													<p className='text-xs text-text-muted'>Assistant is typing…</p>
+												)}
+											</div>
+										</ScrollFade>
+										<div className='absolute inset-x-0 bottom-0 p-4'>
+											<form onSubmit={handleSubmit} className='flex w-full flex-col items-center gap-2'>
+												{attachedFile && (
+													<div className='flex w-full max-w-md items-center gap-2'>
+														<Attachment name={attachedFile.name} size={\`\${Math.max(1, Math.round(attachedFile.size / 1024))} KB\`} />
+														<Button type='button' variant='ghost' size='icon-sm' aria-label='Remove attachment' onClick={() => setAttachedFile(null)}>
+															<CloseIcon />
+														</Button>
+													</div>
+												)}
+												<div className='flex w-full max-w-md items-center gap-1.5 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel p-1.5 shadow-[var(--shadow-lg)]'>
+													<input
+														ref={fileInputRef}
+														type='file'
+														onChange={handleFileChange}
+														className='hidden'
+														tabIndex={-1}
+														aria-hidden='true'
+													/>
+													<Button type='button' variant='ghost' size='icon' aria-label='Attach file' disabled={isGenerating} onClick={() => fileInputRef.current?.click()}>
+														<PaperclipIcon />
+													</Button>
+													<CommandInput
+														className='min-w-0 flex-1'
+														value={draft}
+														onChange={setDraft}
+														commands={COMMANDS}
+														onCommand={handleCommand}
+														placeholder='Message… (try /compact)'
+														aria-label='Message'
+														disabled={isGenerating}
+													/>
+													{isGenerating ? (
+														<Button type='button' size='icon' aria-label='Stop generating' onClick={handleStop}>
+															<StopIcon />
+														</Button>
+													) : (
+														<Button type='submit' size='icon' className='group' aria-label='Send message' disabled={!draft.trim() && !attachedFile}>
+															<SendIcon />
+														</Button>
+													)}
+												</div>
+											</form>
 										</div>
-									)}
-									<div className='flex w-full max-w-md items-center gap-1.5 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel p-1.5 shadow-[var(--shadow-lg)]'>
-										<input
-											ref={fileInputRef}
-											type='file'
-											onChange={handleFileChange}
-											className='hidden'
-											tabIndex={-1}
-											aria-hidden='true'
-										/>
-										<Button type='button' variant='ghost' size='icon' aria-label='Attach file' disabled={isGenerating} onClick={() => fileInputRef.current?.click()}>
-											<PaperclipIcon />
-										</Button>
-										<CommandInput
-											className='min-w-0 flex-1'
-											value={draft}
-											onChange={setDraft}
-											commands={COMMANDS}
-											onCommand={handleCommand}
-											placeholder='Message… (try /compact)'
-											aria-label='Message'
-											disabled={isGenerating}
-										/>
-										{isGenerating ? (
-											<Button type='button' size='icon' aria-label='Stop generating' onClick={handleStop}>
-												<StopIcon />
-											</Button>
-										) : (
-											<Button type='submit' size='icon' aria-label='Send message' disabled={!draft.trim() && !attachedFile}>
-												<SendIcon />
-											</Button>
-										)}
 									</div>
-								</form>
-							</div>
+								</>
+							) : (
+								<div className='flex flex-1 items-center justify-center p-6 text-center'>
+									<p className='text-sm text-text-muted'>Select or start a chat to begin.</p>
+								</div>
+							)}
 						</div>
+					</ResizablePanel>
+
+				{activeThread && activeChat && (
+					<>
+						<ResizableHandle aria-label='Resize thread panel' />
+						<ResizablePanel defaultSize={320} minSize={240} maxSize={480} className='flex'>
+							<ThreadPanel
+								title={activeChat.title}
+								rootMessages={getThreadRootMessage(activeThread.chatId, activeThread.rootMessageId)}
+								threadMessages={threadMessages[activeThread.threadId] ?? []}
+								loading={loadingThreadId === activeThread.threadId}
+								draft={threadDraft}
+								onDraftChange={setThreadDraft}
+								onSubmit={handleThreadSubmit}
+								isGenerating={isThreadGenerating}
+								isTyping={isThreadTyping}
+								onStop={handleThreadStop}
+								renderMessage={renderThreadMessage}
+								onClose={handleCloseThread}
+							/>
+						</ResizablePanel>
 					</>
-				) : (
-					<div className='flex flex-1 items-center justify-center p-6 text-center'>
-						<p className='text-sm text-text-muted'>Select or start a chat to begin.</p>
-					</div>
 				)}
+				</Resizable>
 			</div>
 
 			<Modal open={chatPendingDeletion !== null} onOpenChange={handleDeleteOpenChange}>
@@ -1923,6 +2211,23 @@ export const AiChat = () => {
 					<Button variant='destructive' onClick={handleConfirmDelete}>Delete</Button>
 				</ModalFooter>
 			</Modal>
+
+			<CommandPalette open={threadSearchOpen} onClose={() => setThreadSearchOpen(false)} placeholder='Search threads…'>
+				{chats.filter((c) => c.threadRefs.length > 0).map((chat) => (
+					<CommandGroup key={chat.id} label={chat.title}>
+						{chat.threadRefs.map((ref) => (
+							<CommandItem
+								key={ref.id}
+								value={ref.snippet}
+								icon={<ReplyIcon />}
+								onSelect={() => handleOpenThread(chat.id, ref.id, ref.rootMessageId)}
+							>
+								{\`\${ref.snippet} · \${ref.createdAt}\`}
+							</CommandItem>
+						))}
+					</CommandGroup>
+				))}
+			</CommandPalette>
 		</div>
 	);
 };
@@ -1930,8 +2235,8 @@ export const AiChat = () => {
 export default AiChat;
 `,
 		dependencies: ['react-markdown', 'remark-gfm', 'remark-math'],
-		registryDependencies: ['sidebar', 'scroll-fade', 'message', 'typewriter', 'attachment', 'button', 'input', 'command-input', 'collapsible', 'timeline', 'modal', 'charts', 'function-plotter', 'table', 'date-picker', 'slider', 'formula', 'code-block', 'audioplayer', 'skeleton'],
-		files: ['AiChat/AiChat.tsx', 'AiChat/ToolCallTrace.tsx', 'AiChat/QuestionCard.tsx', 'AiChat/ChatMarkdown.tsx'],
+		registryDependencies: ['sidebar', 'scroll-fade', 'message', 'typewriter', 'attachment', 'button', 'input', 'command-input', 'command-palette', 'badge', 'tooltip', 'collapsible', 'timeline', 'modal', 'charts', 'function-plotter', 'table', 'date-picker', 'slider', 'formula', 'code-block', 'audioplayer', 'skeleton', 'questionnaire', 'tool-call-trace', 'resizable'],
+		files: ['AiChat/AiChat.tsx', 'AiChat/ChatMarkdown.tsx', 'AiChat/StreamingMessage.tsx', 'AiChat/ThreadPanel.tsx'],
 		promptSnippet: `Most of your reply can just be normal GitHub-flavored markdown — the chat already
 renders it: **bold**/*italic*, [links](https://example.com), \`inline code\`, fenced code blocks
 (\`\`\`js ... \`\`\`, any language), bullet/numbered lists, and pipe tables all render with this

@@ -20,7 +20,7 @@ export const Message = ({ variant = 'received', avatar, bubble = true, className
 	return (
 		<div
 			{...props}
-			className={['flex items-end gap-2', isSent ? 'flex-row-reverse' : 'flex-row', className].join(' ')}
+			className={['flex w-full items-end gap-2', isSent ? 'flex-row-reverse' : 'flex-row', className].join(' ')}
 		>
 			{avatar && <span className='shrink-0'>{avatar}</span>}
 

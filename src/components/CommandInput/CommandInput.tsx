@@ -192,12 +192,13 @@ export const CommandInput = (
 				onChange={handleChange}
 				onKeyDown={handleKeyDown}
 				className={[
-					'w-full rounded-[var(--radius)] border-[length:var(--border-width)] bg-surface text-text text-sm outline-none',
+					'w-full rounded-[var(--radius)] border-[length:var(--border-width)] bg-surface text-text text-sm px-3 py-2',
 					'placeholder:text-text-subtle',
-					'motion-safe:transition-[border-color,box-shadow] motion-safe:duration-[var(--duration-fast)]',
-					'focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
-					'border-input-border hover:border-input-border-hover px-3 py-2',
-					disabled ? 'opacity-50 cursor-not-allowed pointer-events-none bg-input-disabled-bg text-input-disabled-text' : '',
+					'motion-safe:transition-shadow motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] outline-none',
+					'hover:border-input-border-hover',
+					'border-input-border focus:border-input-ring',
+					'focus:outline-none shadow-[var(--inner-shadow)] focus-visible:shadow-[var(--input-focus-shadow)]',
+					'disabled:cursor-not-allowed disabled:bg-input-disabled-bg disabled:text-input-disabled-text disabled:border-input-border',
 				].join(' ')}
 			/>
 

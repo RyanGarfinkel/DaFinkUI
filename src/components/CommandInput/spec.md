@@ -85,13 +85,15 @@ Tab and Enter are intentionally different actions: Tab only autocompletes the te
 
 ## Interactive States
 
-| State         | Input element                                        | Option row                                   |
-|---------------|-------------------------------------------------------|-----------------------------------------------|
-| Default       | `border-input-border bg-surface`                       | `text-text-muted`                              |
-| Hover         | `hover:border-input-border-hover`                      | `hover:bg-surface-hover hover:text-text`       |
-| Focus-visible | `focus-visible:ring-2 focus-visible:ring-brand-ring`   | N/A (keyboard via `aria-activedescendant`)     |
-| Active (kbd/pointer) | None                                            | `bg-surface-active text-text`                  |
-| Disabled      | `opacity-50 cursor-not-allowed bg-input-disabled-bg`   | N/A                                            |
+| State         | Input element                                                          | Option row                                   |
+|---------------|-------------------------------------------------------------------------|-----------------------------------------------|
+| Default       | `border-input-border bg-surface`                                       | `text-text-muted`                              |
+| Hover         | `hover:border-input-border-hover`                                      | `hover:bg-surface-hover hover:text-text`       |
+| Focus-visible | `focus:border-input-ring focus-visible:shadow-[var(--input-focus-shadow)]` | N/A (keyboard via `aria-activedescendant`)  |
+| Active (kbd/pointer) | None                                                            | `bg-surface-active text-text`                  |
+| Disabled      | `disabled:cursor-not-allowed disabled:bg-input-disabled-bg`           | N/A                                            |
+
+Matches the focus style used by `Input`/`Textarea` (border color shift + inset focus shadow) rather than the `ring-2` style used by composite/button-like controls, so it reads as the same text field across the system.
 
 ## Animation
 
@@ -99,7 +101,7 @@ The menu enters with `opacity-0 scale-95` → `opacity-100 scale-100` at `var(--
 
 ## Tokens Used
 
-`--color-brand`, `--color-brand-ring`, `--color-surface`, `--color-surface-panel`, `--color-surface-hover`, `--color-surface-active`, `--color-surface-border`, `--color-text`, `--color-text-muted`, `--color-text-subtle`, `--color-input-border`, `--color-input-border-hover`, `--color-input-disabled-bg`, `--color-input-disabled-text`, `--duration-fast`, `--radius`, `--radius-sm`, `--radius-lg`, `--shadow-lg`, `--backdrop-blur`
+`--color-brand`, `--color-surface`, `--color-surface-panel`, `--color-surface-hover`, `--color-surface-active`, `--color-surface-border`, `--color-text`, `--color-text-muted`, `--color-text-subtle`, `--color-input-border`, `--color-input-border-hover`, `--color-input-ring`, `--color-input-disabled-bg`, `--color-input-disabled-text`, `--input-focus-shadow`, `--inner-shadow`, `--duration-fast`, `--radius`, `--radius-sm`, `--radius-lg`, `--shadow-lg`, `--backdrop-blur`
 
 ## When to Use
 

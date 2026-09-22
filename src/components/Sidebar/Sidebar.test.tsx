@@ -546,6 +546,60 @@ describe('SidebarButton', () =>
 		expect(button.contains(action)).toBe(false);
 	});
 
+	it('gives the label min-w-0 so a long title truncates instead of pushing past the action', () =>
+	{
+		render(
+			<SidebarButton action={<button aria-label='Rename'>pencil</button>}>
+				A very long chat title that should truncate before reaching the action icons
+			</SidebarButton>
+		);
+		const label = screen.getByRole('button', { name: /A very long chat title/ }).querySelector('span:last-child');
+		expect(label?.className).toContain('truncate');
+		expect(label?.className).toContain('min-w-0');
+	});
+
+	it('also gives the button itself min-w-0, so it can\'t grow past its container to fit the label instead of truncating it', () =>
+	{
+		render(
+			<SidebarButton action={<button aria-label='Rename'>pencil</button>}>
+				A very long chat title that should truncate before reaching the action icons
+			</SidebarButton>
+		);
+		const button = screen.getByRole('button', { name: /A very long chat title/ });
+		expect(button.className).toContain('min-w-0');
+		expect(button.className).toContain('w-full');
+	});
+
+	it('defaults the reserved action gutter to pr-9', () =>
+	{
+		render(
+			<SidebarButton action={<button aria-label='Rename'>pencil</button>}>
+				Inbox
+			</SidebarButton>
+		);
+		expect(screen.getByRole('button', { name: 'Inbox' }).className).toContain('pr-9');
+	});
+
+	it('widens the reserved action gutter when actionGutter is set, for an action wider than one icon', () =>
+	{
+		render(
+			<SidebarButton
+				actionGutter='pr-16'
+				action={
+					<div>
+						<button aria-label='Rename'>pencil</button>
+						<button aria-label='Delete'>trash</button>
+					</div>
+				}
+			>
+				Inbox
+			</SidebarButton>
+		);
+		const button = screen.getByRole('button', { name: 'Inbox' });
+		expect(button.className).toContain('pr-16');
+		expect(button.className).not.toContain('pr-9');
+	});
+
 	it('shares roving tabindex / arrow-key navigation with SidebarLink', async () =>
 	{
 		const user = userEvent.setup();
