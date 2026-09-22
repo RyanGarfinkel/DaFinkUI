@@ -6,8 +6,7 @@ import Progress from '../../components/Progress/Progress';
 import Button from '../../components/Button/Button';
 import { useState } from 'react';
 
-interface OnboardingTask
-{
+interface OnboardingTask {
 	id: string;
 	label: string;
 	done: boolean;

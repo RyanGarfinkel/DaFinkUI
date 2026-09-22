@@ -6,8 +6,7 @@ import Avatar from '../../components/Avatar/Avatar';
 import Button from '../../components/Button/Button';
 import { useState } from 'react';
 
-interface Notification
-{
+interface Notification {
 	id:      number;
 	name:    string;
 	message: string;

@@ -9,8 +9,7 @@ import CountUp from '../../components/CountUp/CountUp';
 import Avatar from '../../components/Avatar/Avatar';
 import { useState } from 'react';
 
-interface ActivityRow
-{
+interface ActivityRow {
 	id:     number;
 	user:   string;
 	action: string;

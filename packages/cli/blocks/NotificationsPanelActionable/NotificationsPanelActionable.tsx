@@ -9,8 +9,7 @@ import { useState, type ReactNode } from 'react';
 
 type NotificationType = 'mention' | 'task' | 'system';
 
-interface Notification
-{
+interface Notification {
 	id:      number;
 	type:    NotificationType;
 	message: string;

@@ -9,8 +9,7 @@ import { useState } from 'react';
 
 type BillingPeriod = 'monthly' | 'yearly';
 
-interface Tier
-{
+interface Tier {
 	name:        string;
 	description: string;
 	monthly:     number;

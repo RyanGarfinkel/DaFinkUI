@@ -11,8 +11,7 @@ import { useState } from 'react';
 
 type TeamRole = 'Admin' | 'Member' | 'Viewer';
 
-interface TeamMember
-{
+interface TeamMember {
 	id:    number;
 	name:  string;
 	email: string;
