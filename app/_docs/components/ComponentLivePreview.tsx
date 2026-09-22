@@ -13,6 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
 import DataTable, { type ColumnDef, type PaginatorVariant } from '@/src/components/DataTable/DataTable';
 import { AreaChart, BarChart, DonutChart, LineChart, RadarChart } from '@/src/components/Charts/Charts';
+import { Resizable, ResizablePanel, ResizableHandle } from '@/src/components/Resizable/Resizable';
 import { Message, MessageReactions, MessageReaction } from '@/src/components/Message/Message';
 import { CommandInput, type CommandOption } from '@/src/components/CommandInput/CommandInput';
 import { KanbanBoard, type KanbanCardDetailsRenderer } from '@/src/components/Kanban/Kanban';
@@ -1462,6 +1463,27 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         <div className='w-full'>
           <WorkflowBuilder height={420} />
         </div>
+      );
+
+    case 'resizable':
+      return (
+        <Resizable direction='horizontal' className='flex h-64 w-full overflow-hidden rounded-[var(--radius)] border border-surface-border'>
+          <ResizablePanel defaultSize={160} minSize={120} maxSize={240} className='flex items-center justify-center bg-surface-panel text-sm text-text-muted'>
+            Sidebar
+          </ResizablePanel>
+          <ResizableHandle aria-label='Resize sidebar' />
+          <ResizablePanel minSize={200} className='flex'>
+            <Resizable direction='vertical' className='flex-1 min-w-0'>
+              <ResizablePanel minSize={80} className='flex items-center justify-center bg-surface text-sm text-text-muted'>
+                Editor
+              </ResizablePanel>
+              <ResizableHandle aria-label='Resize terminal panel' />
+              <ResizablePanel defaultSize={120} minSize={80} maxSize={200} className='flex items-center justify-center bg-surface-panel text-sm text-text-muted'>
+                Terminal
+              </ResizablePanel>
+            </Resizable>
+          </ResizablePanel>
+        </Resizable>
       );
 
     default:

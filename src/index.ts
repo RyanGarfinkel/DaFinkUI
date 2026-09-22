@@ -169,3 +169,5 @@ export type { TiltProps } from './components/Tilt/Tilt';
 export { default as WorkflowBuilder } from './components/WorkflowBuilder/WorkflowBuilder';
 export type { WorkflowBuilderProps, WorkflowGraph, WorkflowPort, WorkflowDirection } from './components/WorkflowBuilder/WorkflowBuilder';
 
+export { default as Resizable, ResizablePanel, ResizableHandle } from './components/Resizable/Resizable';
+export type { ResizableDirection, ResizableProps, ResizablePanelProps, ResizableHandleProps } from './components/Resizable/Resizable';

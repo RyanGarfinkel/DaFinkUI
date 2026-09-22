@@ -3777,6 +3777,53 @@ export default function Example() {
     registryDependencies: [],
     files: ['ThemeToggle/ThemeToggle.tsx'],
   },
+  {
+    slug: 'resizable',
+    name: 'Resizable',
+    category: 'Layout',
+    description: 'A split-pane layout primitive: drag a handle between two panels to resize the sized one, with min/max clamping and full keyboard support. Composed from Resizable, ResizablePanel, and ResizableHandle.',
+    previewMinHeight: '300px',
+    usage: `'use client';
+
+import { Resizable, ResizablePanel, ResizableHandle } from '@components/ui';
+
+export default function Example() {
+  return (
+    <Resizable direction="horizontal" className="flex h-64 w-full overflow-hidden rounded-[var(--radius)] border border-surface-border">
+      <ResizablePanel defaultSize={160} minSize={120} maxSize={240} className="flex items-center justify-center bg-surface-panel text-sm text-text-muted">
+        Sidebar
+      </ResizablePanel>
+      <ResizableHandle aria-label="Resize sidebar" />
+      <ResizablePanel minSize={200} className="flex">
+        <Resizable direction="vertical" className="flex-1 min-w-0">
+          <ResizablePanel minSize={80} className="flex items-center justify-center bg-surface text-sm text-text-muted">
+            Editor
+          </ResizablePanel>
+          <ResizableHandle aria-label="Resize terminal panel" />
+          <ResizablePanel defaultSize={120} minSize={80} maxSize={200} className="flex items-center justify-center bg-surface-panel text-sm text-text-muted">
+            Terminal
+          </ResizablePanel>
+        </Resizable>
+      </ResizablePanel>
+    </Resizable>
+  );
+}`,
+    props: [
+      { name: 'direction', type: "'horizontal' | 'vertical'", default: '-', description: 'Axis panels split and resize along. horizontal renders a row and resizes widths; vertical renders a column and resizes heights.' },
+      { name: 'className', type: 'string', default: "''", description: 'Additional classes merged onto the root flex container.' },
+      { name: 'children', type: 'ReactNode', default: '-', description: 'ResizablePanel and ResizableHandle elements, alternating.' },
+    ],
+    dependencies:         [],
+    registryDependencies: [],
+    files:                ['Resizable/Resizable.tsx'],
+    composition: {
+      name: 'Resizable',
+      children: [
+        { name: 'ResizablePanel', description: 'defaultSize (sized) or omitted (flexible), minSize (120), maxSize' },
+        { name: 'ResizableHandle', description: 'keyboard-operable drag grip between two panels; aria-label' },
+      ],
+    },
+  },
 ];
 
 export const getComponent = (slug: string) => {
