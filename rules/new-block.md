@@ -2,9 +2,21 @@
 
 Apply this rule whenever creating a new UI block in `src/blocks/`.
 
+`src/blocks/CLAUDE.md` is the directory-level guide that Claude loads when working in that folder. It summarizes this rule plus the sync checklist. **Keep it current**: when this rule, the block registry workflow, or a block footgun changes, update `src/blocks/CLAUDE.md` in the same change.
+
 ## What a Block Is
 
 A block is a full, opinionated composition of existing components (a dashboard, a login flow, a settings form) meant to give a fast starting point that gets copied in and then adapted. It is **not** a reusable, prop-driven API like a component. If you find yourself adding a `variant` or `size` prop to a block, it's drifting into being a component: stop and reconsider.
+
+## Scaffolding
+
+Start every new block with the generator:
+
+```
+npm run new:block -- PricingTable --category Marketing [--slug pricing-table] [--description "..."]
+```
+
+It creates `BlockName.tsx` (a minimal Card + Button composition to replace), the `blocks.ts` entry, and the `blockPreviews.tsx` entry, then runs `eslint --fix` and `npm run sync-registry`. Replace the placeholder source, then update `usage` and `registryDependencies` to match. Multi-file blocks still need their sibling files and `files` entries added by hand. The templates live in `scripts/scaffold.mjs`; **when this rule changes, update the templates in the same change.**
 
 ## Required File Structure
 

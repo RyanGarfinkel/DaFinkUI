@@ -2,6 +2,18 @@
 
 Apply this rule whenever creating a new UI component in `src/components/`.
 
+`src/components/CLAUDE.md` is the directory-level guide that Claude loads when working in that folder. It summarizes this rule plus the sync checklist. **Keep it current**: when this rule, the registry workflow, or a component footgun changes, update `src/components/CLAUDE.md` in the same change.
+
+## Scaffolding
+
+Start every new component with the generator instead of creating files by hand:
+
+```
+npm run new:component -- Rating --category Inputs [--slug rating] [--description "..."]
+```
+
+It creates the three required files, adds the registry entry, the `ComponentLivePreview.tsx` case, and the `src/index.ts` export, then runs `eslint --fix` and `npm run sync-registry`. The output is a placeholder: replace the registry `props`, `usage`, and preview with the real thing (keeping them in sync), and fill in every `TODO` in `spec.md`. Effects are not scaffolded. The templates live in `scripts/scaffold.mjs`; **when this rule changes, update the templates in the same change.**
+
 ## Required File Structure
 
 Every component lives in its own folder under `src/components/`. The folder name is PascalCase and matches the component name exactly.

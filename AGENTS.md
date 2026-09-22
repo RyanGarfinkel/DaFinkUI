@@ -20,6 +20,14 @@ Project-specific rules are in `rules/`. Read the relevant file before starting a
 | `rules/docs-site.md`       | Any time you work on files under `app/` (including `app/_docs/`)          |
 | `rules/commits.md`         | Before writing any commit message                                         |
 
+### Scaffolding
+
+`npm run new:component -- Name --category <Category>` and `npm run new:block -- Name --category <Category>` (see `scripts/scaffold.mjs`) create every file and registry entry a new component or block needs. Use them instead of hand-creating files. The templates are derived from `rules/new-component.md` and `rules/new-block.md`, so update `scripts/scaffold.mjs` whenever those rules change.
+
+### Directory guides
+
+`src/components/CLAUDE.md` and `src/blocks/CLAUDE.md` are short, directory-scoped summaries of `rules/new-component.md` and `rules/new-block.md`. They are derived from the rule files, so when a rule changes, update the matching guide in the same change. Add a new `CLAUDE.md` in a subfolder only when it carries guidance that isn't in that component's `spec.md` or the rules.
+
 ## Pattern Files
 
 Design and accessibility patterns are in `src/patterns/`. These are served via MCP and are the canonical source of truth; do not duplicate their content elsewhere.
