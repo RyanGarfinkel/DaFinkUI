@@ -1,11 +1,27 @@
 import { WorkflowBuilderShowcase } from '@/app/_docs/components/examples/WorkflowBuilderShowcase';
 import { AudioPlayerCompactDemo } from '@/app/_docs/components/examples/AudioPlayerCompactDemo';
+import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
 
 export interface ExtraSection {
 	heading: string;
 	description?: React.ReactNode;
 	demo: React.ReactNode;
 }
+
+const TOOL_CALL_ENTRY_TYPE = `interface ToolCallLink {
+  title: string;
+  url:   string;
+}
+
+interface ToolCallEntry {
+  id:      string;
+  kind:    string;
+  title:   string;
+  detail:  string;
+  result?: string;
+  links?:  ToolCallLink[];
+  icon?:   ReactNode;
+}`;
 
 export const extraSections: Record<string, ExtraSection[]> = {
 	audioplayer: [
@@ -23,6 +39,12 @@ export const extraSections: Record<string, ExtraSection[]> = {
 		{
 			heading: 'Examples',
 			demo: <WorkflowBuilderShowcase />,
+		},
+	],
+	'tool-call-trace': [
+		{
+			heading: 'ToolCallEntry fields',
+			demo: <CodeBlock variant='code' code={TOOL_CALL_ENTRY_TYPE} />,
 		},
 	],
 };

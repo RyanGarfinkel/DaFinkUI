@@ -28,6 +28,7 @@ No npm dependencies. No registry dependencies.
 | `label`       | `string`                | `undefined`      | Visible label rendered above the trigger button.               |
 | `hint`        | `string`                | `undefined`      | Helper text below the trigger. Hidden when `error` is set.     |
 | `error`       | `string`                | `undefined`      | Error message below the trigger; also applies error border.    |
+| `panelSide`   | `'top' \| 'bottom'`     | `'bottom'`       | Which side of the trigger the calendar panel opens on. Use `'top'` when the trigger sits near the bottom of its container (e.g. a card near the end of a scrollable list) so the panel doesn't get clipped or push the container taller. |
 | `className`   | `string`                | `''`             | Additional classes merged onto the root wrapper element.       |
 
 ---

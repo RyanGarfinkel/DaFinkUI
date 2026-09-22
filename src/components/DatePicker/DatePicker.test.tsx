@@ -48,6 +48,22 @@ describe('DatePicker', () =>
 		expect(screen.getByRole('grid')).toBeDefined();
 	});
 
+	it('defaults to opening the panel below the trigger', async () =>
+	{
+		renderPicker({ value: MAY_15 });
+		await userEvent.click(screen.getByRole('button', { name: /may 15, 2025/i }));
+		expect(screen.getByRole('dialog').className).toContain('top-full');
+	});
+
+	it('opens the panel above the trigger when panelSide="top"', async () =>
+	{
+		renderPicker({ value: MAY_15, panelSide: 'top' });
+		await userEvent.click(screen.getByRole('button', { name: /may 15, 2025/i }));
+		const dialog = screen.getByRole('dialog');
+		expect(dialog.className).toContain('bottom-full');
+		expect(dialog.className).not.toContain('top-full');
+	});
+
 	it('closes on Escape and returns focus to trigger', async () =>
 	{
 		renderPicker({ value: MAY_15 });

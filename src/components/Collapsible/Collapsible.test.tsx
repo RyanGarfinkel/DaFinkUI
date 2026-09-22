@@ -122,4 +122,24 @@ describe('Collapsible', () =>
 		const trigger = screen.getByRole('button', { name: 'Toggle' });
 		expect(trigger.className).toContain('focus-visible:ring-1');
 	});
+
+	it('defaults the trigger chevron to justify-between', () =>
+	{
+		render(<Base />);
+		const trigger = screen.getByRole('button', { name: 'Toggle' });
+		expect(trigger.className).toContain('justify-between');
+	});
+
+	it('places the trigger chevron next to the content when justify="start"', () =>
+	{
+		render(
+			<Collapsible>
+				<CollapsibleTrigger justify='start'>Toggle</CollapsibleTrigger>
+				<CollapsibleContent>Hidden content</CollapsibleContent>
+			</Collapsible>
+		);
+		const trigger = screen.getByRole('button', { name: 'Toggle' });
+		expect(trigger.className).toContain('justify-start');
+		expect(trigger.className).not.toContain('justify-between');
+	});
 });

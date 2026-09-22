@@ -8,12 +8,14 @@ import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose, 
 import { MenuBar, MenuBarBrand, MenuBarActions, MenuBarNav, MenuBarNavItem, MenuBarNavMore } from '@/src/components/MenuBar/MenuBar';
 import Form, { FormControl, FormDescription, FormField, FormLabel, FormMessage, useZodForm } from '@/src/components/Form/Form';
 import Accordion, { AccordionContent, AccordionItem, AccordionTrigger } from '@/src/components/Accordion/Accordion';
+import ToolCallTrace, { type ToolCallEntry, type ToolCallLink } from '@/src/components/ToolCallTrace/ToolCallTrace';
 import Collapsible, { CollapsibleTrigger, CollapsibleContent } from '@/src/components/Collapsible/Collapsible';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/src/components/Table/Table';
 import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
 import DataTable, { type ColumnDef, type PaginatorVariant } from '@/src/components/DataTable/DataTable';
 import { AreaChart, BarChart, DonutChart, LineChart, RadarChart } from '@/src/components/Charts/Charts';
 import { Resizable, ResizablePanel, ResizableHandle } from '@/src/components/Resizable/Resizable';
+import Questionnaire, { type QuestionStep } from '@/src/components/Questionnaire/Questionnaire';
 import { Message, MessageReactions, MessageReaction } from '@/src/components/Message/Message';
 import { CommandInput, type CommandOption } from '@/src/components/CommandInput/CommandInput';
 import { KanbanBoard, type KanbanCardDetailsRenderer } from '@/src/components/Kanban/Kanban';
@@ -291,6 +293,95 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
     case 'form':
       return <FormDemo />;
 
+    case 'questionnaire': {
+      const featureSteps: QuestionStep[] = [
+        {
+          type: 'radio',
+          question: 'What kind of feature is this?',
+          description: 'Pick the category that fits best.',
+          options: [
+            { id: 'ui', label: 'UI improvement', description: 'A visual or interaction change' },
+            { id: 'integration', label: 'Integration', description: 'Connects to another tool or API' },
+            { id: 'automation', label: 'Automation', description: 'Removes a manual step' },
+          ],
+          otherPlaceholder: 'Describe another kind…',
+        },
+        {
+          type: 'slider',
+          question: 'How urgent is this?',
+          description: 'Drag to set a priority level from 1 (low) to 5 (high).',
+          min: 1,
+          max: 5,
+          step: 1,
+        },
+        {
+          type: 'calendar',
+          question: 'When do you need this by?',
+          description: 'Pick a target date.',
+        },
+      ];
+
+      const bugSteps: QuestionStep[] = [
+        {
+          type: 'radio',
+          question: 'How severe is this bug?',
+          description: 'Choose the closest match.',
+          options: [
+            { id: 'blocker', label: 'Blocker', description: 'Nothing works until this is fixed' },
+            { id: 'major', label: 'Major', description: 'A core flow is broken' },
+            { id: 'minor', label: 'Minor', description: 'An edge case or cosmetic issue' },
+          ],
+          otherPlaceholder: 'Describe the impact…',
+        },
+        {
+          type: 'number',
+          question: 'How many users are affected?',
+          description: 'A rough estimate is fine.',
+          placeholder: 'e.g. 12',
+        },
+        {
+          type: 'calendar',
+          question: 'When did you first notice it?',
+          description: 'Pick the date it started.',
+        },
+      ];
+
+      const onboardingSteps: QuestionStep[] = [
+        {
+          type: 'radio',
+          question: "How's the rollout going?",
+          description: 'Pick the closest status.',
+          options: [
+            { id: 'on-track', label: 'On track', description: 'No blockers so far' },
+            { id: 'needs-help', label: 'Needs help', description: 'Making progress, but stuck somewhere' },
+            { id: 'blocked', label: 'Blocked', description: 'Can’t move forward right now' },
+          ],
+          otherPlaceholder: 'Describe the status…',
+        },
+        {
+          type: 'slider',
+          question: 'How confident are you in the plan?',
+          description: 'Drag to set a confidence level from 1 (low) to 5 (high).',
+          min: 1,
+          max: 5,
+          step: 1,
+        },
+        {
+          type: 'number',
+          question: 'How many team members have you onboarded so far?',
+          placeholder: 'e.g. 4',
+        },
+      ];
+
+      return (
+        <div className='grid w-full grid-cols-1 items-start gap-4 sm:grid-cols-3'>
+          <Questionnaire steps={featureSteps} onAnswer={(value) => console.log(value)} className='w-full' />
+          <Questionnaire steps={bugSteps} onAnswer={(value) => console.log(value)} className='w-full' />
+          <Questionnaire steps={onboardingSteps} onAnswer={(value) => console.log(value)} className='w-full' />
+        </div>
+      );
+    }
+
     case 'collapsible':
       return (
         <div className='w-full max-w-sm rounded-lg border border-surface-border px-4'>
@@ -329,6 +420,29 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
           </Accordion>
         </div>
       );
+
+    case 'tool-call-trace': {
+      const searchLinks: ToolCallLink[] = [
+        { title: 'Installation — DaFink UI Docs', url: 'https://ui.ryangarfinkel.dev/installation' },
+        { title: 'dafink-ui — npm', url: 'https://www.npmjs.com/package/dafink-ui' },
+        { title: 'DaFink UI CLI source — GitHub', url: 'https://github.com/RyanGarfinkel/DaFinkUI/tree/main/packages/cli' },
+      ];
+
+      const toolCalls: ToolCallEntry[] = [
+        { id: 't1', kind: 'thought', title: 'Thinking', detail: 'The user wants the install command — check the CLI docs for the exact syntax before answering.' },
+        { id: 't2', kind: 'search', title: 'Web search', detail: '"dafink-ui cli install command"', links: searchLinks },
+        { id: 't3', kind: 'tool', title: 'Read file', detail: 'packages/cli/src/commands/add.ts', result: 'Found the add command implementation' },
+      ];
+
+      return (
+        <div className='flex w-full max-w-md flex-col gap-1.5'>
+          <ToolCallTrace toolCalls={toolCalls} />
+          <Message variant='received' bubble={false}>
+            Run npx dafink-ui add button in your project root; it copies the component source straight into your repo.
+          </Message>
+        </div>
+      );
+    }
 
     case 'tabs':
       return (

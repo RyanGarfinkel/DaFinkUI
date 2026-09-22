@@ -16,6 +16,8 @@ export interface DatePickerProps {
 	label?:        string;
 	hint?:         string;
 	error?:        string;
+	/** Which side of the trigger the calendar panel opens on. Default 'bottom'; use 'top' when the trigger sits near the bottom of its container (e.g. a card near the end of a scrollable list) so the panel doesn't get clipped or push the container taller. */
+	panelSide?:    'top' | 'bottom';
 	className?:    string;
 }
 
@@ -31,6 +33,7 @@ export const DatePicker = (
         label,
         hint,
         error,
+        panelSide   = 'bottom',
         className   = '',
     }: DatePickerProps
 ) => {
@@ -343,9 +346,10 @@ export const DatePicker = (
 						role='dialog'
 						aria-label={dialogLabel}
 						className={[
-							'absolute z-50 top-full mt-1 left-0 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
+							'absolute z-50 left-0 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
+							panelSide === 'top' ? 'bottom-full mb-1 origin-bottom' : 'top-full mt-1 origin-top',
 							'p-3 w-72 outline-none',
-							'motion-safe:transition-[opacity,transform] motion-safe:duration-[var(--duration-fast)] origin-top',
+							'motion-safe:transition-[opacity,transform] motion-safe:duration-[var(--duration-fast)]',
 							visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
 						].join(' ')}
 					>

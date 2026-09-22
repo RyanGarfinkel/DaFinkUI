@@ -132,9 +132,9 @@ const ComponentPage = async (
             {section.heading}
           </h2>
           {section.description && (
-            <p className='text-sm text-text-muted'>
+            <div className='text-sm text-text-muted'>
               {section.description}
-            </p>
+            </div>
           )}
           <ComponentPreview>
             {section.demo}

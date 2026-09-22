@@ -24,6 +24,7 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>`. Renders a full-width button w
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `className` | `string` | `""` | Additional classes on the button element. |
+| `justify` | `'between' \| 'start'` | `'between'` | Chevron placement. `'between'` pins it to the far right of the full-width trigger (the standard accordion/disclosure row). `'start'` keeps it right next to the trigger content instead, for a compact, inline-summary-style trigger — used by `ToolCallTrace`. |
 | `children` | `ReactNode` | None | Trigger label content. |
 
 ### CollapsibleContent

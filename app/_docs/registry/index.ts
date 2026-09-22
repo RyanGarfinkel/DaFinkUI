@@ -928,6 +928,143 @@ export default function Example() {
     },
   },
   {
+    slug: 'questionnaire',
+    name: 'Questionnaire',
+    category: 'Forms',
+    description: 'A structured question widget for chat-style flows: a single radio, slider, number, or calendar question, or a `steps` sequence of several questions paginated inside one card with a "Question X of N" progress indicator.',
+    usage: `'use client';
+
+import Questionnaire, { type QuestionStep } from '@/components/ui/Questionnaire/Questionnaire';
+
+const FEATURE_STEPS: QuestionStep[] = [
+  {
+    type: 'radio',
+    question: 'What kind of feature is this?',
+    description: 'Pick the category that fits best.',
+    options: [
+      { id: 'ui', label: 'UI improvement', description: 'A visual or interaction change' },
+      { id: 'integration', label: 'Integration', description: 'Connects to another tool or API' },
+      { id: 'automation', label: 'Automation', description: 'Removes a manual step' },
+    ],
+    otherPlaceholder: 'Describe another kind…',
+  },
+  {
+    type: 'slider',
+    question: 'How urgent is this?',
+    description: 'Drag to set a priority level from 1 (low) to 5 (high).',
+    min: 1,
+    max: 5,
+    step: 1,
+  },
+  {
+    type: 'calendar',
+    question: 'When do you need this by?',
+    description: 'Pick a target date.',
+  },
+];
+
+const BUG_STEPS: QuestionStep[] = [
+  {
+    type: 'radio',
+    question: 'How severe is this bug?',
+    description: 'Choose the closest match.',
+    options: [
+      { id: 'blocker', label: 'Blocker', description: 'Nothing works until this is fixed' },
+      { id: 'major', label: 'Major', description: 'A core flow is broken' },
+      { id: 'minor', label: 'Minor', description: 'An edge case or cosmetic issue' },
+    ],
+    otherPlaceholder: 'Describe the impact…',
+  },
+  {
+    type: 'number',
+    question: 'How many users are affected?',
+    description: 'A rough estimate is fine.',
+    placeholder: 'e.g. 12',
+  },
+  {
+    type: 'calendar',
+    question: 'When did you first notice it?',
+    description: 'Pick the date it started.',
+  },
+];
+
+const ONBOARDING_STEPS: QuestionStep[] = [
+  {
+    type: 'radio',
+    question: "How's the rollout going?",
+    description: 'Pick the closest status.',
+    options: [
+      { id: 'on-track', label: 'On track', description: 'No blockers so far' },
+      { id: 'needs-help', label: 'Needs help', description: 'Making progress, but stuck somewhere' },
+      { id: 'blocked', label: 'Blocked', description: 'Can’t move forward right now' },
+    ],
+    otherPlaceholder: 'Describe the status…',
+  },
+  {
+    type: 'slider',
+    question: 'How confident are you in the plan?',
+    description: 'Drag to set a confidence level from 1 (low) to 5 (high).',
+    min: 1,
+    max: 5,
+    step: 1,
+  },
+  {
+    type: 'number',
+    question: 'How many team members have you onboarded so far?',
+    placeholder: 'e.g. 4',
+  },
+];
+
+function QuestionnaireColumn({ steps }: { steps: QuestionStep[] }) {
+  return <Questionnaire steps={steps} onAnswer={(value) => console.log(value)} className="w-full" />;
+}
+
+export default function Example() {
+  return (
+    <div className="grid w-full grid-cols-1 items-start gap-4 sm:grid-cols-3">
+      <QuestionnaireColumn steps={FEATURE_STEPS} />
+      <QuestionnaireColumn steps={BUG_STEPS} />
+      <QuestionnaireColumn steps={ONBOARDING_STEPS} />
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'step',
+        type: 'QuestionStep',
+        default: '-',
+        description: "A single question to render: a discriminated union on type ('radio' | 'slider' | 'number' | 'calendar'), each carrying a question, an optional description, and type-specific fields ('radio' adds options: QuestionOption[] ({ id, label, description? }) and an optional otherPlaceholder; 'slider' adds min/max/step; 'number' adds an optional placeholder). Mutually exclusive with steps.",
+      },
+      {
+        name: 'steps',
+        type: 'QuestionStep[]',
+        default: '-',
+        description: 'A sequence of questions rendered one at a time inside the same card, with a "Question X of N" progress indicator advancing between them. Mutually exclusive with step.',
+      },
+      {
+        name: 'answer',
+        type: 'string',
+        default: '-',
+        description: 'When set, the card renders as a locked "You answered: {answer}" summary instead of the input control. Only applies to a single step; a steps sequence shows its own completed recap once every question is answered.',
+      },
+      {
+        name: 'onAnswer',
+        type: '(value: string) => void',
+        default: '-',
+        description: 'Called with the submitted answer, formatted as a display string regardless of control type. For a steps sequence, called once at the end with every answer joined together.',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        default: "''",
+        description: 'Additional classes on the root wrapper.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: ['date-picker', 'slider', 'button', 'input'],
+    files: ['Questionnaire/Questionnaire.tsx'],
+  },
+  {
     slug: 'alert',
     name: 'Alert',
     category: 'Feedback',
@@ -1104,6 +1241,50 @@ export default function Example() {
         },
       ],
     },
+  },
+  {
+    slug: 'tool-call-trace',
+    name: 'ToolCallTrace',
+    category: 'Disclosure',
+    description: 'A collapsible summary of an AI assistant\'s tool calls, web searches, and internal "thoughts" behind a single reply: a one-line trigger ("Thought, searched the web, used 2 tools") that expands into a vertical timeline of each step. Each step is a ToolCallEntry — one thing the assistant did (ran a tool, searched the web, or reasoned out loud) — rendered as one row of that timeline.',
+    usage: `'use client';
+
+import ToolCallTrace, { type ToolCallEntry, type ToolCallLink } from '@/components/ui/ToolCallTrace/ToolCallTrace';
+import Message from '@/components/ui/Message/Message';
+
+const SEARCH_LINKS: ToolCallLink[] = [
+  { title: 'Installation — DaFink UI Docs', url: 'https://ui.ryangarfinkel.dev/installation' },
+  { title: 'dafink-ui — npm', url: 'https://www.npmjs.com/package/dafink-ui' },
+  { title: 'DaFink UI CLI source — GitHub', url: 'https://github.com/RyanGarfinkel/DaFinkUI/tree/main/packages/cli' },
+];
+
+const TOOL_CALLS: ToolCallEntry[] = [
+  { id: 't1', kind: 'thought', title: 'Thinking', detail: 'The user wants the install command — check the CLI docs for the exact syntax before answering.' },
+  { id: 't2', kind: 'search', title: 'Web search', detail: '"dafink-ui cli install command"', links: SEARCH_LINKS },
+  { id: 't3', kind: 'tool', title: 'Read file', detail: 'packages/cli/src/commands/add.ts', result: 'Found the add command implementation' },
+];
+
+export default function Example() {
+  return (
+    <div className="flex w-full max-w-md flex-col gap-1.5">
+      <ToolCallTrace toolCalls={TOOL_CALLS} />
+      <Message variant="received" bubble={false}>
+        Run npx dafink-ui add button in your project root; it copies the component source straight into your repo.
+      </Message>
+    </div>
+  );
+}`,
+    props: [
+      {
+        name: 'toolCalls',
+        type: 'ToolCallEntry[]',
+        default: '-',
+        description: 'The ordered list of steps to summarize and, once expanded, render as a timeline; renders nothing when empty. See "ToolCallEntry fields" below for what each field does.',
+      },
+    ],
+    dependencies: [],
+    registryDependencies: ['collapsible', 'timeline', 'scroll-fade'],
+    files: ['ToolCallTrace/ToolCallTrace.tsx'],
   },
   {
     slug: 'tabs',
@@ -2558,6 +2739,7 @@ export default function Example() {
       { name: 'label',       type: 'string',             default: 'undefined', description: 'Visible label above the trigger.' },
       { name: 'hint',        type: 'string',             default: 'undefined', description: 'Helper text below the trigger.' },
       { name: 'error',       type: 'string',             default: 'undefined', description: 'Error message; applies error border styling.' },
+      { name: 'panelSide',   type: "'top' | 'bottom'",   default: "'bottom'",  description: "Which side of the trigger the calendar panel opens on. Use 'top' when the trigger sits near the bottom of its container." },
       { name: 'className',   type: 'string',             default: "''",        description: 'Additional classes on the root wrapper.' },
     ],
     dependencies: [],
