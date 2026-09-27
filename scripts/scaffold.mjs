@@ -36,6 +36,7 @@ const PATHS = {
 	barrel:           join(ROOT, 'src/index.ts'),
 	componentSlugs:   join(ROOT, 'app/_docs/registry/index.ts'),
 	componentPreview: join(ROOT, 'app/_docs/components/ComponentLivePreview.tsx'),
+	extraSections:    join(ROOT, 'app/_docs/registry/extraSections.tsx'),
 	componentCats:    join(ROOT, 'app/_docs/registry/categories.ts'),
 	blockRegistry:    join(ROOT, 'app/_docs/registry/blocks.ts'),
 	blockPreviews:    join(ROOT, 'app/_docs/registry/blockPreviews.tsx'),
@@ -79,6 +80,27 @@ const insertBeforeArrayEnd = (text, anchor, insertion, label) => {
 		if(backticks % 2 === 0) break;
 
 		end = text.indexOf('\n];', end + 1);
+	}
+
+	if(end === -1) die(`Could not find the end of ${label}.`);
+
+	return `${text.slice(0, end + 1)}${insertion}${text.slice(end + 1)}`;
+};
+
+// Same as insertBeforeArrayEnd, but for an object literal that closes with
+// `};` (extraSections.tsx's `Record<string, ExtraSection[]>`) instead of an
+// array closing with `];`.
+const insertBeforeObjectEnd = (text, anchor, insertion, label) => {
+	const start = text.indexOf(anchor);
+	if(start === -1) die(`Could not find ${label} (${anchor}).`);
+
+	let end = text.indexOf('\n};', start);
+	while(end !== -1)
+	{
+		const backticks = text.slice(start, end).match(/(?<!\\)`/g)?.length ?? 0;
+		if(backticks % 2 === 0) break;
+
+		end = text.indexOf('\n};', end + 1);
 	}
 
 	if(end === -1) die(`Could not find the end of ${label}.`);
@@ -209,6 +231,24 @@ const componentPreviewCase = ({ name, slug }) => `    case '${slug}':
 
 `;
 
+// Every component needs an Accessibility section (rules/new-component.md ->
+// "Docs Page Accessibility Section (Required)"); this stub is a placeholder,
+// not a finished section. Fill in the real focus/keyboard behavior — add a
+// `KeyboardShortcutsTable` (see the `toggle-group` entry above it) if the
+// component has more than a couple of keyboard interactions, or keep it to a
+// short paragraph if it's a display-only component with none.
+const accessibilityStub = (slug) => `	'${slug}': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<p>
+					TODO: describe the focus model (roving tabindex, focus trap, native tab order, or none) and any ARIA roles/attributes. Add a KeyboardShortcutsTable below this paragraph if the component has real keyboard interaction — see the 'toggle-group' entry above for the pattern.
+				</p>
+			),
+		},
+	],
+`;
+
 const blockSource = (name, importPrefix) => `'use client';
 
 import { Card, CardContent, CardHeader } from '${importPrefix}/Card/Card';
@@ -275,6 +315,13 @@ const scaffoldComponent = ({ name, slug, category, description }, touched) => {
 	write(
 		PATHS.barrel,
 		`${barrel}\n\nexport { ${name} } from './components/${name}/${name}';\nexport type { ${name}Props } from './components/${name}/${name}';\n`,
+		touched,
+	);
+
+	const extraSectionsText = readFileSync(PATHS.extraSections, 'utf8');
+	write(
+		PATHS.extraSections,
+		insertBeforeObjectEnd(extraSectionsText, 'export const extraSections: Record<string, ExtraSection[]> = {', accessibilityStub(slug), 'the extraSections object'),
 		touched,
 	);
 };
@@ -369,6 +416,6 @@ if(!flags['no-sync']) execSync('npm run sync-registry', { cwd: ROOT, stdio: 'inh
 console.log(`
 Next steps:
   1. Implement ${name} and replace the placeholder registry props, usage, and preview so they match.
-  2. Fill in every TODO in ${kind === 'component' ? 'spec.md and the registry description' : 'the registry description'}.
+  2. Fill in every TODO in ${kind === 'component' ? 'spec.md, the registry description, and the Accessibility entry in extraSections.tsx' : 'the registry description'}.
   3. Run: npm test && node scripts/validate-components.mjs
 `);

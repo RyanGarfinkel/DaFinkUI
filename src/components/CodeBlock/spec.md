@@ -59,6 +59,7 @@ Interaction states are owned by the `ToggleGroup` / `ToggleGroupItem` component.
 - The ToggleGroup strip receives an `aria-label` from the `label` prop.
 - No focus trap is needed: neither variant opens a floating overlay.
 - The `<pre>` block (read-only variant) is conditionally focusable based on overflow state. When code overflows horizontally (`scrollWidth > clientWidth`), the element receives `tabIndex={0}`, `role="region"`, `aria-label="Code sample"`, and `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring` so keyboard users can scroll to read clipped content. When content fits without overflow, `tabIndex={-1}` keeps it out of the tab order and the copy button remains the primary tab stop. A `ResizeObserver` tracks this state and updates dynamically.
+- **`editable` mode intercepts Tab.** When `editable` is true, the `<textarea>`'s `onKeyDown` checks `e.key === 'Tab'` only (it does not check `e.shiftKey`), so both Tab and Shift+Tab are `preventDefault()`-ed and insert two spaces at the caret instead of moving focus. There is currently no keyboard-only way to leave the textarea once it's focused (a mouse click elsewhere, or a screen-reader-specific focus command, is required). Anyone embedding `editable` should be aware this is a keyboard trap by the letter of WCAG 2.1.2 and should pair it with an escape hatch (e.g. an Escape handler, or a visible "done editing" control) if used outside a controlled docs context.
 
 ---
 

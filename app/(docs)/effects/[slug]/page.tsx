@@ -125,23 +125,6 @@ const EffectPage = async (
         </section>
       )}
 
-      {/* Extra sections (variant demos, interactive examples), data-driven per slug */}
-      {(effectExtraSections[slug] ?? []).map((section) => (
-        <section key={section.heading} className='flex flex-col gap-3'>
-          <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
-            {section.heading}
-          </h2>
-          {section.description && (
-            <p className='text-sm text-text-muted'>
-              {section.description}
-            </p>
-          )}
-          <ComponentPreview>
-            {section.demo}
-          </ComponentPreview>
-        </section>
-      ))}
-
       {/* Props */}
       {entry.props.length > 0 && (
         <section className='flex flex-col gap-3'>
@@ -151,6 +134,25 @@ const EffectPage = async (
           <PropsTable rows={entry.props} />
         </section>
       )}
+
+      {/* Extra sections (variant demos, interactive examples, accessibility notes), data-driven per slug */}
+      {(effectExtraSections[slug] ?? []).map((section) => (
+        <section key={section.heading} className='flex flex-col gap-3'>
+          <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
+            {section.heading}
+          </h2>
+          {section.description && (
+            <div className='text-sm text-text-muted'>
+              {section.description}
+            </div>
+          )}
+          {section.demo && (
+            <ComponentPreview>
+              {section.demo}
+            </ComponentPreview>
+          )}
+        </section>
+      ))}
     </div>
   );
 };

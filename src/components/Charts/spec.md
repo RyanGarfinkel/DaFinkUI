@@ -104,6 +104,9 @@ All chart elements use CSS custom properties (`var(--color-brand)`, `var(--color
 
 ## Accessibility notes
 
+- Every chart's SVG root gets Recharts' `accessibilityLayer` (on by default; none of these five charts disable it): `tabIndex={0}` and `role="application"`, plus focus/blur/keydown wiring, so `Tab` reaches the chart and `ArrowLeft`/`ArrowRight` step a shared tooltip through each data point (each slice, for `DonutChart`); `Enter` pins/unpins the active tooltip in place.
+- `LineChart`, `AreaChart`, `DonutChart`, and `RadarChart` wrap their `ResponsiveContainer` in a `<div role="img" aria-label="… chart">` for an accessible name. `BarChart` instead passes a `title` prop straight to Recharts, which renders it as the SVG's own `<title>` element — same effect, different mechanism. Neither approach exposes the underlying data as text.
+- Legends are static labels only: none of the five charts wire a click handler to their `<Legend>`, so activating a legend entry does not toggle that series' visibility (unlike Recharts' own optional capability for this).
+- `DonutChart`'s slice-enlargement effect (the `activeShape` sector) is driven by this component's own `onMouseEnter`/`onMouseLeave` state, not by Recharts' keyboard-driven active index — keyboard users still get the stepped tooltip, but not the enlarged-slice visual.
 - Charts are decorative by nature. Always pair a chart with a data table or text summary for screen-reader users.
-- Tooltips are keyboard-accessible via Recharts' built-in implementation.
 - Color is not the only differentiator; series also differ by label and position.

@@ -41,7 +41,7 @@ Accepts all native `<button>` HTML attributes. Renders a chevron icon that rotat
 
 ### `AccordionContent`
 
-The panel shown when the item is open. Uses `hidden` attribute to toggle visibility.
+The panel shown when the item is open. Uses a CSS `grid-template-rows` height animation plus `aria-hidden` to toggle visibility; the panel is never unmounted and never receives the native `hidden` attribute.
 
 | Prop      | Type      | Default | Description                                       |
 |-----------|-----------|---------|---------------------------------------------------|
@@ -55,7 +55,7 @@ Accepts all native `<div>` HTML attributes.
 - **Multiple mode** (`type='multiple'`): any number of items can be open simultaneously.
 - **Collapsible** (`collapsible=true`, single mode only): the open item can be closed by clicking its trigger again. When `false`, clicking the already-open trigger does nothing.
 - **defaultValue**: sets the initially open item(s) without controlling state externally. Accordion manages open state internally.
-- Hidden content uses the `hidden` attribute: items are not unmounted, just hidden.
+- Closed content is visually collapsed via a `grid-template-rows` height transition (`1fr` → `0fr`) and marked `aria-hidden="true"`; items are never unmounted and never receive the native `hidden` attribute.
 
 ## Interactive States
 
@@ -67,9 +67,9 @@ Accepts all native `<div>` HTML attributes.
 ## Accessibility
 
 - Each `AccordionTrigger` is a `<button>` with `aria-expanded` reflecting the open/closed state
-- Content panels use `role="region"`
+- Content panels use `role="region"` and `aria-hidden` (`true` when closed, `false` when open)
 - Chevron icon is `aria-hidden`
-- Keyboard: `Tab` moves focus between triggers; `Enter`/`Space` toggles the focused item
+- Keyboard: uses native tab order, not roving tabindex — every `AccordionTrigger` is its own native button and its own Tab stop; `Tab` moves focus between triggers in document order, `Enter`/`Space` toggles the focused item
 
 ## Tokens Used
 

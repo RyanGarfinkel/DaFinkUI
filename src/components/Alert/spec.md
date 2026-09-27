@@ -38,7 +38,7 @@ Each variant applies a matching background, border, text color, and icon. The ic
 
 - Root element has `role="alert"`, which causes screen readers to announce the content immediately when it is added to the DOM.
 - The icon is `aria-hidden="true"`: variant state is communicated by the text content, not the icon alone.
-- Color is not the only signal: each variant renders a semantically different icon path in addition to the color change.
+- Color is not the only signal: only the `success` variant uses a visually distinct icon (a check-circle); `default`, `warning`, and `danger` currently share the same triangle-alert icon path, so for those three it's the required title/body text — not the icon — that keeps the state from depending on color alone.
 
 ## When to Use
 

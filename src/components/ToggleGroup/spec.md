@@ -64,7 +64,8 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>`: all native button attributes 
 - Each `ToggleGroupItem` renders as a `<button type="button">`.
 - `aria-pressed` is set to `true` on active items and `false` on inactive items, communicating toggle state to assistive technologies.
 - The container renders with `role="group"` to semantically associate the buttons.
-- All items are keyboard-reachable via Tab. Activation is via Space or Enter (native button behavior).
+- Uses roving tabindex: only the active or last-focused item is in the page's Tab order (`tabIndex={0}`); the rest are `tabIndex={-1}`. Tab moves focus into and out of the group in a single stop.
+- Arrow Right/Down and Arrow Left/Up move focus between items, wrapping at the ends. Home/End jump to the first/last enabled item. Activation is via Space or Enter (native button behavior).
 - When an item has only icon content, pass an `aria-label` prop to provide a text alternative.
 - `focus:outline-none` suppresses the browser default; `focus-visible:ring-*` provides a visible keyboard-only focus indicator.
 

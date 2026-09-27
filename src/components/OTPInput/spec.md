@@ -47,7 +47,7 @@ Since the native text caret is hidden (`caret-transparent`), the currently focus
 
 ## Accessibility
 
-- Each cell has `aria-label="Digit N of M"` for screen readers
+- Each cell has `aria-label="Character N of M"` for screen readers
 - Cells are grouped in a `role="group"` with `aria-labelledby` linked to the label
 - Error and hint messages are associated to the group via `aria-describedby`
 - `caret-transparent` hides the native blinking text cursor: the cell's box-shadow focus ring plus the custom blinking cursor line provide the visual focus indicator

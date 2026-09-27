@@ -95,7 +95,7 @@ When `children` is a function, it receives the current `{ colSpan, rowSpan }` an
 
 - Grid container has `role="grid"` and `aria-label="Mosaic"`
 - Drag handles have `aria-label="Drag to reposition {id}"` and accept keyboard interaction via dnd-kit's keyboard sensor
-- Resize handles are `aria-hidden`: resize is pointer-only
+- Resize handles are `aria-hidden`: dragging an edge to resize is pointer-only, but the "Resize" button in a tile's corner opens a `SizePicker` of real, focusable `<button>`s (`aria-pressed` on the current size) offering the same colSpan/rowSpan choice with full keyboard support
 - `prefers-reduced-motion` is respected via `motion-safe:` Tailwind prefixes on all transitions
 
 ---

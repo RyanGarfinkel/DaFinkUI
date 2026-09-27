@@ -59,7 +59,8 @@ Four question types share the same card shell and progress/advance mechanics: `r
 - The free-text "other" field and the slider both carry an explicit `aria-label` (`otherPlaceholder` / the question text), since neither has a visible `<label>` element.
 - After completion the collapsed question section is `aria-hidden` and `inert`, so it can't be focused or read; only the recap is exposed.
 - The completion checkmark shown for an answered or completed question is `aria-hidden`.
-- The "Question X of N" progress indicator is plain text, not a live region; advancing moves focus naturally onto the newly rendered question's control.
+- The "Question X of N" progress indicator is plain text, not a live region.
+- Advancing to the next question does **not** move focus: the Next/Submit `<Button>` is not remounted (only `QuestionInput` is, via its `key={currentIndex}`), so focus stays on that button after a click. Keyboard and screen reader users must Tab forward manually to reach the newly rendered question's control; nothing programmatically re-focuses it.
 
 ---
 

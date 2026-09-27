@@ -155,10 +155,11 @@ Edges route as right-angle "step" paths (`getSmoothStepPath`, 8px corner radius)
 
 - The "Add node" toolbar is a `role="toolbar"`, with its button carrying a descriptive `aria-label`.
 - The "Layout" direction control is a `ToggleGroup` (`role="group"`) with roving tabindex between its two items; the active item carries `aria-pressed="true"`.
-- Each node renders with `aria-label` stating its label and description (when present).
+- Each node renders with `aria-label` stating its label and description (when present); `@xyflow/react` itself also gives every node `role="group"`, `tabIndex={0}`, and `aria-roledescription="node"`, so nodes sit in normal document tab order — not a roving-tabindex group — alongside the toolbar and inspector panel.
+- Node keyboard interaction comes from React Flow's default keyboard support (not disabled here via `disableKeyboardA11y`): `Enter`/`Space` selects a focused node and opens the inspector panel, arrow keys reposition the selected node (`Shift`+arrow moves it further per press), `Escape` deselects it, and `Delete`/`Backspace` deletes the selected node or edge. None of this fires in `readOnly` mode.
+- Connecting two nodes (dragging from an output handle to an input handle) is pointer/touch-only: `Handle` renders a plain, non-focusable `<div>` with only `onMouseDown`/`onTouchStart`/`onClick` — there is no keyboard path to wire two ports together.
 - The node inspector panel (`aria-label="Node inspector"`) is a plain docked form region, not an overlay — see "Editing" above. Every field is a real `<label>`-associated `<input>`/`<textarea>`; port rows carry a descriptive `aria-label` (e.g. "Input port label", "Remove output out"); the close button is `aria-label="Close node inspector"`.
-- Canvas pan/zoom interactions are handled by `@xyflow/react`'s built-in keyboard support (arrow keys pan, +/- zoom).
-- React Flow's Controls panel provides focus-accessible zoom/fit buttons.
+- Zooming/fitting the canvas is done via the Controls panel's own focusable buttons; there is no raw keyboard pan or +/- zoom shortcut on the canvas itself.
 
 ## Tokens Used
 

@@ -109,6 +109,10 @@ The preview must match the `usage` field in the registry entry exactly. If the p
 
 A component is not done until its preview case exists and renders correctly on the docs site.
 
+## Docs Page Accessibility Section (Required)
+
+Every component's detail page must have an Accessibility section, added as an `extraSections[slug]` entry (`heading: 'Accessibility'`) in `app/_docs/registry/extraSections.tsx` — never hand-added to `page.tsx`. It always renders last, after Props, so it is the final section on the page and the final entry in the table of contents; don't reorder `page.tsx` to change that. See `rules/docs-site.md` → "Accessibility Section (Required for Every Component)" for the full content rules, and the `toggle-group` entry in `extraSections.tsx` for the reference implementation (a short prose paragraph on the focus model, followed by a `Key`/`Function` table via the shared `KeyboardShortcutsTable` helper for components with real keyboard interaction). `scripts/validate-components.mjs` fails CI if this is missing. A component is not done without it.
+
 ## Tests for Bugs Found
 
 Whenever a bug or unexpected behavior is noticed (whether caught in code review, manual testing, or reported by a user), write a failing test that reproduces it **before** fixing it. The test proves the bug existed, proves the fix works, and prevents regression.

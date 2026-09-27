@@ -19,7 +19,7 @@ Folder name = component name, PascalCase. Sibling helper files are allowed only 
 
 | You changed | Also update |
 |---|---|
-| A prop, variant, size, state, or a11y behavior | `spec.md` and `ComponentName.test.tsx` |
+| A prop, variant, size, state, or a11y behavior | `spec.md`, `ComponentName.test.tsx`, and the docs page's Accessibility section (`extraSections[slug]` in `app/_docs/registry/extraSections.tsx`) |
 | Anything the docs demo shows | `usage` in `app/_docs/registry/index.ts` (or `effects.ts`) **and** the `case` in `app/_docs/components/ComponentLivePreview.tsx`. Re-read both side by side, including sample data |
 | An import of another component | `registryDependencies` in the registry entry |
 | An import of an npm package | `dependencies` in the registry entry. Ask the user before adding a new package |
@@ -34,6 +34,7 @@ After registry edits run `npm run sync-registry`. Never hand-edit `packages/cli/
 - **Portals bubble through the React tree.** A `Modal`/`Popover`/`Tooltip`/`Drawer` rendered inside an element with `onClick` or dnd-kit `listeners` fires those handlers. Wrap the portaled child in `<div className="contents" onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>`. `Kanban.tsx` is the reference case.
 - **`'use client'` on shared data files** silently breaks Server Component consumers. Don't add it to a file that also exports plain data.
 - **Overlays** (Modal, Drawer, DropdownMenu, Popover, Tooltip, Combobox, Select, CommandPalette): focus in on open, focus back to trigger on close, Escape closes, trap only for Modal/Dialog/Drawer. Document all of it in `spec.md`.
+- **Every component needs a docs-page Accessibility section.** `extraSections[slug]` in `app/_docs/registry/extraSections.tsx` must have a `heading: 'Accessibility'` entry — it renders last on the page, after Props. `scripts/validate-components.mjs` enforces this in CI. See `rules/docs-site.md` and the `toggle-group` entry for the pattern (prose on the focus model + a `KeyboardShortcutsTable` for real keyboard interactions).
 - **Composite widgets** (Tabs, ToggleGroup, Radio, Tree, MenuBar) use roving tabindex.
 - **Motion** must respect `prefers-reduced-motion`; the global rule in `globals.css` covers CSS animation, but JS-driven motion (Magnetic, Tilt, Particles, Confetti, CursorTrail, and similar) needs its own check.
 - **Bug found → failing test first**, then the fix.

@@ -15,6 +15,8 @@
  *  5. Every registry entry's usage code contains the component as JSX (<ComponentName)
  *  6. The live preview case block also uses the component as JSX (<ComponentName)
  *  7. Every component directory has a CLI registry entry (across registry.ts + blocksRegistry.ts's component-shaped entries)
+ *  8. Every non-hidden registry entry has an Accessibility section registered in its catalog's extraSections file
+ *     (rules/new-component.md -> "Docs Page Accessibility Section (Required)")
  */
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'fs';
@@ -27,14 +29,18 @@ const COMP_DIR   = join(ROOT, 'src/components');
 
 const CATALOGS = [
 	{
-		label:      'component',
-		registry:   join(ROOT, 'app/_docs/registry/index.ts'),
-		preview:    join(ROOT, 'app/_docs/components/ComponentLivePreview.tsx'),
+		label:             'component',
+		registry:          join(ROOT, 'app/_docs/registry/index.ts'),
+		preview:           join(ROOT, 'app/_docs/components/ComponentLivePreview.tsx'),
+		extraSectionsFile: join(ROOT, 'app/_docs/registry/extraSections.tsx'),
+		extraSectionsName: 'extraSections',
 	},
 	{
-		label:      'effect',
-		registry:   join(ROOT, 'app/_docs/registry/effects.ts'),
-		preview:    join(ROOT, 'app/_docs/components/EffectLivePreview.tsx'),
+		label:             'effect',
+		registry:          join(ROOT, 'app/_docs/registry/effects.ts'),
+		preview:           join(ROOT, 'app/_docs/components/EffectLivePreview.tsx'),
+		extraSectionsFile: join(ROOT, 'app/_docs/registry/effectExtraSections.tsx'),
+		extraSectionsName: 'effectExtraSections',
 	},
 ];
 
@@ -82,6 +88,30 @@ const buildEntryRegions = (registryText) => {
 	return regions;
 };
 
+// extraSections.tsx / effectExtraSections.tsx export a
+// `Record<string, ExtraSection[]>` keyed by slug, one tab deep, e.g.
+// `\t'toggle-group': [` or `\taudioplayer: [`. Slices the text between each
+// top-level key and the next one, same technique as buildEntryRegions above.
+const parseExtraSectionsRegions = (text, exportName) => {
+	const anchor = `export const ${exportName}`;
+	const anchorStart = text.indexOf(anchor);
+	if(anchorStart === -1) return {};
+
+	const body = text.slice(anchorStart);
+	const keyMatches = [...body.matchAll(/^\t(?:'([^']+)'|([A-Za-z0-9_]+)):\s*\[/gm)];
+
+	const regions = {};
+	for(let i = 0; i < keyMatches.length; i++)
+	{
+		const key   = keyMatches[i][1] ?? keyMatches[i][2];
+		const start = keyMatches[i].index;
+		const end   = i + 1 < keyMatches.length ? keyMatches[i + 1].index : body.length;
+		regions[key] = body.slice(start, end);
+	}
+
+	return regions;
+};
+
 const getCaseBlock = (previewText, slug) => {
 	const start = previewText.indexOf(`case '${slug}':`);
 	if(start === -1) return null;
@@ -110,6 +140,9 @@ for(const catalog of CATALOGS)
 			.filter(([, region]) => /^ {4}hidden:\s*true/m.test(region))
 			.map(([slug]) => slug)
 	);
+
+	catalog.extraSectionsText    = readFileSync(catalog.extraSectionsFile, 'utf8');
+	catalog.extraSectionsRegions = parseExtraSectionsRegions(catalog.extraSectionsText, catalog.extraSectionsName);
 }
 
 const allEntries = CATALOGS.flatMap(c => c.entries);
@@ -212,6 +245,26 @@ for(const dir of compDirs)
 {
 	if(!cliFiles.has(`${dir}/${dir}.tsx`))
 		fail(`${dir}/${dir}.tsx is missing from packages/cli/src/lib/registry.ts`);
+}
+
+console.log('Checking Accessibility sections…');
+
+for(const catalog of CATALOGS)
+{
+	for(const entry of catalog.entries)
+	{
+		if(catalog.hiddenSlugs.has(entry.slug)) continue;
+
+		const region = catalog.extraSectionsRegions[entry.slug];
+		if(!region)
+		{
+			fail(`${catalog.label} '${entry.slug}' has no entry in ${catalog.extraSectionsFile.replace(`${ROOT}/`, '')}: every ${catalog.label} needs an Accessibility section (rules/new-component.md)`);
+			continue;
+		}
+
+		if(!/heading:\s*'Accessibility'/.test(region))
+			fail(`${catalog.label} '${entry.slug}' has extra sections but none is 'Accessibility' (rules/new-component.md)`);
+	}
 }
 
 console.log('');

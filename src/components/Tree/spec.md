@@ -90,10 +90,13 @@ export default function Example() {
 | `End`          | Jump focus to the last visible item.                                       |
 | `Enter`        | Toggle a branch open or closed.                                            |
 | `Space`        | Toggle a branch open or closed.                                            |
+| `Tab` / `Shift+Tab` | Moves focus to the next/previous visible, enabled, collapsible item in document order — see the note below on why this differs from a classic single-stop roving-tabindex tree. |
 
 A `collapsible={false}` item (branch or leaf) is excluded entirely from keyboard interaction, not just the open/close toggle: it has `tabIndex={-1}` (not a Tab stop), is never registered with the tree's roving-focus index, so `ArrowDown`/`ArrowUp`/`Home`/`End` skip over it and can never land on it, and has no `onClick`/`onKeyDown`/`onFocus` handlers at all. It behaves like static content, not a control. Sibling items that are still collapsible continue to participate in keyboard navigation normally.
 
 Focus management is context-driven: a single `onKeyDown` handler on the tree container reads `offsetParent` to determine the current visible item list and calls `.focus()` on the target element.
+
+**Tree does not use single-stop roving tabindex.** Every visible item that is enabled and `collapsible` has `tabIndex={0}` unconditionally (not keyed to a single "currently active" item), so it is its own native Tab stop; `Tab`/`Shift+Tab` step through every visible item individually in document order, the same items the Arrow keys move between. This differs from the roving-tabindex pattern used by `ToggleGroup`/`MenuBar` (single item at `tabIndex={0}`, rest at `-1`, one Tab stop for the whole widget) — document this distinction rather than describing Tree as a single-stop widget.
 
 ---
 
@@ -104,6 +107,7 @@ Focus management is context-driven: a single `onKeyDown` handler on the tree con
 - `role="group"` on each children container.
 - `aria-expanded` set to `true`/`false` on branch nodes only; absent on leaf nodes. Always `true` on a `collapsible={false}` branch, since it can never close.
 - `aria-disabled="true"` on disabled items.
+- Every visible, enabled, `collapsible` item carries `tabIndex={0}`, not a roving `-1`/`0` pair keyed to one active item — Tab moves through each visible item in the tree individually, in document order, in addition to the Arrow/Home/End shortcuts above.
 - The icon span is always `aria-hidden="true"`, whatever it renders (chevron, `terminalIcon`, `nonTerminalIcon`, a per-item `icon`, or nothing at all). No chevron is rendered for a `collapsible={false}` branch: there is no affordance implying it can be closed. There is no built-in default icon of any kind: leaves and non-collapsible branches render no icon unless `Tree` is given `terminalIcon`/`nonTerminalIcon`, or the item is given its own `icon`.
 - A `collapsible={false}` item has no hover, focus-visible, or active styling and is excluded from the Tab order and arrow-key roving focus; it presents as static content, not a control.
 - All animation respects `prefers-reduced-motion` via the `motion-safe:` Tailwind prefix.

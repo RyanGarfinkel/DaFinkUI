@@ -90,6 +90,14 @@ This means the same `Card` component placed in a narrow sidebar column and in a 
 
 ---
 
+## Accessibility
+
+- `Card`, `CardHeader`, `CardContent`, and `CardFooter` all render plain `<div>`s with no ARIA role and nothing focusable by default.
+- `interactive` only changes visual affordances (`cursor-pointer`, hover lift/shadow, and a `focus-visible` ring) — it does not add `tabIndex`, a `role`, or a keyboard handler. A consumer who wants a clickable Card must add `tabIndex={0}`, an appropriate `role` (or use a real `<button>`/`<a>` inside instead), and an `onKeyDown` handler for Enter/Space themselves; `interactive` alone does not make the card keyboard-reachable.
+- Use real heading elements (`<h2>`, `<h3>`, etc.) inside `CardHeader` for document structure; Card imposes no heading semantics itself.
+
+---
+
 ## When to Use
 
 - Use `Card` to group related content into a self-contained unit: a user profile, a pricing tier, a form section, a data summary.

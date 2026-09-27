@@ -125,7 +125,17 @@ const ComponentPage = async (
         </section>
       )}
 
-      {/* Extra sections (variant demos, interactive examples), data-driven per slug */}
+      {/* Props */}
+      {entry.props.length > 0 && (
+        <section className='flex flex-col gap-3'>
+          <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
+            Props
+          </h2>
+          <PropsTable rows={entry.props} />
+        </section>
+      )}
+
+      {/* Extra sections (variant demos, interactive examples, accessibility notes), data-driven per slug */}
       {(extraSections[slug] ?? []).map((section) => (
         <section key={section.heading} className='flex flex-col gap-3'>
           <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
@@ -136,21 +146,13 @@ const ComponentPage = async (
               {section.description}
             </div>
           )}
-          <ComponentPreview>
-            {section.demo}
-          </ComponentPreview>
+          {section.demo && (
+            <ComponentPreview>
+              {section.demo}
+            </ComponentPreview>
+          )}
         </section>
       ))}
-
-      {/* Props */}
-      {entry.props.length > 0 && (
-        <section className='flex flex-col gap-3'>
-          <h2 className='text-sm font-semibold text-text uppercase tracking-wide'>
-            Props
-          </h2>
-          <PropsTable rows={entry.props} />
-        </section>
-      )}
     </div>
   );
 };

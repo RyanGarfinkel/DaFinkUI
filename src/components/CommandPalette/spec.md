@@ -105,7 +105,7 @@ Disabled items are completely skipped during keyboard navigation.
 
 While the palette is open, `document.body.style.overflow` is set to `'hidden'`. This is removed when `open` becomes false (or on component unmount), restoring the previous overflow value.
 
-To prevent the page content from shifting horizontally when the scrollbar disappears, the scrollbar's width (`window.innerWidth - document.documentElement.clientWidth`) is measured on lock and applied as `document.body.style.paddingRight`. This is restored to its original value alongside `overflow` when the lock is released.
+No scrollbar-width compensation (e.g. `paddingRight`) is applied: `html` permanently reserves its scrollbar gutter (see `globals.css`), so toggling `overflow` on `<body>` never changes the page's rendered width, and there is nothing to compensate for.
 
 ### Reduced Motion
 

@@ -71,8 +71,8 @@ npm dependency: `d3-force`. No registry dependencies.
 | Element           | Role / attribute                               |
 |-------------------|------------------------------------------------|
 | `<svg>`           | `role="application"`, `aria-label="Graph"`     |
-| Node container    | `role="list"`, `aria-label="Nodes"`            |
-| Each node `<g>`   | `role="listitem"`, `aria-label={node.label}`, `aria-pressed={isSelected}` |
+| Node container    | `role="listbox"`, `aria-label="Nodes"`         |
+| Each node `<g>`   | `role="option"`, `aria-label={node.label}`, `aria-selected={isSelected}` |
 | Live region       | `role="status"`, `aria-live="polite"`: announces selection and initial node/edge count |
 
 ### Keyboard model

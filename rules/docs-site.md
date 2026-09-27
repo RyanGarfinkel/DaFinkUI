@@ -112,8 +112,10 @@ Each page (`app/(docs)/components/[slug]/page.tsx`) renders these sections, in t
 2. **Installation**: `npx dafink-ui add {slug}` in a `CodeBlock`; if the component has `registryDependencies`, list them as "Also installs: Button, Icon" below the command; if it has npm `dependencies`, list them as "Requires: …" in inline `font-mono text-xs` code
 3. **Demo / Demos**: one `<h2>` heading, always rendered (never "Preview" as its own heading, never "Examples" as its own heading, and there is no separate "Usage" heading; those three concepts were merged into this single section). It is a list with **at least one element**: the primary live render, wrapped in `CodeBlock variant='example'` with `code={entry.usage}`, so the primary item's own Preview↔Code toggle is what shows its usage code; nothing else duplicates it. If the slug has entries in `componentExamples`, they render underneath, separated by a top border, each with its own title/description/`CodeBlock variant='example'` Preview↔Code toggle, see Examples Guidelines below. **Heading text**: singular **"Demo"** when the list has exactly one item (no `componentExamples` entries for this slug), plural **"Demos"** when it has more than one. **Rule**: no page may have a bare "Preview", "Examples", or "Usage" `<h2>`, always "Demo"/"Demos". The Preview/Code toggle *inside* a `CodeBlock variant='example'` keeps the word "Preview" as its tab label; that is a different, unrelated piece of UI text and is not renamed by this rule.
 4. **Composition (optional, per component)**: only rendered for compound components with a registered `composition`
-5. **Extra sections (optional, per component)**: variant demos and interactive examples that aren't a simple list of named examples (e.g. Timeline "Horizontal variant" / "Interactive example", Workflow Builder "Examples")
-6. **Props**: `PropsTable` from the registry `props` field
+5. **Props**: `PropsTable` from the registry `props` field
+6. **Extra sections (per component)**: variant demos, interactive examples, and the required Accessibility section (see below) render last, after Props, so Accessibility is always the final section on the page and the final entry in the table of contents
+
+Extra sections render after Props (not before) specifically so the required Accessibility section lands at the bottom of the page/TOC. Don't move this block back above Props.
 
 ### Section Format
 
@@ -139,8 +141,20 @@ Add entries to `componentExamples` (not Extra Sections) when a component has sev
 - A variant section = heading + one-line prose explaining the prop that enables it + a `ComponentPreview` demo
 - An interactive example section = heading + one-line prose stating what to do and what to expect + a `ComponentPreview` demo
 - Demos must follow the "Usage Code and Preview Must Align" rule below if their code is shown anywhere
-- **Data-driven, not hardcoded**: extra sections are never `{slug === 'x' && ...}` conditionals in `page.tsx`. Register them in `app/_docs/registry/extraSections.tsx` as `extraSections[slug]: ExtraSection[]` (`heading`, optional `description`, `demo`). The `[slug]/page.tsx` template loops over `extraSections[slug] ?? []` generically: adding a new variant/interactive section for a component means adding an entry to that map, never touching the page template
+- **Data-driven, not hardcoded**: extra sections are never `{slug === 'x' && ...}` conditionals in `page.tsx`. Register them in `app/_docs/registry/extraSections.tsx` as `extraSections[slug]: ExtraSection[]` (`heading`, optional `description`, optional `demo`). The `[slug]/page.tsx` template loops over `extraSections[slug] ?? []` generically: adding a new variant/interactive section for a component means adding an entry to that map, never touching the page template
+- `demo` is optional: omit it for a text/table-only section (like Accessibility below) instead of forcing prose into the centered `ComponentPreview` box, which is meant for live component renders
 - Use Extra Sections (not Examples) for demos that aren't simply "one example per sub-component", e.g. a single named variant demo or an interactive scripted example
+
+### Accessibility Section (Required for Every Component)
+
+Every component and effect registry entry must have an `extraSections[slug]` (or `effectExtraSections[slug]`) entry with `heading: 'Accessibility'`. It always renders last (see Component Detail Page ordering above), so it is always the bottom item in the page's table of contents. `scripts/validate-components.mjs` (run in CI, see the Effect Registry section below) fails the build if a non-`hidden` registry entry has no matching Accessibility entry.
+
+Content rules, following the `toggle-group` entry as the reference implementation:
+
+- Lead with one short prose paragraph (in `description`) stating the actual focus-management model: whether the component uses roving tabindex, a focus trap, native tab order, or no special focus handling at all. Don't guess — read the component's source (`handleKeyDown`, `tabIndex`, `role`, `aria-*` attributes) before writing this.
+- If the component has more than a couple of keyboard interactions, follow the paragraph with a `Key` / `Function` table using the shared `KeyboardShortcutsTable` helper in `extraSections.tsx` (rows are `{ keys: string[], description: string }`; multiple keys in one row render as `key1 + key2`, e.g. `['shift', 'tab']`). Reuse `KeyboardShortcutsTable`, don't re-implement the table markup per component.
+- If the component has no keyboard interaction beyond native semantics (most display-only components: Badge, Skeleton, Avatar, Separator, Spinner, Progress, Card, etc.), skip the table and keep the paragraph short: state the ARIA role/attributes used (if any) and that there is no component-specific keyboard behavior. Don't fabricate a keyboard table for a component that doesn't have one.
+- This section documents the same behavior as `spec.md`'s own `## Accessibility` section for that component; keep the two consistent. If writing this section surfaces an inaccuracy in `spec.md` (e.g. it claims every item is Tab-reachable when the component actually uses roving tabindex), fix `spec.md` too.
 
 **Next.js 16 note**: `params` is a `Promise`, always destructure with `await`:
 
@@ -187,7 +201,7 @@ Because an effect is a real component, `packages/cli/scripts/build-registry.mjs`
 
 ## Effect Detail Page
 
-Each page (`app/(docs)/effects/[slug]/page.tsx`) is byte-for-byte the same template as the Component Detail Page above (Header, Installation, Demo/Demos via `EffectLivePreview` + `effectExamples`, optional Composition, optional Extra Sections via `effectExtraSections`, Props), just pointed at `getEffect`/`effects` instead of `getComponent`/`registry`. The gallery page (`app/(docs)/effects/page.tsx`) mirrors `app/(docs)/components/page.tsx`'s category-grouped card grid (using `EFFECT_CATEGORIES`), not the blocks gallery, since effects aren't filtered by `hidden` any differently than components are.
+Each page (`app/(docs)/effects/[slug]/page.tsx`) is byte-for-byte the same template as the Component Detail Page above (Header, Installation, Demo/Demos via `EffectLivePreview` + `effectExamples`, optional Composition, Props, then Extra Sections via `effectExtraSections` — including the required Accessibility entry, last), just pointed at `getEffect`/`effects` instead of `getComponent`/`registry`. The gallery page (`app/(docs)/effects/page.tsx`) mirrors `app/(docs)/components/page.tsx`'s category-grouped card grid (using `EFFECT_CATEGORIES`), not the blocks gallery, since effects aren't filtered by `hidden` any differently than components are.
 
 ## Themes and Styles
 

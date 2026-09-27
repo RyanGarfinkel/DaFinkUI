@@ -73,6 +73,14 @@ When `loading` is `true`: a spinner replaces children, the button is disabled, a
 - ghost variant has no background or border by default; hover adds `bg-zinc-100`
 - secondary variant has a `border-zinc-200` border at rest
 
+## Accessibility
+
+- Renders a native `<button type="button">` by default, so Tab reaches it in normal document order and Enter/Space activate it with no extra JS.
+- When `href` is passed, it renders a Next.js `<Link>` (an `<a>`) instead: keyboard activation is native anchor behavior, so only Enter confirms it, Space does not (unlike the `<button>` case). `loading` and `disabled` are ignored in this mode since a plain anchor has no disabled state.
+- `loading` sets `aria-busy="true"` on the `<button>` and also sets `disabled`, so the control is removed from the tab order and announced as busy while a screen reader is focused elsewhere in the page.
+- `size="icon"` / `size="icon-sm"` render no visible text, so an `aria-label` (or `aria-labelledby`) is required for the button to have an accessible name; the component does not supply one automatically.
+- No component-specific keyboard behavior beyond native `<button>`/`<a>` semantics: no roving tabindex, no arrow keys.
+
 ## Tokens Used
 
 - Colors: `colors.primary`, `colors.secondary`, `colors.ghost`, `colors.destructive`
