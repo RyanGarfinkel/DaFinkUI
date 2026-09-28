@@ -17,6 +17,8 @@ A compact chip representing a single linked or attached file: icon, filename, an
 | icon         | `'file' \| 'image' \| 'video' \| 'audio' \| 'archive' \| 'code'`        | inferred from `name` | Overrides the automatically inferred icon. Inference checks the file extension in `name` (e.g. `.png` → `image`, `.zip` → `archive`) and falls back to `file`. |
 | thumbnail    | `string`                                                                | None             | An image URL rendered in place of the icon glyph. For an image-type attachment this defaults to `href` automatically: the image file is its own preview. For anything else (a PDF, say), there's no such shortcut: pass a pre-rendered cover/preview image explicitly, since a browser can't render a non-image file as an `<img>`. |
 | onClick      | `(event: MouseEvent<HTMLAnchorElement \| HTMLButtonElement>) => void`  | None             | Fires when the primary control (link or button) is activated: the "open" action. Call `event.preventDefault()` here if you want to replace default link navigation with custom behavior (e.g. opening a preview in a new tab). |
+| onRemove     | `() => void`                                                            | None             | When provided, renders a small remove (✕) button inside the chip, after the primary control, with `aria-label="Remove {name}"`. Omit it and no remove button is rendered. |
+| compact      | `boolean`                                                               | `false`          | Smaller text (`text-xs`, secondary `text-[11px]`), tighter padding, a 16px icon glyph, a 28px (`h-7 w-7`) thumbnail, and a `max-w-[160px]` cap instead of 240px, so longer filenames truncate with an ellipsis sooner. |
 | className    | `string`                                                                | `""`             | Additional classes merged onto the root chip wrapper.                       |
 
 `Attachment` also extends `AnchorHTMLAttributes<HTMLAnchorElement>` (minus `href` and `onClick`, which are typed above), so native attributes like `target`, `rel`, `download`, and `aria-*`/`data-*` pass through onto the primary control. These only make sense when `href` is also set.
@@ -35,7 +37,8 @@ A compact chip representing a single linked or attached file: icon, filename, an
 ## Behavior
 
 - `Attachment` renders one focusable primary control inside a bordered chip: a real `<a>` when `href` is given, a real `<button type="button">` otherwise.
-- The filename truncates with an ellipsis once the chip hits its default `max-w-[240px]` (overridable via `className`). The full name is always available via the native `title` attribute (or your own override).
+- With `onRemove`, the remove button is a second focusable control inside the same chip, a sibling of the primary control (never nested in the link/button), so activating it can't trigger `onClick` or navigation. It's part of the chip's flex row, so it needs no manual positioning and stays at the right edge whatever the filename length.
+- The filename truncates with an ellipsis once the chip hits its default `max-w-[240px]` (`max-w-[160px]` when `compact`; overridable via `className`). The full name is always available via the native `title` attribute (or your own override).
 - The icon is inferred from the file extension in `name` unless `icon` is explicitly set: pass `icon` directly when you already know the category, or when the filename has no extension.
 - When a real preview image is available (`thumbnail`, or an automatic fallback to `href` for image-type attachments), it replaces the icon glyph entirely: a 36×36px (`h-9 w-9`) rounded, cropped (`object-cover`) thumbnail instead.
 - `AttachmentGroup` renders a semantic `<ul>`/`<li>` list with `flex flex-wrap gap-2`: a compact, chat-style "attached files" strip that wraps onto multiple lines rather than one long horizontally-scrolling row.
@@ -50,6 +53,7 @@ A compact chip representing a single linked or attached file: icon, filename, an
 | hover         | `hover:bg-surface-hover`                                                             |
 | focus-visible | `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring`     |
 | chip (root)   | `hover:border-surface-border-hover`                                                  |
+| remove button | `text-text-muted`, `hover:bg-surface-hover hover:text-text`, `focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring` |
 
 All color/background transitions use `transition-colors duration-[var(--duration-fast)]` and respect `prefers-reduced-motion` via the global rule.
 

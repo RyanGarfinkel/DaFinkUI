@@ -3309,6 +3309,7 @@ export default function Example() {
         }}
       />
       <Attachment name="archive.zip" href="/files/archive.zip" size="14.6 MB" />
+      <Attachment compact name="notes.txt" onRemove={() => {}} />
     </AttachmentGroup>
   );
 }`,
@@ -3320,6 +3321,8 @@ export default function Example() {
       { name: 'icon',      type: "'file' | 'image' | 'video' | 'audio' | 'archive' | 'code'", default: 'inferred from name', description: 'Overrides the automatically inferred icon.' },
       { name: 'thumbnail', type: 'string',  default: '-', description: 'Image URL shown instead of the icon glyph. Defaults to href automatically for image-type attachments; pass explicitly for anything else (e.g. a PDF cover preview).' },
       { name: 'onClick',   type: '(event: MouseEvent) => void', default: '-', description: 'Fires when the primary control (link or button) is activated.' },
+      { name: 'onRemove',  type: '() => void', default: '-', description: 'Renders a small remove (✕) button inside the chip, after the primary control, labelled "Remove {name}". Omit it and no remove button is rendered.' },
+      { name: 'compact',   type: 'boolean', default: 'false',          description: 'Smaller text, padding, icon and thumbnail, with a 160px max width instead of 240px, so longer filenames truncate with an ellipsis sooner. Suited to tight spots like a composer or message bubble.' },
       { name: 'className', type: 'string',  default: "''",             description: 'Additional classes merged onto the root chip wrapper.' },
     ],
     dependencies:         [],

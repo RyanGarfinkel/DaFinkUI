@@ -121,6 +121,49 @@ describe('Attachment', () =>
 		const { container } = render(<Attachment name='photo.png' href='/f' icon='code' />);
 		expect(container.querySelector('polyline')).toBeTruthy();
 	});
+
+	it('renders no remove button when onRemove is not given', () =>
+	{
+		render(<Attachment name='invoice.pdf' />);
+		expect(screen.queryByRole('button', { name: /remove/i })).toBeNull();
+	});
+
+	it('renders a labelled remove button that fires onRemove and not the primary onClick', () =>
+	{
+		const onRemove = vi.fn();
+		const onClick = vi.fn();
+		render(<Attachment name='invoice.pdf' onClick={onClick} onRemove={onRemove} />);
+
+		fireEvent.click(screen.getByRole('button', { name: 'Remove invoice.pdf' }));
+		expect(onRemove).toHaveBeenCalledTimes(1);
+		expect(onClick).not.toHaveBeenCalled();
+	});
+
+	it('keeps the remove button a sibling of the primary control, never nested inside a link', () =>
+	{
+		render(<Attachment name='invoice.pdf' href='/f' onRemove={() => {}} />);
+		expect(screen.getByRole('link').contains(screen.getByRole('button', { name: 'Remove invoice.pdf' }))).toBe(false);
+	});
+
+	it('applies focus-visible ring classes to the remove button', () =>
+	{
+		render(<Attachment name='invoice.pdf' onRemove={() => {}} />);
+		expect(screen.getByRole('button', { name: 'Remove invoice.pdf' }).className).toContain('focus-visible:ring-2');
+	});
+
+	it('uses a smaller max width and text size when compact', () =>
+	{
+		const { container } = render(<Attachment compact name='invoice.pdf' size='12 KB' />);
+		expect((container.firstChild as HTMLElement).className).toContain('max-w-[160px]');
+		expect(screen.getByText('invoice.pdf').className).toContain('text-xs');
+	});
+
+	it('uses the default 240px max width and text-sm when not compact', () =>
+	{
+		const { container } = render(<Attachment name='invoice.pdf' />);
+		expect((container.firstChild as HTMLElement).className).toContain('max-w-[240px]');
+		expect(screen.getByText('invoice.pdf').className).toContain('text-sm');
+	});
 });
 
 describe('AttachmentGroup', () =>

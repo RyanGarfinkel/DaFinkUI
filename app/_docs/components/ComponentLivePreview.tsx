@@ -1359,6 +1359,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
             }}
           />
           <Attachment name='archive.zip' href='#' size='14.6 MB' />
+          <Attachment compact name='notes.txt' onRemove={() => {}} />
         </AttachmentGroup>
       );
 

@@ -62,6 +62,12 @@ const CodeGlyph = () => (
 	</svg>
 );
 
+const RemoveGlyph = () => (
+	<svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<path d='M18 6 6 18M6 6l12 12' />
+	</svg>
+);
+
 const ICON_GLYPHS: Record<AttachmentIcon, () => ReactNode> = {
 	file:    FileGlyph,
 	image:   ImageGlyph,
@@ -82,13 +88,15 @@ export interface AttachmentProps extends Omit<HTMLAttributes<HTMLElement>, 'onCl
 	icon?:         AttachmentIcon;
 	thumbnail?:    string;
 	onClick?:      (event: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
+	onRemove?:     () => void;
+	compact?:      boolean;
 	className?:    string;
 }
 
 export const Attachment = (
     {
         name, href, target, rel, download, size, type, icon, thumbnail,
-        onClick, title, className = '', ...rest
+        onClick, onRemove, compact = false, title, className = '', ...rest
     }: AttachmentProps
 ) => {
 	const resolvedIcon = icon ?? inferIcon(name);
@@ -104,24 +112,25 @@ export const Attachment = (
 	const content = (
 		<>
 			{previewSrc ? (
-				<span aria-hidden='true' className='h-9 w-9 shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-surface-hover'>
+				<span aria-hidden='true' className={`shrink-0 overflow-hidden rounded-[var(--radius-sm)] bg-surface-hover ${compact ? 'h-7 w-7' : 'h-9 w-9'}`}>
 					{/* eslint-disable-next-line @next/next/no-img-element -- arbitrary external/user file URLs, not a static asset next/image can optimize */}
 					<img src={previewSrc} alt='' className='h-full w-full object-cover' />
 				</span>
 			) : (
-				<span aria-hidden='true' className='shrink-0 text-text-muted'>
+				<span aria-hidden='true' className={`shrink-0 text-text-muted ${compact ? '[&>svg]:h-4 [&>svg]:w-4' : ''}`}>
 					<Glyph />
 				</span>
 			)}
 			<span className='flex min-w-0 flex-1 flex-col items-start'>
-				<span className='block w-full truncate text-sm text-text'>{name}</span>
-				{meta && <span className='block w-full truncate text-xs text-text-muted'>{meta}</span>}
+				<span className={`block w-full truncate text-text ${compact ? 'text-xs' : 'text-sm'}`}>{name}</span>
+				{meta && <span className={`block w-full truncate text-text-muted ${compact ? 'text-[11px]' : 'text-xs'}`}>{meta}</span>}
 			</span>
 		</>
 	);
 
 	const primaryClasses = [
-		'flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-sm)] py-1.5 pl-2.5 pr-1.5',
+		'flex min-w-0 flex-1 items-center gap-2 rounded-[var(--radius-sm)] pr-1.5',
+		compact ? 'py-1 pl-2' : 'py-1.5 pl-2.5',
 		'transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover',
 		'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 	].join(' ');
@@ -129,7 +138,8 @@ export const Attachment = (
 	return (
 		<div
 			className={[
-				'group inline-flex max-w-[240px] items-center rounded-[var(--radius)]',
+				'group inline-flex items-center rounded-[var(--radius)]',
+				compact ? 'max-w-[160px]' : 'max-w-[240px]',
 				'border-[length:var(--border-width)] border-surface-border bg-surface-panel',
 				'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:border-surface-border-hover',
 				className,
@@ -145,6 +155,16 @@ export const Attachment = (
 				// reachable regardless.
 				<button type='button' title={title ?? name} onClick={onClick} className={primaryClasses} {...rest}>
 					{content}
+				</button>
+			)}
+			{onRemove && (
+				<button
+					type='button'
+					aria-label={`Remove ${name}`}
+					onClick={onRemove}
+					className='mr-1.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
+				>
+					<RemoveGlyph />
 				</button>
 			)}
 		</div>
