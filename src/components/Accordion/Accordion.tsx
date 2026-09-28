@@ -116,7 +116,7 @@ export const AccordionTrigger = ({ className = '', children, disabled, ...props 
 			aria-expanded={isOpen}
 			disabled={disabled}
 			onClick={() => toggle(value)}
-			className={`flex w-full items-center justify-between rounded-[var(--radius)] py-4 text-sm font-medium text-text transition-colors duration-150 hover:text-text-muted focus:outline-none focus-visible:bg-surface-hover focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-brand-ring/40 disabled:pointer-events-none disabled:opacity-40 ${className}`}
+			className={`flex w-full items-center justify-between rounded-[var(--radius)] px-1 py-3 text-sm font-medium text-text transition-colors duration-150 hover:text-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40 ${className}`}
 			{...props}
 		>
 			{children}
@@ -154,7 +154,7 @@ export const AccordionContent = ({ className = '', children, ...props }: Accordi
 			{...props}
 		>
 			<div className={`overflow-hidden ${isOpen ? 'pb-4' : ''} ${className}`}>
-				<div className='text-sm text-text-muted'>
+				<div className='px-1 text-sm text-text-muted'>
 					{children}
 				</div>
 			</div>

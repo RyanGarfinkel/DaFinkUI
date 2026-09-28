@@ -50,7 +50,7 @@ None: Collapsible is unstyled at the container level. Apply your own border, bac
 |-------|-----------------|
 | Default | `text-text`, no background |
 | Hover | `hover:text-text-muted` |
-| Focus-visible | `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring` |
+| Focus-visible | `focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-ring` (matches `Accordion`) |
 | Disabled | `opacity-40`, `pointer-events-none`: no hover or focus-visible styles |
 
 ---

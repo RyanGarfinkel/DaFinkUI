@@ -81,7 +81,7 @@ export const CollapsibleTrigger = (
 			aria-expanded={isOpen}
 			disabled={disabled}
 			onClick={toggle}
-			className={`flex w-full items-center -mx-3 rounded-[var(--radius)] px-3 py-3 text-sm font-medium text-text transition-colors duration-150 hover:text-text-muted focus:outline-none focus-visible:bg-surface-hover focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-brand-ring/40 disabled:pointer-events-none disabled:opacity-40 ${justifyClass} ${className}`}
+			className={`flex w-full items-center -mx-3 rounded-[var(--radius)] px-3 py-3 text-sm font-medium text-text transition-colors duration-150 hover:text-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40 ${justifyClass} ${className}`}
 			{...props}
 		>
 			{children}

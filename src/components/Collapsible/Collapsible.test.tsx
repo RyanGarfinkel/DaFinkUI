@@ -120,7 +120,7 @@ describe('Collapsible', () =>
 	{
 		render(<Base />);
 		const trigger = screen.getByRole('button', { name: 'Toggle' });
-		expect(trigger.className).toContain('focus-visible:ring-1');
+		expect(trigger.className).toContain('focus-visible:ring-2');
 	});
 
 	it('defaults the trigger chevron to justify-between', () =>

@@ -61,7 +61,7 @@ Accepts all native `<div>` HTML attributes.
 
 - **hover**: `hover:text-text-muted`, trigger text dims slightly on hover
 - **focus**: `focus:outline-none`, native outline suppressed
-- **focus-visible**: `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring`, keyboard-only focus ring in the brand color
+- **focus-visible**: `focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-ring`, keyboard-only focus ring in the brand color, drawn inset so it can't bleed into the revealed content below when the item is open
 - **disabled**: `disabled:pointer-events-none disabled:opacity-40`, trigger is visible but non-interactive
 
 ## Accessibility

@@ -72,7 +72,7 @@ export default function Example() {
 | Default        | `text-text` on transparent background.                                     |
 | Hover          | `bg-surface-hover`, 150ms ease transition.                                |
 | Active/pressed | `bg-surface-active` on mousedown.                                          |
-| Focus-visible  | `ring-2 ring-offset-2 ring-brand-ring` via `:focus-visible`.               |
+| Focus-visible  | `ring-2 ring-inset ring-brand-ring` via `:focus-visible`. Inset (no offset) because rows stack with zero vertical gap — an offset ring would visually overlap the adjacent item above/below. Per `src/patterns/accessibility.md` → Composite Widgets, the offset double-outline is reserved for items with a *persistent* selected state distinct from focus (e.g. ToggleGroup); Tree's `aria-selected` just mirrors the current focus, so it takes the single, non-offset ring. |
 | Disabled       | `opacity-40`, `cursor-not-allowed`, `pointer-events-none`. No hover/focus. |
 | Non-collapsible (`collapsible={false}`) | Plain `cursor-default`. No hover, focus-visible, or active styling: the row never looks like a control. |
 
