@@ -13,19 +13,28 @@ export interface PaginatorProps {
 	className?:   string;
 }
 
+// Layout/behavior only — no color classes here. A color utility that's present alongside
+// a conflicting one (e.g. text-text-muted next to text-brand-fg) has cascade-order-dependent
+// precedence in the compiled CSS, not "last one in the class string wins": each button gets
+// exactly one of BTN_DEFAULT or BTN_CURRENT below, never both, so there's nothing to conflict.
 const BTN_BASE = [
-	'inline-flex items-center justify-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border',
-	'text-sm text-text-muted',
+	'inline-flex items-center justify-center rounded-[var(--radius)] border-[length:var(--border-width)]',
+	'text-sm',
 	'transition-colors duration-[var(--duration-fast)] motion-reduce:transition-none',
-	'hover:bg-surface-hover hover:border-surface-border-hover hover:text-text',
 	'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 	'disabled:opacity-40 disabled:cursor-not-allowed',
+].join(' ');
+
+const BTN_DEFAULT = [
+	'border-surface-border text-text-muted',
+	'hover:bg-surface-hover hover:border-surface-border-hover hover:text-text',
 	'disabled:hover:bg-transparent disabled:hover:border-surface-border disabled:hover:text-text-muted',
 ].join(' ');
 
+const BTN_CURRENT = 'bg-brand text-brand-fg border-brand hover:bg-brand-hover hover:border-brand-hover hover:text-brand-fg';
+
 const BTN_TEXT  = 'px-3 py-1.5';
 const BTN_ICON  = 'w-8 h-8';
-const BTN_CURRENT = 'bg-brand text-brand-fg border-brand hover:bg-brand-hover hover:border-brand-hover hover:text-brand-fg';
 
 const ChevronLeft = () => (
 	<svg width='16' height='16' viewBox='0 0 16 16' fill='none' aria-hidden='true'>
@@ -79,7 +88,7 @@ export const Paginator = (
 					onClick={() => onPageChange(page - 1)}
 					disabled={!hasPrev}
 					aria-label='Go to previous page'
-					className={`${BTN_BASE} ${BTN_ICON}`}
+					className={`${BTN_BASE} ${BTN_ICON} ${BTN_DEFAULT}`}
 				>
 					<ChevronLeft />
 				</button>
@@ -88,7 +97,7 @@ export const Paginator = (
 					onClick={() => onPageChange(page + 1)}
 					disabled={!hasNext}
 					aria-label='Go to next page'
-					className={`${BTN_BASE} ${BTN_ICON}`}
+					className={`${BTN_BASE} ${BTN_ICON} ${BTN_DEFAULT}`}
 				>
 					<ChevronRight />
 				</button>
@@ -108,7 +117,7 @@ export const Paginator = (
 					onClick={() => onPageChange(page - 1)}
 					disabled={!hasPrev}
 					aria-label='Go to previous page'
-					className={`${BTN_BASE} ${BTN_ICON}`}
+					className={`${BTN_BASE} ${BTN_ICON} ${BTN_DEFAULT}`}
 				>
 					<ChevronLeft />
 				</button>
@@ -123,7 +132,7 @@ export const Paginator = (
 					onClick={() => onPageChange(page + 1)}
 					disabled={!hasNext}
 					aria-label='Go to next page'
-					className={`${BTN_BASE} ${BTN_ICON}`}
+					className={`${BTN_BASE} ${BTN_ICON} ${BTN_DEFAULT}`}
 				>
 					<ChevronRight />
 				</button>
@@ -141,7 +150,7 @@ export const Paginator = (
 					onClick={() => onPageChange(page - 1)}
 					disabled={!hasPrev}
 					aria-label='Go to previous page'
-					className={`${BTN_BASE} ${BTN_ICON}`}
+					className={`${BTN_BASE} ${BTN_ICON} ${BTN_DEFAULT}`}
 				>
 					<ChevronLeft />
 				</button>
@@ -166,7 +175,7 @@ export const Paginator = (
 								className={[
 									BTN_BASE,
 									BTN_ICON,
-									p === page ? BTN_CURRENT : '',
+									p === page ? BTN_CURRENT : BTN_DEFAULT,
 								].join(' ')}
 							>
 								{p + 1}
@@ -179,7 +188,7 @@ export const Paginator = (
 					onClick={() => onPageChange(page + 1)}
 					disabled={!hasNext}
 					aria-label='Go to next page'
-					className={`${BTN_BASE} ${BTN_ICON}`}
+					className={`${BTN_BASE} ${BTN_ICON} ${BTN_DEFAULT}`}
 				>
 					<ChevronRight />
 				</button>
@@ -195,7 +204,7 @@ export const Paginator = (
 				onClick={() => onPageChange(page - 1)}
 				disabled={!hasPrev}
 				aria-label='Go to previous page'
-				className={`${BTN_BASE} ${BTN_TEXT}`}
+				className={`${BTN_BASE} ${BTN_TEXT} ${BTN_DEFAULT}`}
 			>
 				Prev
 			</button>
@@ -211,7 +220,7 @@ export const Paginator = (
 				onClick={() => onPageChange(page + 1)}
 				disabled={!hasNext}
 				aria-label='Go to next page'
-				className={`${BTN_BASE} ${BTN_TEXT}`}
+				className={`${BTN_BASE} ${BTN_TEXT} ${BTN_DEFAULT}`}
 			>
 				Next
 			</button>
