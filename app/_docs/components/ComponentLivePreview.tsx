@@ -1217,23 +1217,22 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         role:       string;
         department: string;
         status:     string;
-        joined:     string;
         salary:     number;
       }
 
       const EMPLOYEES: DemoEmployee[] = [
-        { id: 1,  name: 'Alice Chen',     role: 'Engineer',        department: 'Platform',   status: 'Active',   joined: '2022-03-14', salary: 145000 },
-        { id: 2,  name: 'Bob Ruiz',       role: 'Designer',        department: 'Product',    status: 'Away',     joined: '2021-07-01', salary: 130000 },
-        { id: 3,  name: 'Carol Smith',    role: 'Engineering Mgr', department: 'Platform',   status: 'Active',   joined: '2020-01-20', salary: 165000 },
-        { id: 4,  name: 'Dave Park',      role: 'Data Analyst',    department: 'Analytics',  status: 'Active',   joined: '2023-05-10', salary: 120000 },
-        { id: 5,  name: 'Eve Torres',     role: 'Designer',        department: 'Product',    status: 'Active',   joined: '2022-11-03', salary: 128000 },
-        { id: 6,  name: 'Frank Lee',      role: 'Engineer',        department: 'Growth',     status: 'Away',     joined: '2021-09-15', salary: 140000 },
-        { id: 7,  name: 'Grace Yoon',     role: 'Product Manager', department: 'Product',    status: 'Active',   joined: '2020-06-22', salary: 155000 },
-        { id: 8,  name: 'Hugo Martins',   role: 'Engineer',        department: 'Growth',     status: 'Active',   joined: '2023-02-28', salary: 138000 },
-        { id: 9,  name: 'Iris Nakamura',  role: 'Recruiter',       department: 'People',     status: 'Active',   joined: '2021-04-05', salary: 115000 },
-        { id: 10, name: 'James Okafor',   role: 'Engineer',        department: 'Platform',   status: 'Inactive', joined: '2019-11-18', salary: 148000 },
-        { id: 11, name: 'Kira Walsh',     role: 'Marketing Lead',  department: 'Growth',     status: 'Active',   joined: '2022-08-30', salary: 125000 },
-        { id: 12, name: 'Leo Fernandez',  role: 'Data Scientist',  department: 'Analytics',  status: 'Active',   joined: '2023-01-09', salary: 155000 },
+        { id: 1,  name: 'Alice Chen',     role: 'Engineer',        department: 'Platform',   status: 'Active',   salary: 145000 },
+        { id: 2,  name: 'Bob Ruiz',       role: 'Designer',        department: 'Product',    status: 'Away',     salary: 130000 },
+        { id: 3,  name: 'Carol Smith',    role: 'Engineering Mgr', department: 'Platform',   status: 'Active',   salary: 165000 },
+        { id: 4,  name: 'Dave Park',      role: 'Data Analyst',    department: 'Analytics',  status: 'Active',   salary: 120000 },
+        { id: 5,  name: 'Eve Torres',     role: 'Designer',        department: 'Product',    status: 'Active',   salary: 128000 },
+        { id: 6,  name: 'Frank Lee',      role: 'Engineer',        department: 'Growth',     status: 'Away',     salary: 140000 },
+        { id: 7,  name: 'Grace Yoon',     role: 'Product Manager', department: 'Product',    status: 'Active',   salary: 155000 },
+        { id: 8,  name: 'Hugo Martins',   role: 'Engineer',        department: 'Growth',     status: 'Active',   salary: 138000 },
+        { id: 9,  name: 'Iris Nakamura',  role: 'Recruiter',       department: 'People',     status: 'Active',   salary: 115000 },
+        { id: 10, name: 'James Okafor',   role: 'Engineer',        department: 'Platform',   status: 'Inactive', salary: 148000 },
+        { id: 11, name: 'Kira Walsh',     role: 'Marketing Lead',  department: 'Growth',     status: 'Active',   salary: 125000 },
+        { id: 12, name: 'Leo Fernandez',  role: 'Data Scientist',  department: 'Analytics',  status: 'Active',   salary: 155000 },
       ];
 
       const STATUS_COLORS: Record<string, string> = {
@@ -1241,29 +1240,6 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         Away:     'bg-warning-bg text-warning border border-warning-border',
         Inactive: 'bg-surface-active text-text-muted border border-surface-border',
       };
-
-      const EMP_COLUMNS: ColumnDef<DemoEmployee>[] = [
-        { key: 'name',       header: 'Name',       sortable: true  },
-        { key: 'role',       header: 'Role',       sortable: true  },
-        { key: 'department', header: 'Department', sortable: true  },
-        {
-          key: 'status',
-          header: 'Status',
-          sortable: false,
-          render: (val) => (
-            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[String(val)] ?? ''}`}>
-              {String(val)}
-            </span>
-          ),
-        },
-        { key: 'joined', header: 'Joined',  sortable: true },
-        {
-          key: 'salary',
-          header: 'Salary',
-          sortable: true,
-          render: (val) => `$${Number(val).toLocaleString()}`,
-        },
-      ];
 
       const VARIANTS: { value: PaginatorVariant; label: string }[] = [
         { value: 'default',  label: 'Default'  },
@@ -1275,6 +1251,43 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       const DataTablePreview = () => {
         const [selected, setSelected] = useState<DemoEmployee[]>([]);
         const [variant,  setVariant]  = useState<PaginatorVariant>('default');
+        const [remote, setRemote] = useState<Record<number, boolean>>({});
+
+        const EMP_COLUMNS: ColumnDef<DemoEmployee>[] = [
+          { key: 'name',       header: 'Name',       sortable: true  },
+          { key: 'role',       header: 'Role',       sortable: true  },
+          { key: 'department', header: 'Department', sortable: true  },
+          {
+            key: 'status',
+            header: 'Status',
+            sortable: false,
+            render: (val) => (
+              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[String(val)] ?? ''}`}>
+                {String(val)}
+              </span>
+            ),
+          },
+          {
+            key: 'salary',
+            header: 'Salary',
+            sortable: true,
+            render: (val) => `$${Number(val).toLocaleString()}`,
+          },
+          {
+            key: 'id',
+            header: 'Work type',
+            sortable: false,
+            render: (_val, row) => (
+              <Switch
+                id={`remote-${row.id}`}
+                checked={remote[row.id] ?? true}
+                onCheckedChange={(v) => setRemote(prev => ({ ...prev, [row.id]: v }))}
+                label={(remote[row.id] ?? true) ? 'Remote' : 'Office'}
+              />
+            ),
+          },
+        ];
+
         return (
           <div className='flex flex-col gap-3 w-full'>
             <div className='flex items-center gap-2 flex-wrap'>

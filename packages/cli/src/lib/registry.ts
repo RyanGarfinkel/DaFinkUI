@@ -58,7 +58,7 @@ export const REGISTRY: RegistryEntry[] = [
 	{ name: 'Combobox', slug: 'combobox', files: ['Combobox/Combobox.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'CommandInput', slug: 'command-input', files: ['CommandInput/CommandInput.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'DatePicker', slug: 'date-picker', files: ['DatePicker/DatePicker.tsx', 'DatePicker/TimeField.tsx'], deps: [], registryDependencies: [] },
-	{ name: 'DataTable', slug: 'data-table', files: ['DataTable/DataTable.tsx', 'DataTable/Paginator.tsx'], deps: [], registryDependencies: [] },
+	{ name: 'DataTable', slug: 'data-table', files: ['DataTable/DataTable.tsx', 'DataTable/Paginator.tsx'], deps: [], registryDependencies: ['checkbox'] },
 	{ name: 'FunctionPlotter', slug: 'function-plotter', files: ['FunctionPlotter/FunctionPlotter.tsx'], deps: ['mathjs'], registryDependencies: [] },
 	{ name: 'Carousel', slug: 'carousel', files: ['Carousel/Carousel.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'Slider', slug: 'slider', files: ['Slider/Slider.tsx'], deps: [], registryDependencies: [] },

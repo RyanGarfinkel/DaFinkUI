@@ -1,7 +1,9 @@
+import { ToggleGroup, ToggleGroupItem } from '../ToggleGroup/ToggleGroup';
 import { render, screen } from '@testing-library/react';
 import DataTable, { type ColumnDef } from './DataTable';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
+import { useState } from 'react';
 
 interface Person {
 	id:     number;
@@ -366,6 +368,260 @@ describe('DataTable', () =>
 		});
 	});
 
+	describe('grid navigation', () =>
+	{
+		it('renders as role="grid"', () =>
+		{
+			renderTable();
+			expect(screen.getByRole('grid')).toBeDefined();
+		});
+
+		it('is a single tab stop, landing on the focusable content of the first cell (not the cell itself)', async () =>
+		{
+			renderTable();
+			await userEvent.tab();
+
+			const nameBtn = screen.getByRole('button', { name: /name/i });
+			expect(document.activeElement).toBe(nameBtn);
+		});
+
+		it('gives the wrapping header cell no tabIndex when it has focusable content', () =>
+		{
+			renderTable();
+			const nameHeader = screen.getByRole('columnheader', { name: /name/i });
+			expect(nameHeader.tabIndex).toBe(-1);
+		});
+
+		it('ArrowDown does not move when the column has no focusable body cells (there is nothing to land on)', async () =>
+		{
+			// COLUMNS' body cells are all plain text: the "name" column has no focusable
+			// content anywhere below the header, so there's nothing to skip down to.
+			renderTable();
+			await userEvent.tab();
+			const nameBtn = screen.getByRole('button', { name: /name/i });
+			await userEvent.keyboard('{ArrowDown}');
+
+			expect(document.activeElement).toBe(nameBtn);
+		});
+
+		it('arrow-right skips over plain-text columns and lands on the next cell with focusable content', async () =>
+		{
+			const actionColumns: ColumnDef<Person>[] = [
+				{ key: 'name',   header: 'Name',   sortable: false },
+				{ key: 'role',   header: 'Role',   sortable: false },
+				{ key: 'status', header: 'Status', sortable: false },
+				{
+					key:    'id',
+					header: 'Actions',
+					render: (_val, row) => <button type='button'>Edit {row.name}</button>,
+				},
+			];
+			renderTable({ columns: actionColumns, selectable: true });
+
+			// First navigable cell overall is the header "select all" checkbox: none of these
+			// columns' headers are sortable, so it's the only focusable thing in the header row.
+			await userEvent.tab();
+			await userEvent.keyboard('{ArrowDown}'); // down to the first row's checkbox
+			await userEvent.keyboard('{ArrowRight}'); // skips name, role, status — all plain text
+
+			const firstEditBtn = screen.getAllByRole('button', { name: /edit/i })[0];
+			expect(document.activeElement).toBe(firstEditBtn);
+		});
+
+		it('is not a Tab stop at all when nothing in the table is focusable', async () =>
+		{
+			const plainColumns: ColumnDef<Person>[] = [
+				{ key: 'name', header: 'Name', sortable: false },
+				{ key: 'role', header: 'Role', sortable: false },
+			];
+			renderTable({ columns: plainColumns });
+
+			await userEvent.tab();
+			expect(document.activeElement).toBe(document.body);
+		});
+
+		it('ArrowUp wraps to the last focusable row in the same column (none here, so it stays put)', async () =>
+		{
+			// COLUMNS' "name" column has no focusable body cells, so wrapping through every
+			// row finds nothing else and lands back on the same header button.
+			renderTable();
+			await userEvent.tab();
+			const nameBtn = screen.getByRole('button', { name: /name/i });
+			await userEvent.keyboard('{ArrowUp}');
+
+			expect(document.activeElement).toBe(nameBtn);
+		});
+
+		it('ArrowLeft wraps around to the last focusable column in the same row', async () =>
+		{
+			// From "Name" (the first column), ArrowLeft wraps past "Status" (not sortable, not
+			// focusable) and lands on "Role" — the last focusable header in the row.
+			renderTable();
+			await userEvent.tab();
+			await userEvent.keyboard('{ArrowLeft}');
+
+			const roleBtn = screen.getByRole('button', { name: /role/i });
+			expect(document.activeElement).toBe(roleBtn);
+		});
+
+		it('ArrowRight from the last focusable column wraps back to the first', async () =>
+		{
+			renderTable();
+			await userEvent.tab();
+			await userEvent.keyboard('{ArrowRight}'); // Name -> Role (last focusable header)
+			await userEvent.keyboard('{ArrowRight}'); // wraps back to Name
+
+			const nameBtn = screen.getByRole('button', { name: /name/i });
+			expect(document.activeElement).toBe(nameBtn);
+		});
+
+		it('Enter activates a focused sort button natively (real focus, not delegated)', async () =>
+		{
+			renderTable();
+			await userEvent.tab();
+			await userEvent.keyboard('{Enter}');
+
+			const nameHeader = screen.getByRole('columnheader', { name: /name/i });
+			expect(nameHeader.getAttribute('aria-sort')).toBe('ascending');
+		});
+
+		it('only the active cell (or its focusable content) has tabIndex 0; every other sort button is -1', async () =>
+		{
+			renderTable();
+			await userEvent.tab();
+
+			const roleBtn = screen.getByRole('button', { name: /role/i });
+			expect(roleBtn.tabIndex).toBe(-1);
+		});
+
+		it('arrow-navigating onto a checkbox cell focuses the checkbox itself, not the wrapping cell', async () =>
+		{
+			renderTable({ selectable: true });
+			await userEvent.tab();
+			await userEvent.keyboard('{ArrowRight}{ArrowLeft}');
+
+			const checkboxes = screen.getAllByRole('checkbox') as HTMLInputElement[];
+			expect(document.activeElement).toBe(checkboxes[0]);
+			expect(checkboxes[0].tabIndex).toBe(0);
+			expect(checkboxes.slice(1).every(c => c.tabIndex === -1)).toBe(true);
+		});
+
+		it('renders the shared Checkbox component for selection, not a hand-rolled input', () =>
+		{
+			renderTable({ selectable: true });
+			const checkboxes = screen.getAllByRole('checkbox');
+			// Checkbox wraps its <input> in a <label>, which a hand-rolled bare <input> would not have.
+			checkboxes.forEach(checkbox => expect(checkbox.closest('label')).not.toBeNull());
+		});
+
+		it('sets tabIndex declaratively (correct on first render, before any effect runs)', () =>
+		{
+			// A regression test for a real bug: tabIndex was only ever applied imperatively in a
+			// useEffect, so server-rendered HTML (and the very first client render, pre-effect)
+			// had every sort button and checkbox natively tabbable at once. Known-shape cells
+			// (checkboxes, sort buttons, plain-text cells with no `render`) must get the right
+			// tabIndex synchronously from render output alone — not only after an effect runs.
+			renderTable({ selectable: true });
+
+			const nameBtn       = screen.getByRole('button', { name: /name/i });
+			const roleBtn       = screen.getByRole('button', { name: /role/i });
+			const headerCheckbox = screen.getAllByRole('checkbox')[0];
+
+			expect(nameBtn.tabIndex).toBe(-1);
+			expect(roleBtn.tabIndex).toBe(-1);
+			expect(headerCheckbox.tabIndex).toBe(0); // default active cell is (0, 0): the checkbox
+		});
+
+		it('gives a plain-text data cell (no render) its tabIndex declaratively too', () =>
+		{
+			renderTable();
+			const nameCell = screen.getByText('Alice Chen').closest('td')!;
+			expect(nameCell.hasAttribute('data-dynamic')).toBe(false);
+			expect(nameCell.tabIndex).toBe(-1); // not (0, 0): the default active cell is the "name" sort button
+		});
+
+		it('defers to a composite widget rendered in a cell instead of hijacking its arrow keys', async () =>
+		{
+			// A regression test: ToggleGroup (or any composite that manages its own roving
+			// tabindex) calls preventDefault() on the arrow keys it handles but never
+			// stopPropagation(), so the grid's own keydown handler still sees the event. It
+			// must defer to e.defaultPrevented rather than also moving to a neighboring cell.
+			const ToggleCell = () => {
+				const [value, setValue] = useState('remote');
+				return (
+					<ToggleGroup type='single' value={value} onValueChange={(v) => setValue(v as string)}>
+						<ToggleGroupItem value='remote'>Remote</ToggleGroupItem>
+						<ToggleGroupItem value='office'>Office</ToggleGroupItem>
+					</ToggleGroup>
+				);
+			};
+
+			const columns: ColumnDef<Person>[] = [
+				{ key: 'name', header: 'Name', sortable: false, render: () => <ToggleCell /> },
+			];
+			render(<DataTable<Person> data={DATA.slice(0, 1)} columns={columns} keyField='id' pageSize={0} />);
+
+			await userEvent.tab(); // lands on the "Remote" toggle item
+			await userEvent.keyboard('{ArrowRight}'); // ToggleGroup's own nav: moves focus Remote -> Office
+
+			// Arrow keys move ToggleGroup's own internal focus only; they don't select a value
+			// (that needs Enter/Space) — so the only thing this asserts is that the grid didn't
+			// steal focus back to some neighboring cell instead of leaving it on "Office".
+			const officeItem = screen.getByRole('button', { name: 'Office' });
+			expect(document.activeElement).toBe(officeItem);
+
+			await userEvent.keyboard('{Enter}');
+			expect(officeItem.getAttribute('aria-pressed')).toBe('true');
+		});
+
+		it('ArrowUp/ArrowDown still escape a composite widget to a different row', async () =>
+		{
+			// A regression test: ToggleGroup treats ArrowUp/Down the same as Left/Right for its
+			// own navigation, and with 2 items it always finds a wrap target — so it always
+			// calls preventDefault(), and deferring to that (like Left/Right correctly do)
+			// would make Up/Down permanently unable to leave the cell. The grid must claim
+			// Up/Down for itself regardless.
+			const ToggleCell = ({ id }: { id: number }) => {
+				const [value, setValue] = useState('remote');
+				return (
+					<ToggleGroup type='single' value={value} onValueChange={(v) => setValue(v as string)} aria-label={`row-${id}`}>
+						<ToggleGroupItem value='remote'>Remote</ToggleGroupItem>
+						<ToggleGroupItem value='office'>Office</ToggleGroupItem>
+					</ToggleGroup>
+				);
+			};
+
+			const columns: ColumnDef<Person>[] = [
+				{ key: 'name', header: 'Name', sortable: false, render: (_v, row) => <ToggleCell id={row.id} /> },
+			];
+			render(<DataTable<Person> data={DATA.slice(0, 2)} columns={columns} keyField='id' pageSize={0} />);
+
+			await userEvent.tab(); // lands on row 1's "Remote" item
+			await userEvent.keyboard('{ArrowDown}');
+
+			const row2Group = screen.getByRole('group', { name: 'row-2' });
+			expect(row2Group.contains(document.activeElement)).toBe(true);
+		});
+
+		it('Enter toggles a focused checkbox, same as Space', async () =>
+		{
+			// Native <input type="checkbox"> only toggles on Space, never Enter, in every
+			// browser — DataTable makes Enter work too so a focused checkbox behaves like any
+			// other focused control in the grid (a sort button responds to both).
+			const onSelectionChange = vi.fn();
+			renderTable({ selectable: true, onSelectionChange });
+
+			await userEvent.tab(); // lands on the header "select all" checkbox
+			await userEvent.keyboard('{ArrowDown}'); // -> row 1's checkbox
+			await userEvent.keyboard('{Enter}');
+
+			expect(onSelectionChange).toHaveBeenCalledTimes(1);
+			const [selectedRows] = onSelectionChange.mock.calls[0];
+			expect(selectedRows).toHaveLength(1);
+			expect(selectedRows[0].id).toBe(1);
+		});
+	});
+
 	describe('accessibility', () =>
 	{
 		it('sort button has focus-visible ring classes', () =>
@@ -393,10 +649,10 @@ describe('DataTable', () =>
 			expect(screen.getByRole('button', { name: 'Go to next page' })).toBeDefined();
 		});
 
-		it('table renders as a table element', () =>
+		it('table renders as a real <table> element', () =>
 		{
 			renderTable();
-			expect(screen.getByRole('table')).toBeDefined();
+			expect(screen.getByRole('grid').tagName).toBe('TABLE');
 		});
 
 		it('renders thead with column headers', () =>

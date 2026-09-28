@@ -2797,7 +2797,7 @@ export default function Example() {
       { name: 'className',         type: 'string',                 default: "''",      description: 'Additional classes on the root wrapper.' },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['checkbox'],
     files: ['DataTable/DataTable.tsx', 'DataTable/Paginator.tsx'],
   },
   {
