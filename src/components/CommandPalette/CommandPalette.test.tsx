@@ -422,4 +422,51 @@ describe('CommandPalette', () =>
 
 		expect(document.body.style.overflow).toBe('');
 	});
+
+	describe('server-driven results', () =>
+	{
+		it('calls onQueryChange as the user types', async () =>
+		{
+			const onQueryChange = vi.fn();
+			render(
+				<CommandPalette open onClose={vi.fn()} onQueryChange={onQueryChange} filter={false}>
+					<CommandItem value='Result' onSelect={vi.fn()}>Result</CommandItem>
+				</CommandPalette>
+			);
+			await waitFor(() => expect(screen.getByRole('combobox')).toBeDefined());
+
+			await userEvent.type(screen.getByRole('combobox'), 'ab');
+
+			expect(onQueryChange).toHaveBeenLastCalledWith('ab');
+		});
+
+		it('keeps items that do not contain the query when filter=false', async () =>
+		{
+			render(
+				<CommandPalette open onClose={vi.fn()} filter={false}>
+					<CommandItem value='Alpha' onSelect={vi.fn()}>Alpha</CommandItem>
+				</CommandPalette>
+			);
+			await waitFor(() => expect(screen.getByRole('combobox')).toBeDefined());
+
+			await userEvent.type(screen.getByRole('combobox'), 'zzz');
+
+			expect(screen.getByRole('option', { name: 'Alpha' })).toBeDefined();
+		});
+
+		it('shows a searching state instead of the empty state while loading', async () =>
+		{
+			render(
+				<CommandPalette open onClose={vi.fn()} filter={false} loading>
+					<div />
+				</CommandPalette>
+			);
+			await waitFor(() => expect(screen.getByRole('combobox')).toBeDefined());
+
+			await userEvent.type(screen.getByRole('combobox'), 'zzz');
+
+			expect(screen.getByText('Searching…')).toBeDefined();
+			expect(screen.queryByText(/No results for/)).toBeNull();
+		});
+	});
 });

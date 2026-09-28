@@ -23,6 +23,7 @@ interface ItemEntry {
 
 interface PaletteCtx {
 	query:        string;
+	filter:       boolean;
 	activeId:     string | null;
 	setActiveId:  (id: string | null) => void;
 	registerItem: (entry: ItemEntry) => void;
@@ -43,9 +44,15 @@ const usePaletteContext = () => {
 const GroupContext = createContext<string>('');
 
 export interface CommandPaletteProps {
-	open:         boolean;
-	onClose:      () => void;
-	placeholder?: string;
+	open:           boolean;
+	onClose:        () => void;
+	placeholder?:   string;
+	/** Fires on every keystroke and once with `''` when the palette resets. Use it to drive server-side search. */
+	onQueryChange?: (query: string) => void;
+	/** Set to `false` when the caller supplies already-filtered results (e.g. from an API). Default `true`. */
+	filter?:        boolean;
+	/** Shows a searching state instead of the empty state while results are in flight. */
+	loading?:       boolean;
 	children:     ReactNode;
 }
 
@@ -72,6 +79,9 @@ const FOCUSABLE_SELECTOR = [
 	'[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
+const matchesQuery = (value: string, query: string, filter: boolean) =>
+	!filter || value.toLowerCase().includes(query.toLowerCase());
+
 const highlightMatch = (text: string, query: string) => {
 	if(!query) return text;
 
@@ -94,6 +104,9 @@ export const CommandPalette = (
         open,
         onClose,
         placeholder = 'Search commands…',
+        onQueryChange,
+        filter = true,
+        loading = false,
         children,
     }: CommandPaletteProps
 ) => {
@@ -129,7 +142,7 @@ export const CommandPalette = (
 
     const getVisibleEnabled = () => {
 		return itemsRef.current.filter(
-			(item) => !item.disabled && item.value.toLowerCase().includes(query.toLowerCase())
+			(item) => !item.disabled && matchesQuery(item.value, query, filter)
 		);
 	};
 
@@ -138,7 +151,7 @@ export const CommandPalette = (
 		return itemsRef.current.some(
 			(item) =>
 				item.groupId === groupId &&
-				item.value.toLowerCase().includes(query.toLowerCase())
+				matchesQuery(item.value, query, filter)
 		);
 	};
 
@@ -146,7 +159,7 @@ export const CommandPalette = (
 	{
 		if(open)
 		{
-			// eslint-disable-next-line react-hooks/set-state-in-effect
+			 
 			setQuery('');
 			setActiveId(null);
 			setMounted(true);
@@ -187,24 +200,28 @@ export const CommandPalette = (
 
     useEffect(() =>
 	{
-		const q       = query.toLowerCase();
 		const enabled = itemsRef.current.filter(
-			(item) => !item.disabled && item.value.toLowerCase().includes(q)
+			(item) => !item.disabled && matchesQuery(item.value, query, filter)
 		);
 		if(activeId && !enabled.find((i) => i.id === activeId))
-			// eslint-disable-next-line react-hooks/set-state-in-effect
+			 
 			setActiveId(enabled[0]?.id ?? null);
-	}, [query, activeId, _itemStamp]);
+	}, [query, filter, activeId, _itemStamp]);
 
     useEffect(() =>
 	{
-		const q     = query.toLowerCase();
 		const count = mounted ? itemsRef.current.filter(
-			(item) => item.value.toLowerCase().includes(q)
+			(item) => matchesQuery(item.value, query, filter)
 		).length : 0;
-		// eslint-disable-next-line react-hooks/set-state-in-effect
+		 
 		setVisibleCount(count);
-	}, [mounted, query, _itemStamp]);
+	}, [mounted, query, filter, _itemStamp]);
+
+    useEffect(() =>
+	{
+		onQueryChange?.(query);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [query]);
 
     useEffect(() =>
 	{
@@ -308,7 +325,8 @@ export const CommandPalette = (
 		}
 	};
 
-    const showEmpty = query.length > 0 && visibleCount === 0;
+    const showEmpty = query.length > 0 && visibleCount === 0 && !loading;
+    const showLoading = loading && visibleCount === 0;
 
     if(!mounted) return null;
 
@@ -316,6 +334,7 @@ export const CommandPalette = (
 		<PaletteContext.Provider
 			value={{
 				query,
+				filter,
 				activeId,
 				setActiveId,
 				registerItem,
@@ -392,8 +411,15 @@ export const CommandPalette = (
 						aria-label='Commands'
 						fadeFrom='from-surface-panel'
 						className='max-h-[60vh] py-1.5'
+						aria-busy={loading || undefined}
 					>
 						{children}
+
+						{showLoading && (
+							<div role='status' className='py-8 text-center text-sm text-text-muted'>
+								Searching…
+							</div>
+						)}
 
 						{showEmpty && (
 							<div className='py-8 text-center text-sm text-text-muted'>
@@ -449,7 +475,7 @@ export const CommandItem = (
     const id       = useId();
     const isActive = ctx.activeId === id;
 
-    const isVisible = value.toLowerCase().includes(ctx.query.toLowerCase());
+    const isVisible = matchesQuery(value, ctx.query, ctx.filter);
 
     useEffect(() =>
 	{

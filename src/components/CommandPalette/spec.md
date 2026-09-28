@@ -33,6 +33,9 @@ No additional npm packages required. Registry dependency: `ScrollFade` (wraps th
 | `open`        | `boolean`     | None                | Controls whether the palette is rendered and visible.          |
 | `onClose`     | `() => void`  | None                | Called when the user dismisses via Escape, backdrop, or select.|
 | `placeholder` | `string`      | `"Search commands…"`| Placeholder text for the search input.                         |
+| `onQueryChange` | `(query: string) => void` | None      | Called on every keystroke and once with `''` when the palette resets. Drives server-side search. |
+| `filter`      | `boolean`     | `true`              | Set `false` when the caller supplies already-filtered results (e.g. from an API); disables the built-in substring filter. |
+| `loading`     | `boolean`     | `false`             | Shows a `Searching…` state instead of the empty state while results are in flight, and sets `aria-busy` on the listbox. |
 | `children`    | `ReactNode`   | None                | `CommandGroup` and/or `CommandItem` elements.                  |
 
 ### CommandGroup
@@ -62,6 +65,12 @@ No additional npm packages required. Registry dependency: `ScrollFade` (wraps th
 - `CommandGroup` components hide themselves entirely when all their child items are filtered out.
 - When the query is non-empty and zero items match, an empty state message is shown: `No results for "{query}"`.
 - Matched substring in string `children` is wrapped in `<mark>` with `text-brand font-semibold`.
+
+---
+
+### Server-driven results
+
+For search backed by an API, pass `filter={false}`, listen with `onQueryChange`, debounce and fetch in the caller, and render the returned `CommandItem`s. Keep `value` set to the displayed text so keyboard navigation registers the item. Pass `loading` while a request is in flight. String children still get the match highlighted from the typed query.
 
 ---
 
