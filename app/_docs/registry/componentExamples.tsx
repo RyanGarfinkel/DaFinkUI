@@ -17,6 +17,7 @@ import {
 import { TimelineHorizontalDemo } from '@/app/_docs/components/examples/TimelineHorizontalDemo';
 import { KanbanCustomFaceDemo } from '@/app/_docs/components/examples/KanbanCustomFaceDemo';
 import { TimelineDeployDemo } from '@/app/_docs/components/examples/TimelineDeployDemo';
+import { SidebarDynamicDemo } from '@/app/_docs/components/examples/SidebarDynamicDemo';
 import { TimelineYearsDemo } from '@/app/_docs/components/examples/TimelineYearsDemo';
 import { SidebarButtonDemo } from '@/app/_docs/components/examples/SidebarButtonDemo';
 import { MessageMediaDemo } from '@/app/_docs/components/examples/MessageMediaDemo';
@@ -569,6 +570,26 @@ export default function Example() {
   );
 }`,
 			preview: <SidebarButtonDemo />,
+		},
+		{
+			id:          'dynamic-items',
+			title:       'Dynamic items with SidebarSkeleton',
+			description: 'When nav items come from an API, render SidebarSkeleton in their place while the request is in flight, then swap in the real SidebarLink or SidebarButton items once the data arrives. Its rows match the height and padding of a real item, so the list does not jump. This demo holds the loading state.',
+			usage: `export default function Example() {
+  return (
+    <div className="flex h-64 w-full max-w-md overflow-hidden rounded-lg border border-surface-border">
+      <Sidebar width="w-44" height="h-full">
+        <SidebarSection label="Projects">
+          <SidebarSkeleton count={5} aria-label="Loading projects" />
+        </SidebarSection>
+      </Sidebar>
+      <div className="flex flex-1 items-center justify-center p-4 text-center text-sm text-text-muted">
+        Loading projects…
+      </div>
+    </div>
+  );
+}`,
+			preview: <SidebarDynamicDemo />,
 		},
 	],
 	kanban: [

@@ -1,4 +1,4 @@
-import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarButton, SidebarDivider } from './Sidebar';
+import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarButton, SidebarDivider, SidebarSkeleton } from './Sidebar';
 import { describe, it, expect, vi, beforeEach, type Mock } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -130,6 +130,12 @@ describe('SidebarHeader', () =>
 		const { container } = render(<SidebarHeader className='extra'><span>Brand</span></SidebarHeader>);
 		expect((container.firstChild as HTMLElement).className).toContain('extra');
 	});
+
+	it('never clips its own overflow, so a focused child\'s focus-visible ring is never cut off', () =>
+	{
+		const { container } = render(<SidebarHeader><button type='button'>Search</button></SidebarHeader>);
+		expect((container.firstChild as HTMLElement).className).not.toContain('overflow-hidden');
+	});
 });
 
 describe('SidebarFooter', () =>
@@ -144,6 +150,12 @@ describe('SidebarFooter', () =>
 	{
 		const { container } = render(<SidebarFooter className='extra'><span>Logout</span></SidebarFooter>);
 		expect((container.firstChild as HTMLElement).className).toContain('extra');
+	});
+
+	it('never clips its own overflow, so a focused child\'s focus-visible ring is never cut off', () =>
+	{
+		const { container } = render(<SidebarFooter><button type='button'>Account</button></SidebarFooter>);
+		expect((container.firstChild as HTMLElement).className).not.toContain('overflow-hidden');
 	});
 });
 
@@ -160,6 +172,29 @@ describe('Sidebar layout regions', () =>
 		const scrollRegion = container.querySelector('[class*="overflow-y-auto"]') as HTMLElement;
 		expect(scrollRegion.textContent).not.toContain('Brand');
 		expect(screen.getByText('Brand')).toBeTruthy();
+	});
+
+	it('gives the header wrapper an explicit h-14 by default, so its border can align with an adjacent title bar of the same height', () =>
+	{
+		render(
+			<Sidebar>
+				<SidebarHeader><span>Brand</span></SidebarHeader>
+			</Sidebar>
+		);
+		const wrapper = screen.getByText('Brand').closest('.border-b-\\[length\\:var\\(--border-width\\)\\]') as HTMLElement;
+		expect(wrapper.className).toContain('h-14');
+	});
+
+	it('lets headerHeight override the header wrapper\'s height, for a taller adjacent title bar', () =>
+	{
+		render(
+			<Sidebar headerHeight='h-16'>
+				<SidebarHeader><span>Brand</span></SidebarHeader>
+			</Sidebar>
+		);
+		const wrapper = screen.getByText('Brand').closest('.border-b-\\[length\\:var\\(--border-width\\)\\]') as HTMLElement;
+		expect(wrapper.className).toContain('h-16');
+		expect(wrapper.className).not.toContain('h-14');
 	});
 
 	it('keeps the footer outside the scrollable region', () =>
@@ -616,6 +651,248 @@ describe('SidebarButton', () =>
 		await user.keyboard('{ArrowDown}');
 
 		expect(button).toHaveFocus();
+	});
+});
+
+describe('Sidebar row action keyboard navigation', () =>
+{
+	const renderRowsWithActions = () => render(
+		<Sidebar>
+			<SidebarButton action={<button type='button'>Rename A</button>}>Chat A</SidebarButton>
+			<SidebarButton action={<button type='button'>Rename B</button>}>Chat B</SidebarButton>
+		</Sidebar>
+	);
+
+	it('moves focus into the row\'s action group on ArrowRight', async () =>
+	{
+		const user = userEvent.setup();
+		renderRowsWithActions();
+		screen.getByRole('button', { name: 'Chat A' }).focus();
+
+		await user.keyboard('{ArrowRight}');
+
+		expect(screen.getByRole('button', { name: 'Rename A' })).toHaveFocus();
+	});
+
+	it('does nothing on ArrowRight for a row with no action', async () =>
+	{
+		const user = userEvent.setup();
+		render(
+			<Sidebar>
+				<SidebarButton>Chat A</SidebarButton>
+			</Sidebar>
+		);
+		const row = screen.getByRole('button', { name: 'Chat A' });
+		row.focus();
+
+		await user.keyboard('{ArrowRight}');
+
+		expect(row).toHaveFocus();
+	});
+
+	it('moves focus to the last action on ArrowLeft from the row', async () =>
+	{
+		const user = userEvent.setup();
+		renderRowWithTwoActions();
+		screen.getByRole('button', { name: 'Chat A' }).focus();
+
+		await user.keyboard('{ArrowLeft}');
+
+		expect(screen.getByRole('button', { name: 'Delete A' })).toHaveFocus();
+	});
+
+	it('does nothing on ArrowLeft for a row with no action', async () =>
+	{
+		const user = userEvent.setup();
+		render(
+			<Sidebar>
+				<SidebarButton>Chat A</SidebarButton>
+			</Sidebar>
+		);
+		const row = screen.getByRole('button', { name: 'Chat A' });
+		row.focus();
+
+		await user.keyboard('{ArrowLeft}');
+
+		expect(row).toHaveFocus();
+	});
+
+	it('returns focus to the row on ArrowLeft from the first action', async () =>
+	{
+		const user = userEvent.setup();
+		renderRowsWithActions();
+		screen.getByRole('button', { name: 'Rename A' }).focus();
+
+		await user.keyboard('{ArrowLeft}');
+
+		expect(screen.getByRole('button', { name: 'Chat A' })).toHaveFocus();
+	});
+
+	it('returns focus to the row on Escape from an action', async () =>
+	{
+		const user = userEvent.setup();
+		renderRowsWithActions();
+		screen.getByRole('button', { name: 'Rename A' }).focus();
+
+		await user.keyboard('{Escape}');
+
+		expect(screen.getByRole('button', { name: 'Chat A' })).toHaveFocus();
+	});
+
+	it('stays in the action column when ArrowDown moves to a row that also has actions', async () =>
+	{
+		const user = userEvent.setup();
+		renderRowsWithActions();
+		screen.getByRole('button', { name: 'Rename A' }).focus();
+
+		await user.keyboard('{ArrowDown}');
+
+		expect(screen.getByRole('button', { name: 'Rename B' })).toHaveFocus();
+	});
+
+	it('falls back to focusing the row when ArrowDown moves to a row with no action', async () =>
+	{
+		const user = userEvent.setup();
+		render(
+			<Sidebar>
+				<SidebarButton action={<button type='button'>Rename A</button>}>Chat A</SidebarButton>
+				<SidebarButton>Chat B</SidebarButton>
+			</Sidebar>
+		);
+		screen.getByRole('button', { name: 'Rename A' }).focus();
+
+		await user.keyboard('{ArrowDown}');
+
+		expect(screen.getByRole('button', { name: 'Chat B' })).toHaveFocus();
+	});
+
+	it('makes the row moved to via ArrowDown the new roving tab stop, even though DOM focus landed on its action', async () =>
+	{
+		const user = userEvent.setup();
+		renderRowsWithActions();
+		screen.getByRole('button', { name: 'Rename A' }).focus();
+
+		await user.keyboard('{ArrowDown}');
+
+		expect(screen.getByRole('button', { name: 'Chat A' })).toHaveProperty('tabIndex', -1);
+		expect(screen.getByRole('button', { name: 'Chat B' })).toHaveProperty('tabIndex', 0);
+	});
+
+	const renderRowWithTwoActions = () => render(
+		<Sidebar>
+			<SidebarButton
+				action={
+					<div>
+						<button type='button'>Rename A</button>
+						<button type='button'>Delete A</button>
+					</div>
+				}
+			>
+				Chat A
+			</SidebarButton>
+		</Sidebar>
+	);
+
+	it('moves between two actions on ArrowRight/ArrowLeft without wrapping', async () =>
+	{
+		const user = userEvent.setup();
+		renderRowWithTwoActions();
+		screen.getByRole('button', { name: 'Chat A' }).focus();
+
+		await user.keyboard('{ArrowRight}');
+		expect(screen.getByRole('button', { name: 'Rename A' })).toHaveFocus();
+
+		await user.keyboard('{ArrowRight}');
+		expect(screen.getByRole('button', { name: 'Delete A' })).toHaveFocus();
+	});
+
+	it('returns focus to the row on ArrowRight from the last action, instead of wrapping to the first', async () =>
+	{
+		const user = userEvent.setup();
+		renderRowWithTwoActions();
+		screen.getByRole('button', { name: 'Delete A' }).focus();
+
+		await user.keyboard('{ArrowRight}');
+
+		expect(screen.getByRole('button', { name: 'Chat A' })).toHaveFocus();
+	});
+
+	it('excludes action buttons from the Tab order, so Tab from the row skips straight past them', async () =>
+	{
+		const user = userEvent.setup();
+		renderRowWithTwoActions();
+		screen.getByRole('button', { name: 'Chat A' }).focus();
+
+		await user.tab();
+
+		expect(screen.getByRole('button', { name: 'Rename A' })).not.toHaveFocus();
+		expect(screen.getByRole('button', { name: 'Delete A' })).not.toHaveFocus();
+	});
+
+	it('keeps action buttons out of the Tab order even after Home/End/ArrowDown re-render the list', async () =>
+	{
+		const { rerender } = renderRowsWithActions();
+		rerender(
+			<Sidebar>
+				<SidebarButton action={<button type='button'>Rename A</button>}>Chat A</SidebarButton>
+				<SidebarButton action={<button type='button'>Rename B</button>}>Chat B</SidebarButton>
+				<SidebarButton action={<button type='button'>Rename C</button>}>Chat C</SidebarButton>
+			</Sidebar>
+		);
+
+		expect(screen.getByRole('button', { name: 'Rename C' })).toHaveProperty('tabIndex', -1);
+	});
+});
+
+describe('SidebarSkeleton', () =>
+{
+	it('renders a busy status region labelled Loading', () =>
+	{
+		render(<Sidebar><SidebarSkeleton /></Sidebar>);
+		const status = screen.getByRole('status', { name: 'Loading' });
+		expect(status.getAttribute('aria-busy')).toBe('true');
+	});
+
+	it('renders three placeholder rows by default', () =>
+	{
+		render(<Sidebar><SidebarSkeleton /></Sidebar>);
+		expect(screen.getByRole('status').children).toHaveLength(3);
+	});
+
+	it('renders as many rows as count asks for', () =>
+	{
+		render(<Sidebar><SidebarSkeleton count={5} /></Sidebar>);
+		expect(screen.getByRole('status').children).toHaveLength(5);
+	});
+
+	it('matches the height and horizontal padding of a real nav item so nothing shifts when items load', () =>
+	{
+		render(<Sidebar><SidebarSkeleton count={1} /></Sidebar>);
+		const row = screen.getByRole('status').children[0] as HTMLElement;
+		expect(row.className).toContain('h-8');
+		expect(row.className).toContain('px-3');
+	});
+
+	it('adds a leading icon placeholder to each row only when icon is set', () =>
+	{
+		const { rerender } = render(<Sidebar><SidebarSkeleton count={1} /></Sidebar>);
+		expect(screen.getByRole('status').children[0].children).toHaveLength(1);
+
+		rerender(<Sidebar><SidebarSkeleton count={1} icon /></Sidebar>);
+		expect(screen.getByRole('status').children[0].children).toHaveLength(2);
+	});
+
+	it('lets the aria-label be overridden, and merges className', () =>
+	{
+		render(<Sidebar><SidebarSkeleton aria-label='Loading chats' className='mt-2' /></Sidebar>);
+		const status = screen.getByRole('status', { name: 'Loading chats' });
+		expect(status.className).toContain('mt-2');
+	});
+
+	it('renders nothing when the parent Sidebar is collapsed', () =>
+	{
+		render(<Sidebar collapsible collapsed><SidebarSkeleton /></Sidebar>);
+		expect(screen.queryByRole('status')).toBeNull();
 	});
 });
 

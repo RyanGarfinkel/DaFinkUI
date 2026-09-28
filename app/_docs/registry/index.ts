@@ -1449,7 +1449,7 @@ export default function Example() {
       { name: 'children',          type: 'ReactNode',                    default: 'undefined', description: 'Sidebar content (header, sections, links, dividers, footer).' },
     ],
     dependencies:         [],
-    registryDependencies: ['tooltip', 'scroll-fade'],
+    registryDependencies: ['tooltip', 'scroll-fade', 'skeleton'],
     files:                ['Sidebar/Sidebar.tsx'],
     composition: {
       name: 'Sidebar',
@@ -1460,6 +1460,7 @@ export default function Example() {
           children: [
             { name: 'SidebarLink' },
             { name: 'SidebarButton', description: 'event-driven, no URL' },
+            { name: 'SidebarSkeleton', description: 'placeholder rows while items load' },
           ],
         },
         { name: 'SidebarDivider' },

@@ -11,7 +11,9 @@ A vertical navigation sidebar composed of seven sub-components: `Sidebar`, `Side
 | Name              | Type                          | Default   | Description                                                             |
 |-------------------|-------------------------------|-----------|---------------------------------------------------------------------------|
 | width             | string                        | `"w-56"`  | Tailwind width class used when expanded.                                |
+| height            | string                        | `"h-full"` | Tailwind height class for the whole `<aside>`.                         |
 | collapsedWidth    | string                        | `"w-16"`  | Tailwind width class used when collapsed.                               |
+| headerHeight      | string                        | `"h-14"`  | Tailwind height class for the `SidebarHeader` slot's wrapping bar. Matches `MenuBar`'s default height, so an adjacent title bar of that same height gets a border that aligns with this one — override this (and give that title bar the same explicit height) when it's taller, e.g. it carries a subtitle. |
 | collapsible       | boolean                       | `false`   | Renders the built-in expand/collapse toggle button.                     |
 | collapsed         | boolean                       | -         | Controlled collapsed state. Omit to let `Sidebar` manage state itself.  |
 | defaultCollapsed  | boolean                       | `false`   | Initial collapsed state when uncontrolled.                              |
@@ -27,12 +29,16 @@ A vertical navigation sidebar composed of seven sub-components: `Sidebar`, `Side
 | className | string      | `""`      | Additional CSS classes merged onto the div.          |
 | children  | ReactNode   | -         | Header content, typically brand/logo or a title.    |
 
+Doesn't clip its own overflow — the ancestor `Sidebar` wrapper already constrains width during the collapse transition, so an interactive child's `focus-visible` ring, or any shadow, can bleed into the surrounding padded wrapper instead of being cut off at the header's own edge.
+
 ### SidebarFooter
 
 | Name      | Type        | Default   | Description                                                  |
 |-----------|-------------|-----------|------------------------------------------------------------------|
 | className | string      | `""`      | Additional CSS classes merged onto the div.                    |
 | children  | ReactNode   | -         | Footer content, typically a user menu or settings link.       |
+
+Same non-clipping behavior as `SidebarHeader`.
 
 ### SidebarSection
 
@@ -75,6 +81,18 @@ All other native `<button>` attributes (`onClick`, `disabled`, `aria-label`, etc
 | Name      | Type        | Default   | Description                                          |
 |-----------|-------------|-----------|-------------------------------------------------------|
 | className | string      | `""`      | Additional CSS classes merged onto the hr element.   |
+
+### SidebarSkeleton
+
+A placeholder for nav items that are still loading (a list fetched from an API, for example). Each row has the same height (`h-8`) and horizontal padding (`px-3`) as a real `SidebarLink`/`SidebarButton`, so the list doesn't jump when the real items replace it. Label bars vary in width so the rows read as text rather than a uniform block. Render it in place of the items, inside a `SidebarSection`, while loading.
+
+| Name      | Type        | Default   | Description                                          |
+|-----------|-------------|-----------|-------------------------------------------------------|
+| count     | number      | `3`       | Number of placeholder rows.                          |
+| icon      | boolean     | `false`   | Adds a 16×16 leading icon placeholder to each row. Use it when the real items have icons. |
+| className | string      | `""`      | Additional CSS classes merged onto the wrapper.      |
+
+`SidebarSkeleton` extends `HTMLAttributes<HTMLDivElement>`. The wrapper is `role="status"` with `aria-busy="true"` and `aria-label="Loading"`; pass `aria-label` to say what is loading (e.g. `"Loading chats"`). Like an icon-less `SidebarButton`, it renders nothing while the parent `Sidebar` is collapsed to its rail.
 
 ---
 
@@ -135,7 +153,9 @@ Pass `action` to render a secondary control (typically a `Button` with `size="ic
 
 **Why it's not nested inside the `<a>`:** a button cannot be a descendant of an anchor — it's invalid HTML and produces ambiguous keyboard/screen-reader behavior (activating the outer link and the inner button becomes indistinguishable). `SidebarLink` instead renders the action as a DOM **sibling** of the `<a>`, both inside a shared wrapper `<div>`, with the action absolutely positioned over the pill's trailing edge (`z-20`, above the link's `z-10`). Visually it reads as one pill; structurally it's two independent, independently-focusable controls. Clicking the action can never trigger navigation, because it was never inside the anchor to begin with — no `stopPropagation`/`preventDefault` workaround needed.
 
-The action fades in on hover or focus-within and stays hidden otherwise, matching the rest of the design system's subtle-motion default. Tab order visits the link, then the action (plain DOM order); the action is a normal tab stop and does **not** participate in the sidebar's roving-tabindex/arrow-key navigation, which only tracks elements marked `data-sidebar-item` (every `SidebarLink` and `SidebarButton`) — arrow keys move strictly between links/buttons, Tab reaches both them and any actions. `SidebarButton` renders the same action pattern identically.
+The action fades in on hover or focus-within and stays hidden otherwise, matching the rest of the design system's subtle-motion default. Tab order visits the link, then the action (plain DOM order). `SidebarButton` renders the same action pattern identically.
+
+Every focusable control inside `action` is excluded from the regular Tab order (`tabIndex={-1}`, reapplied whenever `children` changes so a freshly-added row's actions are excluded too): Tab/Shift+Tab move straight from one row to the next, never stopping at a hidden-until-focused rename/delete pair along the way. They're reached only through arrow keys — Arrow keys move strictly between rows (elements marked `data-sidebar-item`) — an action is never itself part of that vertical sequence — but `ArrowRight`/`ArrowLeft` on a focused row with an `action` dives straight into it: `ArrowRight` focuses the first control (rename), `ArrowLeft` focuses the last (delete), so either end of the action group is one press away, never a step-by-step walk through the ones in between. Pressing the *opposite* arrow immediately afterward exits back to the row — e.g. `ArrowRight` from the row to rename, then `ArrowLeft` from rename back to the row — since each entry point is also that same end's exit point (see below). From inside the action: `ArrowRight`/`ArrowLeft` move between however many focusable controls `action` contains (e.g. AiChat's rename-then-delete pair) *without wrapping* — `ArrowLeft` on the first one, or `ArrowRight` on the last one, climbs back out to the row (so does `Escape`, from any of them) — and `ArrowUp`/`ArrowDown` move to the *same* control slot on the adjacent row's action group when it has one (falling back to focusing that row directly when it has fewer actions, or none). The row that focus lands on this way — even indirectly, via one of its actions — becomes the new roving tab stop, exactly as if `ArrowUp`/`ArrowDown` had been pressed while a row itself was focused.
 
 When `action` is present, the pill reserves trailing padding (`actionGutter`, default `pr-9`) so the action never overlaps the label. That default fits exactly one icon-sized control; `action` content wider than that — e.g. AiChat's rename-and-delete pair — needs a wider `actionGutter` (e.g. `pr-16`) passed explicitly, or the label truncates too late and the ellipsis lands under the action instead of before it, since `action`'s real rendered width can't be measured from here (it's absolutely positioned, see below).
 
@@ -196,6 +216,7 @@ For breadcrumb-style hierarchical location indicators, use `Breadcrumb` instead.
 | `text-text-subtle`     | Section label text color                 |
 | `ring-brand-ring`      | Focus ring color                         |
 | `--duration-fast`      | Transition duration for hover            |
+| `bg-surface-active`    | SidebarSkeleton placeholder bars (via `Skeleton`) |
 
 ---
 
@@ -205,4 +226,4 @@ For breadcrumb-style hierarchical location indicators, use `Breadcrumb` instead.
 npx dafink-ui add sidebar
 ```
 
-No additional npm dependencies. Registry dependencies: `Tooltip` (used to label icon-only links when collapsed) and `ScrollFade` (wraps the scrollable middle region so it fades at whichever edge still has more content).
+No additional npm dependencies. Registry dependencies: `Tooltip` (used to label icon-only links when collapsed), `ScrollFade` (wraps the scrollable middle region so it fades at whichever edge still has more content), and `Skeleton` (the placeholder bars in `SidebarSkeleton`).

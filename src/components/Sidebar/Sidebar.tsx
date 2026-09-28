@@ -2,9 +2,21 @@
 
 import { ButtonHTMLAttributes, Children, HTMLAttributes, KeyboardEvent, ReactElement, ReactNode, createContext, isValidElement, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import ScrollFade from '../ScrollFade/ScrollFade';
+import { Skeleton } from '../Skeleton/Skeleton';
 import { usePathname } from 'next/navigation';
 import Link, { LinkProps } from 'next/link';
 import Tooltip from '../Tooltip/Tooltip';
+
+// Same list as Modal's own FOCUSABLE_SELECTOR — kept local rather than shared, matching how
+// every other overlay/composite component here defines its own copy.
+const ACTION_FOCUSABLE_SELECTOR = [
+	'a[href]',
+	'button:not([disabled])',
+	'input:not([disabled])',
+	'select:not([disabled])',
+	'textarea:not([disabled])',
+	'[tabindex]:not([tabindex="-1"])',
+].join(', ');
 
 const SidebarCollapsedContext = createContext(false);
 
@@ -77,6 +89,8 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
 	width?:             string;
 	height?:            string;
 	collapsedWidth?:    string;
+	/** Tailwind height class for the SidebarHeader slot's wrapping bar. Default `'h-14'` matches MenuBar, so an adjacent title bar of that same default height gets a border that aligns with this one. Override when that title bar is taller (e.g. it has a subtitle) — give both the same explicit height, since neither's content height predicts the other's. */
+	headerHeight?:      string;
 	collapsible?:       boolean;
 	collapsed?:         boolean;
 	defaultCollapsed?:  boolean;
@@ -86,7 +100,7 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
 
 export const Sidebar = (
     {
-        width = 'w-56', height = 'h-full', collapsedWidth = 'w-16', collapsible = false,
+        width = 'w-56', height = 'h-full', collapsedWidth = 'w-16', headerHeight = 'h-14', collapsible = false,
         collapsed, defaultCollapsed = false, onCollapsedChange, togglePosition = 'middle',
         className = '', children, onKeyDown, ...props
     }: SidebarProps
@@ -135,6 +149,19 @@ export const Sidebar = (
         const rover   = current[current.length - 1] ?? links[0];
         links.forEach(l => { l.tabIndex = l === rover ? 0 : -1; });
     }, [isCollapsed]);
+
+    useEffect(() =>
+    {
+        if(!sidebarRef.current) return;
+        // A row's action buttons are reachable via ArrowRight (see handleKeyDown), not Tab —
+        // Tab/Shift+Tab should skip straight from one row to the next, not stop at every
+        // hidden-until-focused rename/delete pair along the way. Re-runs on every `children`
+        // change (not just mount) so a freshly-added row's actions are excluded too.
+        const actions = sidebarRef.current.querySelectorAll<HTMLElement>(
+            `[data-sidebar-item-actions] :is(${ACTION_FOCUSABLE_SELECTOR})`
+        );
+        actions.forEach(a => { a.tabIndex = -1; });
+    }, [children]);
 
     useEffect(() =>
     {
@@ -195,7 +222,84 @@ export const Sidebar = (
     // event-driven selection, not just route changes.
     }, [pathname, isCollapsed, children]);
 
+    // A row's own tabIndex is the single source of truth for where Tab lands (the roving-
+    // tabindex contract), so any time focus moves to a different row — even indirectly, by
+    // landing on one of *its* action buttons — that row must become the one with tabIndex 0.
+    const focusRow = (rows: HTMLElement[], target: HTMLElement) => {
+        rows.forEach(r => { r.tabIndex = -1; });
+        target.tabIndex = 0;
+    };
+
     const handleKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+        const active = document.activeElement as HTMLElement | null;
+        const actionGroup = active?.closest<HTMLElement>('[data-sidebar-item-actions]');
+
+        // Inside a row's action group (e.g. the rename/delete buttons on a chat row):
+        // Right/Left cycle within it, Left from the first action (or Escape) climbs back out
+        // to the row, and Up/Down jump to the same action slot on the adjacent row — so the
+        // reader never loses their place in the row/action "column" they were in.
+        if(actionGroup && e.currentTarget.contains(actionGroup))
+        {
+            const actions = Array.from(actionGroup.querySelectorAll<HTMLElement>(ACTION_FOCUSABLE_SELECTOR));
+            const actionIndex = actions.findIndex(a => a === active);
+            const row = actionGroup.previousElementSibling as HTMLElement | null;
+            if(actionIndex === -1) return;
+
+            if(e.key === 'ArrowRight')
+            {
+                e.preventDefault();
+                if(actionIndex === actions.length - 1) row?.focus();
+                else actions[actionIndex + 1].focus();
+            }
+            else if(e.key === 'ArrowLeft')
+            {
+                e.preventDefault();
+                if(actionIndex === 0) row?.focus();
+                else actions[actionIndex - 1].focus();
+            }
+            else if(e.key === 'Escape')
+            {
+                e.preventDefault();
+                row?.focus();
+            }
+            else if(e.key === 'ArrowDown' || e.key === 'ArrowUp')
+            {
+                const rows = Array.from(e.currentTarget.querySelectorAll<HTMLElement>('[data-sidebar-item]'));
+                const rowIndex = rows.findIndex(r => r === row);
+                if(rowIndex === -1) return;
+
+                e.preventDefault();
+                const targetRow = rows[e.key === 'ArrowDown' ? (rowIndex + 1) % rows.length : (rowIndex - 1 + rows.length) % rows.length];
+                focusRow(rows, targetRow);
+
+                const targetGroup = targetRow.nextElementSibling;
+                const targetActions = targetGroup?.matches('[data-sidebar-item-actions]')
+                    ? Array.from(targetGroup.querySelectorAll<HTMLElement>(ACTION_FOCUSABLE_SELECTOR))
+                    : [];
+                if(targetActions.length > 0) targetActions[Math.min(actionIndex, targetActions.length - 1)].focus();
+                else targetRow.focus();
+            }
+
+            return;
+        }
+
+        // Row-level Right/Left: dive into this row's action group, if it has one. Right
+        // enters at the first action (rename), Left enters at the last (delete) — each
+        // arrow's entry point mirrors the direction you'd exit the group back the same way.
+        if((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && active?.hasAttribute('data-sidebar-item'))
+        {
+            const group = active.nextElementSibling;
+            const actions = group?.matches('[data-sidebar-item-actions]')
+                ? Array.from(group.querySelectorAll<HTMLElement>(ACTION_FOCUSABLE_SELECTOR))
+                : [];
+            if(actions.length > 0)
+            {
+                e.preventDefault();
+                actions[e.key === 'ArrowRight' ? 0 : actions.length - 1].focus();
+            }
+            return;
+        }
+
         if(!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(e.key)) return;
 
         const links = Array.from(
@@ -203,7 +307,7 @@ export const Sidebar = (
         );
         if(!links.length) return;
 
-        const index = links.findIndex(l => l === document.activeElement);
+        const index = links.findIndex(l => l === active);
         e.preventDefault();
 
         let next: HTMLElement;
@@ -212,8 +316,7 @@ export const Sidebar = (
         else if(e.key === 'Home')      next = links[0];
         else                            next = links[links.length - 1];
 
-        links.forEach(l => { l.tabIndex = -1; });
-        next.tabIndex = 0;
+        focusRow(links, next);
         next.focus();
 
         onKeyDown?.(e);
@@ -267,9 +370,17 @@ export const Sidebar = (
 
             <div className='flex h-full flex-col overflow-hidden'>
                 {headerChild && (
-                    // pt-5 + pb-4 + a ~20px content row lands the border at ~56px,
-                    // matching a standard h-14 MenuBar so the two border lines align.
-                    <div className='shrink-0 border-b-[length:var(--border-width)] border-surface-border px-3 pt-5 pb-4'>
+                    // Explicit height (headerHeight, default h-14) rather than padding around
+                    // the content's own height: the latter drifts the moment headerChild's
+                    // content changes, which is exactly what broke this border's alignment
+                    // with an adjacent title bar the first time around.
+                    //
+                    // [&>*]:w-full: `headerChild` (SidebarHeader's own div) was previously a
+                    // plain block-level child of a non-flex wrapper, so it filled the width
+                    // for free. Making this wrapper `flex` to center it vertically means it
+                    // no longer does that on its own — this restores it without needing
+                    // SidebarHeader itself to declare a width it can't know it needs.
+                    <div className={['shrink-0 flex items-center border-b-[length:var(--border-width)] border-surface-border px-3 [&>*]:w-full', headerHeight].join(' ')}>
                         {headerChild}
                     </div>
                 )}
@@ -322,8 +433,12 @@ export const Sidebar = (
 export type SidebarHeaderProps = HTMLAttributes<HTMLDivElement>;
 
 export const SidebarHeader = ({ className = '', children, ...props }: SidebarHeaderProps) => {
+	// No overflow-hidden here: the ancestor Sidebar wrapper already clips to width during the
+	// collapse transition, so this only needs whitespace-nowrap. An extra overflow-hidden this
+	// close to a focused child clips its focus-visible ring before it can bleed into the
+	// padded wrapper around headerChild.
 	return (
-		<div {...props} className={['flex items-center gap-2 overflow-hidden whitespace-nowrap', className].join(' ')}>
+		<div {...props} className={['flex items-center gap-2 whitespace-nowrap', className].join(' ')}>
 			{children}
 		</div>
 	);
@@ -332,8 +447,10 @@ export const SidebarHeader = ({ className = '', children, ...props }: SidebarHea
 export type SidebarFooterProps = HTMLAttributes<HTMLDivElement>;
 
 export const SidebarFooter = ({ className = '', children, ...props }: SidebarFooterProps) => {
+	// Same reasoning as SidebarHeader: no local overflow-hidden, so a focused child's ring
+	// isn't clipped before it can bleed into the padded wrapper around footerChild.
 	return (
-		<div {...props} className={['flex items-center gap-2 overflow-hidden whitespace-nowrap', className].join(' ')}>
+		<div {...props} className={['flex items-center gap-2 whitespace-nowrap', className].join(' ')}>
 			{children}
 		</div>
 	);
@@ -386,7 +503,7 @@ const sidebarItemClassName = ({ hideLabel, showAction, isActive, actionGutter, c
 	// an action is present). Without it, its own min-width:auto — driven by its nowrap text
 	// content — overrides w-full and lets it grow to fit the full label, which is what let
 	// the label's own truncate never actually trigger.
-	'relative z-10 flex w-full min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius)] px-3 py-1.5 text-sm',
+	'relative z-10 flex w-full min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius)] px-3 py-1.5 text-left text-sm',
 	'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 	'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 	hideLabel ? 'justify-center' : '',
@@ -433,7 +550,10 @@ const wrapSidebarItem = (item: ReactElement<HTMLAttributes<HTMLElement>>, { hide
 	return (
 		<div className='relative flex w-full items-center'>
 			{item}
-			<span className='absolute right-1.5 top-1/2 z-20 -translate-y-1/2 opacity-0 motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)] group-hover:opacity-100 focus-within:opacity-100 has-[:focus-visible]:opacity-100 [div:hover>&]:opacity-100'>
+			{/* data-sidebar-item-actions: a direct sibling of `item`, so handleKeyDown can walk
+			    between the two with next/previousElementSibling — this is what lets ArrowRight
+			    dive from the row into its actions and ArrowLeft/Escape climb back out. */}
+			<span data-sidebar-item-actions='' className='absolute right-1.5 top-1/2 z-20 -translate-y-1/2 opacity-0 motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)] group-hover:opacity-100 focus-within:opacity-100 has-[:focus-visible]:opacity-100 [div:hover>&]:opacity-100'>
 				{action}
 			</span>
 		</div>
@@ -530,6 +650,33 @@ export const SidebarDivider = ({ className = '', ...props }: HTMLAttributes<HTML
 			{...props}
 			className={['border-t-[length:var(--border-width)] border-surface-border', className].join(' ')}
 		/>
+	);
+};
+
+const SKELETON_LABEL_WIDTHS = ['w-3/4', 'w-full', 'w-2/3', 'w-5/6'];
+
+export interface SidebarSkeletonProps extends HTMLAttributes<HTMLDivElement> {
+	count?: number;
+	icon?:  boolean;
+}
+
+// A stand-in for nav items that are still loading. Rows match the height and horizontal
+// padding of a real SidebarLink/SidebarButton, so the list doesn't shift when the items
+// arrive. Like an icon-less item, it renders nothing in the collapsed rail.
+export const SidebarSkeleton = ({ count = 3, icon = false, className = '', ...props }: SidebarSkeletonProps) => {
+	const collapsed = useSidebarCollapsed();
+
+	if(collapsed) return null;
+
+	return (
+		<div role='status' aria-busy='true' aria-label='Loading' {...props} className={['flex flex-col gap-1', className].join(' ')}>
+			{Array.from({ length: count }, (_, i) => (
+				<div key={i} className='flex h-8 items-center gap-2 px-3'>
+					{icon && <Skeleton className='h-4 w-4 shrink-0' />}
+					<Skeleton className={['h-3 rounded-full', SKELETON_LABEL_WIDTHS[i % SKELETON_LABEL_WIDTHS.length]].join(' ')} />
+				</div>
+			))}
+		</div>
 	);
 };
 

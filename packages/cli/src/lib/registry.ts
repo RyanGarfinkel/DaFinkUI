@@ -32,7 +32,7 @@ export const REGISTRY: RegistryEntry[] = [
 	{ name: 'Accordion', slug: 'accordion', files: ['Accordion/Accordion.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'ToolCallTrace', slug: 'tool-call-trace', files: ['ToolCallTrace/ToolCallTrace.tsx'], deps: [], registryDependencies: ['collapsible', 'timeline', 'scroll-fade'] },
 	{ name: 'Tabs', slug: 'tabs', files: ['Tabs/Tabs.tsx'], deps: [], registryDependencies: [] },
-	{ name: 'Sidebar', slug: 'sidebar', files: ['Sidebar/Sidebar.tsx'], deps: [], registryDependencies: ['tooltip', 'scroll-fade'] },
+	{ name: 'Sidebar', slug: 'sidebar', files: ['Sidebar/Sidebar.tsx'], deps: [], registryDependencies: ['tooltip', 'scroll-fade', 'skeleton'] },
 	{ name: 'Breadcrumb', slug: 'breadcrumb', files: ['Breadcrumb/Breadcrumb.tsx'], deps: [], registryDependencies: [] },
 	{ name: 'MenuBar', slug: 'menu-bar', files: ['MenuBar/MenuBar.tsx'], deps: [], registryDependencies: ['dropdown-menu'] },
 	{ name: 'TableOfContents', slug: 'table-of-contents', files: ['TableOfContents/TableOfContents.tsx'], deps: [], registryDependencies: [] },
