@@ -56,11 +56,11 @@ Accepts all native `<div>` HTML attributes.
 - **Controlled only**: `Tabs` requires both `value` and `onValueChange`. The parent owns the active state.
 - When a `TabsTrigger` is clicked, `onValueChange` is called with that trigger's `value`. The parent updates `value` and the active tab changes.
 - Only the `TabsContent` whose `value` matches the active tab is rendered; inactive panels are unmounted, not hidden.
-- Disabled triggers are not clickable and do not fire `onValueChange`.
+- Disabled triggers are not clickable, do not fire `onValueChange`, and are skipped by arrow key navigation.
 
 ## Interactive States
 
-- **hover**: `hover:bg-surface-hover hover:text-text` (subtle background fill and text brightens)
+- **hover**: `hover:text-text` (text brightens, no background fill)
 - **focus**: `focus:outline-none` (native outline suppressed)
 - **focus-visible**: `focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring` (keyboard-only focus ring in the brand color)
 - **active (pressed)**: inherited from base button behavior
@@ -72,14 +72,23 @@ The active tab is marked by an absolutely-positioned `h-0.5 bg-brand` bar render
 
 ## Keyboard Navigation
 
-Arrow key navigation between tabs is a progressive enhancement, not currently implemented. Tab key moves focus to the next focusable element in the document order. Each `TabsTrigger` is independently focusable and activatable with `Enter` or `Space`.
+`TabsList` uses the **roving tabindex** pattern: only one trigger is a tab stop at a time (`tabIndex={0}`), all others are `tabIndex={-1}`. This keeps `Tab`/`Shift+Tab` a single stop in and out of the tab list, matching the rest of the composite widgets in this codebase (`ToggleGroup`, `Radio`, `Tree`).
 
-To add arrow key navigation, a `keyDown` handler on `TabsList` can intercept `ArrowLeft` and `ArrowRight`, focus the adjacent trigger, and optionally activate it.
+| Key                  | Behavior                                                              |
+|----------------------|------------------------------------------------------------------------|
+| `Tab` / `Shift+Tab`  | Moves focus into/out of the tab list at the roving trigger; does not cycle through other triggers |
+| `ArrowRight`         | Moves focus to the next enabled trigger, wrapping from the last to the first |
+| `ArrowLeft`          | Moves focus to the previous enabled trigger, wrapping from the first to the last |
+| `Home`               | Moves focus to the first enabled trigger                              |
+| `End`                | Moves focus to the last enabled trigger                               |
+| `Enter` / `Space`    | Activates the focused trigger (native button behavior)                |
+
+Arrow keys move focus only; they do not change the active tab. This separates navigation from activation, consistent with the manual-activation model documented in `src/patterns/accessibility.md` → "Arrow navigation vs. selection". The roving trigger syncs to the active tab whenever `value` changes, whether from a click or a parent-driven update.
 
 ## Accessibility
 
 - `TabsList` carries `role="tablist"`
-- Each `TabsTrigger` carries `role="tab"`, `aria-selected`, and `aria-controls` pointing to its panel
+- Each `TabsTrigger` carries `role="tab"`, `aria-selected`, `aria-controls` pointing to its panel, and a roving `tabIndex`
 - Each `TabsContent` carries `role="tabpanel"` and `aria-labelledby` pointing back to its trigger
 - All ARIA relationships are derived automatically from the shared `value` string: no manual wiring needed
 - Focus-visible ring meets WCAG AA contrast requirements when using the `brand-ring` token
@@ -88,8 +97,6 @@ To add arrow key navigation, a `keyDown` handler on `TabsList` can intercept `Ar
 
 | Token              | Used on                            |
 |--------------------|------------------------------------|
-| `bg-surface`       | Active trigger background          |
-| `bg-surface-hover` | Inactive trigger hover background  |
 | `border-brand`     | Active trigger bottom border       |
 | `border-surface-border` | TabsList bottom border        |
 | `text-text`        | Active trigger text                |

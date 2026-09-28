@@ -75,7 +75,6 @@ describe('Tabs', () =>
 	{
 		renderTabs('one');
 		const trigger = screen.getByRole('tab', { name: 'One' });
-		expect(trigger.className).toContain('bg-surface');
 		expect(trigger.className).toContain('text-text');
 		expect(trigger.className).toContain('font-medium');
 	});
@@ -111,5 +110,68 @@ describe('Tabs', () =>
 		const panel = screen.getByRole('tabpanel');
 		expect(panel.getAttribute('aria-labelledby')).toBe('trigger-one');
 		expect(panel.getAttribute('id')).toBe('panel-one');
+	});
+
+	it('only the active trigger is a tab stop; the rest use roving tabindex', () =>
+	{
+		renderTabs('one');
+		expect(screen.getByRole('tab', { name: 'One' }).getAttribute('tabindex')).toBe('0');
+		expect(screen.getByRole('tab', { name: 'Two' }).getAttribute('tabindex')).toBe('-1');
+		expect(screen.getByRole('tab', { name: 'Three' }).getAttribute('tabindex')).toBe('-1');
+	});
+
+	it('ArrowRight moves focus to the next trigger without changing the selection', async () =>
+	{
+		const onValueChange = vi.fn();
+		renderTabs('one', onValueChange);
+
+		screen.getByRole('tab', { name: 'One' }).focus();
+		await userEvent.keyboard('{ArrowRight}');
+
+		expect(screen.getByRole('tab', { name: 'Two' })).toHaveFocus();
+		expect(onValueChange).not.toHaveBeenCalled();
+	});
+
+	it('ArrowRight skips disabled triggers and wraps to the first trigger', async () =>
+	{
+		renderTabs('two');
+
+		screen.getByRole('tab', { name: 'Two' }).focus();
+		await userEvent.keyboard('{ArrowRight}');
+
+		expect(screen.getByRole('tab', { name: 'One' })).toHaveFocus();
+	});
+
+	it('ArrowLeft moves focus to the previous trigger and wraps', async () =>
+	{
+		renderTabs('one');
+
+		screen.getByRole('tab', { name: 'One' }).focus();
+		await userEvent.keyboard('{ArrowLeft}');
+
+		expect(screen.getByRole('tab', { name: 'Two' })).toHaveFocus();
+	});
+
+	it('Home and End jump to the first and last enabled triggers', async () =>
+	{
+		renderTabs('two');
+
+		screen.getByRole('tab', { name: 'Two' }).focus();
+		await userEvent.keyboard('{End}');
+		expect(screen.getByRole('tab', { name: 'Two' })).toHaveFocus();
+
+		await userEvent.keyboard('{Home}');
+		expect(screen.getByRole('tab', { name: 'One' })).toHaveFocus();
+	});
+
+	it('Enter activates the focused trigger reached via arrow keys', async () =>
+	{
+		const onValueChange = vi.fn();
+		renderTabs('one', onValueChange);
+
+		screen.getByRole('tab', { name: 'One' }).focus();
+		await userEvent.keyboard('{ArrowRight}{Enter}');
+
+		expect(onValueChange).toHaveBeenCalledWith('two');
 	});
 });

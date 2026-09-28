@@ -727,9 +727,21 @@ export const extraSections: Record<string, ExtraSection[]> = {
 		{
 			heading: 'Accessibility',
 			description: (
-				<p>
-					Tabs uses native tab order, not roving tabindex or arrow-key navigation: each TabsTrigger is an independently focusable button, so Tab and Shift+Tab move through every trigger in document order and Enter/Space activate whichever trigger is currently focused. TabsList carries <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;tablist&quot;</code>, each trigger carries <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;tab&quot;</code> with <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-selected</code> and <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-controls</code> pointing at its panel, and each TabsContent carries <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;tabpanel&quot;</code> with <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-labelledby</code> pointing back to its trigger; the inactive panel is unmounted entirely rather than merely hidden.
-				</p>
+				<div className='flex flex-col gap-4'>
+					<p>
+						Tabs uses roving tabindex: only the active trigger sits in the page&apos;s Tab order, so Tab moves into and out of the whole tab list in a single stop, the same mechanic as ToggleGroup and MenuBarNav. Arrow keys move focus between triggers without changing the active tab; Enter/Space activates whichever trigger is currently focused. TabsList carries <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;tablist&quot;</code>, each trigger carries <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;tab&quot;</code> with <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-selected</code> and <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-controls</code> pointing at its panel, and each TabsContent carries <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;tabpanel&quot;</code> with <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-labelledby</code> pointing back to its trigger; the inactive panel is unmounted entirely rather than merely hidden.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['tab'], description: "Moves focus to the tab list's active trigger, or out to the next tabbable element if focus is already inside the list." },
+						{ keys: ['shift', 'tab'], description: 'Moves focus out of the tab list to the previous tabbable element.' },
+						{ keys: ['right arrow'], description: 'Moves focus to the next enabled trigger, wrapping from the last to the first.' },
+						{ keys: ['left arrow'], description: 'Moves focus to the previous enabled trigger, wrapping from the first to the last.' },
+						{ keys: ['home'], description: 'Moves focus to the first enabled trigger.' },
+						{ keys: ['end'], description: 'Moves focus to the last enabled trigger.' },
+						{ keys: ['enter'], description: 'Activates the focused trigger.' },
+						{ keys: ['space'], description: 'Activates the focused trigger.' },
+					]} />
+				</div>
 			),
 		},
 	],
