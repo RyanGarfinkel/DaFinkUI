@@ -96,6 +96,20 @@ describe('CommandInput: filtering', () =>
 		expect(opts[0]).toHaveTextContent('compact');
 	});
 
+	it('never opens a menu when the commands list is empty, so it behaves as a plain input', () =>
+	{
+		const NoCommands = () => {
+			const [value, setValue] = useState('');
+			return <CommandInput value={value} onChange={setValue} commands={[]} onCommand={vi.fn()} placeholder='Message…' />;
+		};
+		render(<NoCommands />);
+		const input = screen.getByRole('combobox');
+		fireEvent.change(input, { target: { value: '/anything' } });
+		expect(screen.queryByRole('listbox')).toBeNull();
+		expect(screen.queryByText('No matching commands')).toBeNull();
+		expect(input).toHaveValue('/anything');
+	});
+
 	it('shows "No matching commands" when nothing matches', () =>
 	{
 		render(<Harness />);

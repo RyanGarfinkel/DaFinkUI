@@ -37,6 +37,7 @@ Also accepts and forwards standard `<input>` attributes (`placeholder`, `disable
 - The menu opens only when `value` starts with `trigger` as its very first character (e.g. `/compact`, not `and/or`).
 - Filtering is a case-insensitive prefix match on `command.name` against the text after the trigger. The matched prefix is bolded in brand color in the menu.
 - When no commands match, the menu shows a "No matching commands" row instead of closing.
+- When the `commands` array is empty, the menu never opens at all: the field is a plain text input, so `/` is just a character. Pass `commands={[]}` for a surface that shouldn't offer commands (e.g. a thread reply box) rather than rendering a different component.
 - The first (or otherwise active) match is highlighted automatically as soon as the menu opens — there's always something to Tab-complete or Enter-run once at least one match exists.
 - Typing when the value no longer starts with `trigger` (trigger character deleted) closes the menu and the field behaves as a normal text input; whatever was typed is preserved via the normal `onChange`.
 - When the menu is closed (value doesn't start with `trigger`, or nothing matches), Enter is left unhandled so it can bubble to a surrounding `<form onSubmit>` for normal submission — CommandInput is a drop-in swap for a plain message input.

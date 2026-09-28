@@ -111,7 +111,7 @@ export const CommandInput = (
 		const next = e.target.value;
 		onChange(next);
 		setRawActiveIndex(0);
-		if(next.startsWith(trigger)) openMenu();
+		if(next.startsWith(trigger) && commands.length > 0) openMenu();
 		else if(mounted) closeMenu(false);
 	};
 
