@@ -167,6 +167,34 @@ describe('WorkflowBuilder', () =>
 		const { container } = render(<WorkflowBuilder height={600} />);
 		expect((container.firstChild as HTMLElement).style.height).toBe('600px');
 	});
+
+});
+
+describe('WorkflowBuilder readOnly mode', () =>
+{
+	it('renders nodes but hides the entire toolbar', () =>
+	{
+		render(<WorkflowBuilder readOnly />);
+		expect(screen.getByText('Form submitted')).toBeTruthy();
+		expect(screen.queryByRole('toolbar', { name: /workflow controls/i })).toBeNull();
+		expect(screen.queryByRole('button', { name: 'Add node' })).toBeNull();
+		expect(screen.queryByRole('button', { name: 'Horizontal' })).toBeNull();
+		expect(screen.queryByRole('button', { name: 'Run workflow animation' })).toBeNull();
+	});
+
+	it('does not open the node inspector panel when a node is clicked', () =>
+	{
+		render(<WorkflowBuilder readOnly />);
+		fireEvent.click(screen.getByTestId('node-wrapper-n1'));
+		expect(screen.queryByRole('textbox', { name: 'Title' })).toBeNull();
+	});
+
+	it('does not show a delete button on hover', () =>
+	{
+		render(<WorkflowBuilder readOnly />);
+		fireEvent.mouseEnter(screen.getByLabelText(/Node: Form submitted/));
+		expect(screen.queryByRole('button', { name: 'Delete node' })).toBeNull();
+	});
 });
 
 describe('WorkflowNode ports', () =>

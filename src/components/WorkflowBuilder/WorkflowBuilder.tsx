@@ -6,6 +6,15 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState } f
 import ToggleGroup, { ToggleGroupItem } from '../ToggleGroup/ToggleGroup';
 import '@xyflow/react/dist/style.css';
 
+const CONTROLS_STYLE = {
+	'--xy-controls-button-background-color':       'var(--color-surface)',
+	'--xy-controls-button-background-color-hover': 'var(--color-surface-hover)',
+	'--xy-controls-button-color':                   'var(--color-text)',
+	'--xy-controls-button-color-hover':             'var(--color-text)',
+	'--xy-controls-button-border-color':            'var(--color-surface-border)',
+	'--xy-controls-box-shadow':                     'var(--shadow-sm)',
+} as React.CSSProperties;
+
 export type WorkflowDirection = 'horizontal' | 'vertical';
 
 export interface WorkflowPort {
@@ -31,6 +40,7 @@ export interface WorkflowBuilderProps {
 	height?:           number;
 	className?:        string;
 	defaultDirection?: WorkflowDirection;
+	readOnly?:         boolean;
 }
 
 type WFData = { label: string; description: string; inputs: WorkflowPort[]; outputs: WorkflowPort[] };
@@ -48,6 +58,7 @@ interface RunContextValue {
 	completedEdgeIds:     Set<string>;
 	prefersReducedMotion: boolean;
 	direction:            WorkflowDirection;
+	readOnly:             boolean;
 }
 
 const RunContext = createContext<RunContextValue>({
@@ -57,6 +68,7 @@ const RunContext = createContext<RunContextValue>({
 	completedEdgeIds:     new Set(),
 	prefersReducedMotion: false,
 	direction:            'horizontal',
+	readOnly:             false,
 });
 
 // A node with zero inputs is an entry point; a node with zero outputs is terminal.
@@ -87,6 +99,8 @@ const NODE_DWELL_MS          = 200; // active-node hold before advancing to the 
 const COMPLETE_HOLD_MS       = 900; // "complete" hold before auto-reset
 const REDUCED_MOTION_HOLD_MS = 400; // reduced-motion equivalent of COMPLETE_HOLD_MS
 
+const ALIGN_TOLERANCE = 4;
+
 const AnimatedEdge = ({
 	id, sourceX, sourceY, targetX, targetY,
 	sourcePosition, targetPosition, markerEnd, style,
@@ -99,11 +113,13 @@ const AnimatedEdge = ({
 	// are perfectly aligned (straight down or straight across) — fall back to a
 	// true straight line in that case rather than a step path with nothing to step around.
 	const isAligned =
-		(sourcePosition === Position.Bottom && targetPosition === Position.Top  && Math.abs(sourceX - targetX) < 1) ||
-		(sourcePosition === Position.Right  && targetPosition === Position.Left && Math.abs(sourceY - targetY) < 1);
+		(sourcePosition === Position.Bottom && targetPosition === Position.Top  && Math.abs(sourceX - targetX) < ALIGN_TOLERANCE) ||
+		(sourcePosition === Position.Right  && targetPosition === Position.Left && Math.abs(sourceY - targetY) < ALIGN_TOLERANCE);
 
 	const [edgePath] = isAligned
-		? getStraightPath({ sourceX, sourceY, targetX, targetY })
+		? getStraightPath(sourcePosition === Position.Right
+			? { sourceX, sourceY: (sourceY + targetY) / 2, targetX, targetY: (sourceY + targetY) / 2 }
+			: { sourceX: (sourceX + targetX) / 2, sourceY, targetX: (sourceX + targetX) / 2, targetY })
 		: getSmoothStepPath({
 			sourceX, sourceY, sourcePosition,
 			targetX, targetY, targetPosition,
@@ -164,9 +180,9 @@ const GRID_SIZE = 20;
 // (rendered by WorkflowBuilder) — nodes here are display + drag + select + delete only.
 
 const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) => {
-	const { setNodes, setEdges }                 = useReactFlow();
-	const { runPhase, nodeRunStates, direction } = useContext(RunContext);
-	const { label, description, inputs, outputs } = data;
+	const { setNodes, setEdges }                           = useReactFlow();
+	const { runPhase, nodeRunStates, direction, readOnly } = useContext(RunContext);
+	const { label, description, inputs, outputs }          = data;
 
 	const isHorizontal = direction === 'horizontal';
 
@@ -181,7 +197,7 @@ const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) => {
 		setEdges(es => es.filter(edge => edge.source !== id && edge.target !== id));
 	};
 
-	const showDelete = runPhase === 'idle' && (selected || hovered);
+	const showDelete = !readOnly && runPhase === 'idle' && (selected || hovered);
 
 	const deleteBtn = showDelete ? (
 		<button
@@ -221,7 +237,7 @@ const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) => {
 	const outputPorts = outputs.map(p => renderPort(p, 'output'));
 
 	const body = (
-		<div className='flex-1 min-w-0 px-2.5 py-2'>
+		<div className='flex-1 min-w-0 px-2.5 py-1.5'>
 			<p className='text-xs font-medium text-text truncate'>
 				{label || <span className='text-text-subtle italic'>Untitled node</span>}
 			</p>
@@ -234,7 +250,7 @@ const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) => {
 	return (
 		<div
 			className={[
-				'relative bg-surface border border-surface-border shadow-[var(--shadow)] rounded-[var(--radius)] min-w-[176px] max-w-[260px]',
+				'relative bg-surface border border-surface-border shadow-[var(--shadow)] rounded-[var(--radius)] w-[200px]',
 				selected  ? 'ring-2 ring-offset-1 ring-brand-ring' : '',
 				isRunDone ? 'opacity-60' : '',
 			].join(' ')}
@@ -252,7 +268,7 @@ const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) => {
 			{deleteBtn}
 
 			{isHorizontal ? (
-				<div className='flex'>
+				<div className='flex min-h-[58px]'>
 					{inputPorts.length > 0 && <div className='flex flex-col justify-center gap-1.5 py-1.5 pl-1'>{inputPorts}</div>}
 					{body}
 					{outputPorts.length > 0 && <div className='flex flex-col justify-center gap-1.5 py-1.5 pr-1'>{outputPorts}</div>}
@@ -352,7 +368,7 @@ const computeLayeredLayout = (nds: WFNode[], eds: WFEdge[], direction: WorkflowD
 
 	byLevel.forEach((ids, lv) =>
 	{
-		const crossOffset = ((maxCount - ids.length) * SIBLING_SPACING) / 2;
+		const crossOffset = Math.round(((maxCount - ids.length) * SIBLING_SPACING) / 2 / GRID_SIZE) * GRID_SIZE;
 		ids.forEach((id, i) =>
 		{
 			const main  = lv * LEVEL_SPACING;
@@ -364,7 +380,7 @@ const computeLayeredLayout = (nds: WFNode[], eds: WFEdge[], direction: WorkflowD
 	return nds.map(n => ({ ...n, position: positions.get(n.id) ?? n.position }));
 };
 
-const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '', defaultDirection }: WorkflowBuilderProps) => {
+const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '', defaultDirection, readOnly = false }: WorkflowBuilderProps) => {
 	const initialDirection: WorkflowDirection = defaultDirection ?? 'horizontal';
 
 	const initialNodes = defaultGraph
@@ -617,6 +633,7 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 		completedEdgeIds,
 		prefersReducedMotion,
 		direction,
+		readOnly,
 	};
 
 	return (
@@ -635,7 +652,10 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 					edgeTypes={EDGE_TYPES}
 					fitView
 					fitViewOptions={{ padding: 0.3 }}
-					deleteKeyCode={['Delete', 'Backspace']}
+					nodesDraggable={!readOnly}
+					nodesConnectable={!readOnly}
+					elementsSelectable={!readOnly}
+					deleteKeyCode={readOnly ? [] : ['Delete', 'Backspace']}
 					onInit={instance => { rfInstance.current = instance; }}
 					defaultEdgeOptions={{ style: EDGE_IDLE_STYLE }}
 					connectionLineStyle={{ stroke: 'var(--color-brand)', strokeWidth: 2 }}
@@ -644,61 +664,63 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 					snapGrid={[GRID_SIZE, GRID_SIZE]}
 				>
 					<Background color='var(--color-surface-border)' gap={GRID_SIZE} />
-					<Controls />
+					<Controls style={CONTROLS_STYLE} />
 
-					<Panel position='top-left'>
-						<div
-							className='flex flex-col gap-0.5 p-2 bg-surface border border-surface-border rounded-[var(--radius)] shadow-[var(--shadow-sm)]'
-							role='toolbar'
-							aria-label='Workflow controls'
-						>
-							<button
-								type='button'
-								onClick={addNode}
-								disabled={runPhase !== 'idle'}
-								className={[
-									TOOLBAR_BTN,
-									runPhase !== 'idle' ? 'opacity-40 pointer-events-none' : '',
-								].join(' ')}
-								aria-label='Add node'
+					{!readOnly && (
+						<Panel position='top-left'>
+							<div
+								className='flex flex-col gap-0.5 p-2 bg-surface border border-surface-border rounded-[var(--radius)] shadow-[var(--shadow-sm)]'
+								role='toolbar'
+								aria-label='Workflow controls'
 							>
-								<span aria-hidden='true'>+</span>
-								Add node
-							</button>
+								<button
+									type='button'
+									onClick={addNode}
+									disabled={runPhase !== 'idle'}
+									className={[
+										TOOLBAR_BTN,
+										runPhase !== 'idle' ? 'opacity-40 pointer-events-none' : '',
+									].join(' ')}
+									aria-label='Add node'
+								>
+									<span aria-hidden='true'>+</span>
+									Add node
+								</button>
 
-							<div className='border-t border-surface-border my-1' aria-hidden='true' />
+								<div className='border-t border-surface-border my-1' aria-hidden='true' />
 
-							<span className='text-[10px] font-semibold text-text-subtle uppercase tracking-wider px-1 pb-1'>
-								Layout
-							</span>
-							<ToggleGroup
-								type='single'
-								size='sm'
-								value={direction}
-								onValueChange={value => handleDirectionChange(value as WorkflowDirection)}
-								disabled={runPhase !== 'idle'}
-								aria-label='Workflow layout direction'
-								className='w-full'
-							>
-								<ToggleGroupItem value='horizontal' className='flex-1'>Horizontal</ToggleGroupItem>
-								<ToggleGroupItem value='vertical' className='flex-1'>Vertical</ToggleGroupItem>
-							</ToggleGroup>
+								<span className='text-[10px] font-semibold text-text-subtle uppercase tracking-wider px-1 pb-1'>
+									Layout
+								</span>
+								<ToggleGroup
+									type='single'
+									size='sm'
+									value={direction}
+									onValueChange={value => handleDirectionChange(value as WorkflowDirection)}
+									disabled={runPhase !== 'idle'}
+									aria-label='Workflow layout direction'
+									className='w-full'
+								>
+									<ToggleGroupItem value='horizontal' className='flex-1'>Horizontal</ToggleGroupItem>
+									<ToggleGroupItem value='vertical' className='flex-1'>Vertical</ToggleGroupItem>
+								</ToggleGroup>
 
-							<div className='border-t border-surface-border my-1' aria-hidden='true' />
+								<div className='border-t border-surface-border my-1' aria-hidden='true' />
 
-							<button
-								type='button'
-								onClick={runPhase === 'running' ? resetAnimation : runAnimation}
-								disabled={runPhase === 'complete'}
-								className={[RUN_BTN_BASE, RUN_BTN_STATE[runPhase]].join(' ')}
-								aria-label={runPhase === 'running' ? 'Stop animation' : 'Run workflow animation'}
-							>
-								{runBtnLabel}
-							</button>
-						</div>
-					</Panel>
+								<button
+									type='button'
+									onClick={runPhase === 'running' ? resetAnimation : runAnimation}
+									disabled={runPhase === 'complete'}
+									className={[RUN_BTN_BASE, RUN_BTN_STATE[runPhase]].join(' ')}
+									aria-label={runPhase === 'running' ? 'Stop animation' : 'Run workflow animation'}
+								>
+									{runBtnLabel}
+								</button>
+							</div>
+						</Panel>
+					)}
 
-					{selectedNode && (
+					{!readOnly && selectedNode && (
 						<Panel position='top-right' style={{ margin: 0, top: 0, right: 0, bottom: 0 }}>
 							<aside
 								className='w-72 max-w-[85vw] h-full flex flex-col bg-surface border-l-[length:var(--border-width)] border-surface-border shadow-[var(--shadow-sm)] overflow-y-auto scrollbar-thin'

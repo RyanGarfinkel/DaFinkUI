@@ -32,7 +32,8 @@ import '@xyflow/react/dist/style.css';
 | `onChange`         | `(graph: WorkflowGraph) => void`  | -              | Fired after every change: node move, edge connection, inspector panel edit (title/description/ports), node add/delete. |
 | `height`           | `number`                          | `500`          | Canvas height in pixels.                                            |
 | `className`        | `string`                          | `""`           | Additional classes on the root container.                           |
-| `defaultDirection` | `'horizontal' \| 'vertical'`      | `'horizontal'` | Initial flow orientation. Not reactive after mount — the user can still switch orientation live via the "Layout" toggle in the toolbar. When no `defaultGraph` is given and `defaultDirection` is `'vertical'`, the built-in demo graph is auto-laid-out vertically on first render. |
+| `defaultDirection` | `'horizontal' \| 'vertical'`      | `'horizontal'` | Initial flow orientation. Not reactive after mount — the user can still switch orientation live via the "Layout" toggle in the toolbar, unless `readOnly` is set. When no `defaultGraph` is given and `defaultDirection` is `'vertical'`, the built-in demo graph is auto-laid-out vertically on first render. |
+| `readOnly`         | `boolean`                         | `false`        | Renders the graph as a static, non-editable diagram: hides the entire toolbar (Add node, Layout toggle, Run button) and the node inspector, and disables node dragging, connecting, and deleting. Use this to display a graph — e.g. one described by an LLM — for viewing only. |
 
 ## Data Shape
 
@@ -90,6 +91,8 @@ Port **names are not shown on the canvas card** — only the dot — to keep nod
 | Zoom                       | Scroll wheel, or use the Controls panel buttons                           |
 | Fit to view                | Click the fit button in the Controls panel                                |
 
+Every row above except Pan/Zoom/Fit to view is disabled in `readOnly` mode — see "Read-Only Mode" below.
+
 ## Editing: Node Inspector Panel
 
 Clicking a node selects it (`selected: true`, managed internally by `@xyflow/react`'s node state) and opens a panel docked to the right edge of the canvas — full height, not a floating overlay. It disappears automatically when the node is deselected (clicking blank canvas, per React Flow's default behavior) or via its own close (×) button.
@@ -115,6 +118,17 @@ The "Layout" toggle in the toolbar switches the graph between a horizontal (left
 ## Grid Snapping
 
 Dragging a node snaps its position to a 20px grid (`GRID_SIZE` in `WorkflowBuilder.tsx`), via `@xyflow/react`'s `snapToGrid`/`snapGrid={[20, 20]}` props — the same value used for the dot `Background`'s `gap`, so the visible dots are exactly the grid nodes snap to, not just a similar-looking texture. A node added via the toolbar also gets its randomized initial position rounded to the nearest grid multiple, so it never starts off-grid.
+
+## Read-Only Mode
+
+Set `readOnly={true}` to render the graph as a static, non-editable diagram — nodes and edges only, nothing else:
+
+- The entire toolbar (Add node, Layout toggle, Run button) and the node inspector panel are not rendered at all.
+- Nodes cannot be dragged (`nodesDraggable={false}`), edges cannot be created (`nodesConnectable={false}`), and nothing can be selected or deleted (`elementsSelectable={false}`, `deleteKeyCode={[]}`) — so the per-node hover delete button never appears either.
+- Panning and zooming (drag the background, scroll, or the Controls panel's zoom/fit buttons) still work, since those are just ways of viewing the diagram, not editing it.
+- The orientation is whatever `defaultDirection` is set to and cannot change, since the Layout toggle that would switch it is gone.
+
+Use this when the graph is something to look at, not edit — e.g. a workflow described by an LLM in a chat reply.
 
 ## Run Animation
 
@@ -195,4 +209,4 @@ Edges route as right-angle "step" paths (`getSmoothStepPath`, 8px corner radius)
 - Anywhere the user needs to define a graph of input→logic→output nodes by connecting them visually, without a fixed vocabulary of node kinds
 - Configuration UIs where the structure (not just the values) is user-defined
 
-Not a substitute for a read-only force-directed graph (`Graph`) or a static diagram: use WorkflowBuilder when editing is the primary goal.
+Not a substitute for a read-only force-directed graph (`Graph`): that's for exploring relationships in arbitrary data, not a defined input→logic→output process. For a static, view-only rendering of a workflow itself, use `readOnly` (see "Read-Only Mode" above) rather than reaching for a different component.
