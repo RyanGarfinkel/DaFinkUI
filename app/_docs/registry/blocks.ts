@@ -1,3 +1,11 @@
+// A block file is either an untagged path (installs into the block's own folder, same as
+// always) or tagged with a `kind` — a file the CLI reroutes to the consumer's configured
+// per-kind directory (e.g. `api` -> their apiDir) when they've opted into split-file
+// organization, rewriting that file's own sibling imports to match. See CLAUDE.md in
+// src/blocks/AiChat/ for the first real usage of this.
+export type BlockFileKind  = 'api' | 'model' | 'hook';
+export type BlockFileEntry = string | { path: string; kind: BlockFileKind };
+
 export interface BlockEntry {
 	slug: string;                    // URL segment, e.g. "dashboard"
 	name: string;                    // Display name, e.g. "Dashboard"
@@ -6,7 +14,7 @@ export interface BlockEntry {
 	usage: string;                   // Complete, runnable code example (the string shown in the Code tab)
 	dependencies: string[];          // npm packages this block requires, e.g. ["recharts"]
 	registryDependencies: string[];  // Components from the component registry this block requires
-	files: string[];                 // Source files to copy, relative to src/blocks/
+	files: BlockFileEntry[];         // Source files to copy, relative to src/blocks/. Untagged = block folder; tagged = see BlockFileEntry above.
 	hidden?: boolean;                // Installable via the CLI and directly linkable, but omitted from the /blocks gallery and index. Used for blockExamples.tsx variants: they're surfaced only through their parent block's Demos section, not as their own gallery entry.
 	promptSnippet?: string;          // Optional copy-paste system-prompt text a consumer adds to their own LLM call to make a real model emit content this block knows how to render (e.g. the ```lineplot fence convention). Docs-only; never touched by the CLI.
 }

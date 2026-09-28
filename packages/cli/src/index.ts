@@ -25,7 +25,8 @@ program
 	.description('Copy component files into your project')
 	.option('--all', 'Copy every component')
 	.option('--with-tests', 'Also copy each component\'s .test.tsx file', false)
-	.action(async (components: string[], options: { all?: boolean; withTests?: boolean }) =>
+	.option('--flat', 'Dump every file into the block\'s own folder, ignoring api/model/hook tags and your fileOrganization default')
+	.action(async (components: string[], options: { all?: boolean; withTests?: boolean; flat?: boolean }) =>
 	{
 		await runAdd(components, options, process.cwd());
 	});

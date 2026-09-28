@@ -1,12 +1,14 @@
+import { resolveBlock, type BlockRegistryEntry, type BlockFileEntry, type BlockFileKind } from '../lib/blocksRegistry.js';
 import { mkdirSync, copyFileSync, readFileSync, writeFileSync, existsSync } from 'fs';
-import { resolveBlock, type BlockRegistryEntry } from '../lib/blocksRegistry.js';
 import { REGISTRY, resolve as resolveEntry } from '../lib/registry.js';
+import { rewriteImportSpecifiers } from '../lib/rewriteImports.js';
 import type { RegistryEntry } from '../lib/registry.js';
+import { readConfig, type DaFinkConfig } from '../lib/config.js';
 import { generateBarrel } from '../lib/barrel.js';
+import { addKindAlias } from '../lib/tsconfig.js';
 import { spinner, log } from '@clack/prompts';
-import { readConfig } from '../lib/config.js';
 import { execSync } from 'child_process';
-import { resolve, dirname } from 'path';
+import { resolve, dirname, basename, relative, sep } from 'path';
 import pc from 'picocolors';
 
 function detectPackageManager(cwd: string): 'pnpm' | 'yarn' | 'npm'
@@ -85,39 +87,119 @@ function transformForReact(content: string, file: string): string
 	return result;
 }
 
-function copyFile(file: string, registryDir: URL, targetDir: string, stripNextjs: boolean): void
+/** Each kind's config field (`modelsDir`/`hooksDir` are plural, `apiDir` isn't — this map
+ * exists so nothing has to derive one from the other by string-munging). */
+const KIND_DIR_FIELD: Record<BlockFileKind, keyof DaFinkConfig> = {
+	api:   'apiDir',
+	model: 'modelsDir',
+	hook:  'hooksDir',
+};
+
+const KIND_ALIAS_PREFIX: Record<BlockFileKind, string> = {
+	api:   '@api',
+	model: '@models',
+	hook:  '@hooks',
+};
+
+interface BlockRouting
 {
-	const srcPath = new URL(file, registryDir).pathname;
-	const destPath = resolve(targetDir, file);
+	cwd:        string;
+	blockSlug:  string;
+	config:     DaFinkConfig;
+	files:      BlockFileEntry[];
+	blockDir:   string; // absolute path to this block's own folder (where untagged files land)
+}
+
+/** A block's kind-tagged files land in the consumer's configured directory for that kind
+ * (namespaced by the block's own slug, so two blocks' files never collide) whenever `routing`
+ * is passed — the caller decides once, for the whole entry, whether that's the case (i.e.
+ * fileOrganization is 'split') rather than this being re-checked per file. Everything else —
+ * untagged files, or every file when routing is omitted — installs into the block's own
+ * folder exactly as it always has. */
+function resolveFileDest(file: BlockFileEntry, routing: BlockRouting): { path: string; destPath: string; destDir: string }
+{
+	const path = typeof file === 'string' ? file : file.path;
+
+	if(typeof file === 'string')
+		return { path, destPath: resolve(routing.blockDir, basename(path)), destDir: routing.blockDir };
+
+	const destDir = resolve(routing.cwd, routing.config[KIND_DIR_FIELD[file.kind]] as string, routing.blockSlug);
+	return { path, destPath: resolve(destDir, basename(path)), destDir };
+}
+
+/** The alias map for *this specific file*, since it depends on where the file being written
+ * itself ends up, not just on the entry as a whole:
+ * - every tagged sibling's `./name` always rewrites to its alias (`@api/<slug>/name`, etc.) —
+ *   true regardless of which file is asking, tagged or not, since alias resolution doesn't
+ *   care where the importer physically lives.
+ * - an untagged sibling's `./name` only needs rewriting when *this* file is itself moving
+ *   (tagged): its relative path back to the block's own folder (where untagged files stay)
+ *   changes because this file's own directory changed, even though the untagged sibling
+ *   didn't move at all. A file that isn't moving needs no such correction — its relative
+ *   paths to other stay-put siblings are already correct.
+ */
+function buildAliasMapForFile(file: BlockFileEntry, files: BlockFileEntry[], blockSlug: string, destDir: string, blockDir: string): Record<string, string>
+{
+	const map: Record<string, string> = {};
+	const thisFileIsMoving = typeof file !== 'string';
+
+	for(const sibling of files)
+	{
+		if(typeof sibling === 'string')
+		{
+			if(!thisFileIsMoving) continue; // stay-put file referencing another stay-put file: already correct
+			const name = basename(sibling).replace(/\.tsx?$/, '');
+			const rel = relative(destDir, blockDir).split(sep).join('/') || '.';
+			map[`./${name}`] = `${rel}/${name}`;
+		}
+		else
+		{
+			const name = basename(sibling.path).replace(/\.tsx?$/, '');
+			map[`./${name}`] = `${KIND_ALIAS_PREFIX[sibling.kind]}/${blockSlug}/${name}`;
+		}
+	}
+
+	return map;
+}
+
+function copyFile(file: BlockFileEntry, registryDir: URL, targetDir: string, stripNextjs: boolean, routing?: BlockRouting): void
+{
+	const { path, destPath, destDir } = routing ? resolveFileDest(file, routing) : { path: file as string, destPath: resolve(targetDir, file as string), destDir: targetDir };
 
 	mkdirSync(dirname(destPath), { recursive: true });
 
-	if(stripNextjs)
+	const aliasMap = routing ? buildAliasMapForFile(file, routing.files, routing.blockSlug, destDir, routing.blockDir) : {};
+	const needsRewrite = Object.keys(aliasMap).length > 0;
+
+	if(stripNextjs || needsRewrite)
 	{
-		const content = readFileSync(srcPath, 'utf8');
-		writeFileSync(destPath, transformForReact(content, file), 'utf8');
+		let content = readFileSync(new URL(path, registryDir).pathname, 'utf8');
+		if(stripNextjs) content = transformForReact(content, path);
+		if(needsRewrite) content = rewriteImportSpecifiers(content, aliasMap);
+		writeFileSync(destPath, content, 'utf8');
 	}
 	else
 	{
-		copyFileSync(srcPath, destPath);
+		copyFileSync(new URL(path, registryDir).pathname, destPath);
 	}
 
-	log.info(pc.dim('copied ') + pc.cyan(file) + pc.dim(` → ${destPath}`));
+	log.info(pc.dim('copied ') + pc.cyan(path) + pc.dim(` → ${destPath}`));
 }
 
-function copyEntry(entry: { files: string[] }, registryDir: URL, targetDir: string, stripNextjs: boolean, withTests: boolean): void
+function copyEntry(entry: { files: BlockFileEntry[] }, registryDir: URL, targetDir: string, stripNextjs: boolean, withTests: boolean, routing?: BlockRouting): void
 {
 	for(const file of entry.files)
 	{
-		copyFile(file, registryDir, targetDir, stripNextjs);
+		copyFile(file, registryDir, targetDir, stripNextjs, routing);
 
 		if(!withTests) continue;
 
-		const testFile = file.replace(/\.tsx$/, '.test.tsx');
+		const path = typeof file === 'string' ? file : file.path;
+		const testFile = path.replace(/\.tsx$/, '.test.tsx');
 		const testSrcPath = new URL(testFile, registryDir).pathname;
 
 		if(existsSync(testSrcPath))
-			copyFile(testFile, registryDir, targetDir, stripNextjs);
+			copyFile(testFile, registryDir, targetDir, stripNextjs, routing);
 	}
 }
 
@@ -143,9 +225,12 @@ function resolveComponentsTransitive(initialSlugs: string[]): RegistryEntry[]
 	return [...resolved.values()];
 }
 
-export async function runAdd(inputs: string[], options: { all?: boolean; withTests?: boolean }, cwd: string): Promise<void>
+export async function runAdd(inputs: string[], options: { all?: boolean; withTests?: boolean; flat?: boolean }, cwd: string): Promise<void>
 {
 	const config = readConfig(cwd);
+	// The --flat flag overrides the persisted default for this one invocation only; it never
+	// rewrites dafink.config.json.
+	const split = !options.flat && config.fileOrganization !== 'flat';
 	const componentsTargetDir = resolve(cwd, config.componentsDir);
 	const blocksTargetDir = resolve(cwd, config.blocksDir);
 	const pm = detectPackageManager(cwd);
@@ -208,10 +293,34 @@ export async function runAdd(inputs: string[], options: { all?: boolean; withTes
 	s.start(`Copying ${blockEntries.length + componentEntries.length} item(s)...`);
 
 	const allDeps = new Set<string>();
+	const aliasedKinds = new Set<BlockFileKind>();
 
 	for(const entry of blockEntries)
 	{
-		copyEntry(entry, blocksRegistryDir, blocksTargetDir, stripNextjs, withTests);
+		const taggedKinds = entry.files.filter((f): f is Exclude<BlockFileEntry, string> => typeof f !== 'string').map(f => f.kind);
+		// Every file in an entry shares one source folder (e.g. all of 'AiChat/*.ts(x)') —
+		// that's also where an untagged file installs, so it doubles as blockDir.
+		const blockFolder = dirname(typeof entry.files[0] === 'string' ? entry.files[0] : entry.files[0].path);
+		const routing: BlockRouting | undefined = split && taggedKinds.length > 0
+			? { cwd, blockSlug: entry.slug, config, files: entry.files, blockDir: resolve(blocksTargetDir, blockFolder) }
+			: undefined;
+
+		if(routing)
+		{
+			for(const kind of new Set(taggedKinds))
+			{
+				if(aliasedKinds.has(kind)) continue;
+				aliasedKinds.add(kind);
+
+				const aliasResult = addKindAlias(cwd, kind, config[KIND_DIR_FIELD[kind]] as string);
+				if(aliasResult.updated)
+					log.info(pc.dim(aliasResult.configFile!) + pc.dim(` updated with @${KIND_ALIAS_PREFIX[kind].slice(1)}/* alias`));
+				else
+					log.warn(pc.yellow(aliasResult.reason ?? `skipped ${kind} alias setup`));
+			}
+		}
+
+		copyEntry(entry, blocksRegistryDir, blocksTargetDir, stripNextjs, withTests, routing);
 		entry.deps.forEach(d => allDeps.add(d));
 	}
 

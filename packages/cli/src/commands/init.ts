@@ -139,6 +139,13 @@ export async function runInit(cwd: string): Promise<void>
 		componentsDir: (componentsDir as string) || 'src/components/ui',
 		blocksDir:     'src/blocks',
 		cssFile,
+		// Not prompted, same as blocksDir above — most projects never install a block with a
+		// kind-tagged file, so asking everyone up front is friction for a setting most people
+		// won't touch. Hand-edit dafink.config.json if these defaults aren't right.
+		apiDir:           'src/api',
+		modelsDir:        'src/models',
+		hooksDir:         'src/hooks',
+		fileOrganization: 'split',
 	};
 
 	writeConfig(cwd, config);

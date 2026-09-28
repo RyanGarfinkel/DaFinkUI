@@ -26,7 +26,13 @@ function copyDirs(root, destRoot, label)
 	for(const name of dirs)
 	{
 		const dir = resolve(root, name);
-		const files = readdirSync(dir).filter(f => extname(f) === '.tsx');
+		// .ts too, not just .tsx: a component/block can have a plain-TS sibling file (types,
+		// pure helpers) alongside its .tsx ones — SidePanel's sidePanelStack.ts and AiChat's
+		// types.ts/constants.ts/chatApi.ts/messageHelpers.ts are both real examples. Missing
+		// this silently drops those files from the copy regardless of what a registry entry's
+		// `files` array says, so a consumer's `npx dafink-ui add` installs a component/block
+		// that imports a file that was never actually shipped.
+		const files = readdirSync(dir).filter(f => extname(f) === '.tsx' || extname(f) === '.ts');
 
 		for(const file of files)
 		{
@@ -102,10 +108,18 @@ async function importDataModule(tsSourcePath)
 const quoteString = (value) => `'${value.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 const quoteArray  = (values) => `[${values.map(quoteString).join(', ')}]`;
 
+// A block's `files` entries are either a plain path (untagged — installs into the block's own
+// folder, same as a component's files always do) or `{ path, kind }` (installs into the
+// consumer's configured directory for that kind instead, when they've opted into split-file
+// organization). Rendered as a matching object literal so the shape survives into the
+// generated file; a plain string renders exactly as `quoteArray` always has.
+const quoteFileEntry  = (file) => (typeof file === 'string' ? quoteString(file) : `{ path: ${quoteString(file.path)}, kind: ${quoteString(file.kind)} }`);
+const quoteFilesArray = (files) => `[${files.map(quoteFileEntry).join(', ')}]`;
+
 function renderRegistryFile({ header, interfaceBlock, entries, arrayName, helperBlock })
 {
 	const entryLines = entries.map(({ name, slug, files, deps, registryDependencies }) =>
-		`\t{ name: ${quoteString(name)}, slug: ${quoteString(slug)}, files: ${quoteArray(files)}, deps: ${quoteArray(deps)}, registryDependencies: ${quoteArray(registryDependencies)} },`
+		`\t{ name: ${quoteString(name)}, slug: ${quoteString(slug)}, files: ${quoteFilesArray(files)}, deps: ${quoteArray(deps)}, registryDependencies: ${quoteArray(registryDependencies)} },`
 	).join('\n');
 
 	return `${header}\n\n${interfaceBlock}\n\nexport const ${arrayName} = [\n${entryLines}\n];\n\n${helperBlock}\n`;
@@ -165,11 +179,14 @@ console.log(`\nCLI component registry generated: ${cliComponentEntries.length} e
 writeFileSync(cliBlockRegistryPath, renderRegistryFile({
 	header: GENERATED_HEADER,
 	interfaceBlock: [
+		'export type BlockFileKind  = \'api\' | \'model\' | \'hook\';',
+		'export type BlockFileEntry = string | { path: string; kind: BlockFileKind };',
+		'',
 		'export interface BlockRegistryEntry',
 		'{',
 		'\tname: string;',
 		'\tslug: string;',
-		'\tfiles: string[];',
+		'\tfiles: BlockFileEntry[];',
 		'\tdeps: string[];',
 		'\tregistryDependencies: string[];',
 		'}',

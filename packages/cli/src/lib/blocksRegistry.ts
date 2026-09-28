@@ -2,11 +2,14 @@
 // Source of truth: app/_docs/registry/ (index.ts + effects.ts for components, blocks.ts for blocks).
 // Run `npm run sync-registry` from the repo root to regenerate this file.
 
+export type BlockFileKind  = 'api' | 'model' | 'hook';
+export type BlockFileEntry = string | { path: string; kind: BlockFileKind };
+
 export interface BlockRegistryEntry
 {
 	name: string;
 	slug: string;
-	files: string[];
+	files: BlockFileEntry[];
 	deps: string[];
 	registryDependencies: string[];
 }
@@ -21,7 +24,7 @@ export const BLOCKS_REGISTRY: BlockRegistryEntry[] = [
 	{ name: 'Notifications panel', slug: 'notifications-panel', files: ['NotificationsPanel/NotificationsPanel.tsx'], deps: [], registryDependencies: ['card', 'scroll-fade', 'avatar', 'button'] },
 	{ name: 'Team grid', slug: 'team-grid', files: ['TeamGrid/TeamGrid.tsx'], deps: [], registryDependencies: ['badge', 'card', 'avatar'] },
 	{ name: 'Chart card', slug: 'chart-card', files: ['ChartCard/ChartCard.tsx'], deps: [], registryDependencies: ['card', 'charts', 'count-up', 'badge'] },
-	{ name: 'AI chat', slug: 'ai-chat', files: ['AiChat/AiChat.tsx', 'AiChat/ChatMarkdown.tsx', 'AiChat/StreamingMessage.tsx', 'AiChat/ThreadPanel.tsx'], deps: ['react-markdown', 'remark-gfm', 'remark-math'], registryDependencies: ['sidebar', 'scroll-fade', 'message', 'typewriter', 'attachment', 'button', 'input', 'command-input', 'command-palette', 'badge', 'tooltip', 'collapsible', 'timeline', 'modal', 'charts', 'function-plotter', 'table', 'date-picker', 'slider', 'formula', 'code-block', 'audioplayer', 'skeleton', 'questionnaire', 'tool-call-trace', 'resizable'] },
+	{ name: 'AI chat', slug: 'ai-chat', files: ['AiChat/AiChat.tsx', 'AiChat/ChatMarkdown.tsx', 'AiChat/StreamingMessage.tsx', 'AiChat/ThreadPanel.tsx', 'AiChat/Composer.tsx', 'AiChat/Phrases.tsx', 'AiChat/icons.tsx', 'AiChat/constants.ts', 'AiChat/messageHelpers.ts', 'AiChat/MessageRow.tsx', { path: 'AiChat/types.ts', kind: 'model' }, { path: 'AiChat/chatApi.ts', kind: 'api' }, { path: 'AiChat/useConversation.ts', kind: 'hook' }], deps: ['react-markdown', 'remark-gfm', 'remark-math'], registryDependencies: ['sidebar', 'scroll-fade', 'message', 'typewriter', 'attachment', 'button', 'input', 'textarea', 'command-input', 'command-palette', 'badge', 'tooltip', 'spinner', 'collapsible', 'timeline', 'modal', 'charts', 'function-plotter', 'table', 'date-picker', 'slider', 'formula', 'code-block', 'audioplayer', 'skeleton', 'questionnaire', 'tool-call-trace', 'resizable', 'workflow-builder', 'avatar', 'select', 'switch'] },
 	{ name: 'Team management', slug: 'team-management', files: ['TeamManagement/TeamManagement.tsx'], deps: [], registryDependencies: ['modal', 'card', 'select', 'badge', 'avatar', 'button', 'input'] },
 	{ name: 'Project hub', slug: 'project-hub', files: ['ProjectHub/ProjectHub.tsx'], deps: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'], registryDependencies: ['modal', 'kanban', 'sidebar', 'badge', 'avatar', 'text-shimmer', 'typewriter', 'breadcrumb', 'card', 'progress', 'count-up', 'button', 'input'] },
 	{ name: 'Job application tracker', slug: 'job-application-tracker', files: ['JobApplicationTracker/JobApplicationTracker.tsx', 'JobApplicationTracker/ApplicationCard.tsx', 'JobApplicationTracker/ApplicationDetailsModal.tsx'], deps: ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'], registryDependencies: ['modal', 'select', 'date-picker', 'textarea', 'attachment', 'separator', 'input', 'button', 'avatar', 'badge', 'toggle-group', 'data-table'] },

@@ -16,7 +16,8 @@
 	],
 	"scripts": {
 		"build": "node scripts/build-registry.mjs && tsc",
-		"dev": "tsc --watch"
+		"dev": "tsc --watch",
+		"test": "npm run build && node --test src/lib/*.test.mjs"
 	},
 	"dependencies": {
 		"@clack/prompts": "^0.9.0",
