@@ -12,6 +12,98 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
 	{
+		'version': 'Unreleased',
+		'date': null,
+		'sections': [
+			{
+				'label': 'Added',
+				'changes': [
+					'Add size prop and independent content scroll to modal',
+					'Add click handler support to breadcrumb items',
+					'Add trigger class and aria-label overrides to select',
+					'Add bring-your-own details popup and card face to kanban',
+					'Redesign workflow builder around generic input/output ports',
+					'Add time selection to date picker',
+					'Add command input component',
+					'Add sidebar button for event-driven nav items',
+					'Add safe mathjs parsing, tooltip, extrema, and layout to plotter',
+					'Rework slider thumb rendering and focus ring',
+					'Add compact spacing mode to timeline',
+					'Add reveal callback to typewriter',
+					'Add markdown, question card, and tool trace rendering to ai chat',
+					'Add job application tracker and project hub blocks',
+					'Transform next link and pathname usage in cli-installed files',
+					'Add resizable split-pane component',
+					'Add tool call trace and questionnaire components',
+					'Rework ai chat block with threaded panels and streaming messages'
+				]
+			},
+			{
+				'label': 'Fixed',
+				'changes': [
+					'Add scrollbar-none and recharts-surface focus css utilities',
+					'Suppress redundant focus ring and refine bar chart interaction',
+					'Restore focus to a pill after removing it in combobox',
+					'Narrow otp input cursor indicator width',
+					'Register resizable component in cli registry and category list'
+				]
+			},
+			{
+				'label': 'Changed',
+				'changes': [
+					'Change component import alias to @components/ui',
+					'Switch accordion/collapsible trigger focus ring to inset style',
+					'Add mathjs, react-markdown, remark-gfm, remark-math deps',
+					'Add unwired ai questionnaire block scaffold',
+					'Add eslint rules for braces, directives, and comments',
+					'Add scaffolding scripts for new components and blocks',
+					'Collapse interface and arrow-function braces onto one line'
+				]
+			},
+			{
+				'label': 'Docs',
+				'changes': [
+					'Document multi-file blocks, portal bubbling, and dep policy',
+					'Sync component and block registries with new props and blocks'
+				]
+			}
+		]
+	},
+	{
+		'version': '0.3.0',
+		'date': '2026-08-02',
+		'sections': [
+			{
+				'label': 'Added',
+				'changes': [
+					'Rename top nav to menu bar, add table of contents and theme toggle',
+					'Add formula component for rendering latex via katex',
+					'Generate cli registries from docs registries, add hidden entries',
+					'Add new animation effect components',
+					'Add effects gallery to docs site',
+					'Add trigger passthrough and unstyled mode to dropdown menu',
+					'Add sliding-pill nav group with overflow menu to menu bar'
+				]
+			},
+			{
+				'label': 'Fixed',
+				'changes': [
+					'Fix command palette touch scrolling, add mobile nav footer links',
+					'Center docs header search trigger on desktop'
+				]
+			},
+			{
+				'label': 'Changed',
+				'changes': [
+					'Normalize style/token formatting and update docs',
+					'Rename docs top nav to docs header, sync docs and cli',
+					'Rewrite docs page content, add mobile skill',
+					'Bump cli package version to 0.3.0'
+				]
+			}
+		]
+	},
+	{
 		'version': '0.2.1',
 		'date': '2026-07-08',
 		'sections': [
