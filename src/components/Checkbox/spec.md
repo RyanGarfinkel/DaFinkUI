@@ -37,6 +37,7 @@ Extends all native `<input type="checkbox">` HTML attributes (except `type`). Ac
 - When `id` is provided, the label is additionally linked via `htmlFor`; this is required when placing the label outside the wrapper.
 - `aria-invalid` is not set by Checkbox itself; if you need error state, wrap it in a `FormField` with `FormMessage`.
 - Disabled state uses native `disabled` attribute, which is correctly announced by screen readers.
+- **Enter toggles the checkbox, same as Space.** A native `<input type="checkbox">` only responds to Space in every browser — Checkbox adds its own `onKeyDown` so Enter works too, since a checkbox that ignores Enter reads as broken next to every other control (a button, a link) that responds to both. If you pass your own `onKeyDown`, it still runs first; call `event.preventDefault()` inside it to suppress Checkbox's Enter handling for that keypress (matching how `DataTable`'s own Left/Right grid navigation defers to a focused composite widget that already called `preventDefault()`).
 
 ## When to Use
 

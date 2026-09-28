@@ -248,9 +248,16 @@ export const extraSections: Record<string, ExtraSection[]> = {
 		{
 			heading: 'Accessibility',
 			description: (
-				<p>
-					Checkbox renders a native <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;input type=&quot;checkbox&quot;&gt;</code> wrapped in a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;label&gt;</code>, so the entire label row is a click target and Space toggles it via native semantics: no custom keyboard handling, no roving tabindex, native Tab order. When an explicit <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>id</code> is passed it&apos;s also linked via <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>htmlFor</code>. Checkbox does not set <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-invalid</code> itself; error state is left to a wrapping <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>FormField</code>/<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>FormMessage</code>.
-				</p>
+				<div className='flex flex-col gap-4'>
+					<p>
+						Checkbox renders a native <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;input type=&quot;checkbox&quot;&gt;</code> wrapped in a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;label&gt;</code>, so the entire label row is a click target: native Tab order, no roving tabindex. Space toggles it via native semantics; Enter is the one piece of custom handling Checkbox adds on top — a native checkbox only responds to Space in every browser, which reads as broken next to a button or link that responds to both, so Checkbox&apos;s own <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>onKeyDown</code> makes Enter toggle it too (a consumer&apos;s own <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>onKeyDown</code> still runs first and can call <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>preventDefault()</code> to suppress it). When an explicit <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>id</code> is passed it&apos;s also linked via <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>htmlFor</code>. Checkbox does not set <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-invalid</code> itself; error state is left to a wrapping <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>FormField</code>/<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>FormMessage</code>.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['tab'], description: 'Focuses the checkbox, or the whole label row if it wraps one — native tab order, no roving tabindex.' },
+						{ keys: ['space'], description: 'Toggles the checkbox. Native browser behavior, not something Checkbox adds.' },
+						{ keys: ['enter'], description: 'Also toggles the checkbox, matching Space. This is Checkbox’s own addition: a native checkbox otherwise ignores Enter entirely.' },
+					]} />
+				</div>
 			),
 		},
 	],

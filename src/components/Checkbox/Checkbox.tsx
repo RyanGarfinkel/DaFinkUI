@@ -1,16 +1,28 @@
 'use client';
 
-import { InputHTMLAttributes, forwardRef } from 'react';
+import { InputHTMLAttributes, KeyboardEvent, forwardRef } from 'react';
 
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> {
 	label?: string;
 }
 
 export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((
-	{ label, className = '', id, ...props },
+	{ label, className = '', id, onKeyDown, ...props },
 	ref
 ) =>
 {
+	const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+		onKeyDown?.(e);
+		// Native checkboxes only toggle on Space, never Enter, in every browser — correct on
+		// the open web, but a jarring inconsistency next to every other control (a button, a
+		// sort header) that responds to both. Make Enter toggle too, matching Space.
+		if(!e.defaultPrevented && e.key === 'Enter')
+		{
+			e.preventDefault();
+			e.currentTarget.click();
+		}
+	};
+
 	return (
 		<label
 			htmlFor={id}
@@ -20,6 +32,7 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>((
 				ref={ref}
 				type='checkbox'
 				id={id}
+				onKeyDown={handleKeyDown}
 				{...props}
 				className={[
 					'w-4 h-4 rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-input-border bg-surface text-brand',

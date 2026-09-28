@@ -44,6 +44,42 @@ describe('Checkbox', () =>
 		expect(onChange).toHaveBeenCalledOnce();
 	});
 
+	it('toggles checked state on Enter, same as Space', async () =>
+	{
+		// Native <input type="checkbox"> only toggles on Space in every browser, never Enter —
+		// Checkbox adds Enter support itself so it behaves consistently wherever it's used,
+		// not just inside composites (like DataTable's grid) that happen to add their own.
+		render(<Checkbox />);
+		const checkbox = screen.getByRole('checkbox');
+		checkbox.focus();
+
+		await userEvent.keyboard('{Enter}');
+		expect(checkbox).toHaveProperty('checked', true);
+
+		await userEvent.keyboard('{Enter}');
+		expect(checkbox).toHaveProperty('checked', false);
+	});
+
+	it('calls a consumer-provided onKeyDown alongside its own Enter handling', async () =>
+	{
+		const onKeyDown = vi.fn();
+		render(<Checkbox onKeyDown={onKeyDown} />);
+		screen.getByRole('checkbox').focus();
+
+		await userEvent.keyboard('{Enter}');
+		expect(onKeyDown).toHaveBeenCalledOnce();
+		expect(screen.getByRole('checkbox')).toHaveProperty('checked', true);
+	});
+
+	it('does not toggle on Enter when a consumer already called preventDefault', async () =>
+	{
+		render(<Checkbox onKeyDown={(e) => e.preventDefault()} />);
+		screen.getByRole('checkbox').focus();
+
+		await userEvent.keyboard('{Enter}');
+		expect(screen.getByRole('checkbox')).toHaveProperty('checked', false);
+	});
+
 	it('does not toggle when disabled', async () =>
 	{
 		render(<Checkbox disabled />);
