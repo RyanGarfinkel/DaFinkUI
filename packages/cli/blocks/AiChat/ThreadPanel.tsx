@@ -1,24 +1,22 @@
 'use client';
 
-import { FormEvent, KeyboardEvent, ReactNode, useEffect, useRef } from 'react';
-import CommandInput from '../../components/CommandInput/CommandInput';
+import { KeyboardEvent, ReactNode, useEffect, useRef } from 'react';
 import { SkeletonCard } from '../../components/Skeleton/Skeleton';
 import ScrollFade from '../../components/ScrollFade/ScrollFade';
+import Composer, { type ComposerProps } from './Composer';
 import Button from '../../components/Button/Button';
 import type { ChatMessage } from './AiChat';
+import { TypingPhrase } from './Phrases';
 
 export interface ThreadPanelProps {
 	title:          string;
 	rootMessages:   ChatMessage[];
 	threadMessages: ChatMessage[];
 	loading:        boolean;
-	draft:          string;
-	onDraftChange:  (value: string) => void;
-	onSubmit:       (e: FormEvent) => void;
-	isGenerating:   boolean;
+	composer:       ComposerProps;
 	isTyping:       boolean;
-	onStop:         () => void;
-	renderMessage:  (message: ChatMessage) => ReactNode;
+	renderRoot:     (message: ChatMessage) => ReactNode;
+	renderReply:    (message: ChatMessage, index: number) => ReactNode;
 	onClose:        () => void;
 }
 
@@ -27,19 +25,6 @@ const NEAR_BOTTOM_THRESHOLD_PX = 80;
 const CloseIcon = () => (
 	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
 		<path d='M18 6 6 18M6 6l12 12' />
-	</svg>
-);
-
-const SendIcon = () => (
-	<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='m22 2-7 20-4-9-9-4Z' />
-		<path d='M22 2 11 13' />
-	</svg>
-);
-
-const StopIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='currentColor' aria-hidden='true'>
-		<rect x='6' y='6' width='12' height='12' rx='2' />
 	</svg>
 );
 
@@ -56,8 +41,7 @@ const Divider = ({ label }: { label: string }) => (
 // contract in src/patterns/accessibility.md, since this never blocks the page behind it.
 export const ThreadPanel = (
 	{
-		title, rootMessages, threadMessages, loading, draft, onDraftChange, onSubmit,
-		isGenerating, isTyping, onStop, renderMessage, onClose,
+		title, rootMessages, threadMessages, loading, composer, isTyping, renderRoot, renderReply, onClose,
 	}: ThreadPanelProps
 ) => {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -104,7 +88,7 @@ export const ThreadPanel = (
 	};
 
 	return (
-		<div onKeyDown={handleKeyDown} className='flex flex-1 flex-col border-l-[length:var(--border-width)] border-surface-border'>
+		<div onKeyDown={handleKeyDown} className='flex min-w-0 flex-1 flex-col border-l-[length:var(--border-width)] border-surface-border'>
 			<div className='flex items-center justify-between gap-2 border-b-[length:var(--border-width)] border-surface-border px-4 py-3'>
 				<div className='min-w-0'>
 					<p className='text-[11px] font-medium uppercase tracking-wide text-text-subtle'>Thread</p>
@@ -125,45 +109,21 @@ export const ThreadPanel = (
 							</div>
 						) : (
 							<>
-								{rootMessages.map((m) => renderMessage(m))}
+								{rootMessages.map((m) => renderRoot(m))}
 								<Divider label='Thread replies' />
 								{threadMessages.length === 0 ? (
 									<p className='text-center text-sm text-text-muted'>No replies yet — start the thread below.</p>
 								) : (
-									threadMessages.map((m) => renderMessage(m))
+									threadMessages.map((m, index) => renderReply(m, index))
 								)}
-								{isTyping && (
-									<p className='text-xs text-text-muted'>Assistant is typing…</p>
-								)}
+								{isTyping && <TypingPhrase />}
 							</>
 						)}
 					</div>
 				</ScrollFade>
 
 				<div className='absolute inset-x-0 bottom-0 p-4'>
-					<form onSubmit={onSubmit} className='flex w-full flex-col items-center gap-2'>
-						<div className='flex w-full max-w-md items-center gap-1.5 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel p-1.5 shadow-[var(--shadow-lg)]'>
-							<CommandInput
-								className='min-w-0 flex-1'
-								value={draft}
-								onChange={onDraftChange}
-								commands={[]}
-								onCommand={() => {}}
-								placeholder='Reply in thread…'
-								aria-label='Thread reply'
-								disabled={isGenerating}
-							/>
-							{isGenerating ? (
-								<Button type='button' size='icon' aria-label='Stop generating' onClick={onStop}>
-									<StopIcon />
-								</Button>
-							) : (
-								<Button type='submit' size='icon' aria-label='Send reply' disabled={!draft.trim()}>
-									<SendIcon />
-								</Button>
-							)}
-						</div>
-					</form>
+					<Composer {...composer} />
 				</div>
 			</div>
 		</div>

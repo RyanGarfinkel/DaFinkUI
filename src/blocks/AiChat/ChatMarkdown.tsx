@@ -46,7 +46,7 @@ const components: Components = {
 			href={href}
 			target='_blank'
 			rel='noopener noreferrer'
-			className='text-brand underline-offset-2 hover:underline focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring rounded-[var(--radius-sm)]'
+			className='text-brand underline underline-offset-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring rounded-[var(--radius-sm)]'
 		>
 			{children}
 		</a>

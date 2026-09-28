@@ -114,6 +114,12 @@ const CANNED_REPLIES: CannedReply[] = [
 		text: 'If you want something short and sharp, Klara and the Sun is worth it — under 300 pages and hard to put down once you start.',
 	},
 	{
+		text: 'Here\'s a small debounce helper you can drop into any project:\n\n```ts\nconst debounce = <T extends unknown[]>(fn: (...args: T) => void, delay = 300) =>\n{\n\tlet timer: ReturnType<typeof setTimeout>;\n\n\treturn (...args: T) =>\n\t{\n\t\tclearTimeout(timer);\n\t\ttimer = setTimeout(() => fn(...args), delay);\n\t};\n};\n```\n\nCall it once, outside your render path, so the timer survives between calls.',
+		toolCalls: [
+			{ id: 'r5', kind: 'thought', title: 'Thinking', detail: 'A short, self-contained snippet is more useful here than a full explanation of timers.' },
+		],
+	},
+	{
 		text: 'A squeeze of lime right before serving wakes up almost any braise — acid is the most under-used seasoning in a home kitchen.',
 	},
 	{

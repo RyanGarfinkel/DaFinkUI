@@ -2,6 +2,7 @@
 
 import { LineChart, BarChart, AreaChart, DonutChart, RadarChart, type ChartSeries, type DonutSlice } from '../../components/Charts/Charts';
 import { Table, TableHead, TableBody, TableRow, TableHeader, TableCell } from '../../components/Table/Table';
+import WorkflowBuilder, { type WorkflowGraph } from '../../components/WorkflowBuilder/WorkflowBuilder';
 import FunctionPlotter from '../../components/FunctionPlotter/FunctionPlotter';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import AudioPlayer from '../../components/AudioPlayer/AudioPlayer';
@@ -41,6 +42,8 @@ export interface TableSpec {
 	rows:    Record<string, string | number>[];
 }
 
+export type WorkflowSpec = WorkflowGraph;
+
 type MessageSegment =
 	| { kind: 'text';       text: string }
 	| { kind: 'table';      spec: TableSpec }
@@ -51,11 +54,12 @@ type MessageSegment =
 	| { kind: 'donutchart'; spec: DonutSpec }
 	| { kind: 'math';       spec: MathSpec }
 	| { kind: 'image';      spec: ImageSpec }
-	| { kind: 'audio';      spec: AudioSpec };
+	| { kind: 'audio';      spec: AudioSpec }
+	| { kind: 'workflow';   spec: WorkflowSpec };
 
 const FENCE_PATTERN = /```(\w+)\n([\s\S]*?)```/g;
 
-const FENCE_LANGS = new Set(['table', 'lineplot', 'barchart', 'areachart', 'radarchart', 'donutchart', 'math', 'image', 'audio']);
+const FENCE_LANGS = new Set(['table', 'lineplot', 'barchart', 'areachart', 'radarchart', 'donutchart', 'math', 'image', 'audio', 'workflow']);
 
 const parseMessageSegments = (text: string): MessageSegment[] => {
 	const segments: MessageSegment[] = [];
@@ -190,6 +194,20 @@ const renderSegment = (seg: MessageSegment, index: number) => {
 
 		case 'audio':
 			return <AudioPlayer key={index} size='compact' src={seg.spec.src} title={seg.spec.title} className='w-56' />;
+
+		case 'workflow':
+			// A static diagram, not an editable builder: no toolbar, no run/simulate control,
+			// no dragging or editing — just the nodes and wires an LLM described, laid out
+			// horizontally to match the reading direction of the surrounding chat message.
+			return (
+				<WorkflowBuilder
+					key={index}
+					defaultGraph={seg.spec}
+					defaultDirection='horizontal'
+					readOnly
+					height={260}
+				/>
+			);
 
 		case 'text':
 			return seg.text.trim() ? <ChatMarkdown key={index} text={seg.text.trim()} /> : null;
