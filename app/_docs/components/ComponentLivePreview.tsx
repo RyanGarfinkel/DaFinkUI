@@ -457,7 +457,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
               <p className='text-base text-text leading-7'>Manage your account settings and preferences.</p>
             </TabsContent>
             <TabsContent value='security'>
-              <p className='text-base text-text leading-7'>Update your password and two-factor authentication settings.</p>
+              <p className='text-base text-text leading-7'>Update your password and two-factor settings.</p>
             </TabsContent>
             <TabsContent value='notifications'>
               <p className='text-base text-text leading-7'>Choose what notifications you receive and how.</p>

@@ -167,9 +167,15 @@ export const extraSections: Record<string, ExtraSection[]> = {
 		{
 			heading: 'Accessibility',
 			description: (
-				<p>
-					Button renders a native <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;button&gt;</code>, so it sits in normal Tab order and Enter/Space activate it with no extra JS; when <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>href</code> is passed it renders a Next.js <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>Link</code> instead, so only Enter (not Space) activates it, matching native anchor behavior. <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>loading</code> sets both <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-busy=&quot;true&quot;</code> and <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>disabled</code>. Icon-only sizes (<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>icon</code>, <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>icon-sm</code>) require an <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-label</code> since none is supplied automatically. No roving tabindex or arrow-key behavior.
-				</p>
+				<div className='flex flex-col gap-4'>
+					<p>
+						Button renders a native <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;button&gt;</code>, so it sits in normal Tab order and Enter/Space activate it with no extra JS; when <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>href</code> is passed it renders a Next.js <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>Link</code> instead, so only Enter (not Space) activates it, matching native anchor behavior. <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>loading</code> sets both <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-busy=&quot;true&quot;</code> and <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>disabled</code>. Icon-only sizes (<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>icon</code>, <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>icon-sm</code>) require an <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-label</code> since none is supplied automatically. No roving tabindex or arrow-key behavior.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['tab'], description: 'Moves focus to the button (or the rendered link, when href is set) in normal document order.' },
+						{ keys: ['shift', 'tab'], description: 'Moves focus to the previous tabbable element.' },
+					]} />
+				</div>
 			),
 		},
 	],
@@ -687,9 +693,15 @@ export const extraSections: Record<string, ExtraSection[]> = {
 		{
 			heading: 'Accessibility',
 			description: (
-				<p>
-					<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>Attachment</code> has no custom focus management: its primary control is a real <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;a href&gt;</code> when <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>href</code> is set, or a real <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;button type=&quot;button&quot;&gt;</code> otherwise, so it&apos;s never left keyboard-unreachable just because no URL was given. When <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>onRemove</code> is supplied, the remove button is a second, independent Tab stop as a sibling of the primary control (never nested inside it), each with its own native activation and visible focus ring — no roving tabindex, no custom key handling. The thumbnail image, when shown, is <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>alt=&quot;&quot;</code> since it&apos;s redundant with the adjacent filename text, and <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>AttachmentGroup</code> renders a native <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;ul&gt;</code>/<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;li&gt;</code> list so assistive tech announces the attached-file count.
-				</p>
+				<div className='flex flex-col gap-4'>
+					<p>
+						<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>Attachment</code> has no custom focus management: its primary control is a real <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;a href&gt;</code> when <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>href</code> is set, or a real <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;button type=&quot;button&quot;&gt;</code> otherwise, so it&apos;s never left keyboard-unreachable just because no URL was given. When <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>onRemove</code> is supplied, the remove button is a second, independent Tab stop as a sibling of the primary control (never nested inside it), each with its own native activation and visible focus ring — no roving tabindex, no custom key handling. The thumbnail image, when shown, is <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>alt=&quot;&quot;</code> since it&apos;s redundant with the adjacent filename text, and <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>AttachmentGroup</code> renders a native <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;ul&gt;</code>/<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;li&gt;</code> list so assistive tech announces the attached-file count.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['tab'], description: 'Moves focus to the primary control, then to the remove button (when onRemove is set), in normal document order.' },
+						{ keys: ['shift', 'tab'], description: 'Same as Tab, in reverse.' },
+					]} />
+				</div>
 			),
 		},
 	],
