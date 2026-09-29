@@ -1841,6 +1841,7 @@ export default AiChat;
 			{ path: 'AiChat/types.ts', kind: 'model' },
 			{ path: 'AiChat/chatApi.ts', kind: 'api' },
 			{ path: 'AiChat/useConversation.ts', kind: 'hook' },
+			'AiChat/CLAUDE.md',
 		],
 		promptSnippet: `Most of your reply can just be normal GitHub-flavored markdown — the chat already
 renders it: **bold**/*italic*, [links](https://example.com), \`inline code\`, fenced code blocks

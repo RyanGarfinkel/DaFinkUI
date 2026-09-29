@@ -32,7 +32,13 @@ function copyDirs(root, destRoot, label)
 		// this silently drops those files from the copy regardless of what a registry entry's
 		// `files` array says, so a consumer's `npx dafink-ui add` installs a component/block
 		// that imports a file that was never actually shipped.
-		const files = readdirSync(dir).filter(f => extname(f) === '.tsx' || extname(f) === '.ts');
+		//
+		// CLAUDE.md specifically (not every .md — a component's spec.md stays internal, it's
+		// authoring documentation, not usage guidance) is included so a directory guide like
+		// AiChat/CLAUDE.md can be listed in a registry entry's `files` and ship to consumers,
+		// giving an AI agent working in the installed copy the same map of the block a repo
+		// maintainer has.
+		const files = readdirSync(dir).filter(f => extname(f) === '.tsx' || extname(f) === '.ts' || f === 'CLAUDE.md');
 
 		for(const file of files)
 		{
