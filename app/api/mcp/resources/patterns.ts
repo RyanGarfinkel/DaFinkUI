@@ -14,5 +14,5 @@ export const getPattern = (name: string) => {
 		const p = join(PATTERNS_DIR, `${name}${ext}`);
 		if(existsSync(p)) return readFileSync(p, 'utf-8');
 	}
-	throw new Error(`No pattern found: ${name}`);
+	throw new Error(`No pattern found: ${name}. Available: ${listPatterns().join(', ')}`);
 };

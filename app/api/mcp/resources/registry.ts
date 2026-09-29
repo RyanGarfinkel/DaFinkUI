@@ -1,7 +1,16 @@
 import { registry, ComponentEntry } from '@/app/_docs/registry/index';
 
-export const getFullRegistry = () => {
-	return registry;
+type ComponentSummary = Pick<ComponentEntry, 'slug' | 'name' | 'category' | 'description'>;
+
+const toSummary = ({ slug, name, category, description }: ComponentEntry): ComponentSummary =>
+	({ slug, name, category, description });
+
+// `full: true` returns every field (usage source, props table, deps) for all
+// components — this is tens of thousands of tokens. Default to name/category/
+// description only; callers that need one component's full entry should use
+// get_component_registry_entry(name) instead of dumping everything.
+export const getFullRegistry = (full = false): ComponentEntry[] | ComponentSummary[] => {
+	return full ? registry : registry.map(toSummary);
 };
 
 export const getRegistryEntry = (name: string): string => {

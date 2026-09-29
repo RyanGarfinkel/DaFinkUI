@@ -1,7 +1,16 @@
 import { blocks, BlockEntry } from '@/app/_docs/registry/blocks';
 
-export const getFullBlockRegistry = () => {
-	return blocks;
+type BlockSummary = Pick<BlockEntry, 'slug' | 'name' | 'category' | 'description'>;
+
+const toSummary = ({ slug, name, category, description }: BlockEntry): BlockSummary =>
+	({ slug, name, category, description });
+
+// `full: true` returns every field (usage source, deps) for all blocks — this
+// is well over 100KB of JSON. Default to name/category/description only;
+// callers that need one block's full entry should use
+// get_block_registry_entry(name) instead of dumping everything.
+export const getFullBlockRegistry = (full = false): BlockEntry[] | BlockSummary[] => {
+	return full ? blocks : blocks.map(toSummary);
 };
 
 export const getBlockRegistryEntry = (name: string): string => {

@@ -1,36 +1,121 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { getFullBlockRegistry, getBlockRegistryEntry, listBlocksByCategory, searchBlocks } from './resources/blocks';
 import { getFullRegistry, getRegistryEntry, listByCategory, searchComponents } from './resources/registry';
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { getFullStyleRegistry, listStyles, getStyle } from './resources/styles';
+import { getFullThemeRegistry, listThemes, getTheme } from './resources/themes';
 import { listPatterns, getPattern } from './resources/patterns';
 import { getComponentSpec } from './resources/components';
 import { listRules, getRule } from './resources/rules';
 import { registerPrompts } from './resources/prompts';
+import { registry } from '@/app/_docs/registry/index';
+import { blocks } from '@/app/_docs/registry/blocks';
 import { getTokens } from './resources/tokens';
+import pkg from '@/package.json';
 import { z } from 'zod';
 
+// Always dynamic: every response depends on request-scoped MCP protocol state
+// (the transport reads the request body/headers itself, which Next's static
+// analysis can't see into) and on disk reads at request time. Never let this
+// route be statically optimized or cached.
+export const dynamic = 'force-dynamic';
+
 const buildServer = (): McpServer => {
-	const server = new McpServer({ name: 'dafink-ui', version: '1.0.0' });
+	const server = new McpServer({ name: 'dafink-ui', version: pkg.version });
 
-	server.resource('components', 'dafink://components', async () => ({
-		contents: [{ uri: 'dafink://components', text: JSON.stringify(getFullRegistry()) }],
-	}));
+	server.resource(
+		'components', 'dafink://components',
+		{ description: 'Full component registry: every component with usage code, props, and dependencies', mimeType: 'application/json' },
+		async () => ({ contents: [{ uri: 'dafink://components', text: JSON.stringify(getFullRegistry(true)) }] })
+	);
 
-	server.resource('blocks', 'dafink://blocks', async () => ({
-		contents: [{ uri: 'dafink://blocks', text: JSON.stringify(getFullBlockRegistry()) }],
-	}));
+	server.resource(
+		'blocks', 'dafink://blocks',
+		{ description: 'Full block registry: every block with usage code and dependencies', mimeType: 'application/json' },
+		async () => ({ contents: [{ uri: 'dafink://blocks', text: JSON.stringify(getFullBlockRegistry(true)) }] })
+	);
 
-	server.resource('tokens', 'dafink://tokens', async () => ({
-		contents: [{ uri: 'dafink://tokens', text: JSON.stringify(getTokens(), null, 2) }],
-	}));
+	server.resource(
+		'themes', 'dafink://themes',
+		{ description: 'Every color palette (theme): light/dark CSS custom property maps', mimeType: 'application/json' },
+		async () => ({ contents: [{ uri: 'dafink://themes', text: JSON.stringify(getFullThemeRegistry()) }] })
+	);
 
-	server.resource('patterns', 'dafink://patterns', async () => ({
-		contents: [{ uri: 'dafink://patterns', text: JSON.stringify(listPatterns()) }],
-	}));
+	server.resource(
+		'styles', 'dafink://styles',
+		{ description: 'Every surface style: light/dark CSS custom property maps for radius, shadow, blur, and depth tokens', mimeType: 'application/json' },
+		async () => ({ contents: [{ uri: 'dafink://styles', text: JSON.stringify(getFullStyleRegistry()) }] })
+	);
 
-	server.resource('rules', 'dafink://rules', async () => ({
-		contents: [{ uri: 'dafink://rules', text: JSON.stringify(listRules()) }],
-	}));
+	server.resource(
+		'tokens', 'dafink://tokens',
+		{ description: 'Default (Zinc) color tokens, spacing, typography, and motion (duration/easing) tokens', mimeType: 'application/json' },
+		async () => ({ contents: [{ uri: 'dafink://tokens', text: JSON.stringify(getTokens(), null, 2) }] })
+	);
+
+	server.resource(
+		'patterns', 'dafink://patterns',
+		{ description: 'Names of every design/accessibility pattern doc available via get_pattern', mimeType: 'application/json' },
+		async () => ({ contents: [{ uri: 'dafink://patterns', text: JSON.stringify(listPatterns()) }] })
+	);
+
+	server.resource(
+		'rules', 'dafink://rules',
+		{ description: 'Names of every project rule doc available via get_rule', mimeType: 'application/json' },
+		async () => ({ contents: [{ uri: 'dafink://rules', text: JSON.stringify(listRules()) }] })
+	);
+
+	// Per-item resource templates. These address the same data the tools below
+	// return (they call the identical functions) so there is exactly one
+	// implementation per data source — the template is just a second, URI-based
+	// way to reach it for resource-aware clients.
+	server.resource(
+		'component', new ResourceTemplate('dafink://components/{slug}', {
+			list: async () => ({ resources: registry.map((e) => ({ uri: `dafink://components/${e.slug}`, name: e.name, description: e.description })) }),
+		}),
+		{ description: 'A single component\'s registry entry by slug' },
+		async (uri, { slug }) => ({ contents: [{ uri: uri.href, text: getRegistryEntry(String(slug)) }] })
+	);
+
+	server.resource(
+		'block', new ResourceTemplate('dafink://blocks/{slug}', {
+			list: async () => ({ resources: blocks.map((e) => ({ uri: `dafink://blocks/${e.slug}`, name: e.name, description: e.description })) }),
+		}),
+		{ description: 'A single block\'s registry entry by slug' },
+		async (uri, { slug }) => ({ contents: [{ uri: uri.href, text: getBlockRegistryEntry(String(slug)) }] })
+	);
+
+	server.resource(
+		'pattern', new ResourceTemplate('dafink://patterns/{name}', {
+			list: async () => ({ resources: listPatterns().map((name) => ({ uri: `dafink://patterns/${name}`, name })) }),
+		}),
+		{ description: 'A single pattern doc by name' },
+		async (uri, { name }) => ({ contents: [{ uri: uri.href, text: getPattern(String(name)) }] })
+	);
+
+	server.resource(
+		'rule', new ResourceTemplate('dafink://rules/{name}', {
+			list: async () => ({ resources: listRules().map((name) => ({ uri: `dafink://rules/${name}`, name })) }),
+		}),
+		{ description: 'A single project rule doc by name' },
+		async (uri, { name }) => ({ contents: [{ uri: uri.href, text: getRule(String(name)) }] })
+	);
+
+	server.resource(
+		'theme', new ResourceTemplate('dafink://themes/{name}', {
+			list: async () => ({ resources: getFullThemeRegistry().map((t) => ({ uri: `dafink://themes/${t.name}`, name: t.label })) }),
+		}),
+		{ description: 'A single color palette (theme) by name' },
+		async (uri, { name }) => ({ contents: [{ uri: uri.href, text: getTheme(String(name)) }] })
+	);
+
+	server.resource(
+		'style', new ResourceTemplate('dafink://styles/{name}', {
+			list: async () => ({ resources: getFullStyleRegistry().map((s) => ({ uri: `dafink://styles/${s.name}`, name: s.label })) }),
+		}),
+		{ description: 'A single surface style by name' },
+		async (uri, { name }) => ({ contents: [{ uri: uri.href, text: getStyle(String(name)) }] })
+	);
 
 	server.tool(
 		'get_component_spec',
@@ -62,9 +147,9 @@ const buildServer = (): McpServer => {
 
 	server.tool(
 		'get_full_registry',
-		'Get every component with its full registry entry: usage code, props, and dependencies for all 48 components',
-		{},
-		async () => ({ content: [{ type: 'text', text: JSON.stringify(getFullRegistry()) }] })
+		`Get every component (${registry.length} total). By default returns slug/name/category/description only — pass full: true for complete entries (usage code, props, deps), which is a very large payload. Prefer search_components or get_component_registry_entry for a specific need.`,
+		{ full: z.boolean().optional().describe('Return complete entries (usage, props, deps) instead of summaries. Defaults to false.') },
+		async ({ full }) => ({ content: [{ type: 'text', text: JSON.stringify(getFullRegistry(full)) }] })
 	);
 
 	server.tool(
@@ -90,9 +175,9 @@ const buildServer = (): McpServer => {
 
 	server.tool(
 		'get_full_block_registry',
-		'Get every block with its full registry entry: usage code and dependencies for all blocks',
-		{},
-		async () => ({ content: [{ type: 'text', text: JSON.stringify(getFullBlockRegistry()) }] })
+		`Get every block (${blocks.length} total). By default returns slug/name/category/description only — pass full: true for complete entries (usage code, deps), which is a very large payload. Prefer search_blocks or get_block_registry_entry for a specific need.`,
+		{ full: z.boolean().optional().describe('Return complete entries (usage, deps) instead of summaries. Defaults to false.') },
+		async ({ full }) => ({ content: [{ type: 'text', text: JSON.stringify(getFullBlockRegistry(full)) }] })
 	);
 
 	server.tool(
@@ -103,10 +188,52 @@ const buildServer = (): McpServer => {
 	);
 
 	server.tool(
+		'list_patterns',
+		'List every available design/accessibility pattern doc by name',
+		{},
+		async () => ({ content: [{ type: 'text', text: JSON.stringify(listPatterns()) }] })
+	);
+
+	server.tool(
 		'get_rule',
 		'Get a project rule document: coding standards, component creation rules, commit conventions, token usage, etc.',
 		{ name: z.string().describe('Rule name, e.g. "code", "new-component", "tokens", "commits"') },
 		async ({ name }) => ({ content: [{ type: 'text', text: getRule(name) }] })
+	);
+
+	server.tool(
+		'list_rules',
+		'List every available project rule doc by name',
+		{},
+		async () => ({ content: [{ type: 'text', text: JSON.stringify(listRules()) }] })
+	);
+
+	server.tool(
+		'get_theme',
+		'Get a single color palette (theme): its light/dark CSS custom property values for brand, danger, success, warning, surface, and text tokens',
+		{ name: z.string().describe('Theme name, e.g. "ocean", "ember", "forest", "noir", "plum", "default"') },
+		async ({ name }) => ({ content: [{ type: 'text', text: getTheme(name) }] })
+	);
+
+	server.tool(
+		'list_themes',
+		'List every available color palette (theme) by name, label, and accent color',
+		{},
+		async () => ({ content: [{ type: 'text', text: listThemes() }] })
+	);
+
+	server.tool(
+		'get_style',
+		'Get a single surface style: its light/dark CSS custom property values for radius, border width, shadow, backdrop blur, and inner shadow',
+		{ name: z.string().describe('Style name, e.g. "minimal", "neumorph", "brutalist"') },
+		async ({ name }) => ({ content: [{ type: 'text', text: getStyle(name) }] })
+	);
+
+	server.tool(
+		'list_styles',
+		'List every available surface style by name, label, and description',
+		{},
+		async () => ({ content: [{ type: 'text', text: listStyles() }] })
 	);
 
 	registerPrompts(server);

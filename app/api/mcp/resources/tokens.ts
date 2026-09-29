@@ -1,3 +1,3 @@
-import { colors, spacing, typography } from '@/src/tokens';
+import { colors, spacing, typography, motion } from '@/src/tokens';
 
-export const getTokens = () => ({ colors, spacing, typography });
+export const getTokens = () => ({ colors, spacing, typography, motion });

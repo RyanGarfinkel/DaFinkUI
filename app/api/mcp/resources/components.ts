@@ -11,6 +11,6 @@ export const listComponents = () =>
 export const getComponentSpec = (name: string) => {
 	const specPath = join(COMPONENTS_DIR, name, 'spec.md');
 	if(!existsSync(specPath))
-		throw new Error(`No spec found for component: ${name}`);
+		throw new Error(`No spec found for component: ${name}. Available: ${listComponents().join(', ')}`);
 	return readFileSync(specPath, 'utf-8');
 };
