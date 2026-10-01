@@ -930,7 +930,7 @@ export default function ChartCard() {
 		slug: 'ai-chat',
 		name: 'AI chat',
 		category: 'AI',
-		description: 'A chat app with a history sidebar (new-chat button, rename, delete, ⌘K message search, and a footer profile card that opens a settings modal), streaming replies, and forkable reply threads in a resizable side panel. Installs as a folder with ToolCallTrace and Questionnaire as dependencies. Chats, threads, replies, and search all load from API routes: the demo uses the docs-site /api/ai-chat, /api/ai-chat/chats, /api/ai-chat/threads/[id], and /api/ai-chat/search, so point them at your own backend.',
+		description: 'A chat app with a history sidebar (new-chat button, rename, delete, and a footer profile card that opens a settings modal), streaming replies, and forkable reply threads in a resizable side panel. Installs as a folder with ToolCallTrace and Questionnaire as dependencies. Works with a real API: chats, threads, replies, and search all load from API routes, so point them at your own backend.',
 		usage: `'use client';
 
 import { describeAttachments, buildHistory, findLastUserMessageId, hasPrecedingUserMessage, DRAFT_TITLE_MAX_LENGTH } from '@/src/blocks/AiChat/messageHelpers';
