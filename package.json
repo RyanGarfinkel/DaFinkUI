@@ -20,7 +20,9 @@
     "sync-registry": "node packages/cli/scripts/build-registry.mjs",
     "build-changelog": "node scripts/build-changelog.mjs",
     "prepare": "husky",
-    "check-contrast": "npx tsx scripts/check-contrast.ts"
+    "check-contrast": "npx tsx scripts/check-contrast.ts",
+    "test:visual": "playwright test",
+    "test:visual:update": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@babel/standalone": "^8.0.3",
@@ -52,6 +54,7 @@
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@commitlint/types": "^21.0.1",
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
