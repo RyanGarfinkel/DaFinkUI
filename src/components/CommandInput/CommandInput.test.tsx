@@ -57,6 +57,34 @@ describe('CommandInput: open/close', () =>
 		expect(input).toHaveAttribute('aria-expanded', 'true');
 	});
 
+	it('clears the pending close timer when unmounted mid-close', () =>
+	{
+		vi.useFakeTimers();
+
+		try
+		{
+			const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+			const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+			const { unmount } = render(<Harness />);
+			const input = screen.getByRole('combobox');
+			fireEvent.change(input, { target: { value: '/' } });
+			fireEvent.keyDown(input, { key: 'Escape' });
+
+			const closeCallIndex = setTimeoutSpy.mock.calls.findIndex(([, ms]) => ms === 150);
+			const closeTimerId = setTimeoutSpy.mock.results[closeCallIndex].value;
+			clearTimeoutSpy.mockClear();
+			unmount();
+
+			expect(clearTimeoutSpy).toHaveBeenCalledWith(closeTimerId);
+		}
+		finally
+		{
+			vi.restoreAllMocks();
+			vi.useRealTimers();
+		}
+	});
+
 	it('closes the listbox on Escape and returns focus to the input', async () =>
 	{
 		render(<Harness />);

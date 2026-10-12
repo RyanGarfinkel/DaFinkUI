@@ -50,6 +50,7 @@ export const DatePicker = (
     const [second,        setSecond]        = useState(() => (value ?? today).getSeconds());
 
     const triggerRef  = useRef<HTMLButtonElement>(null);
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const popupRef    = useRef<HTMLDivElement>(null);
     const gridRef     = useRef<HTMLDivElement>(null);
     const buttonRefs  = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -58,8 +59,11 @@ export const DatePicker = (
     const popupId  = `${id}-popup`;
     const gridId   = `${id}-grid`;
 
+    useEffect(() => () => clearTimeout(closeTimerRef.current), []);
+
     const openPopup = () => {
 		if(disabled) return;
+		clearTimeout(closeTimerRef.current);
 
 		const base = value ?? today;
 		setViewYear(base.getFullYear());
@@ -90,7 +94,8 @@ export const DatePicker = (
 
     const closePopup = (returnFocus = true) => {
 		setVisible(false);
-		setTimeout(() => setMounted(false), 150);
+		clearTimeout(closeTimerRef.current);
+		closeTimerRef.current = setTimeout(() => setMounted(false), 150);
 		if(returnFocus) triggerRef.current?.focus();
 	};
 

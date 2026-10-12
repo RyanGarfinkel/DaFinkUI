@@ -137,6 +137,7 @@ export const Menu = (
     const [subPosition, setSubPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
     const triggerRef     = useRef<HTMLButtonElement>(null);
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const menuRef        = useRef<HTMLUListElement>(null);
     const subRef         = useRef<HTMLUListElement>(null);
     const typeaheadTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -185,8 +186,11 @@ export const Menu = (
         setPosition({ top, left });
     }, [side, align]);
 
+    useEffect(() => () => clearTimeout(closeTimerRef.current), []);
+
     const openMenu = (initial: 'first' | 'last') => {
 		if(disabled || navigable.length === 0) return;
+		clearTimeout(closeTimerRef.current);
 		setActiveIndex(initial === 'first' ? navigable[0] : navigable[navigable.length - 1]);
 		setMounted(true);
 	};
@@ -238,7 +242,8 @@ export const Menu = (
 		setSubVisible(false);
 		if(typeaheadTimer.current) clearTimeout(typeaheadTimer.current);
 		setTypeahead('');
-		setTimeout(() => setMounted(false), 150);
+		clearTimeout(closeTimerRef.current);
+		closeTimerRef.current = setTimeout(() => setMounted(false), 150);
 		if(returnFocus) triggerRef.current?.focus();
 	}, []);
 

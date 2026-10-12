@@ -58,6 +58,7 @@ const TimeField = (
 	const bufferRef    = useRef<{ segment: DigitSegment; digits: string } | null>(null);
 	const timeoutRef   = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const wheelBtnRef  = useRef<HTMLButtonElement>(null);
+	const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const wheelPopRef  = useRef<HTMLDivElement>(null);
 
 	const [wheelMounted, setWheelMounted] = useState(false);
@@ -84,14 +85,18 @@ const TimeField = (
 		return () => cancelAnimationFrame(frame);
 	}, [autoFocusFirst]);
 
+	useEffect(() => () => clearTimeout(closeTimerRef.current), []);
+
 	const openWheel = () => {
 		if(disabled) return;
+		clearTimeout(closeTimerRef.current);
 		setWheelMounted(true);
 	};
 
 	const closeWheel = (returnFocus = true) => {
 		setWheelVisible(false);
-		setTimeout(() => setWheelMounted(false), 150);
+		clearTimeout(closeTimerRef.current);
+		closeTimerRef.current = setTimeout(() => setWheelMounted(false), 150);
 		if(returnFocus) wheelBtnRef.current?.focus();
 	};
 

@@ -53,6 +53,7 @@ export const Select = (
     const [typeahead,   setTypeahead]   = useState('');
 
     const triggerRef      = useRef<HTMLButtonElement>(null);
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const listRef         = useRef<HTMLUListElement>(null);
     const typeaheadTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -62,8 +63,11 @@ export const Select = (
     const selectedIdx   = options.findIndex((o) => o.value === value);
     const selectedLabel = selectedIdx >= 0 ? options[selectedIdx].label : null;
 
+    useEffect(() => () => clearTimeout(closeTimerRef.current), []);
+
     const openList = () => {
 		if(disabled) return;
+		clearTimeout(closeTimerRef.current);
 		setActiveIndex(selectedIdx >= 0 ? selectedIdx : 0);
 		setMounted(true);
 	};
@@ -89,7 +93,8 @@ export const Select = (
 		setVisible(false);
 		if(typeaheadTimer.current) clearTimeout(typeaheadTimer.current);
 		setTypeahead('');
-		setTimeout(() => setMounted(false), 150);
+		clearTimeout(closeTimerRef.current);
+		closeTimerRef.current = setTimeout(() => setMounted(false), 150);
 		if(returnFocus) triggerRef.current?.focus();
 	};
 

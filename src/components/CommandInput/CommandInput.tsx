@@ -55,6 +55,7 @@ export const CommandInput = (
 	const inputRef     = useRef<HTMLInputElement>(null);
 	const listRef      = useRef<HTMLUListElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
+	const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
 	const id     = useId();
 	const listId = `${id}-listbox`;
@@ -66,11 +67,17 @@ export const CommandInput = (
 		: [];
 	const activeIndex = filtered.length === 0 ? -1 : Math.min(rawActiveIndex, filtered.length - 1);
 
-	const openMenu = () => setMounted(true);
+	useEffect(() => () => clearTimeout(closeTimerRef.current), []);
+
+	const openMenu = () => {
+		clearTimeout(closeTimerRef.current);
+		setMounted(true);
+	};
 
 	const closeMenu = (returnFocus: boolean) => {
 		setVisible(false);
-		setTimeout(() => setMounted(false), 150);
+		clearTimeout(closeTimerRef.current);
+		closeTimerRef.current = setTimeout(() => setMounted(false), 150);
 		if(returnFocus) inputRef.current?.focus();
 	};
 

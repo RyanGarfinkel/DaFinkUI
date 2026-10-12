@@ -46,6 +46,7 @@ export const Popover = (
     const [position, setPosition] = useState<{ top: number; left: number }>({ top: 0, left: 0 });
 
     const triggerRef = useRef<HTMLButtonElement>(null);
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
     const panelRef   = useRef<HTMLDivElement>(null);
 
     const id      = useId();
@@ -86,15 +87,19 @@ export const Popover = (
         setPosition({ top, left });
     }, [side, align]);
 
+    useEffect(() => () => clearTimeout(closeTimerRef.current), []);
+
     const openPopover = () => {
 		if(disabled) return;
+		clearTimeout(closeTimerRef.current);
 		setMounted(true);
 		onOpenChange?.(true);
 	};
 
     const closePopover = useCallback((returnFocus = true) => {
 		setVisible(false);
-		setTimeout(() => setMounted(false), 150);
+		clearTimeout(closeTimerRef.current);
+		closeTimerRef.current = setTimeout(() => setMounted(false), 150);
 		onOpenChange?.(false);
 		if(returnFocus) triggerRef.current?.focus();
 	}, [onOpenChange]);
