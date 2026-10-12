@@ -147,10 +147,11 @@ export interface TreeItemProps {
 	icon?: ReactNode;
 	disabled?: boolean;
 	className?: string;
+	onSelect?: () => void;
 }
 
 export const TreeItem = (
-    { label, children, defaultOpen = false, collapsible = true, icon, disabled = false, className = '' }: TreeItemProps
+    { label, children, defaultOpen = false, collapsible = true, icon, disabled = false, className = '', onSelect }: TreeItemProps
 ) => {
     const tree = useTreeContext();
     const parent = useTreeItemContext();
@@ -175,6 +176,7 @@ export const TreeItem = (
 		if(disabled) return;
 		if(isBranch && collapsible) setOpen(prev => !prev);
 		tree.setFocusedId(itemId);
+		onSelect?.();
 	};
 
     const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -185,6 +187,7 @@ export const TreeItem = (
 			e.preventDefault();
 			e.stopPropagation();
 			if(isBranch && collapsible) setOpen(prev => !prev);
+			onSelect?.();
 		}
 		else if(e.key === 'ArrowRight')
 		{

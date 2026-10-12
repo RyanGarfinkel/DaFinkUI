@@ -101,8 +101,12 @@ export const FormMessage = ({ className = '', children, ...props }: FormMessageP
 	if(!children) return null;
 
 	return (
-		<p className={`text-sm text-input-error ${className}`} role='alert' {...props}>
-			{children}
+		<p className={`flex items-start gap-1.5 text-sm text-input-error ${className}`} role='alert' {...props}>
+			<svg className='mt-0.5 size-4 shrink-0' viewBox='0 0 16 16' fill='none' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' aria-hidden='true'>
+				<circle cx='8' cy='8' r='6.25' />
+				<path d='M8 4.75v3.75M8 10.75v.01' />
+			</svg>
+			<span>{children}</span>
 		</p>
 	);
 };

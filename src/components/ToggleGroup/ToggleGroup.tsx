@@ -111,7 +111,7 @@ export const ToggleGroupItem = (
 					'absolute inset-y-[5px] inset-x-1 rounded-[max(0px,calc(var(--radius)_-_0.25rem))] transition-[box-shadow,background-color] duration-150',
 					isActive
 						? 'group-hover:backdrop-brightness-[0.82] group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-brand-ring group-focus-visible:[--tw-ring-offset-color:var(--color-surface)]'
-						: 'group-hover:bg-input-border group-focus-visible:ring-2 group-focus-visible:ring-brand-ring',
+						: 'group-hover:bg-input-border group-focus-visible:ring-2 group-focus-visible:ring-offset-2 group-focus-visible:ring-brand-ring group-focus-visible:[--tw-ring-offset-color:var(--color-surface)]',
 				].join(' ')}
 			/>
 			<span className='relative'>{children}</span>

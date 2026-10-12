@@ -1,25 +1,67 @@
 import { createContext, useContext, useRef, useEffect, useState, HTMLAttributes, ButtonHTMLAttributes } from 'react';
-import { DropdownMenu, DropdownMenuItem } from '../DropdownMenu/DropdownMenu';
+import { Menu, MenuItem } from '../Menu/Menu';
 
 export interface MenuBarProps extends HTMLAttributes<HTMLElement> {
 	height?: string;
 }
 
-export const MenuBar = ({ height = 'h-14', className = '', children, ...props }: MenuBarProps) => {
+const TABBABLE_SELECTOR = [
+	'[data-menubar-nav-item]:not(:disabled)',
+	'button:not(:disabled):not([tabindex="-1"])',
+	'a[href]:not([tabindex="-1"])',
+	'input:not(:disabled):not([type="hidden"]):not([tabindex="-1"])',
+	'select:not(:disabled):not([tabindex="-1"])',
+	'textarea:not(:disabled):not([tabindex="-1"])',
+	'[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+const MenuBarContext = createContext(false);
+
+const isTextEntry = (el: Element | null) =>
+	el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement || (el instanceof HTMLElement && el.isContentEditable);
+
+const moveFocusByKey = (e: React.KeyboardEvent<HTMLElement>, scope: HTMLElement | null) => {
+	if(e.defaultPrevented || !scope) return;
+	if(!scope.contains(e.target as Node) || isTextEntry(e.target as Element)) return;
+
+	const items = Array.from(scope.querySelectorAll<HTMLElement>(TABBABLE_SELECTOR));
+	const idx   = items.indexOf(document.activeElement as HTMLElement);
+	if(idx === -1 || items.length < 2) return;
+
+	let next: HTMLElement | undefined;
+
+	if(e.key === 'ArrowRight') next = items[(idx + 1) % items.length];
+	else if(e.key === 'ArrowLeft') next = items[(idx - 1 + items.length) % items.length];
+	else if(e.key === 'Home') next = items[0];
+	else if(e.key === 'End') next = items[items.length - 1];
+
+	if(!next) return;
+
+	e.preventDefault();
+	next.focus();
+};
+
+export const MenuBar = ({ height = 'h-14', className = '', children, onKeyDown, ...props }: MenuBarProps) => {
 	const hasPositionOverride = /\b(static|fixed|absolute|sticky|relative)\b/.test(className);
 
 	return (
-		<header
-			{...props}
-			className={[
-				hasPositionOverride ? '' : 'fixed top-0 left-0 right-0',
-				'z-50 flex items-center gap-2 px-3 sm:gap-3 sm:px-6',
-				'border-b-[length:var(--border-width)] border-surface-border bg-surface/95 backdrop-blur-md',
-				height, className,
-			].filter(Boolean).join(' ')}
-		>
-			{children}
-		</header>
+		<MenuBarContext.Provider value>
+			<header
+				{...props}
+				onKeyDown={(e) => {
+					onKeyDown?.(e);
+					moveFocusByKey(e, e.currentTarget);
+				}}
+				className={[
+					hasPositionOverride ? '' : 'fixed top-0 left-0 right-0',
+					'z-50 flex items-center gap-2 px-3 sm:gap-3 sm:px-6',
+					'border-b-[length:var(--border-width)] border-surface-border bg-surface/95 backdrop-blur-md',
+					height, className,
+				].filter(Boolean).join(' ')}
+			>
+				{children}
+			</header>
+		</MenuBarContext.Provider>
 	);
 };
 
@@ -66,12 +108,14 @@ export interface MenuBarNavProps {
 	'aria-label'?:      string;
 }
 
-const NAV_ITEM_BASE = 'relative z-10 inline-flex h-8 items-center justify-center gap-1.5 rounded-[max(0px,calc(var(--radius)_-_0.25rem))] px-3 text-sm font-medium tracking-tight transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40';
+const NAV_ITEM_BASE = 'relative z-10 inline-flex h-8 items-center justify-center gap-1.5 rounded-[max(0px,calc(var(--radius)_-_0.25rem))] px-3 text-sm font-medium tracking-tight transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring focus-visible:[--tw-ring-offset-color:var(--color-surface)] disabled:pointer-events-none disabled:opacity-40';
 
 export const MenuBarNav = ({ value, onValueChange, className = '', children, 'aria-label': ariaLabel }: MenuBarNavProps) => {
 	const navRef       = useRef<HTMLElement>(null);
 	const indicatorRef = useRef<HTMLDivElement>(null);
 	const initialized  = useRef(false);
+
+	const insideMenuBar = useContext(MenuBarContext);
 
 	const [rovingValue, setRovingValue] = useState<string | null>(null);
 
@@ -115,34 +159,8 @@ export const MenuBarNav = ({ value, onValueChange, className = '', children, 'ar
 	}, [value]);
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
-		const items = Array.from(
-			navRef.current?.querySelectorAll<HTMLButtonElement>('[data-menubar-nav-item]:not(:disabled)') ?? []
-		);
-		if(items.length < 2) return;
-
-		const idx = items.indexOf(document.activeElement as HTMLButtonElement);
-		if(idx === -1) return;
-
-		let next: HTMLButtonElement | undefined;
-
-		if(e.key === 'ArrowRight') {
-			e.preventDefault();
-			next = items[(idx + 1) % items.length];
-		} else if(e.key === 'ArrowLeft') {
-			e.preventDefault();
-			next = items[(idx - 1 + items.length) % items.length];
-		} else if(e.key === 'Home') {
-			e.preventDefault();
-			next = items[0];
-		} else if(e.key === 'End') {
-			e.preventDefault();
-			next = items[items.length - 1];
-		}
-
-		if(!next) return;
-
-		if(next.dataset.value) setRovingValue(next.dataset.value);
-		next.focus();
+		if(insideMenuBar) return;
+		moveFocusByKey(e, navRef.current);
 	};
 
 	return (
@@ -156,7 +174,7 @@ export const MenuBarNav = ({ value, onValueChange, className = '', children, 'ar
 				<div
 					ref={indicatorRef}
 					aria-hidden='true'
-					className='absolute inset-y-1 left-0 z-0 rounded-[max(0px,calc(var(--radius)_-_0.25rem))] bg-brand opacity-0 shadow-[var(--shadow-sm)] motion-safe:transition-[left,width,opacity] motion-safe:duration-200'
+					className='absolute inset-y-0 left-0 z-0 rounded-[max(0px,calc(var(--radius)_-_0.25rem))] bg-brand opacity-0 shadow-[var(--shadow-sm)] motion-safe:transition-[left,width,opacity] motion-safe:duration-200'
 				/>
 				{children}
 			</nav>
@@ -170,7 +188,7 @@ export interface MenuBarNavItemProps extends ButtonHTMLAttributes<HTMLButtonElem
 	className?: string;
 }
 
-export const MenuBarNavItem = ({ value, disabled = false, children, className = '', ...props }: MenuBarNavItemProps) => {
+export const MenuBarNavItem = ({ value, disabled = false, children, className = '', onFocus, ...props }: MenuBarNavItemProps) => {
 	const ctx      = useMenuBarNavContext();
 	const isActive = ctx.value === value;
 
@@ -189,6 +207,10 @@ export const MenuBarNavItem = ({ value, disabled = false, children, className = 
 			disabled={disabled}
 			tabIndex={ctx.rovingValue === value ? 0 : -1}
 			onClick={handleClick}
+			onFocus={(e) => {
+				ctx.setRovingValue(value);
+				onFocus?.(e);
+			}}
 			className={[
 				NAV_ITEM_BASE,
 				isActive ? 'text-brand-fg' : 'text-text-muted hover:text-text hover:bg-surface-hover',
@@ -201,7 +223,7 @@ export const MenuBarNavItem = ({ value, disabled = false, children, className = 
 	);
 };
 
-export interface MenuBarNavMoreItem extends Omit<DropdownMenuItem, 'onSelect'> {
+export interface MenuBarNavMoreItem extends Omit<MenuItem, 'onSelect'> {
 	value:     string;
 	onSelect?: () => void;
 }
@@ -241,7 +263,7 @@ export const MenuBarNavMore = ({ value, items, children, className = '' }: MenuB
 	};
 
 	return (
-		<DropdownMenu
+		<Menu
 			items={menuItems}
 			trigger={
 				<>

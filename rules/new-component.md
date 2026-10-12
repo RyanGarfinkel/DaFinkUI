@@ -25,7 +25,7 @@ src/components/ComponentName/
 └── spec.md                  # Machine-readable spec for MCP
 ```
 
-No exceptions. All three files are required. After creating the files, add an entry for the component to `app/_docs/registry/index.ts`: this is what populates the docs site. A component that exists in code but is not in the registry is invisible to users of the docs site.
+No exceptions. All three files are required. After creating the files, add an entry for the component to `app/_docs/registry/index.ts`: this is what populates the docs site. A component that exists in code but is not in the registry is invisible to users of the docs site. It is also invisible to the MCP server, which serves components, effects, and blocks straight from the docs registries. `app/api/mcp/resources/registry.test.ts` fails (in `npm test`, so pre-commit and CI) if a component or block directory has no registry entry or no `spec.md`.
 
 **Note:** Storybook stories (`.stories.tsx`) are no longer part of the required structure. The docs site registry replaces them as the primary showcase.
 
@@ -61,7 +61,7 @@ Every new component must have an entry in the registry. Categories follow the si
 
 | Category      | Components it contains                                            |
 |---------------|-------------------------------------------------------------------|
-| `Actions`     | Action-triggering components that aren't a form input (e.g. DropdownMenu triggers) |
+| `Actions`     | Action-triggering components that aren't a form input (e.g. Menu triggers) |
 | `Inputs`      | Button, Input, Textarea, Radio, Switch, ToggleGroup, CalendarInput |
 | `Display`     | Card, Table, Skeleton, Typography                                 |
 | `Navigation`  | Tabs, Breadcrumb                                                  |

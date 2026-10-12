@@ -1,5 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import Tree, { TreeItem } from './Tree';
 
 const BasicTree = () => {
@@ -461,5 +461,23 @@ describe('Tree', () =>
 		expect(screen.getByTestId('item-icon')).toBeDefined();
 		expect(screen.queryByTestId('terminal-icon')).toBeNull();
 		expect(screen.queryByTestId('nonterminal-icon')).toBeNull();
+	});
+
+	it('calls onSelect on click and on Enter', () =>
+	{
+		const onSelect = vi.fn();
+		render(<Tree><TreeItem label='leaf' onSelect={onSelect} /></Tree>);
+		const row = screen.getByText('leaf').parentElement!;
+		fireEvent.click(row);
+		fireEvent.keyDown(row, { key: 'Enter' });
+		expect(onSelect).toHaveBeenCalledTimes(2);
+	});
+
+	it('does not call onSelect when disabled', () =>
+	{
+		const onSelect = vi.fn();
+		render(<Tree><TreeItem label='leaf' disabled onSelect={onSelect} /></Tree>);
+		fireEvent.click(screen.getByText('leaf').parentElement!);
+		expect(onSelect).not.toHaveBeenCalled();
 	});
 });

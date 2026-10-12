@@ -109,7 +109,7 @@ No additional npm packages required. No registry dependencies.
 
 ### Scroll Lock
 
-Handled natively by `showModal()`: no manual `document.body.style.overflow` manipulation required.
+While the modal is mounted (including its exit animation), `document.documentElement.style.overflow` is set to `'hidden'` and restored on close or unmount. `showModal()` alone does not stop wheel/touch scrolling from reaching the page behind, and the lock targets `html`, not `body`, because the docs `globals.css` gives `html` an explicit `overflow-y`, which stops a body lock from reaching the viewport. The permanent `scrollbar-gutter: stable` on `html` means no layout shift. Scrolling inside `ModalContent` still works.
 
 ### Reduced Motion
 

@@ -88,6 +88,18 @@ describe('Drawer', () =>
 		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
 	});
 
+	it('locks page scroll on the html element while open and restores it on unmount', async () =>
+	{
+		document.documentElement.style.overflow = '';
+		const { unmount } = renderControlled(true);
+		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
+
+		expect(document.documentElement.style.overflow).toBe('hidden');
+
+		unmount();
+		expect(document.documentElement.style.overflow).toBe('');
+	});
+
 	it('has role="dialog" and aria-modal="true"', async () =>
 	{
 		renderControlled(true);

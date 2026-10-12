@@ -53,7 +53,7 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>`, so native button props (`onCl
 
 ### MenuBarNavMore
 
-A single nav-pill-styled entry that opens a `DropdownMenu` of overflow destinations. It participates in the same sliding pill and roving tabindex as `MenuBarNavItem`, and lights up as active whenever `MenuBarNav`'s `value` matches one of its own `items`.
+A single nav-pill-styled entry that opens a `Menu` of overflow destinations. It participates in the same sliding pill and roving tabindex as `MenuBarNavItem`, and lights up as active whenever `MenuBarNav`'s `value` matches one of its own `items`.
 
 | Name      | Type                                                                          | Default | Description                                                                                          |
 |-----------|--------------------------------------------------------------------------------|---------|--------------------------------------------------------------------------------------------------------|
@@ -99,9 +99,9 @@ Other interactive elements placed inside `MenuBar` (search triggers, account men
 - `<header>` landmark: announced as `banner` by screen readers when it is not nested inside `article`, `aside`, `main`, or `section`.
 - `MenuBarNav` renders a `<nav>` landmark; always pass `aria-label` so multiple nav regions on a page (e.g. this one plus a `Sidebar`) are distinguishable.
 - **Roving tabindex**: exactly one item (`MenuBarNavItem` or `MenuBarNavMore`'s trigger) has `tabIndex={0}` at a time — whichever is active, or the first non-disabled item if nothing matches yet. All others are `tabIndex={-1}`. Tab enters/exits the group at that one stop.
-- **Arrow keys**: `ArrowLeft`/`ArrowRight` move roving focus between items; `Home`/`End` jump to the first/last. `ArrowUp`/`ArrowDown` are intentionally left unhandled by `MenuBarNav` so they still open/close `MenuBarNavMore`'s dropdown per `DropdownMenu`'s own keyboard behavior when it has focus.
+- **Arrow keys**: `ArrowLeft`/`ArrowRight` move focus across every control in the bar in DOM order, so you can arrow from the nav items straight onto search and sign in (and back); `Home`/`End` jump to the first/last control, and the ends wrap. Controls placed in `MenuBarActions` or elsewhere in the bar stay in the normal Tab order as well. Arrow keys are left alone while focus is in a text input, textarea, select, or contenteditable so the caret still moves. When a nav item receives focus from outside the nav, it becomes the roving tab stop. A `MenuBarNav` used without a `MenuBar` keeps arrow navigation within the nav only. `ArrowUp`/`ArrowDown` are intentionally left unhandled so they still open/close `MenuBarNavMore`'s dropdown per `Menu`'s own keyboard behavior when it has focus.
 - Active item uses `aria-current="page"`, not `aria-pressed` — this is a navigation landmark, not a toggle group.
-- `MenuBarNavMore` composes `DropdownMenu` unmodified: focus moves into the menu on open, Escape closes and returns focus to the trigger, arrow keys navigate entries, typeahead and Enter/Space work as documented in `DropdownMenu`'s own spec. See `src/patterns/accessibility.md` for the full popup checklist.
+- `MenuBarNavMore` composes `Menu` unmodified: focus moves into the menu on open, Escape closes and returns focus to the trigger, arrow keys navigate entries, typeahead and Enter/Space work as documented in `Menu`'s own spec. See `src/patterns/accessibility.md` for the full popup checklist.
 - Purely a layout primitive otherwise: any accessibility requirements for search triggers, menu buttons, or toggles placed inside `MenuBarActions` are the responsibility of those inner components; see their own specs.
 
 ---
@@ -136,4 +136,4 @@ Pair with `Sidebar` for a full dashboard shell (fixed sidebar + fixed top bar), 
 npx dafink-ui add menu-bar
 ```
 
-No additional npm dependencies. `MenuBarNavMore` depends on `DropdownMenu` (installed automatically as a registry dependency).
+No additional npm dependencies. `MenuBarNavMore` depends on `Menu` (installed automatically as a registry dependency).

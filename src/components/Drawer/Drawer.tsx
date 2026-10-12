@@ -103,6 +103,16 @@ const Drawer = (
 		}
 	}, [open]);
 
+	// Locks `html`, not `body`: globals.css gives `html` an explicit overflow-y, so a
+	// body lock never reaches the viewport. The scrollbar gutter is permanent, so no layout shift.
+	useEffect(() =>
+	{
+		if(!mounted) return;
+		const previous = document.documentElement.style.overflow;
+		document.documentElement.style.overflow = 'hidden';
+		return () => { document.documentElement.style.overflow = previous; };
+	}, [mounted]);
+
 	// Return focus if the drawer unmounts entirely while still open
 	useEffect(() =>
 	{

@@ -98,6 +98,14 @@ describe('FormLabel', () =>
 
 describe('FormMessage', () =>
 {
+	it('renders an aria-hidden error icon so color is not the only signal', () =>
+	{
+		render(<FormMessage>Bad input</FormMessage>);
+		const alert = screen.getByRole('alert');
+		expect(alert.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+		expect(alert.textContent).toBe('Bad input');
+	});
+
 	it('renders nothing when children is not provided', () =>
 	{
 		const { container } = render(<FormMessage />);
@@ -119,7 +127,7 @@ describe('FormMessage', () =>
 	it('applies error token class', () =>
 	{
 		render(<FormMessage>Error</FormMessage>);
-		expect(screen.getByText('Error').className).toContain('text-input-error');
+		expect(screen.getByRole('alert').className).toContain('text-input-error');
 	});
 
 	it('has role="alert"', () =>
@@ -131,7 +139,7 @@ describe('FormMessage', () =>
 	it('merges custom className', () =>
 	{
 		render(<FormMessage className='extra'>Error</FormMessage>);
-		expect(screen.getByText('Error').className).toContain('extra');
+		expect(screen.getByRole('alert').className).toContain('extra');
 	});
 });
 

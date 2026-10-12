@@ -397,30 +397,30 @@ describe('CommandPalette', () =>
 		});
 	});
 
-	it('locks body scroll when open', async () =>
+	it('locks page scroll on the html element when open', async () =>
 	{
-		document.body.style.overflow = '';
+		document.documentElement.style.overflow = '';
 
 		const { unmount } = renderPalette({ open: true });
 		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
 
-		expect(document.body.style.overflow).toBe('hidden');
+		expect(document.documentElement.style.overflow).toBe('hidden');
 
 		unmount();
-		document.body.style.overflow = '';
+		document.documentElement.style.overflow = '';
 	});
 
-	it('restores the original body overflow when it closes', async () =>
+	it('restores the original html overflow when it closes', async () =>
 	{
-		document.body.style.overflow = '';
+		document.documentElement.style.overflow = '';
 
 		const { unmount } = renderPalette({ open: true });
 		await waitFor(() => expect(screen.getByRole('dialog')).toBeDefined());
-		expect(document.body.style.overflow).toBe('hidden');
+		expect(document.documentElement.style.overflow).toBe('hidden');
 
 		unmount();
 
-		expect(document.body.style.overflow).toBe('');
+		expect(document.documentElement.style.overflow).toBe('');
 	});
 
 	describe('server-driven results', () =>

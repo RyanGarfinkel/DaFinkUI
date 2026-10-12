@@ -81,7 +81,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 		const hasValue = isControlled ? (value !== '' && value != null) : localValue !== '';
 		const labelFloated = isFocused || hasValue || !!error;
 
-		const borderClass = error
+		const borderClass = (error || props['aria-invalid'] === true || props['aria-invalid'] === 'true')
 			? 'border-input-error focus:border-input-error-ring'
 			: 'border-input-border focus:border-input-ring';
 

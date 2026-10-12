@@ -189,13 +189,13 @@ export const CommandPalette = (
     useEffect(() =>
 	{
 		if(!open) return;
-		// No scrollbar-width compensation needed: `html` permanently reserves its
-		// scrollbar gutter (see globals.css), so toggling overflow here never
-		// changes the page's rendered width. Nothing to compensate for.
-		const prevOverflow = document.body.style.overflow;
-		document.body.style.overflow = 'hidden';
+		// Locks `html`, not `body`: globals.css gives `html` an explicit overflow-y, so a
+		// body lock never reaches the viewport. `html` also permanently reserves its
+		// scrollbar gutter, so toggling overflow never shifts the layout.
+		const prevOverflow = document.documentElement.style.overflow;
+		document.documentElement.style.overflow = 'hidden';
 
-		return () => { document.body.style.overflow = prevOverflow; };
+		return () => { document.documentElement.style.overflow = prevOverflow; };
 	}, [open]);
 
     useEffect(() =>

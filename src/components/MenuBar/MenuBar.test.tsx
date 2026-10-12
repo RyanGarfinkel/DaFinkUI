@@ -54,6 +54,96 @@ describe('MenuBar', () =>
 	});
 });
 
+describe('MenuBar arrow key navigation', () =>
+{
+	const renderFullBar = () => render(
+		<MenuBar className='relative'>
+			<MenuBarBrand>Acme</MenuBarBrand>
+			<MenuBarNav value='home' onValueChange={() => {}} aria-label='Main'>
+				<MenuBarNavItem value='home'>Home</MenuBarNavItem>
+				<MenuBarNavItem value='docs'>Docs</MenuBarNavItem>
+				<MenuBarNavMore value='more' items={[{ label: 'Blog', value: 'blog' }]}>More</MenuBarNavMore>
+			</MenuBarNav>
+			<MenuBarActions>
+				<button type='button' aria-label='Search'>S</button>
+				<button type='button'>Sign in</button>
+				<input aria-label='Query' />
+			</MenuBarActions>
+		</MenuBar>
+	);
+
+	it('moves from the nav onto the actions with ArrowRight', async () =>
+	{
+		renderFullBar();
+		screen.getByRole('button', { name: 'Home' }).focus();
+
+		await userEvent.keyboard('{ArrowRight}{ArrowRight}{ArrowRight}');
+		expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Search' }));
+
+		await userEvent.keyboard('{ArrowRight}');
+		expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Sign in' }));
+	});
+
+	it('moves back from the actions into the nav with ArrowLeft', async () =>
+	{
+		renderFullBar();
+		screen.getByRole('button', { name: 'Search' }).focus();
+
+		await userEvent.keyboard('{ArrowLeft}');
+		expect(document.activeElement).toBe(screen.getByRole('button', { name: /More/ }));
+	});
+
+	it('jumps to the first and last control in the bar with Home and End', async () =>
+	{
+		renderFullBar();
+		screen.getByRole('button', { name: 'Search' }).focus();
+
+		await userEvent.keyboard('{End}');
+		expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Query' }));
+
+		screen.getByRole('button', { name: 'Sign in' }).focus();
+		await userEvent.keyboard('{Home}');
+		expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Home' }));
+	});
+
+	it('wraps from the last control to the first with ArrowRight', async () =>
+	{
+		render(
+			<MenuBar className='relative'>
+				<MenuBarNav value='home' onValueChange={() => {}} aria-label='Main'>
+					<MenuBarNavItem value='home'>Home</MenuBarNavItem>
+				</MenuBarNav>
+				<MenuBarActions>
+					<button type='button'>Sign in</button>
+				</MenuBarActions>
+			</MenuBar>
+		);
+		screen.getByRole('button', { name: 'Sign in' }).focus();
+
+		await userEvent.keyboard('{ArrowRight}');
+		expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Home' }));
+	});
+
+	it('leaves arrow keys alone inside text inputs', async () =>
+	{
+		renderFullBar();
+		const input = screen.getByRole('textbox', { name: 'Query' });
+		input.focus();
+
+		await userEvent.keyboard('{ArrowLeft}');
+		expect(document.activeElement).toBe(input);
+	});
+
+	it('keeps the roving tabindex in sync when focus arrives from outside the nav', async () =>
+	{
+		renderFullBar();
+		screen.getByRole('button', { name: 'Search' }).focus();
+		await userEvent.keyboard('{ArrowLeft}{ArrowLeft}');
+
+		expect(screen.getByRole('button', { name: 'Docs' }).tabIndex).toBe(0);
+	});
+});
+
 describe('MenuBarBrand', () =>
 {
 	it('renders children', () =>
@@ -302,7 +392,7 @@ describe('MenuBarNavMore', () =>
 
 	it('applies the active text color to the trigger when the nav value matches one of its items', () =>
 	{
-		// Regression: DropdownMenu's built-in trigger classes include `text-text`, which
+		// Regression: Menu's built-in trigger classes include `text-text`, which
 		// comes later in the generated Tailwind stylesheet than `text-brand-fg` and silently
 		// won the cascade, so the "More" label never visibly changed color when active.
 		render(

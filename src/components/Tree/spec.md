@@ -34,6 +34,7 @@ No additional npm dependencies. No registry dependencies.
 | `collapsible` | `boolean`   | `true`  | When `false`, the item is fully non-interactive: no chevron toggle, no hover/focus-visible/active styling, `tabIndex={-1}` (excluded from the Tab order and from arrow-key roving focus entirely; never registered with the tree, so `ArrowDown`/`ArrowUp`/`Home`/`End` skip over it), and no `onClick`/`onKeyDown`/`onFocus` handlers. A branch also becomes permanently expanded and `aria-expanded` always reports `true`. Applies equally to leaf items: a `collapsible={false}` leaf is just as inert. Use for read-only structural diagrams where nothing should look or behave like a control. |
 | `icon`        | `ReactNode` | -       | Custom icon for this specific item, overriding the chevron (collapsible branch), `Tree`'s `nonTerminalIcon` (non-collapsible branch), or `Tree`'s `terminalIcon` (leaf). Always rendered even when `collapsible` is `false`. |
 | `disabled`    | `boolean`   | `false` | Disables interaction. Item is visible but not clickable or focusable.    |
+| `onSelect`    | `() => void` | -      | Called when the item is activated by click or Enter/Space, in addition to toggling a branch. Not called when `disabled` or `collapsible={false}`. |
 | `className`   | `string`    | `""`    | Additional classes on the item row element.                              |
 
 ---

@@ -112,7 +112,7 @@ Disabled items are completely skipped during keyboard navigation.
 
 ### Scroll Lock
 
-While the palette is open, `document.body.style.overflow` is set to `'hidden'`. This is removed when `open` becomes false (or on component unmount), restoring the previous overflow value.
+While the palette is open, `document.documentElement.style.overflow` is set to `'hidden'` (on `html`, not `body`, since `html` has an explicit `overflow-y` that would stop a body lock reaching the viewport). This is removed when `open` becomes false (or on component unmount), restoring the previous overflow value.
 
 No scrollbar-width compensation (e.g. `paddingRight`) is applied: `html` permanently reserves its scrollbar gutter (see `globals.css`), so toggling `overflow` on `<body>` never changes the page's rendered width, and there is nothing to compensate for.
 

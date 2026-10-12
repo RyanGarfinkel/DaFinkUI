@@ -66,4 +66,4 @@ Panel enters with `opacity-0 scale-95` → `opacity-100 scale-100` over `var(--d
 
 ## When to Use
 
-Use Popover for small interactive surfaces anchored to a control: filters, share panels, inline settings. Use Modal/Dialog instead when the task must block the page, and Tooltip when the content is plain non-interactive text. Use DropdownMenu when the content is a list of actions.
+Use Popover for small interactive surfaces anchored to a control: filters, share panels, inline settings. Use Modal/Dialog instead when the task must block the page, and Tooltip when the content is plain non-interactive text. Use Menu when the content is a list of actions.

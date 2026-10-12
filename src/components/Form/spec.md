@@ -95,7 +95,7 @@ Validation or error message. **Renders nothing when `children` is falsy**: use t
 | `className` | `string`    | `''`    | Additional classes merged onto the `<p>` |
 | `children`  | `ReactNode` | n/a     | Error or validation text                 |
 
-**Styles:** `text-sm text-input-error`. Has `role="alert"` so screen readers announce it when it appears.
+**Styles:** `text-sm text-input-error`, with a leading error icon (`aria-hidden`) so the error isn't signalled by color alone. Has `role="alert"` so screen readers announce it when it appears.
 
 ---
 
