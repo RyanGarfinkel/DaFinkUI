@@ -102,6 +102,8 @@ export const Combobox = (props: ComboboxProps) => {
     const containerRef = useRef<HTMLDivElement>(null);
     const pillsRef    = useRef<HTMLDivElement>(null);
     const pendingFocusIndexRef = useRef<number | null>(null);
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+    const frameRef = useRef<number>(undefined);
 
     const id      = useId();
     const listId  = `${id}-listbox`;
@@ -120,19 +122,27 @@ export const Combobox = (props: ComboboxProps) => {
 
     const openList = () => {
 		if(disabled) return;
+		clearTimeout(closeTimerRef.current);
 		setMounted(true);
 	};
+
+    useEffect(() => () =>
+	{
+		clearTimeout(closeTimerRef.current);
+		cancelAnimationFrame(frameRef.current!);
+	}, []);
 
     useEffect(() =>
 	{
 		if(!mounted) return;
-		requestAnimationFrame(() => setVisible(true));
+		frameRef.current = requestAnimationFrame(() => setVisible(true));
 	}, [mounted]);
 
     const closeList = (returnFocus = true) => {
 		setVisible(false);
 		setActiveIndex(-1);
-		setTimeout(() => setMounted(false), 150);
+		clearTimeout(closeTimerRef.current);
+		closeTimerRef.current = setTimeout(() => setMounted(false), 150);
 		if(returnFocus) inputRef.current?.focus();
 	};
 
