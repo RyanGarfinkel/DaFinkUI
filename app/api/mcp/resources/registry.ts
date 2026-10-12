@@ -1,4 +1,9 @@
-import { registry, ComponentEntry } from '@/app/_docs/registry/index';
+import { registry as componentRegistry, ComponentEntry } from '@/app/_docs/registry/index';
+import { effects } from '@/app/_docs/registry/effects';
+
+// Effects are installable components with their own gallery section, so the MCP
+// server serves them alongside the rest instead of a separate set of tools.
+export const registry: ComponentEntry[] = [...componentRegistry, ...effects];
 
 type ComponentSummary = Pick<ComponentEntry, 'slug' | 'name' | 'category' | 'description'>;
 

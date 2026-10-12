@@ -1,6 +1,6 @@
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { getFullBlockRegistry, getBlockRegistryEntry, listBlocksByCategory, searchBlocks } from './resources/blocks';
-import { getFullRegistry, getRegistryEntry, listByCategory, searchComponents } from './resources/registry';
+import { getFullRegistry, getRegistryEntry, listByCategory, searchComponents, registry } from './resources/registry';
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { getFullStyleRegistry, listStyles, getStyle } from './resources/styles';
 import { getFullThemeRegistry, listThemes, getTheme } from './resources/themes';
@@ -8,7 +8,6 @@ import { listPatterns, getPattern } from './resources/patterns';
 import { getComponentSpec } from './resources/components';
 import { listRules, getRule } from './resources/rules';
 import { registerPrompts } from './resources/prompts';
-import { registry } from '@/app/_docs/registry/index';
 import { blocks } from '@/app/_docs/registry/blocks';
 import { getTokens } from './resources/tokens';
 import pkg from '@/package.json';
