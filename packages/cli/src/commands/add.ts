@@ -4,27 +4,13 @@ import { REGISTRY, resolve as resolveEntry } from '../lib/registry.js';
 import { rewriteImportSpecifiers } from '../lib/rewriteImports.js';
 import type { RegistryEntry } from '../lib/registry.js';
 import { readConfig, type DaFinkConfig } from '../lib/config.js';
+import { detectPackageManager, installCmd } from '../lib/packages.js';
 import { generateBarrel } from '../lib/barrel.js';
 import { addKindAlias } from '../lib/tsconfig.js';
 import { spinner, log } from '@clack/prompts';
 import { execSync } from 'child_process';
 import { resolve, dirname, basename, relative, sep } from 'path';
 import pc from 'picocolors';
-
-function detectPackageManager(cwd: string): 'pnpm' | 'yarn' | 'npm'
-{
-	if(existsSync(resolve(cwd, 'pnpm-lock.yaml'))) return 'pnpm';
-	if(existsSync(resolve(cwd, 'yarn.lock'))) return 'yarn';
-	return 'npm';
-}
-
-function installCmd(pm: 'pnpm' | 'yarn' | 'npm', deps: string[]): string
-{
-	const pkgs = deps.join(' ');
-	if(pm === 'pnpm') return `pnpm add ${pkgs}`;
-	if(pm === 'yarn') return `yarn add ${pkgs}`;
-	return `npm install ${pkgs}`;
-}
 
 const NEXT_LINK_WITH_PROPS_RE = /^import Link, \{ (\w+) \} from ['"]next\/link['"];\n/m;
 const NEXT_LINK_BARE_RE = /^import Link from ['"]next\/link['"];\n/m;
@@ -162,19 +148,30 @@ function buildAliasMapForFile(file: BlockFileEntry, files: BlockFileEntry[], blo
 	return map;
 }
 
-function copyFile(file: BlockFileEntry, registryDir: URL, targetDir: string, stripNextjs: boolean, routing?: BlockRouting): void
+const SIBLING_COMPONENT_IMPORT_RE = /(from\s*)(['"])\.\.\/(\w+)\/\3\2/g;
+
+function flattenSiblingImports(content: string): string
 {
-	const { path, destPath, destDir } = routing ? resolveFileDest(file, routing) : { path: file as string, destPath: resolve(targetDir, file as string), destDir: targetDir };
+	return content.replace(SIBLING_COMPONENT_IMPORT_RE, (_match: string, from: string, quote: string, name: string) => `${from}${quote}./${name}${quote}`);
+}
+
+function copyFile(file: BlockFileEntry, registryDir: URL, targetDir: string, stripNextjs: boolean, routing?: BlockRouting, flatten = false): void
+{
+	const componentPath = file as string;
+	const { path, destPath, destDir } = routing
+		? resolveFileDest(file, routing)
+		: { path: componentPath, destPath: resolve(targetDir, flatten ? basename(componentPath) : componentPath), destDir: targetDir };
 
 	mkdirSync(dirname(destPath), { recursive: true });
 
 	const aliasMap = routing ? buildAliasMapForFile(file, routing.files, routing.blockSlug, destDir, routing.blockDir) : {};
 	const needsRewrite = Object.keys(aliasMap).length > 0;
 
-	if(stripNextjs || needsRewrite)
+	if(stripNextjs || needsRewrite || flatten)
 	{
 		let content = readFileSync(new URL(path, registryDir).pathname, 'utf8');
 		if(stripNextjs) content = transformForReact(content, path);
+		if(flatten) content = flattenSiblingImports(content);
 		if(needsRewrite) content = rewriteImportSpecifiers(content, aliasMap);
 		writeFileSync(destPath, content, 'utf8');
 	}
@@ -186,11 +183,11 @@ function copyFile(file: BlockFileEntry, registryDir: URL, targetDir: string, str
 	log.info(pc.dim('copied ') + pc.cyan(path) + pc.dim(` → ${destPath}`));
 }
 
-function copyEntry(entry: { files: BlockFileEntry[] }, registryDir: URL, targetDir: string, stripNextjs: boolean, withTests: boolean, routing?: BlockRouting): void
+function copyEntry(entry: { files: BlockFileEntry[] }, registryDir: URL, targetDir: string, stripNextjs: boolean, withTests: boolean, routing?: BlockRouting, flatten = false): void
 {
 	for(const file of entry.files)
 	{
-		copyFile(file, registryDir, targetDir, stripNextjs, routing);
+		copyFile(file, registryDir, targetDir, stripNextjs, routing, flatten);
 
 		if(!withTests) continue;
 
@@ -199,7 +196,7 @@ function copyEntry(entry: { files: BlockFileEntry[] }, registryDir: URL, targetD
 		const testSrcPath = new URL(testFile, registryDir).pathname;
 
 		if(existsSync(testSrcPath))
-			copyFile(testFile, registryDir, targetDir, stripNextjs, routing);
+			copyFile(testFile, registryDir, targetDir, stripNextjs, routing, flatten);
 	}
 }
 
@@ -326,7 +323,7 @@ export async function runAdd(inputs: string[], options: { all?: boolean; withTes
 
 	for(const entry of componentEntries)
 	{
-		copyEntry(entry, componentsRegistryDir, componentsTargetDir, stripNextjs, withTests);
+		copyEntry(entry, componentsRegistryDir, componentsTargetDir, stripNextjs, withTests, undefined, !withTests);
 		entry.deps.forEach(d => allDeps.add(d));
 	}
 

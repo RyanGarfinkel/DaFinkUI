@@ -17,6 +17,7 @@ npx dafink-ui add button
 | `add [components...]`   | Copy component files into your project (`--all` for every component) |
 | `skill [path]`          | Download the `dafink-ui.skill` design skill for AI coding assistants |
 | `audit`                 | Copy static accessibility checks + CI workflow into your project (`--provider <github\|gitlab>`) |
+| `eslint`                | Copy the DaFink ESLint rules + config into your project and install their dev dependencies (also offered during `init`) |
 
 ## Setup
 
@@ -30,6 +31,10 @@ npx dafink-ui add button
 This writes a `dafink.config.json` that every other command reads from.
 
 ## Adding components
+
+Each component installs as a single file, e.g. `src/components/ui/Button.tsx`. With `--with-tests` it installs into its own folder alongside its test file (`Button/Button.tsx`, `Button/Button.test.tsx`).
+
+Each component installs as a single file, e.g. `src/components/ui/Button.tsx`. With `--with-tests` it installs into its own folder alongside its test file (`Button/Button.tsx`, `Button/Button.test.tsx`).
 
 ```bash
 npx dafink-ui add button dialog

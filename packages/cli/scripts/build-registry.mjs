@@ -59,6 +59,17 @@ function copyDirs(root, destRoot, label)
 copyDirs(srcRoot, registryRoot, 'Component registry');
 copyDirs(blocksSrcRoot, blocksRoot, 'Block registry');
 
+const eslintRulesSrc  = resolve(__dirname, '../../../eslint-rules');
+const eslintRulesDest = resolve(__dirname, '../assets/eslint-rules');
+
+mkdirSync(eslintRulesDest, { recursive: true });
+
+for(const file of readdirSync(eslintRulesSrc).filter(f => extname(f) === '.mjs'))
+{
+	copyFileSync(resolve(eslintRulesSrc, file), resolve(eslintRulesDest, file));
+	console.log(`ESLint rule bundled: ${file}`);
+}
+
 const skillSrc  = resolve(__dirname, '../../../dafink-ui.skill');
 const skillDest = resolve(__dirname, '../assets/dafink-ui.skill');
 

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { runEslint } from './commands/eslint.js';
 import { runAudit } from './commands/audit.js';
 import { runSkill } from './commands/skill.js';
 import { runInit } from './commands/init.js';
@@ -47,6 +48,14 @@ program
 	.action(async (options: { workflow: boolean; provider: string }) =>
 	{
 		await runAudit(options, process.cwd());
+	});
+
+program
+	.command('eslint')
+	.description('Copy the DaFink ESLint rules + config into your project and install their dependencies')
+	.action(async () =>
+	{
+		await runEslint(process.cwd());
 	});
 
 program.parse();

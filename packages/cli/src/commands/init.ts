@@ -1,8 +1,9 @@
-import { intro, select, text, outro, isCancel, cancel } from '@clack/prompts';
+import { intro, select, text, confirm, outro, isCancel, cancel } from '@clack/prompts';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { addComponentsAlias } from '../lib/tsconfig.js';
 import type { DaFinkConfig } from '../lib/config.js';
 import { resolve, dirname, basename } from 'path';
+import { installEslint } from './eslint.js';
 import { writeConfig } from '../lib/config.js';
 import { generateCss } from '../lib/css.js';
 import pc from 'picocolors';
@@ -132,6 +133,17 @@ export async function runInit(cwd: string): Promise<void>
 		cssFile = cssInput as string;
 	}
 
+	const withEslint = await confirm({
+		message: 'Add the DaFink ESLint rules?',
+		initialValue: false,
+	});
+
+	if(isCancel(withEslint))
+	{
+		cancel('Setup cancelled.');
+		process.exit(0);
+	}
+
 	const config: DaFinkConfig = {
 		style:         style as DaFinkConfig['style'],
 		palette:       palette as DaFinkConfig['palette'],
@@ -164,6 +176,8 @@ export async function runInit(cwd: string): Promise<void>
 	const aliasLine = aliasResult.updated
 		? '  ' + pc.dim(aliasResult.configFile!) + ' updated with ' + pc.dim('@components/ui/*') + ' alias\n'
 		: '  ' + pc.yellow(aliasResult.reason ?? 'skipped @components/ui alias setup') + '\n';
+
+	if(withEslint) installEslint(cwd);
 
 	outro(
 		pc.green('Done!') + '\n\n' +
