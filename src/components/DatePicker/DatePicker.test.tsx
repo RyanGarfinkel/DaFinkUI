@@ -523,4 +523,56 @@ describe('DatePicker granularity', () =>
 
 		await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
 	});
+
+	it('cancels the pending open frame when unmounted right after opening', () =>
+	{
+		vi.useFakeTimers();
+
+		try
+		{
+			const rafSpy = vi.spyOn(globalThis, 'requestAnimationFrame');
+			const cancelSpy = vi.spyOn(globalThis, 'cancelAnimationFrame');
+
+			const { unmount } = renderPicker({ value: MAY_15 });
+			fireEvent.click(screen.getByRole('button', { name: /may 15, 2025/i }));
+
+			const frameIds = rafSpy.mock.results.map((result) => result.value);
+			expect(frameIds.length).toBeGreaterThan(0);
+			cancelSpy.mockClear();
+			unmount();
+
+			frameIds.forEach((id) => expect(cancelSpy).toHaveBeenCalledWith(id));
+		}
+		finally
+		{
+			vi.restoreAllMocks();
+			vi.useRealTimers();
+		}
+	});
+
+	it('cancels the pending wheel open frame when unmounted right after opening', () =>
+	{
+		vi.useFakeTimers();
+
+		try
+		{
+			const rafSpy = vi.spyOn(globalThis, 'requestAnimationFrame');
+			const cancelSpy = vi.spyOn(globalThis, 'cancelAnimationFrame');
+
+			const { unmount } = renderPicker({ granularity: 'time' });
+			fireEvent.click(screen.getByRole('button', { name: /open time picker/i }));
+
+			const frameIds = rafSpy.mock.results.map((result) => result.value);
+			expect(frameIds.length).toBeGreaterThan(0);
+			cancelSpy.mockClear();
+			unmount();
+
+			frameIds.forEach((id) => expect(cancelSpy).toHaveBeenCalledWith(id));
+		}
+		finally
+		{
+			vi.restoreAllMocks();
+			vi.useRealTimers();
+		}
+	});
 });

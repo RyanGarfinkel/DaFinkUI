@@ -103,7 +103,8 @@ const TimeField = (
 	useEffect(() =>
 	{
 		if(!wheelMounted) return;
-		requestAnimationFrame(() => setWheelVisible(true));
+		const frame = requestAnimationFrame(() => setWheelVisible(true));
+		return () => cancelAnimationFrame(frame);
 	}, [wheelMounted]);
 
 	useEffect(() =>

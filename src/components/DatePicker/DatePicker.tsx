@@ -78,7 +78,8 @@ export const DatePicker = (
     useEffect(() =>
 	{
 		if(!mounted) return;
-		requestAnimationFrame(() => setVisible(true));
+		const frame = requestAnimationFrame(() => setVisible(true));
+		return () => cancelAnimationFrame(frame);
 	}, [mounted]);
 
     useEffect(() =>
