@@ -180,4 +180,24 @@ describe('Tooltip', () =>
 		expect(tooltip.className).not.toContain('transition-all');
 		expect(tooltip.className).toContain('transition-[opacity,transform]');
 	});
+
+	it('cancels the pending show frame when unmounted mid-open', () =>
+	{
+		const rafSpy = vi.spyOn(globalThis, 'requestAnimationFrame');
+		const cancelSpy = vi.spyOn(globalThis, 'cancelAnimationFrame');
+
+		const { unmount } = render(
+			<Tooltip content='Helpful hint'>
+				<button>Trigger</button>
+			</Tooltip>
+		);
+		fireEvent.focus(screen.getByRole('button'));
+
+		const frameId = rafSpy.mock.results[rafSpy.mock.results.length - 1].value;
+		cancelSpy.mockClear();
+		unmount();
+
+		expect(cancelSpy).toHaveBeenCalledWith(frameId);
+		vi.restoreAllMocks();
+	});
 });

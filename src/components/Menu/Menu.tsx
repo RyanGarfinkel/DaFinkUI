@@ -186,7 +186,11 @@ export const Menu = (
         setPosition({ top, left });
     }, [side, align]);
 
-    useEffect(() => () => clearTimeout(closeTimerRef.current), []);
+    useEffect(() => () =>
+	{
+		clearTimeout(closeTimerRef.current);
+		if(typeaheadTimer.current) clearTimeout(typeaheadTimer.current);
+	}, []);
 
     const openMenu = (initial: 'first' | 'last') => {
 		if(disabled || navigable.length === 0) return;
@@ -267,12 +271,13 @@ export const Menu = (
     useEffect(() =>
 	{
 		if(!mounted) return;
-		requestAnimationFrame(() =>
+		const frame = requestAnimationFrame(() =>
 		{
 			calcPosition();
 			setVisible(true);
 			menuRef.current?.focus();
 		});
+		return () => cancelAnimationFrame(frame);
 	}, [mounted, calcPosition]);
 
     useEffect(() =>

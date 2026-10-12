@@ -75,11 +75,12 @@ export const Tooltip = (
     useEffect(() =>
 	{
 		if(!mounted) return;
-		requestAnimationFrame(() =>
+		const frame = requestAnimationFrame(() =>
 		{
 			calcPosition();
 			setVisible(true);
 		});
+		return () => cancelAnimationFrame(frame);
 	}, [mounted, calcPosition]);
 
     useEffect(() =>

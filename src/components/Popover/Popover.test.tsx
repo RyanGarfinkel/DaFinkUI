@@ -170,4 +170,20 @@ describe('Popover', () =>
 		render(<Popover trigger='Open'>Content</Popover>);
 		expect(screen.getByRole('button', { name: 'Open' }).className).toContain('focus-visible:ring-2');
 	});
+
+	it('cancels the pending open frame when unmounted mid-open', () =>
+	{
+		const rafSpy = vi.spyOn(globalThis, 'requestAnimationFrame');
+		const cancelSpy = vi.spyOn(globalThis, 'cancelAnimationFrame');
+
+		const { unmount } = render(<Popover trigger='Open'>Content</Popover>);
+		fireEvent.click(screen.getByRole('button', { name: 'Open' }));
+
+		const frameId = rafSpy.mock.results[rafSpy.mock.results.length - 1].value;
+		cancelSpy.mockClear();
+		unmount();
+
+		expect(cancelSpy).toHaveBeenCalledWith(frameId);
+		vi.restoreAllMocks();
+	});
 });

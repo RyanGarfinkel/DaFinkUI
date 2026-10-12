@@ -63,7 +63,11 @@ export const Select = (
     const selectedIdx   = options.findIndex((o) => o.value === value);
     const selectedLabel = selectedIdx >= 0 ? options[selectedIdx].label : null;
 
-    useEffect(() => () => clearTimeout(closeTimerRef.current), []);
+    useEffect(() => () =>
+	{
+		clearTimeout(closeTimerRef.current);
+		if(typeaheadTimer.current) clearTimeout(typeaheadTimer.current);
+	}, []);
 
     const openList = () => {
 		if(disabled) return;
@@ -75,11 +79,12 @@ export const Select = (
     useEffect(() =>
 	{
 		if(!mounted) return;
-		requestAnimationFrame(() =>
+		const frame = requestAnimationFrame(() =>
 		{
 			setVisible(true);
 			listRef.current?.focus();
 		});
+		return () => cancelAnimationFrame(frame);
 	}, [mounted]);
 
     useEffect(() =>

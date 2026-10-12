@@ -107,13 +107,14 @@ export const Popover = (
     useEffect(() =>
 	{
 		if(!mounted) return;
-		requestAnimationFrame(() =>
+		const frame = requestAnimationFrame(() =>
 		{
 			calcPosition();
 			setVisible(true);
 			const first = panelRef.current?.querySelector<HTMLElement>(FOCUSABLE);
 			(first ?? panelRef.current)?.focus();
 		});
+		return () => cancelAnimationFrame(frame);
 	}, [mounted, calcPosition]);
 
     useEffect(() =>

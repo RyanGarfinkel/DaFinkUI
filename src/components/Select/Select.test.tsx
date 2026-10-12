@@ -98,4 +98,47 @@ describe('Select', () =>
 		fireEvent.click(screen.getByRole('button'));
 		expect(screen.getByRole('button')).toHaveAttribute('aria-expanded', 'true');
 	});
+
+	it('cancels the pending open frame when unmounted mid-open', () =>
+	{
+		const rafSpy = vi.spyOn(globalThis, 'requestAnimationFrame');
+		const cancelSpy = vi.spyOn(globalThis, 'cancelAnimationFrame');
+
+		const { unmount } = render(<Select options={OPTIONS} />);
+		fireEvent.click(screen.getByRole('button'));
+
+		const frameId = rafSpy.mock.results[rafSpy.mock.results.length - 1].value;
+		cancelSpy.mockClear();
+		unmount();
+
+		expect(cancelSpy).toHaveBeenCalledWith(frameId);
+		vi.restoreAllMocks();
+	});
+
+	it('clears the typeahead timer when unmounted', () =>
+	{
+		vi.useFakeTimers();
+
+		try
+		{
+			const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+			const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+			const { unmount } = render(<Select options={OPTIONS} />);
+			fireEvent.click(screen.getByRole('button'));
+			fireEvent.keyDown(screen.getByRole('listbox'), { key: 'b' });
+
+			const callIndex = setTimeoutSpy.mock.calls.findIndex(([, ms]) => ms === 500);
+			const timerId = setTimeoutSpy.mock.results[callIndex].value;
+			clearTimeoutSpy.mockClear();
+			unmount();
+
+			expect(clearTimeoutSpy).toHaveBeenCalledWith(timerId);
+		}
+		finally
+		{
+			vi.restoreAllMocks();
+			vi.useRealTimers();
+		}
+	});
 });
