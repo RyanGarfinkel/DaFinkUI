@@ -16,6 +16,7 @@ import { ChartCard } from '@/src/blocks/ChartCard/ChartCard';
 import { Dashboard } from '@/src/blocks/Dashboard/Dashboard';
 import { AuthForm } from '@/src/blocks/AuthForm/AuthForm';
 import { TeamGrid } from '@/src/blocks/TeamGrid/TeamGrid';
+import { Terminal } from '@/src/blocks/Terminal/Terminal';
 import { AiChat } from '@/src/blocks/AiChat/AiChat';
 
 export const blockPreviews: Record<string, React.ReactNode> = {
@@ -38,4 +39,5 @@ export const blockPreviews: Record<string, React.ReactNode> = {
 	'team-management': <TeamManagement />,
 	'project-hub': <ProjectHub />,
 	'job-application-tracker': <JobApplicationTracker />,
+	terminal: <Terminal />,
 };

@@ -857,7 +857,7 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 export default function Example() {
-  const form = useZodForm(schema);
+  const form = useZodForm(schema, { mode: 'onTouched' });
 
   const onSubmit = (values: FormValues) => {
     console.log(values);
@@ -868,17 +868,17 @@ export default function Example() {
       <FormField>
         <FormLabel htmlFor="name" required>Name</FormLabel>
         <FormControl>
-          <Input id="name" placeholder="Jane Smith" aria-required="true" {...form.register('name')} />
+          <Input id="name" placeholder="Jane Smith" aria-required="true" aria-invalid={!!form.formState.errors.name} aria-describedby={form.formState.errors.name ? 'name-error' : undefined} {...form.register('name')} />
         </FormControl>
-        <FormMessage>{form.formState.errors.name?.message}</FormMessage>
+        <FormMessage id="name-error">{form.formState.errors.name?.message}</FormMessage>
       </FormField>
       <FormField>
         <FormLabel htmlFor="email" required>Email</FormLabel>
         <FormControl>
-          <Input id="email" type="email" placeholder="you@example.com" aria-required="true" {...form.register('email')} />
+          <Input id="email" type="email" placeholder="you@example.com" aria-required="true" aria-invalid={!!form.formState.errors.email} aria-describedby={form.formState.errors.email ? 'email-error' : undefined} {...form.register('email')} />
         </FormControl>
         <FormDescription>We will never share your email.</FormDescription>
-        <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+        <FormMessage id="email-error">{form.formState.errors.email?.message}</FormMessage>
       </FormField>
       <Button type="submit">Save changes</Button>
     </Form>
@@ -934,7 +934,7 @@ export default function Example() {
     description: 'A structured question widget for chat-style flows: a single radio, slider, number, or calendar question, or a `steps` sequence of several questions paginated inside one card with a "Question X of N" progress indicator.',
     usage: `'use client';
 
-import Questionnaire, { type QuestionStep } from '@/components/ui/Questionnaire/Questionnaire';
+import Questionnaire, { type QuestionStep } from '@/components/ui/Questionnaire';
 
 const FEATURE_STEPS: QuestionStep[] = [
   {
@@ -1102,7 +1102,7 @@ import { useState } from 'react';
 import Collapsible, {
   CollapsibleTrigger,
   CollapsibleContent,
-} from '@/components/ui/Collapsible/Collapsible';
+} from '@/components/ui/Collapsible';
 
 export default function Example() {
   const [open, setOpen] = useState(false);
@@ -1249,8 +1249,8 @@ export default function Example() {
     description: 'A collapsible summary of an AI assistant\'s tool calls, web searches, and internal "thoughts" behind a single reply: a one-line trigger ("Thought, searched the web, used 2 tools") that expands into a vertical timeline of each step. Each step is a ToolCallEntry — one thing the assistant did (ran a tool, searched the web, or reasoned out loud) — rendered as one row of that timeline.',
     usage: `'use client';
 
-import ToolCallTrace, { type ToolCallEntry, type ToolCallLink } from '@/components/ui/ToolCallTrace/ToolCallTrace';
-import Message from '@/components/ui/Message/Message';
+import ToolCallTrace, { type ToolCallEntry, type ToolCallLink } from '@/components/ui/ToolCallTrace';
+import Message from '@/components/ui/Message';
 
 const SEARCH_LINKS: ToolCallLink[] = [
   { title: 'Installation — DaFink UI Docs', url: 'https://ui.ryangarfinkel.dev/installation' },
@@ -1563,7 +1563,7 @@ export default function Example() {
       { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'MenuBar content (brand, nav, search, actions).' },
     ],
     dependencies:         [],
-    registryDependencies: ['dropdown-menu'],
+    registryDependencies: ['menu'],
     files:                ['MenuBar/MenuBar.tsx'],
     composition: {
       name: 'MenuBar',
@@ -1832,7 +1832,7 @@ import { useState } from 'react';
 import Mosaic, {
   MosaicTile,
   type MosaicTileLayout,
-} from '@/components/ui/Mosaic/Mosaic';
+} from '@/components/ui/Mosaic';
 
 const INITIAL_LAYOUT: MosaicTileLayout[] = [
   { id: 'revenue', col: 1, row: 1, colSpan: 2, rowSpan: 1 },
@@ -2281,6 +2281,12 @@ export default function Example() {
         description: 'Disables interaction. Item is visible but not clickable or focusable. (TreeItem)',
       },
       {
+        name: 'onSelect',
+        type: '() => void',
+        default: '-',
+        description: 'Called when the item is activated by click or Enter/Space, in addition to toggling a branch. (TreeItem)',
+      },
+      {
         name: 'className',
         type: 'string',
         default: '""',
@@ -2524,19 +2530,26 @@ export default function Example() {
     files: ['Popover/Popover.tsx'],
   },
   {
-    slug: 'dropdown-menu',
-    name: 'DropdownMenu',
+    slug: 'menu',
+    name: 'Menu',
     category: 'Overlay',
     description: 'A trigger button that opens a floating menu of actions with arrow-key navigation, typeahead, separators, and disabled items.',
-    usage: `import { DropdownMenu } from '@components/ui';
+    usage: `import { Menu } from '@components/ui';
 
 export default function Example() {
   return (
-    <DropdownMenu
+    <Menu
       trigger="Actions"
       items={[
         { label: 'Edit',      onSelect: () => console.log('edit')      },
         { label: 'Duplicate', onSelect: () => console.log('duplicate') },
+        {
+          label: 'Share',
+          submenu: [
+            { label: 'Copy link', onSelect: () => console.log('copy link') },
+            { label: 'Email',     onSelect: () => console.log('email')     },
+          ],
+        },
         { separator: true },
         { label: 'Archive', disabled: true },
         { label: 'Delete',    onSelect: () => console.log('delete')    },
@@ -2545,18 +2558,18 @@ export default function Example() {
   );
 }`,
     props: [
-      { name: 'items',            type: 'DropdownMenuEntry[]',                 default: '-',          description: 'Array of items ({ label, onSelect?, disabled? }) and separators ({ separator: true }).' },
+      { name: 'items',            type: 'MenuEntry[]',                 default: '-',          description: 'Array of items ({ label, onSelect?, disabled?, selected?, detail?, submenu? }) and separators ({ separator: true }). A submenu is one level deep; selected adds a check and menuitemradio semantics; detail shows muted text on the right.' },
       { name: 'trigger',          type: 'ReactNode',                           default: '-',          description: 'Content of the built-in trigger button.' },
       { name: 'side',             type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'",   description: 'Which side of the trigger the menu appears on.' },
       { name: 'align',            type: "'start' | 'center' | 'end'",          default: "'start'",    description: 'Alignment along the chosen side.' },
-      { name: 'onSelect',         type: '(item: DropdownMenuItem) => void',    default: 'undefined',  description: "Called with the activated item, in addition to the item's own onSelect." },
+      { name: 'onSelect',         type: '(item: MenuItem) => void',    default: 'undefined',  description: "Called with the activated item, in addition to the item's own onSelect." },
       { name: 'disabled',         type: 'boolean',                             default: 'false',      description: 'Disables the trigger.' },
       { name: 'className',        type: 'string',                              default: "''",         description: 'Additional classes on the menu list.' },
       { name: 'triggerClassName', type: 'string',                              default: "''",         description: 'Additional classes on the trigger button.' },
     ],
     dependencies: [],
     registryDependencies: [],
-    files: ['DropdownMenu/DropdownMenu.tsx'],
+    files: ['Menu/Menu.tsx'],
   },
   {
     slug: 'combobox',

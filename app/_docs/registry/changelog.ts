@@ -16,6 +16,20 @@ export const changelog: ChangelogEntry[] = [
 		'date': null,
 		'sections': [
 			{
+				'label': 'Changed',
+				'changes': [
+					'Split ci into parallel jobs with shared setup',
+					'Add pr title check, codeql, and dependabot',
+					'Add playwright visual regression with pr comment'
+				]
+			}
+		]
+	},
+	{
+		'version': '0.3.1',
+		'date': '2026-10-01',
+		'sections': [
+			{
 				'label': 'Added',
 				'changes': [
 					'Add size prop and independent content scroll to modal',
@@ -35,7 +49,20 @@ export const changelog: ChangelogEntry[] = [
 					'Transform next link and pathname usage in cli-installed files',
 					'Add resizable split-pane component',
 					'Add tool call trace and questionnaire components',
-					'Rework ai chat block with threaded panels and streaming messages'
+					'Rework ai chat block with threaded panels and streaming messages',
+					'Require an accessibility section on every component and effect',
+					'Add remove button and compact size to attachment',
+					'Keep command input inert when no commands are given',
+					'Support external filtering and loading state in command palette',
+					'Add keyboard-navigable row actions and skeleton state to sidebar',
+					'Add read-only mode to workflow builder',
+					'Support multi-file blocks with kind-based directories in cli',
+					'Rework ai chat block into api-backed threads with search',
+					'Add enter key support to checkbox',
+					'Add roving tabindex and arrow key navigation to tabs',
+					'Add grid keyboard navigation to data table',
+					'Add theme and style resources to mcp server',
+					'Ship block directory guides through the cli installer'
 				]
 			},
 			{
@@ -45,7 +72,9 @@ export const changelog: ChangelogEntry[] = [
 					'Suppress redundant focus ring and refine bar chart interaction',
 					'Restore focus to a pill after removing it in combobox',
 					'Narrow otp input cursor indicator width',
-					'Register resizable component in cli registry and category list'
+					'Register resizable component in cli registry and category list',
+					'Draw focus-visible ring inset on accordion, collapsible, and tree',
+					'Resolve cascade-order conflict in paginator button color classes'
 				]
 			},
 			{
@@ -57,14 +86,17 @@ export const changelog: ChangelogEntry[] = [
 					'Add unwired ai questionnaire block scaffold',
 					'Add eslint rules for braces, directives, and comments',
 					'Add scaffolding scripts for new components and blocks',
-					'Collapse interface and arrow-function braces onto one line'
+					'Collapse interface and arrow-function braces onto one line',
+					'Release v0.3.1'
 				]
 			},
 			{
 				'label': 'Docs',
 				'changes': [
 					'Document multi-file blocks, portal bubbling, and dep policy',
-					'Sync component and block registries with new props and blocks'
+					'Sync component and block registries with new props and blocks',
+					'Catch up changelog with unreleased and 0.3.0 entries',
+					'Add keyboard shortcuts tables to button and attachment sections'
 				]
 			}
 		]

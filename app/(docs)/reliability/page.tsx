@@ -155,13 +155,35 @@ const ReliabilityPage = () => {
 					for the other.
 				</p>
 				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					DaFink UI ships its own ESLint rules: single quotes, import ordering,
+					brace placement, <code className='font-mono text-xs'>&apos;use client&apos;</code>{' '}
+					spacing, and no banner comments. <code className='font-mono text-xs'>npx dafink-ui init</code>{' '}
+					offers them as an option. To add them to an existing project:
+				</p>
+				<CodeBlock code='npx dafink-ui eslint' />
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					This writes <code className='font-mono text-xs'>eslint-rules/</code> and{' '}
+					<code className='font-mono text-xs'>eslint.dafink.mjs</code>, installs{' '}
+					<code className='font-mono text-xs'>eslint-plugin-perfectionist</code> as a
+					dev dependency, and creates an{' '}
+					<code className='font-mono text-xs'>eslint.config.mjs</code> if you don&apos;t
+					have one. If you do, spread{' '}
+					<code className='font-mono text-xs'>dafinkConfig</code> from{' '}
+					<code className='font-mono text-xs'>eslint.dafink.mjs</code> into your
+					existing config. The rules are style opinions, so drop any you
+					disagree with from <code className='font-mono text-xs'>eslint.dafink.mjs</code>.
+				</p>
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
 					None of the above renders a component or asserts on its behavior.
 					That&apos;s what UI testing is for. Pass{' '}
 					<code className='font-mono text-xs'>--with-tests</code> to{' '}
 					<code className='font-mono text-xs'>dafink-ui add</code> and each
 					component&apos;s own <code className='font-mono text-xs'>.test.tsx</code>{' '}
 					is copied in alongside it, giving you a real starting point instead of
-					an empty file:
+					an empty file. Components install as a single file (<code className='font-mono text-xs'>Button.tsx</code>)
+					by default; with the flag, each gets its own folder
+					(<code className='font-mono text-xs'>Button/Button.tsx</code> and{' '}
+					<code className='font-mono text-xs'>Button/Button.test.tsx</code>):
 				</p>
 				<CodeBlock code='npx dafink-ui add button --with-tests' />
 				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>

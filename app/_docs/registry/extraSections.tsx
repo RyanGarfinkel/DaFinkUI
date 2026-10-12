@@ -482,13 +482,13 @@ export const extraSections: Record<string, ExtraSection[]> = {
 			),
 		},
 	],
-	'dropdown-menu': [
+	'menu': [
 		{
 			heading: 'Accessibility',
 			description: (
 				<div className='flex flex-col gap-4'>
 					<p>
-						DropdownMenu uses virtual focus, not roving tabindex: the menu list itself takes DOM focus (<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>tabIndex={'{-1}'}</code>) on open, and the highlighted item is tracked purely via <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-activedescendant</code> rather than moving real DOM focus between <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>{'<li role="menuitem">'}</code> items. It is a non-modal popup: Tab is never trapped, it closes the menu and continues to the next page element. The trigger carries <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-haspopup=&quot;menu&quot;</code>/<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-expanded</code>/<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-controls</code>; the list is <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;menu&quot;</code>; separators are <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;separator&quot;</code>.
+						Menu uses virtual focus, not roving tabindex: the menu list itself takes DOM focus (<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>tabIndex={'{-1}'}</code>) on open, and the highlighted item is tracked purely via <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-activedescendant</code> rather than moving real DOM focus between <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>{'<li role="menuitem">'}</code> items. It is a non-modal popup: Tab is never trapped, it closes the menu and continues to the next page element. The trigger carries <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-haspopup=&quot;menu&quot;</code>/<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-expanded</code>/<code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-controls</code>; the list is <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;menu&quot;</code>; separators are <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;separator&quot;</code>.
 					</p>
 					<KeyboardShortcutsTable rows={[
 						{ keys: ['enter'], description: 'On trigger: opens the menu. In the menu: activates the active item and closes.' },
@@ -497,7 +497,9 @@ export const extraSections: Record<string, ExtraSection[]> = {
 						{ keys: ['up arrow'], description: 'On trigger: opens with the last item active. In the menu: moves to the previous enabled item, wrapping.' },
 						{ keys: ['home'], description: 'Moves to the first enabled item.' },
 						{ keys: ['end'], description: 'Moves to the last enabled item.' },
-						{ keys: ['escape'], description: 'Closes the menu and returns focus to the trigger.' },
+						{ keys: ['right arrow'], description: 'On an item with a submenu: opens it and moves into its first enabled item.' },
+						{ keys: ['left arrow'], description: 'Inside a submenu: closes it and returns to the parent item.' },
+						{ keys: ['escape'], description: 'Closes the whole menu, including any open submenu, and returns focus to the trigger.' },
 						{ keys: ['tab'], description: 'Closes the menu without intercepting the keypress, so focus continues to the next page element.' },
 					]} />
 				</div>
@@ -763,17 +765,17 @@ export const extraSections: Record<string, ExtraSection[]> = {
 			description: (
 				<div className='flex flex-col gap-4'>
 					<p>
-						MenuBarNav uses roving tabindex: only the active item (or the first enabled item, before anything is active) sits in the page&apos;s Tab order, so Tab moves into and out of the whole nav group in a single stop, the same mechanic as ToggleGroup. MenuBarNavItem sets <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-current=&quot;page&quot;</code> instead of <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-pressed</code> since this is a navigation landmark, not a toggle group, and MenuBarNavMore composes DropdownMenu unmodified, so its own overlay keyboard behavior (focus on open, Escape closes and returns focus to the trigger, arrow-key navigation, typeahead) applies once its dropdown is open.
+						MenuBarNav uses roving tabindex: only the active item (or the first enabled item, before anything is active) sits in the page&apos;s Tab order, so Tab moves into and out of the whole nav group in a single stop, the same mechanic as ToggleGroup. MenuBarNavItem sets <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-current=&quot;page&quot;</code> instead of <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-pressed</code> since this is a navigation landmark, not a toggle group, and MenuBarNavMore composes Menu unmodified, so its own overlay keyboard behavior (focus on open, Escape closes and returns focus to the trigger, arrow-key navigation, typeahead) applies once its dropdown is open.
 					</p>
 					<KeyboardShortcutsTable rows={[
 						{ keys: ['tab'], description: "Moves focus to the nav group's active item, or out to the next tabbable element if focus is already inside the group." },
 						{ keys: ['shift', 'tab'], description: 'Moves focus out of the nav group to the previous tabbable element.' },
 						{ keys: ['enter'], description: 'Activates the focused item, or opens the dropdown when focus is on MenuBarNavMore.' },
 						{ keys: ['space'], description: 'Activates the focused item, or opens the dropdown when focus is on MenuBarNavMore.' },
-						{ keys: ['right arrow'], description: 'Moves focus to the next item, wrapping from the last item to the first.' },
-						{ keys: ['left arrow'], description: 'Moves focus to the previous item, wrapping from the first item to the last.' },
-						{ keys: ['home'], description: 'Moves focus to the first enabled item.' },
-						{ keys: ['end'], description: 'Moves focus to the last enabled item.' },
+						{ keys: ['right arrow'], description: 'Moves focus to the next control in the bar, including search and sign in, wrapping from the last to the first. Ignored inside text inputs.' },
+						{ keys: ['left arrow'], description: 'Moves focus to the previous control in the bar, wrapping from the first to the last. Ignored inside text inputs.' },
+						{ keys: ['home'], description: 'Moves focus to the first control in the bar. Ignored inside text inputs.' },
+						{ keys: ['end'], description: 'Moves focus to the last control in the bar. Ignored inside text inputs.' },
 					]} />
 				</div>
 			),

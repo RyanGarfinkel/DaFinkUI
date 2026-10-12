@@ -31,7 +31,6 @@ import WorkflowBuilder from '@/src/components/WorkflowBuilder/WorkflowBuilder';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
 import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
 import { ToastProvider, useToast } from '@/src/components/Toast/Toast';
-import DropdownMenu from '@/src/components/DropdownMenu/DropdownMenu';
 import Avatar, { AvatarGroup } from '@/src/components/Avatar/Avatar';
 import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
 import { DatePicker } from '@/src/components/DatePicker/DatePicker';
@@ -60,6 +59,7 @@ import Switch from '@/src/components/Switch/Switch';
 import Slider from '@/src/components/Slider/Slider';
 import Button from '@/src/components/Button/Button';
 import Input from '@/src/components/Input/Input';
+import Menu from '@/src/components/Menu/Menu';
 import Tilt from '@/src/components/Tilt/Tilt';
 import { useState } from 'react';
 import { z } from 'zod';
@@ -1065,13 +1065,20 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </Popover>
       );
 
-    case 'dropdown-menu':
+    case 'menu':
       return (
-        <DropdownMenu
+        <Menu
           trigger='Actions'
           items={[
             { label: 'Edit',      onSelect: () => console.log('edit')      },
             { label: 'Duplicate', onSelect: () => console.log('duplicate') },
+            {
+              label: 'Share',
+              submenu: [
+                { label: 'Copy link', onSelect: () => console.log('copy link') },
+                { label: 'Email',     onSelect: () => console.log('email')     },
+              ],
+            },
             { separator: true },
             { label: 'Archive', disabled: true },
             { label: 'Delete',    onSelect: () => console.log('delete')    },
@@ -1670,7 +1677,7 @@ const zodFormSchema = z.object({
 type ZodFormValues = z.infer<typeof zodFormSchema>;
 
 const FormDemo = () => {
-  const form = useZodForm(zodFormSchema);
+  const form = useZodForm(zodFormSchema, { mode: 'onTouched' });
 
   const onSubmit = (values: ZodFormValues) => {
     console.log(values);
@@ -1681,17 +1688,17 @@ const FormDemo = () => {
       <FormField>
         <FormLabel htmlFor='name' required>Name</FormLabel>
         <FormControl>
-          <Input id='name' placeholder='Jane Smith' aria-required='true' {...form.register('name')} />
+          <Input id='name' placeholder='Jane Smith' aria-required='true' aria-invalid={!!form.formState.errors.name} aria-describedby={form.formState.errors.name ? 'name-error' : undefined} {...form.register('name')} />
         </FormControl>
-        <FormMessage>{form.formState.errors.name?.message}</FormMessage>
+        <FormMessage id='name-error'>{form.formState.errors.name?.message}</FormMessage>
       </FormField>
       <FormField>
         <FormLabel htmlFor='email' required>Email</FormLabel>
         <FormControl>
-          <Input id='email' type='email' placeholder='you@example.com' aria-required='true' {...form.register('email')} />
+          <Input id='email' type='email' placeholder='you@example.com' aria-required='true' aria-invalid={!!form.formState.errors.email} aria-describedby={form.formState.errors.email ? 'email-error' : undefined} {...form.register('email')} />
         </FormControl>
         <FormDescription>We will never share your email.</FormDescription>
-        <FormMessage>{form.formState.errors.email?.message}</FormMessage>
+        <FormMessage id='email-error'>{form.formState.errors.email?.message}</FormMessage>
       </FormField>
       <Button type='submit'>Save changes</Button>
     </Form>

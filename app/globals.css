@@ -32,6 +32,10 @@
 /* ─── Design tokens ─────────────────────────────────── */
 
 @theme {
+	/* Typography */
+	--font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji';
+	--font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
+
 	/* Motion */
 	--duration-fast:    150ms;
 	--duration-base:    200ms;
@@ -253,6 +257,16 @@ html {
 body {
 	background-color: var(--color-surface);
 	color:            var(--color-text);
+	font-family:      var(--font-sans);
+}
+
+/* Tailwind's ring-offset gap defaults to a fixed #fff, which makes focus rings
+   vanish in dark mode. Fill the gap with the page surface instead. In @layer base
+   so any ring-offset-* utility or [--tw-ring-offset-color:...] still wins. */
+@layer base {
+	*, ::before, ::after {
+		--tw-ring-offset-color: var(--color-surface);
+	}
 }
 
 /* ─── Native dialog ─────────────────────────────────── */
