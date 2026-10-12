@@ -120,6 +120,7 @@ export const CommandPalette = (
     const itemsRef  = useRef<ItemEntry[]>([]);
     const dialogRef = useRef<HTMLDivElement>(null);
     const inputRef  = useRef<HTMLInputElement>(null);
+    const closeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
     const id     = useId();
     const listId = `${id}-list`;
@@ -155,11 +156,14 @@ export const CommandPalette = (
 		);
 	};
 
+    useEffect(() => () => clearTimeout(closeTimerRef.current), []);
+
     useEffect(() =>
 	{
+		clearTimeout(closeTimerRef.current);
 		if(open)
 		{
-			 
+
 			setQuery('');
 			setActiveId(null);
 			setMounted(true);
@@ -167,7 +171,7 @@ export const CommandPalette = (
 		else
 		{
 			setVisible(false);
-			setTimeout(() =>
+			closeTimerRef.current = setTimeout(() =>
 			{
 				setMounted(false);
 				setQuery('');
@@ -179,11 +183,12 @@ export const CommandPalette = (
     useEffect(() =>
 	{
 		if(!mounted) return;
-		requestAnimationFrame(() =>
+		const frame = requestAnimationFrame(() =>
 		{
 			setVisible(true);
 			inputRef.current?.focus();
 		});
+		return () => cancelAnimationFrame(frame);
 	}, [mounted]);
 
     useEffect(() =>

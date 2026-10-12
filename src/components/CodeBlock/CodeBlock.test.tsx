@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { CodeBlock } from './CodeBlock';
 
@@ -216,6 +216,42 @@ describe('CodeBlock', () =>
 			fireEvent.change(textarea, { target: { value: 'const z = 0;' } });
 
 			expect(onCodeChange).toHaveBeenCalledWith('const z = 0;');
+		});
+	});
+
+	describe('copied reset timer', () =>
+	{
+		it('clears the pending reset timer when unmounted', async () =>
+		{
+			vi.useFakeTimers();
+
+			try
+			{
+				Object.defineProperty(navigator, 'clipboard', {
+					value: { writeText: vi.fn().mockResolvedValue(undefined) },
+					configurable: true,
+				});
+				const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+				const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+				const { unmount } = render(<CodeBlock code={CODE} />);
+				await act(async () =>
+				{
+					fireEvent.click(screen.getByRole('button', { name: 'Copy to clipboard' }));
+				});
+
+				const resetCallIndex = setTimeoutSpy.mock.calls.findIndex(([, ms]) => ms === 2000);
+				const resetTimerId = setTimeoutSpy.mock.results[resetCallIndex].value;
+				clearTimeoutSpy.mockClear();
+				unmount();
+
+				expect(clearTimeoutSpy).toHaveBeenCalledWith(resetTimerId);
+			}
+			finally
+			{
+				vi.restoreAllMocks();
+				vi.useRealTimers();
+			}
 		});
 	});
 });

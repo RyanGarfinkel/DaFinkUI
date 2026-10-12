@@ -131,4 +131,33 @@ describe('Toast interactions', () =>
 
 		await waitFor(() => expect(screen.queryByText('Update')).toBeNull());
 	});
+
+	it('clears the exit timer and open frame when unmounted mid-dismiss', () =>
+	{
+		vi.useFakeTimers();
+
+		try
+		{
+			const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+			const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+			const cancelFrameSpy = vi.spyOn(window, 'cancelAnimationFrame');
+
+			const { unmount } = renderWithProvider({ title: 'Bye', duration: 1000 });
+			act(() => { vi.advanceTimersByTime(1000); });
+
+			const exitCallIndex = setTimeoutSpy.mock.calls.findIndex(([, ms]) => ms === 200);
+			const exitTimerId = setTimeoutSpy.mock.results[exitCallIndex].value;
+			clearTimeoutSpy.mockClear();
+			cancelFrameSpy.mockClear();
+			unmount();
+
+			expect(clearTimeoutSpy).toHaveBeenCalledWith(exitTimerId);
+			expect(cancelFrameSpy).toHaveBeenCalled();
+		}
+		finally
+		{
+			vi.restoreAllMocks();
+			vi.useRealTimers();
+		}
+	});
 });

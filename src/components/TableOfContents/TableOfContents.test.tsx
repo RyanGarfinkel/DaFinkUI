@@ -161,4 +161,26 @@ describe('TableOfContents', () =>
 		const nav = screen.getByRole('navigation');
 		expect(nav.className).toContain('custom-toc');
 	});
+
+	it('cancels a pending scroll frame when unmounted', () =>
+	{
+		const rafSpy = vi.spyOn(window, 'requestAnimationFrame').mockReturnValue(42);
+		const cancelSpy = vi.spyOn(window, 'cancelAnimationFrame');
+
+		try
+		{
+			const { unmount } = renderWithHeadings();
+			fireEvent.scroll(window);
+			expect(rafSpy).toHaveBeenCalled();
+
+			unmount();
+
+			expect(cancelSpy).toHaveBeenCalledWith(42);
+		}
+		finally
+		{
+			rafSpy.mockRestore();
+			cancelSpy.mockRestore();
+		}
+	});
 });

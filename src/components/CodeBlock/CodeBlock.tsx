@@ -45,6 +45,9 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 	const [isOverflowing, setIsOverflowing] = useState(false);
 	const textareaRef = useRef<HTMLTextAreaElement>(null);
 	const preRef = useRef<HTMLPreElement>(null);
+	const copiedTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+	useEffect(() => () => clearTimeout(copiedTimerRef.current), []);
 
 	useEffect(() =>
 	{
@@ -67,7 +70,8 @@ const CodePanel = ({ code, editable, onCodeChange }: { code: string; editable?: 
 		{
 			await navigator.clipboard.writeText(currentCode());
 			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
+			clearTimeout(copiedTimerRef.current);
+			copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
 		}
 		catch
 		{

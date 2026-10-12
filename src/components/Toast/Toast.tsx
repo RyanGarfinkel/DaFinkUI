@@ -79,17 +79,26 @@ const ToastCard = (
     const [visible, setVisible] = useState(false);
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    const exitTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
     const dismiss = useCallback(() =>
 	{
 		setVisible(false);
-		setTimeout(() => onDismiss(item.id), 200);
+		clearTimeout(exitTimerRef.current);
+		exitTimerRef.current = setTimeout(() => onDismiss(item.id), 200);
 	}, [onDismiss, item.id]);
+
+    useEffect(() => () => clearTimeout(exitTimerRef.current), []);
 
     useEffect(() =>
 	{
-		requestAnimationFrame(() => setVisible(true));
+		const frame = requestAnimationFrame(() => setVisible(true));
 		timerRef.current = setTimeout(() => dismiss(), item.duration);
-		return () => { if(timerRef.current) clearTimeout(timerRef.current); };
+		return () =>
+		{
+			cancelAnimationFrame(frame);
+			if(timerRef.current) clearTimeout(timerRef.current);
+		};
 	}, [dismiss, item.duration]);
 
     const s = VARIANT_STYLES[item.variant];

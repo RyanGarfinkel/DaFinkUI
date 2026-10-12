@@ -85,6 +85,7 @@ const TableOfContents = (
 
 		const TRIGGER_OFFSET = 96;
 		let ticking = false;
+		let frame = 0;
 
 		const updateActive = () => {
 			// If the last section's content is shorter than the viewport, its heading
@@ -110,7 +111,7 @@ const TableOfContents = (
 		const onScroll = () => {
 			if(ticking) return;
 			ticking = true;
-			requestAnimationFrame(updateActive);
+			frame = requestAnimationFrame(updateActive);
 		};
 
 		updateActive();
@@ -119,6 +120,8 @@ const TableOfContents = (
 
 		return () =>
 		{
+			cancelAnimationFrame(frame);
+			ticking = false;
 			window.removeEventListener('scroll', onScroll);
 			window.removeEventListener('resize', onScroll);
 		};

@@ -1,5 +1,5 @@
 import CommandPalette, { CommandGroup, CommandItem } from './CommandPalette';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
 
@@ -467,6 +467,63 @@ describe('CommandPalette', () =>
 
 			expect(screen.getByText('Searching…')).toBeDefined();
 			expect(screen.queryByText(/No results for/)).toBeNull();
+		});
+	});
+
+	describe('close timer', () =>
+	{
+		const palette = (open: boolean) => (
+			<CommandPalette open={open} onClose={vi.fn()} placeholder='Search…'>
+				<CommandGroup label='Navigation'>
+					<CommandItem value='Go to Dashboard' onSelect={vi.fn()}>Go to Dashboard</CommandItem>
+				</CommandGroup>
+			</CommandPalette>
+		);
+
+		it('keeps the palette mounted when reopened within the close delay', () =>
+		{
+			vi.useFakeTimers();
+
+			try
+			{
+				const { rerender } = render(palette(true));
+				rerender(palette(false));
+				act(() => { vi.advanceTimersByTime(50); });
+				rerender(palette(true));
+				act(() => { vi.advanceTimersByTime(300); });
+
+				expect(screen.getByRole('dialog')).toBeDefined();
+			}
+			finally
+			{
+				vi.useRealTimers();
+			}
+		});
+
+		it('clears the pending close timer when unmounted mid-close', () =>
+		{
+			vi.useFakeTimers();
+
+			try
+			{
+				const setTimeoutSpy = vi.spyOn(globalThis, 'setTimeout');
+				const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout');
+
+				const { rerender, unmount } = render(palette(true));
+				rerender(palette(false));
+
+				const closeCallIndex = setTimeoutSpy.mock.calls.findIndex(([, ms]) => ms === 150);
+				const closeTimerId = setTimeoutSpy.mock.results[closeCallIndex].value;
+				clearTimeoutSpy.mockClear();
+				unmount();
+
+				expect(clearTimeoutSpy).toHaveBeenCalledWith(closeTimerId);
+			}
+			finally
+			{
+				vi.restoreAllMocks();
+				vi.useRealTimers();
+			}
 		});
 	});
 });
