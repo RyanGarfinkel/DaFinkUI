@@ -2,11 +2,11 @@
 
 import Mosaic, { MosaicTile, type MosaicTileLayout } from '../../components/Mosaic/Mosaic';
 import DataTable, { type ColumnDef } from '../../components/DataTable/DataTable';
-import { DropdownMenu } from '../../components/DropdownMenu/DropdownMenu';
 import Badge, { type BadgeVariant } from '../../components/Badge/Badge';
 import { AreaChart, RadarChart } from '../../components/Charts/Charts';
 import CountUp from '../../components/CountUp/CountUp';
 import Avatar from '../../components/Avatar/Avatar';
+import { Menu } from '../../components/Menu/Menu';
 import { useState } from 'react';
 
 interface ActivityRow {
@@ -98,7 +98,7 @@ export const Dashboard = () => {
 		<div className='flex flex-col gap-5 w-full'>
 			<div className='flex items-center justify-between'>
 				<h2 className='text-lg font-semibold text-text'>Team activity</h2>
-				<DropdownMenu
+				<Menu
 					items={PERIODS.map((label) => ({ label, onSelect: () => setPeriod(label) }))}
 					trigger={period}
 				/>

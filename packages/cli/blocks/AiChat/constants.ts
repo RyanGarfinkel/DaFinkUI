@@ -20,3 +20,22 @@ export const MODEL_OPTIONS: SelectOption[] = [
 	{ value: 'standard', label: 'Standard' },
 	{ value: 'advanced', label: 'Advanced' },
 ];
+
+export const EFFORT_OPTIONS: SelectOption[] = [
+	{ value: 'low',    label: 'Low' },
+	{ value: 'medium', label: 'Medium' },
+	{ value: 'high',   label: 'High' },
+];
+
+export interface Connector {
+	id:          string;
+	label:       string;
+	description: string;
+}
+
+export const CONNECTORS: Connector[] = [
+	{ id: 'drive',  label: 'Google Drive', description: 'Search and read your documents.' },
+	{ id: 'github', label: 'GitHub',       description: 'Look up repositories, issues, and pull requests.' },
+	{ id: 'notion', label: 'Notion',       description: 'Find pages and databases in your workspace.' },
+	{ id: 'slack',  label: 'Slack',        description: 'Search channels and threads.' },
+];

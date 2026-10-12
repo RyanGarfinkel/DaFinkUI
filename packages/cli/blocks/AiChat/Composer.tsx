@@ -3,6 +3,7 @@
 import CommandInput, { type CommandOption } from '../../components/CommandInput/CommandInput';
 import { Attachment, AttachmentGroup } from '../../components/Attachment/Attachment';
 import { ChangeEvent, ClipboardEvent, FormEvent, useRef } from 'react';
+import ModelPicker, { type ModelPickerProps } from './ModelPicker';
 import Button from '../../components/Button/Button';
 
 export interface ComposerProps {
@@ -18,6 +19,7 @@ export interface ComposerProps {
 	placeholder:        string;
 	inputLabel:         string;
 	sendLabel:          string;
+	modelPicker?:       ModelPickerProps;
 }
 
 const PaperclipIcon = () => (
@@ -55,7 +57,7 @@ const StopIcon = () => (
 export const Composer = (
 	{
 		draft, onDraftChange, onSubmit, isGenerating, onStop, attachedFiles, onAttach,
-		commands, onCommand, placeholder, inputLabel, sendLabel,
+		commands, onCommand, placeholder, inputLabel, sendLabel, modelPicker,
 	}: ComposerProps
 ) => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
@@ -126,6 +128,11 @@ export const Composer = (
 					</Button>
 				)}
 			</div>
+			{modelPicker && (
+				<div className='flex w-full max-w-md justify-end px-1.5'>
+					<ModelPicker {...modelPicker} />
+				</div>
+			)}
 		</form>
 	);
 };

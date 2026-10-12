@@ -9,12 +9,12 @@ import { PlusIcon, PencilIcon, TrashIcon, ReplyIcon, SearchIcon, ChevronRightIco
 import { Resizable, ResizablePanel, ResizableHandle } from '../../components/Resizable/Resizable';
 import { MessageActionsRow, ChatMessageRow, buildVersionNav, Divider } from './MessageRow';
 import { fetchChats, fetchThread, searchMessages, buildSearchCorpus } from './chatApi';
+import { COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, CONNECTORS } from './constants';
 import { type CommandOption } from '../../components/CommandInput/CommandInput';
 import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import ScrollFade from '../../components/ScrollFade/ScrollFade';
 import { Greeting, TypingPhrase, USER_NAME } from './Phrases';
 import Spinner from '../../components/Spinner/Spinner';
-import { COMMANDS, MODEL_OPTIONS } from './constants';
 import { useConversation } from './useConversation';
 import Button from '../../components/Button/Button';
 import Avatar from '../../components/Avatar/Avatar';
@@ -52,6 +52,8 @@ export const AiChat = () => {
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [displayName, setDisplayName] = useState(USER_NAME);
 	const [model, setModel] = useState(MODEL_OPTIONS[1].value);
+	const [effort, setEffort] = useState(EFFORT_OPTIONS[1].value);
+	const [enabledConnectors, setEnabledConnectors] = useState<string[]>([]);
 	const [autoTitleEnabled, setAutoTitleEnabled] = useState(true);
 	const [searchOpen, setSearchOpen] = useState(false);
 	const [searchHits, setSearchHits] = useState<SearchHit[]>([]);
@@ -105,6 +107,7 @@ export const AiChat = () => {
 
 	const activeChat = chats.find((c) => c.id === activeId) ?? null;
 	const modelLabel = MODEL_OPTIONS.find((o) => o.value === model)?.label ?? MODEL_OPTIONS[0].label;
+	const modelPicker = { model, effort, onModelChange: setModel, onEffortChange: setEffort };
 	const isTyping = activeId !== null && mainConversation.typingId === activeId;
 	const isGenerating = isTyping || (activeId !== null && mainConversation.streamingId === activeId);
 	const isThreadTyping = activeThread !== null && threadConversation.typingId === activeThread.threadId;
@@ -774,6 +777,7 @@ export const AiChat = () => {
 												placeholder='Message… (try /compact)'
 												inputLabel='Message'
 												sendLabel='Send message'
+												modelPicker={modelPicker}
 											/>
 										</div>
 									</div>
@@ -813,6 +817,7 @@ export const AiChat = () => {
 									placeholder:   'Reply in thread…',
 									inputLabel:    'Thread reply',
 									sendLabel:     'Send reply',
+									modelPicker,
 								}}
 								renderRoot={renderRootMessage}
 								renderReply={renderReplyMessage}
@@ -856,6 +861,18 @@ export const AiChat = () => {
 							value={model}
 							onChange={setModel}
 						/>
+						<div className='col-span-2 flex flex-col gap-3'>
+							<p className='text-sm font-medium text-text'>Connectors</p>
+							{CONNECTORS.map((connector) => (
+								<Switch
+									key={connector.id}
+									checked={enabledConnectors.includes(connector.id)}
+									onCheckedChange={(checked) => setEnabledConnectors((prev) => (checked ? [...prev, connector.id] : prev.filter((id) => id !== connector.id)))}
+									label={connector.label}
+									hint={connector.description}
+								/>
+							))}
+						</div>
 						<div className='col-span-2'>
 							<Switch
 								checked={autoTitleEnabled}
