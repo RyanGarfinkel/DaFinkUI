@@ -412,6 +412,8 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 
 	useEffect(() => { onChangeRef.current = onChange; });
 
+	useEffect(() => () => { runGenRef.current++; }, []);
+
 	useEffect(() =>
 	{
 		onChangeRef.current?.(toWorkflowGraph(nodes, edges));
