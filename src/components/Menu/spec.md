@@ -1,11 +1,11 @@
-# DropdownMenu
+# Menu
 
 A trigger button that opens a floating menu of actions with full keyboard navigation, typeahead, separators, and disabled items.
 
 ## Installation
 
 ```bash
-npx dafink-ui add dropdown-menu
+npx dafink-ui add menu
 ```
 
 No npm dependencies. No registry dependencies.
@@ -14,16 +14,31 @@ No npm dependencies. No registry dependencies.
 
 | Prop               | Type                                      | Default     | Description                                                  |
 |--------------------|-------------------------------------------|-------------|---------------------------------------------------------------|
-| `items`            | `DropdownMenuEntry[]`                     | required    | Array of items (`{ label, onSelect?, disabled? }`) and separators (`{ separator: true }`). |
+| `items`            | `MenuEntry[]`                     | required    | Array of items (`{ label, onSelect?, disabled?, selected?, detail?, submenu? }`) and separators (`{ separator: true }`). |
 | `trigger`          | `ReactNode`                               | required    | Content of the built-in trigger button.                      |
 | `side`             | `'top' \| 'right' \| 'bottom' \| 'left'`  | `'bottom'`  | Which side of the trigger the menu appears on.               |
 | `align`            | `'start' \| 'center' \| 'end'`            | `'start'`   | Alignment along the chosen side.                             |
-| `onSelect`         | `(item: DropdownMenuItem) => void`        | `undefined` | Called with the activated item, in addition to the item's own `onSelect`. |
+| `onSelect`         | `(item: MenuItem) => void`        | `undefined` | Called with the activated item, in addition to the item's own `onSelect`. |
 | `disabled`         | `boolean`                                 | `false`     | Disables the trigger.                                        |
 | `className`        | `string`                                  | `''`        | Additional classes on the menu list.                         |
 | `triggerClassName` | `string`                                  | `''`        | Classes on the trigger button. Appended after the built-in trigger style unless `unstyledTrigger` is set. |
-| `triggerProps`     | `ButtonHTMLAttributes<HTMLButtonElement>` | `undefined` | Extra native attributes spread onto the trigger button (e.g. `data-*`, `aria-current`, `tabIndex`) for composing DropdownMenu into a larger widget's roving-tabindex/ARIA model. |
-| `unstyledTrigger`  | `boolean`                                 | `false`     | When `true`, `triggerClassName` fully replaces the built-in trigger classes instead of being appended after them — use when composing DropdownMenu into a component with its own trigger styling, since Tailwind's generated class order isn't guaranteed to let an appended override win over the built-in defaults (this bit `MenuBarNavMore`: the active-state text color silently lost to the built-in `text-text`). |
+| `triggerProps`     | `ButtonHTMLAttributes<HTMLButtonElement>` | `undefined` | Extra native attributes spread onto the trigger button (e.g. `data-*`, `aria-current`, `tabIndex`) for composing Menu into a larger widget's roving-tabindex/ARIA model. |
+| `unstyledTrigger`  | `boolean`                                 | `false`     | When `true`, `triggerClassName` fully replaces the built-in trigger classes instead of being appended after them — use when composing Menu into a component with its own trigger styling, since Tailwind's generated class order isn't guaranteed to let an appended override win over the built-in defaults (this bit `MenuBarNavMore`: the active-state text color silently lost to the built-in `text-text`). |
+
+## Item Fields
+
+| Field      | Type                      | Description |
+|------------|---------------------------|-------------|
+| `label`    | `string`                  | Item text. Also used for typeahead. |
+| `onSelect` | `() => void`              | Called when the item is activated. |
+| `disabled` | `boolean`                 | Visible but skipped by navigation and inert to clicks. |
+| `selected` | `boolean`                 | Makes the item a `menuitemradio`: renders a check icon (space is reserved on unselected siblings so labels align) and sets `aria-checked`. Use for "current choice" lists. |
+| `detail`   | `string`                  | Muted text on the right of the row, e.g. the current value of a submenu parent. |
+| `submenu`  | `(MenuLeaf \| MenuSeparator)[]` | Turns the item into a parent that opens a second panel beside it. One level deep only: submenu items cannot have their own `submenu`. A parent's own `onSelect` is not called. |
+
+## Submenus
+
+Hovering a parent item, clicking it, or pressing ArrowRight / Enter / Space on it opens its panel beside the menu (flipping to the left edge when there's no room on the right). While focus is inside the panel, the menu list keeps DOM focus and `aria-activedescendant` points at the submenu item. Activating a submenu item calls its `onSelect`, then closes the whole menu and returns focus to the trigger.
 
 ## Keyboard Behavior
 
@@ -34,7 +49,9 @@ No npm dependencies. No registry dependencies.
 | `ArrowUp`       | On trigger: opens with last item active. In menu: previous enabled item (wraps) |
 | `Home`          | First enabled item                                                |
 | `End`           | Last enabled item                                                 |
-| `Escape`        | Closes, returns focus to the trigger                              |
+| `ArrowRight`    | On a submenu parent: opens its panel and moves into the first enabled item |
+| `ArrowLeft`     | Inside a submenu: closes the panel and returns to its parent item |
+| `Escape`        | Closes the whole menu (including any open submenu), returns focus to the trigger |
 | `Tab`           | Closes, moves focus to the next page element (not trapped)        |
 | Printable char  | Typeahead: moves to the next enabled item whose label starts with the accumulated characters (buffer resets after 500 ms) |
 
@@ -47,7 +64,7 @@ Disabled items are skipped by arrow navigation, Home/End, and typeahead, but rem
 - **Escape**: closes and returns focus to the trigger.
 - **Tab**: closes without intercepting the keypress, so focus continues to the next page element.
 - **Arrow keys**: ArrowDown/ArrowUp move between enabled items with wrapping; Home/End jump to the ends.
-- **ARIA roles**: trigger has `aria-haspopup="menu"`, `aria-expanded`, `aria-controls`. List has `role="menu"`, `aria-labelledby` (the trigger), `aria-activedescendant`. Items have `role="menuitem"`; separators have `role="separator"`.
+- **ARIA roles**: trigger has `aria-haspopup="menu"`, `aria-expanded`, `aria-controls`. List has `role="menu"`, `aria-labelledby` (the trigger), `aria-activedescendant`. Items have `role="menuitem"` (or `menuitemradio` with `aria-checked` when `selected` is set); submenu parents add `aria-haspopup="menu"` and `aria-expanded`; each submenu panel is a `role="menu"` labelled by its parent item; separators have `role="separator"`. A selected item is marked by a check icon as well as `aria-checked`, never color alone.
 - **Disabled items**: communicated with `aria-disabled="true"` plus reduced opacity and `cursor-not-allowed`, never color alone. They are visible but skipped in navigation and inert to clicks.
 - **Focus return**: focus returns to the trigger on Escape and on item activation; outside-click and Tab leave focus where the user sent it.
 
@@ -75,4 +92,4 @@ Menu enters with `opacity-0 scale-95` → `opacity-100 scale-100` over `var(--du
 
 ## When to Use
 
-Use DropdownMenu for a list of actions attached to a button: row actions, "more" menus, bulk operations. Use Select when the user is choosing a value that persists, Popover for arbitrary interactive content, and CommandPalette for global, searchable command lists.
+Use Menu for a list of actions attached to a button: row actions, "more" menus, bulk operations. Use Select when the user is choosing a value that persists, Popover for arbitrary interactive content, and CommandPalette for global, searchable command lists.

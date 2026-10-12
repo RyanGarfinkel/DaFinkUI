@@ -74,8 +74,8 @@ export type { DrawerProps, DrawerSide, DrawerHeaderProps, DrawerTitleProps, Draw
 export { default as SidePanel, SidePanelHeader, SidePanelTitle, SidePanelContent, SidePanelFooter, SidePanelClose } from './components/SidePanel/SidePanel';
 export type { SidePanelProps, SidePanelSide, SidePanelHeaderProps, SidePanelTitleProps, SidePanelContentProps, SidePanelFooterProps, SidePanelCloseProps } from './components/SidePanel/SidePanel';
 
-export { default as DropdownMenu } from './components/DropdownMenu/DropdownMenu';
-export type { DropdownMenuProps, DropdownMenuEntry, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuSide, DropdownMenuAlign } from './components/DropdownMenu/DropdownMenu';
+export { default as Menu } from './components/Menu/Menu';
+export type { MenuProps, MenuEntry, MenuItem, MenuSeparator, MenuSide, MenuAlign } from './components/Menu/Menu';
 
 export { default as Form, FormSection, FormField, FormLabel, FormControl, FormDescription, FormMessage } from './components/Form/Form';
 
