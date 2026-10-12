@@ -4,8 +4,8 @@ import { Card, CardContent, CardFooter, CardHeader } from '../../components/Card
 import { FormSection, FormField, FormLabel } from '../../components/Form/Form';
 import { RadioGroup, RadioItem } from '../../components/Radio/Radio';
 import Button from '../../components/Button/Button';
+import { useEffect, useRef, useState } from 'react';
 import Input from '../../components/Input/Input';
-import { useState } from 'react';
 
 const CheckIcon = () => (
 	<svg width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' className='text-success' aria-hidden='true'>
@@ -23,11 +23,16 @@ export const CheckoutForm = () => {
 	const [loading,       setLoading]       = useState(false);
 	const [success,       setSuccess]       = useState(false);
 
+	const payTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
 	const canPay = !!email && !!fullName && (paymentMethod !== 'card' || (!!cardNumber && !!expiry && !!cvc));
+
+	useEffect(() => () => clearTimeout(payTimerRef.current), []);
 
 	const handlePay = () => {
 		setLoading(true);
-		setTimeout(() => {
+		clearTimeout(payTimerRef.current);
+		payTimerRef.current = setTimeout(() => {
 			setLoading(false);
 			setSuccess(true);
 		}, 900);

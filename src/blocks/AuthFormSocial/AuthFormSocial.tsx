@@ -3,9 +3,9 @@
 import { Card, CardContent, CardFooter, CardHeader } from '../../components/Card/Card';
 import { FormField, FormLabel } from '../../components/Form/Form';
 import Button from '../../components/Button/Button';
+import { useEffect, useRef, useState } from 'react';
 import Badge from '../../components/Badge/Badge';
 import Input from '../../components/Input/Input';
-import { useState } from 'react';
 
 type Provider = 'google' | 'github';
 
@@ -37,9 +37,14 @@ export const AuthFormSocial = () => {
 
 	const busy = loading || socialLoading !== null;
 
+	const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+	useEffect(() => () => clearTimeout(timerRef.current), []);
+
 	const handleSocial = (provider: Provider) => {
 		setSocialLoading(provider);
-		setTimeout(() => {
+		clearTimeout(timerRef.current);
+		timerRef.current = setTimeout(() => {
 			setSocialLoading(null);
 			setSuccess(true);
 		}, 900);
@@ -47,7 +52,8 @@ export const AuthFormSocial = () => {
 
 	const handleSubmit = () => {
 		setLoading(true);
-		setTimeout(() => {
+		clearTimeout(timerRef.current);
+		timerRef.current = setTimeout(() => {
 			setLoading(false);
 			setSuccess(true);
 		}, 800);

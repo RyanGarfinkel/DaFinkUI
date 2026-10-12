@@ -5,6 +5,7 @@ import { Attachment, AttachmentGroup } from '../../components/Attachment/Attachm
 import type { ChatMessage, ChatTextMessage, MessageAttachment } from './types';
 import Questionnaire from '../../components/Questionnaire/Questionnaire';
 import ToolCallTrace from '../../components/ToolCallTrace/ToolCallTrace';
+import { useEffect, useRef, useState, ReactNode } from 'react';
 import Textarea from '../../components/Textarea/Textarea';
 import Message from '../../components/Message/Message';
 import Tooltip from '../../components/Tooltip/Tooltip';
@@ -12,7 +13,6 @@ import Spinner from '../../components/Spinner/Spinner';
 import Button from '../../components/Button/Button';
 import StreamingMessage from './StreamingMessage';
 import Badge from '../../components/Badge/Badge';
-import { useState, ReactNode } from 'react';
 import { TypingPhrase } from './Phrases';
 
 export const Divider = ({ label }: { label: string }) => (
@@ -32,13 +32,17 @@ const VERSION_NAV_BUTTON_CLASSES = 'flex h-5 w-5 items-center justify-center rou
 // that needs to stay pinned open like the reply-count badge does.
 const CopyMessageButton = ({ text }: { text: string }) => {
 	const [copied, setCopied] = useState(false);
+	const copiedTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+	useEffect(() => () => clearTimeout(copiedTimerRef.current), []);
 
 	const handleCopy = async () => {
 		try
 		{
 			await navigator.clipboard.writeText(text);
 			setCopied(true);
-			setTimeout(() => setCopied(false), 2000);
+			clearTimeout(copiedTimerRef.current);
+			copiedTimerRef.current = setTimeout(() => setCopied(false), 2000);
 		}
 		catch
 		{

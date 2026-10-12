@@ -7,9 +7,9 @@ import Checkbox from '../../components/Checkbox/Checkbox';
 import OTPInput from '../../components/OTPInput/OTPInput';
 import Progress from '../../components/Progress/Progress';
 import Button from '../../components/Button/Button';
+import { useEffect, useRef, useState } from 'react';
 import Badge from '../../components/Badge/Badge';
 import Input from '../../components/Input/Input';
-import { useState } from 'react';
 
 type Mode = 'signin' | 'signup';
 
@@ -45,12 +45,17 @@ export const AuthForm = () => {
 		setSuccess(false);
 	};
 
+	const signupTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
 	const passwordsMismatch = confirmPassword !== '' && confirmPassword !== signupPassword;
 	const canSignup = !!name && !!signupEmail && !!signupPassword && !!confirmPassword && !passwordsMismatch && agreed;
 
+	useEffect(() => () => clearTimeout(signupTimerRef.current), []);
+
 	const handleSignup = () => {
 		setLoading(true);
-		setTimeout(() => {
+		clearTimeout(signupTimerRef.current);
+		signupTimerRef.current = setTimeout(() => {
 			setLoading(false);
 			setSuccess(true);
 		}, 800);

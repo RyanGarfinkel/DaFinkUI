@@ -3,8 +3,8 @@
 import { Card, CardContent, CardFooter, CardHeader } from '../../components/Card/Card';
 import { FormField, FormLabel } from '../../components/Form/Form';
 import Button from '../../components/Button/Button';
+import { useEffect, useRef, useState } from 'react';
 import Input from '../../components/Input/Input';
-import { useEffect, useState } from 'react';
 
 const RESEND_COOLDOWN = 30;
 
@@ -27,9 +27,14 @@ export const AuthFormMagicLink = () => {
 		return () => clearTimeout(timer);
 	}, [cooldown]);
 
+	const sendTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+	useEffect(() => () => clearTimeout(sendTimerRef.current), []);
+
 	const handleSend = () => {
 		setLoading(true);
-		setTimeout(() => {
+		clearTimeout(sendTimerRef.current);
+		sendTimerRef.current = setTimeout(() => {
 			setLoading(false);
 			setSent(true);
 			setCooldown(RESEND_COOLDOWN);

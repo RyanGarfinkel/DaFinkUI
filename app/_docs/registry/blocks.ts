@@ -200,7 +200,7 @@ import Progress from '@/src/components/Progress/Progress';
 import Button from '@/src/components/Button/Button';
 import Badge from '@/src/components/Badge/Badge';
 import Input from '@/src/components/Input/Input';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function AuthForm() {
   const [mode, setMode] = useState('signin');
@@ -228,12 +228,17 @@ export default function AuthForm() {
     setSuccess(false);
   };
 
+  const signupTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
   const passwordsMismatch = confirmPassword !== '' && confirmPassword !== signupPassword;
   const canSignup = !!name && !!signupEmail && !!signupPassword && !!confirmPassword && !passwordsMismatch && agreed;
 
+  useEffect(() => () => clearTimeout(signupTimerRef.current), []);
+
   const handleSignup = () => {
     setLoading(true);
-    setTimeout(() => {
+    clearTimeout(signupTimerRef.current);
+    signupTimerRef.current = setTimeout(() => {
       setLoading(false);
       setSuccess(true);
     }, 800);
@@ -404,7 +409,7 @@ import Button from '@/src/components/Button/Button';
 import Switch from '@/src/components/Switch/Switch';
 import Input from '@/src/components/Input/Input';
 import Badge from '@/src/components/Badge/Badge';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const TIMEZONES: SelectOption[] = [
   { value: 'utc-8', label: 'Pacific Time (UTC-8)' },
@@ -422,9 +427,14 @@ export default function SettingsForm() {
   const [productNews, setProductNews] = useState(false);
   const [saved, setSaved] = useState(false);
 
+  const savedTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(savedTimerRef.current), []);
+
   const handleSave = () => {
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    clearTimeout(savedTimerRef.current);
+    savedTimerRef.current = setTimeout(() => setSaved(false), 2000);
   };
 
   return (
@@ -561,7 +571,7 @@ import { FormSection, FormField, FormLabel } from '@/src/components/Form/Form';
 import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
 import Button from '@/src/components/Button/Button';
 import Input from '@/src/components/Input/Input';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function CheckoutForm() {
   const [email, setEmail] = useState('');
@@ -573,11 +583,16 @@ export default function CheckoutForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  const payTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
   const canPay = !!email && !!fullName && (paymentMethod !== 'card' || (!!cardNumber && !!expiry && !!cvc));
+
+  useEffect(() => () => clearTimeout(payTimerRef.current), []);
 
   const handlePay = () => {
     setLoading(true);
-    setTimeout(() => {
+    clearTimeout(payTimerRef.current);
+    payTimerRef.current = setTimeout(() => {
       setLoading(false);
       setSuccess(true);
     }, 900);
@@ -999,6 +1014,8 @@ export const AiChat = () => {
 	const searchTriggerRef = useRef<HTMLButtonElement>(null);
 	const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const searchAbortRef = useRef<AbortController | null>(null);
+	const copyNoticeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const mountedRef = useRef(true);
 	const nextChatId = useRef(1);
 	const nextThreadId = useRef(1);
 	const nextMessageIdRef = useRef(1);
@@ -1100,7 +1117,10 @@ export const AiChat = () => {
 	}, [chats, isTyping, activeId]);
 
 	useEffect(() => {
+		mountedRef.current = true;
 		return () => {
+			mountedRef.current = false;
+			clearTimeout(copyNoticeTimerRef.current);
 			clearTimeout(searchTimerRef.current);
 			searchAbortRef.current?.abort();
 		};
@@ -1311,9 +1331,15 @@ export const AiChat = () => {
 		if(threadMessages[threadId]) return;
 		setLoadingThreadId(threadId);
 		fetchThread(threadId)
-			.then((messages) => setThreadMessages((prev) => ({ ...prev, [threadId]: messages })))
+			.then((messages) =>
+			{
+				if(mountedRef.current) setThreadMessages((prev) => ({ ...prev, [threadId]: messages }));
+			})
 			.catch(() => undefined)
-			.finally(() => setLoadingThreadId((prev) => (prev === threadId ? null : prev)));
+			.finally(() =>
+			{
+				if(mountedRef.current) setLoadingThreadId((prev) => (prev === threadId ? null : prev));
+			});
 	};
 
 	const handleStartThread = (chatId: string, rootMessageId: number) => {
@@ -1384,8 +1410,10 @@ export const AiChat = () => {
 		{
 			return;
 		}
+		if(!mountedRef.current) return;
 		setCopyNoticeVisible(true);
-		setTimeout(() => setCopyNoticeVisible(false), COPY_NOTICE_MS);
+		clearTimeout(copyNoticeTimerRef.current);
+		copyNoticeTimerRef.current = setTimeout(() => setCopyNoticeVisible(false), COPY_NOTICE_MS);
 	};
 
 	const handleCommand = (command: CommandOption) => {
@@ -3370,7 +3398,7 @@ export default JobApplicationTracker;`,
 		usage: `'use client';
 
 import { Card, CardContent, CardFooter, CardHeader, FormField, FormLabel, Button, Badge, Input } from '@components/ui';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const GoogleIcon = () => (
   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -3400,9 +3428,14 @@ export default function AuthFormSocialExample() {
 
   const busy = loading || socialLoading !== null;
 
+  const timerRef = useRef(undefined);
+
+  useEffect(() => () => clearTimeout(timerRef.current), []);
+
   const handleSocial = (provider) => {
     setSocialLoading(provider);
-    setTimeout(() => {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
       setSocialLoading(null);
       setSuccess(true);
     }, 900);
@@ -3410,7 +3443,8 @@ export default function AuthFormSocialExample() {
 
   const handleSubmit = () => {
     setLoading(true);
-    setTimeout(() => {
+    clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
       setLoading(false);
       setSuccess(true);
     }, 800);
@@ -3499,7 +3533,7 @@ export default function AuthFormSocialExample() {
 		usage: `'use client';
 
 import { Card, CardContent, CardFooter, CardHeader, FormField, FormLabel, Button, Input } from '@components/ui';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const RESEND_COOLDOWN = 30;
 
@@ -3522,9 +3556,14 @@ export default function AuthFormMagicLinkExample() {
     return () => clearTimeout(timer);
   }, [cooldown]);
 
+  const sendTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(sendTimerRef.current), []);
+
   const handleSend = () => {
     setLoading(true);
-    setTimeout(() => {
+    clearTimeout(sendTimerRef.current);
+    sendTimerRef.current = setTimeout(() => {
       setLoading(false);
       setSent(true);
       setCooldown(RESEND_COOLDOWN);

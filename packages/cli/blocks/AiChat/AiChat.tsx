@@ -66,6 +66,8 @@ export const AiChat = () => {
 	const searchTriggerRef = useRef<HTMLButtonElement>(null);
 	const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const searchAbortRef = useRef<AbortController | null>(null);
+	const copyNoticeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+	const mountedRef = useRef(true);
 	const nextChatId = useRef(1);
 	const nextThreadId = useRef(1);
 	const nextMessageIdRef = useRef(1);
@@ -167,7 +169,10 @@ export const AiChat = () => {
 	}, [chats, isTyping, activeId]);
 
 	useEffect(() => {
+		mountedRef.current = true;
 		return () => {
+			mountedRef.current = false;
+			clearTimeout(copyNoticeTimerRef.current);
 			clearTimeout(searchTimerRef.current);
 			searchAbortRef.current?.abort();
 		};
@@ -378,9 +383,15 @@ export const AiChat = () => {
 		if(threadMessages[threadId]) return;
 		setLoadingThreadId(threadId);
 		fetchThread(threadId)
-			.then((messages) => setThreadMessages((prev) => ({ ...prev, [threadId]: messages })))
+			.then((messages) =>
+			{
+				if(mountedRef.current) setThreadMessages((prev) => ({ ...prev, [threadId]: messages }));
+			})
 			.catch(() => undefined)
-			.finally(() => setLoadingThreadId((prev) => (prev === threadId ? null : prev)));
+			.finally(() =>
+			{
+				if(mountedRef.current) setLoadingThreadId((prev) => (prev === threadId ? null : prev));
+			});
 	};
 
 	const handleStartThread = (chatId: string, rootMessageId: number) => {
@@ -451,8 +462,10 @@ export const AiChat = () => {
 		{
 			return;
 		}
+		if(!mountedRef.current) return;
 		setCopyNoticeVisible(true);
-		setTimeout(() => setCopyNoticeVisible(false), COPY_NOTICE_MS);
+		clearTimeout(copyNoticeTimerRef.current);
+		copyNoticeTimerRef.current = setTimeout(() => setCopyNoticeVisible(false), COPY_NOTICE_MS);
 	};
 
 	const handleCommand = (command: CommandOption) => {

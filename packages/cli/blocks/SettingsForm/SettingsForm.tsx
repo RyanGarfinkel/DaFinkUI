@@ -6,9 +6,9 @@ import { Select, type SelectOption } from '../../components/Select/Select';
 import Textarea from '../../components/Textarea/Textarea';
 import Button from '../../components/Button/Button';
 import Switch from '../../components/Switch/Switch';
+import { useEffect, useRef, useState } from 'react';
 import Input from '../../components/Input/Input';
 import Badge from '../../components/Badge/Badge';
-import { useState } from 'react';
 
 const TIMEZONES: SelectOption[] = [
 	{ value: 'utc-8', label: 'Pacific Time (UTC-8)'  },
@@ -26,9 +26,14 @@ export const SettingsForm = () => {
 	const [productNews,   setProductNews]   = useState(false);
 	const [saved,         setSaved]         = useState(false);
 
+	const savedTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+	useEffect(() => () => clearTimeout(savedTimerRef.current), []);
+
 	const handleSave = () => {
 		setSaved(true);
-		setTimeout(() => setSaved(false), 2000);
+		clearTimeout(savedTimerRef.current);
+		savedTimerRef.current = setTimeout(() => setSaved(false), 2000);
 	};
 
 	return (

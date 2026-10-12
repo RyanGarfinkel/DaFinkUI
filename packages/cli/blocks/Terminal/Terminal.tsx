@@ -13,7 +13,7 @@ import Tree, { TreeItem } from '../../components/Tree/Tree';
 import Spinner from '../../components/Spinner/Spinner';
 import Switch from '../../components/Switch/Switch';
 import Button from '../../components/Button/Button';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useShell } from './useShell';
 import { GitPanel } from './GitPanel';
 import { Shell } from './Shell';
@@ -65,24 +65,42 @@ export const Terminal = () => {
 	const [clearOnRun, setClearOnRun] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const shell = useShell();
+	const mountedRef = useRef(true);
 
 	useEffect(() =>
 	{
+		mountedRef.current = true;
+		let cancelled = false;
+
 		fetchTree()
 			.then((nodes) =>
 			{
+				if(cancelled) return;
 				setTree(nodes);
 				setTreeStatus('ready');
 			})
-			.catch(() => setTreeStatus('error'));
+			.catch(() =>
+			{
+				if(!cancelled) setTreeStatus('error');
+			});
 
 		fetchGitStatus()
 			.then((status) =>
 			{
+				if(cancelled) return;
 				setGit(status);
 				setGitStatus('ready');
 			})
-			.catch(() => setGitStatus('error'));
+			.catch(() =>
+			{
+				if(!cancelled) setGitStatus('error');
+			});
+
+		return () =>
+		{
+			cancelled = true;
+			mountedRef.current = false;
+		};
 	}, []);
 
 	const openFile = async (id: string) => {
@@ -95,15 +113,15 @@ export const Terminal = () => {
 		try
 		{
 			const file = await fetchFile(id);
-			setFiles((prev) => ({ ...prev, [id]: file }));
+			if(mountedRef.current) setFiles((prev) => ({ ...prev, [id]: file }));
 		}
 		catch
 		{
-			setFileError(true);
+			if(mountedRef.current) setFileError(true);
 		}
 		finally
 		{
-			setLoadingId((current) => (current === id ? null : current));
+			if(mountedRef.current) setLoadingId((current) => (current === id ? null : current));
 		}
 	};
 
