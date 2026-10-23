@@ -1058,4 +1058,14 @@ export const extraSections: Record<string, ExtraSection[]> = {
 			),
 		},
 	],
+	'link': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<p>
+					Link renders a native anchor, so it is in the natural tab order and activates with Enter. The underline is always visible, so the link never relies on color alone. Focus shows a 2px ring.
+				</p>
+			),
+		},
+	],
 };

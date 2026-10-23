@@ -58,6 +58,7 @@ import { Badge } from '@/src/components/Badge/Badge';
 import Switch from '@/src/components/Switch/Switch';
 import Slider from '@/src/components/Slider/Slider';
 import Button from '@/src/components/Button/Button';
+import { Link } from '@/src/components/Link/Link';
 import Input from '@/src/components/Input/Input';
 import Menu from '@/src/components/Menu/Menu';
 import Tilt from '@/src/components/Tilt/Tilt';
@@ -1619,6 +1620,13 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
             </Resizable>
           </ResizablePanel>
         </Resizable>
+      );
+
+    case 'link':
+      return (
+        <p className='text-sm text-text'>
+          Read the <Link href='/components'>component docs</Link> to get started.
+        </p>
       );
 
     default:

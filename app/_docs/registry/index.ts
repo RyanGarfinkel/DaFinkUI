@@ -4024,6 +4024,28 @@ export default function Example() {
       ],
     },
   },
+  {
+    slug: 'link',
+    name: 'Link',
+    category: 'Navigation',
+    description: 'An inline text link with no padding, for use inside paragraphs and other running text.',
+    usage: `import { Link } from '@components/ui';
+
+export default function Example() {
+  return (
+    <p>
+      Read the <Link href='/components'>component docs</Link> to get started.
+    </p>
+  );
+}`,
+    props: [
+      { name: 'href', type: 'string', default: 'required', description: 'Destination. Renders through next/link.' },
+      { name: 'className', type: 'string', default: "''", description: 'Additional CSS classes.' },
+    ],
+    dependencies:         [],
+    registryDependencies: [],
+    files:                ['Link/Link.tsx'],
+  },
 ];
 
 export const getComponent = (slug: string) => {

@@ -171,3 +171,6 @@ export type { WorkflowBuilderProps, WorkflowGraph, WorkflowPort, WorkflowDirecti
 
 export { default as Resizable, ResizablePanel, ResizableHandle } from './components/Resizable/Resizable';
 export type { ResizableDirection, ResizableProps, ResizablePanelProps, ResizableHandleProps } from './components/Resizable/Resizable';
+
+export { Link } from './components/Link/Link';
+export type { LinkProps } from './components/Link/Link';
