@@ -1,5 +1,5 @@
 import { MenuBar, MenuBarBrand, MenuBarActions, MenuBarNav, MenuBarNavItem, MenuBarNavMore } from './MenuBar';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 
@@ -121,6 +121,19 @@ describe('MenuBar arrow key navigation', () =>
 		screen.getByRole('button', { name: 'Sign in' }).focus();
 
 		await userEvent.keyboard('{ArrowRight}');
+		expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Home' }));
+	});
+
+	it('parks focus on the last control on Tab and the first on Shift+Tab so the browser exits the bar', () =>
+	{
+		renderFullBar();
+
+		screen.getByRole('button', { name: 'Home' }).focus();
+		fireEvent.keyDown(document.activeElement as Element, { key: 'Tab' });
+		expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Query' }));
+
+		screen.getByRole('button', { name: 'Sign in' }).focus();
+		fireEvent.keyDown(document.activeElement as Element, { key: 'Tab', shiftKey: true });
 		expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Home' }));
 	});
 

@@ -765,11 +765,11 @@ export const extraSections: Record<string, ExtraSection[]> = {
 			description: (
 				<div className='flex flex-col gap-4'>
 					<p>
-						MenuBarNav uses roving tabindex: only the active item (or the first enabled item, before anything is active) sits in the page&apos;s Tab order, so Tab moves into and out of the whole nav group in a single stop, the same mechanic as ToggleGroup. MenuBarNavItem sets <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-current=&quot;page&quot;</code> instead of <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-pressed</code> since this is a navigation landmark, not a toggle group, and MenuBarNavMore composes Menu unmodified, so its own overlay keyboard behavior (focus on open, Escape closes and returns focus to the trigger, arrow-key navigation, typeahead) applies once its dropdown is open.
+						MenuBarNav uses roving tabindex: only the active item (or the first enabled item, before anything is active) sits in the page&apos;s Tab order, and the whole MenuBar acts as one tab stop: arrow keys move between every control in it, while Tab and Shift+Tab leave the bar entirely. MenuBarNavItem sets <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-current=&quot;page&quot;</code> instead of <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-pressed</code> since this is a navigation landmark, not a toggle group, and MenuBarNavMore composes Menu unmodified, so its own overlay keyboard behavior (focus on open, Escape closes and returns focus to the trigger, arrow-key navigation, typeahead) applies once its dropdown is open.
 					</p>
 					<KeyboardShortcutsTable rows={[
-						{ keys: ['tab'], description: "Moves focus to the nav group's active item, or out to the next tabbable element if focus is already inside the group." },
-						{ keys: ['shift', 'tab'], description: 'Moves focus out of the nav group to the previous tabbable element.' },
+						{ keys: ['tab'], description: "Enters the bar at the nav group's active item; from anywhere inside the bar, moves focus out to the next page element." },
+						{ keys: ['shift', 'tab'], description: 'From anywhere inside the bar, moves focus out to the previous page element.' },
 						{ keys: ['enter'], description: 'Activates the focused item, or opens the dropdown when focus is on MenuBarNavMore.' },
 						{ keys: ['space'], description: 'Activates the focused item, or opens the dropdown when focus is on MenuBarNavMore.' },
 						{ keys: ['right arrow'], description: 'Moves focus to the next control in the bar, including search and sign in, wrapping from the last to the first. Ignored inside text inputs.' },

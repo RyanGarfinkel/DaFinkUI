@@ -22,11 +22,20 @@ const isTextEntry = (el: Element | null) =>
 
 const moveFocusByKey = (e: React.KeyboardEvent<HTMLElement>, scope: HTMLElement | null) => {
 	if(e.defaultPrevented || !scope) return;
-	if(!scope.contains(e.target as Node) || isTextEntry(e.target as Element)) return;
+	if(!scope.contains(e.target as Node)) return;
+	if(e.key !== 'Tab' && isTextEntry(e.target as Element)) return;
 
 	const items = Array.from(scope.querySelectorAll<HTMLElement>(TABBABLE_SELECTOR));
 	const idx   = items.indexOf(document.activeElement as HTMLElement);
-	if(idx === -1 || items.length < 2) return;
+	if(idx === -1) return;
+
+	if(e.key === 'Tab' && !e.altKey && !e.ctrlKey && !e.metaKey)
+	{
+		items[e.shiftKey ? 0 : items.length - 1].focus();
+		return;
+	}
+
+	if(items.length < 2) return;
 
 	let next: HTMLElement | undefined;
 
