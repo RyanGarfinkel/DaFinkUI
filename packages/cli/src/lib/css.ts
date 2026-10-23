@@ -539,6 +539,11 @@ const BASE_STYLES_CSS = `body {
 	*, ::before, ::after {
 		--tw-ring-offset-color: var(--color-surface);
 	}
+
+	button:not(:disabled),
+	[role='button']:not([aria-disabled='true']) {
+		cursor: pointer;
+	}
 }`;
 
 const SCROLLBAR_UTILITY_CSS = `/* Utility for scroll containers that should stay invisible until hovered */

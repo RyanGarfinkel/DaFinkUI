@@ -21,6 +21,7 @@ Before building any interactive component that involves overlays, focus manageme
 - All motion must respect `prefers-reduced-motion`, handled globally in `globals.css`
 - Every interactive element needs hover, focus, and focus-visible states, see `src/patterns/interactive-states.mdx`
 - Minimum contrast: 4.5:1 for body text, 3:1 for large text and UI components; tokens are pre-validated
+- Enabled buttons and `[role='button']` get `cursor: pointer` globally (`@layer base` in `globals.css` and `packages/cli/src/lib/css.ts`); don't add per-component `cursor-pointer` to buttons. Non-button clickables (cards, rows, `div`s) still need it explicitly
 - Every component must be keyboard-navigable, see `src/patterns/accessibility.md`
 - Popups and overlays require focus trap (modals) or managed focus (menus), Escape to close, and focus return to trigger, see `src/patterns/accessibility.md`
 - Mobile-first: unprefixed styles target phones; layer up with `sm:`/`md:`/`lg:`. Never patch desktop down with `max-*` variants. See "Responsive Design" in `src/patterns/design.md`
