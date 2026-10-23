@@ -30,6 +30,18 @@ const dafinkConfig = [
 			],
 		},
 	},
+	{
+		files: ['**/*.tsx', '**/*.jsx'],
+		rules: {
+			'no-restricted-syntax': [
+				'error',
+				{
+					selector: 'JSXAttribute[name.name="className"] Literal[value=/\\b(bg-white|text-white|bg-black|text-black)\\b/]',
+					message: 'Use design tokens (bg-surface, text-text, etc.) instead of hardcoded white/black Tailwind classes.',
+				},
+			],
+		},
+	},
 ];
 
 export default dafinkConfig;

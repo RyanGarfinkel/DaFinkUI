@@ -50,7 +50,9 @@ export function installEslint(cwd: string): void
 		log.success(`Wrote ${pc.bold('eslint.config.mjs')}`);
 	}
 
-	const deps = needsEslint ? ['eslint', 'eslint-plugin-perfectionist'] : ['eslint-plugin-perfectionist'];
+	const deps = needsEslint
+		? ['eslint', 'eslint-plugin-perfectionist', 'typescript-eslint', 'eslint-plugin-react-hooks']
+		: ['eslint-plugin-perfectionist'];
 	const cmd = devInstallCmd(detectPackageManager(cwd), deps);
 
 	log.info(`Installing dev dependencies: ${pc.cyan(cmd)}`);

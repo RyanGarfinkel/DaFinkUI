@@ -1,7 +1,9 @@
 #!/usr/bin/env node
+import { runHookInstall } from './commands/hook.js';
 import { runEslint } from './commands/eslint.js';
 import { runAudit } from './commands/audit.js';
 import { runSkill } from './commands/skill.js';
+import { runLint } from './commands/lint.js';
 import { runInit } from './commands/init.js';
 import { runAdd } from './commands/add.js';
 import { Command } from 'commander';
@@ -56,6 +58,28 @@ program
 	.action(async () =>
 	{
 		await runEslint(process.cwd());
+	});
+
+program
+	.command('lint [files...]')
+	.description('Run ESLint with the DaFink rules on your components and blocks (or the given files)')
+	.option('--init', 'Write the DaFink ESLint config into your project and install its dependencies')
+	.option('--fix', 'Autofix problems where possible')
+	.option('--hook', 'Read a Claude Code PostToolUse payload from stdin and lint only the edited file')
+	.action(async (files: string[], options: { init?: boolean; fix?: boolean; hook?: boolean }) =>
+	{
+		await runLint(files, options, process.cwd());
+	});
+
+program
+	.command('hook')
+	.description('Manage the Claude Code lint hook')
+	.command('install')
+	.description('Add a PostToolUse hook to .claude/settings.json that lints every file Claude Code edits')
+	.option('--fix', 'Have the hook autofix problems before reporting the rest')
+	.action(async (options: { fix?: boolean }) =>
+	{
+		await runHookInstall(options, process.cwd());
 	});
 
 program.parse();
