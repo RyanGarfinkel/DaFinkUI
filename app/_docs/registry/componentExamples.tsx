@@ -1,4 +1,12 @@
 import {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselPrevious,
+	CarouselNext,
+	CarouselDots,
+} from '@/src/components/Carousel/Carousel';
+import {
 	Skeleton,
 	SkeletonCard,
 	SkeletonForm,
@@ -52,6 +60,48 @@ export const componentExamples: Record<string, ComponentExample[]> = {
 					<Button variant='arrowleft'>Previous</Button>
 					<Button variant='arrowright'>Next</Button>
 				</div>
+			),
+		},
+	],
+	carousel: [
+		{
+			id:          'single-slide',
+			title:       'Single slide',
+			description: 'With only one slide there is nothing to navigate, so CarouselPrevious, CarouselNext, and CarouselDots render nothing and the carousel reads as a plain image. Autoplay is also skipped.',
+			usage: `export default function Example() {
+  return (
+    <Carousel aria-label="Single photo" className="w-full max-w-sm">
+      <CarouselContent>
+        <CarouselItem>
+          <img
+            src="https://picsum.photos/seed/dafink-carousel/640/384"
+            alt="A single photo in a carousel"
+            className="h-48 w-full rounded-lg object-cover"
+          />
+        </CarouselItem>
+      </CarouselContent>
+      <CarouselPrevious />
+      <CarouselNext />
+      <CarouselDots className="mt-3" />
+    </Carousel>
+  );
+}`,
+			preview: (
+				<Carousel aria-label='Single photo' className='w-full max-w-sm'>
+					<CarouselContent>
+						<CarouselItem>
+							{/* eslint-disable-next-line @next/next/no-img-element */}
+							<img
+								src='https://picsum.photos/seed/dafink-carousel/640/384'
+								alt='A single photo in a carousel'
+								className='h-48 w-full rounded-lg object-cover'
+							/>
+						</CarouselItem>
+					</CarouselContent>
+					<CarouselPrevious />
+					<CarouselNext />
+					<CarouselDots className='mt-3' />
+				</Carousel>
 			),
 		},
 	],

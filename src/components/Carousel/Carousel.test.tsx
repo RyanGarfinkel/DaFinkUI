@@ -125,6 +125,25 @@ describe('Carousel', () =>
 		expect(screen.getByText('Slide 3 of 3')).toBeDefined();
 	});
 
+	it('hides previous, next, and dots when there is only one slide', () =>
+	{
+		render(
+			<Carousel loop aria-label='Single'>
+				<CarouselContent>
+					<CarouselItem>Only slide</CarouselItem>
+				</CarouselContent>
+				<CarouselPrevious />
+				<CarouselNext />
+				<CarouselDots />
+			</Carousel>
+		);
+
+		expect(screen.getByText('Only slide')).toBeDefined();
+		expect(screen.queryByLabelText('Previous slide')).toBeNull();
+		expect(screen.queryByLabelText('Next slide')).toBeNull();
+		expect(screen.queryAllByRole('tab')).toHaveLength(0);
+	});
+
 	it('applies className to the root', () =>
 	{
 		render(<BasicCarousel />);

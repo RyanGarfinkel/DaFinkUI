@@ -71,7 +71,7 @@ export const Carousel = (
 
 	useEffect(() =>
 	{
-		if(!autoPlay || count === 0) return;
+		if(!autoPlay || count <= 1) return;
 		intervalRef.current = setInterval(scrollNext, interval);
 		return () => { if(intervalRef.current) clearInterval(intervalRef.current); };
 	}, [autoPlay, interval, scrollNext, count]);
@@ -238,7 +238,9 @@ const NAV_BASE = 'absolute top-1/2 -translate-y-1/2 z-10 flex h-8 w-8 items-cent
 export type CarouselPreviousProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const CarouselPrevious = ({ className = '', ...props }: CarouselPreviousProps) => {
-	const { scrollPrev, canScrollPrev } = useCarouselContext();
+	const { scrollPrev, canScrollPrev, count } = useCarouselContext();
+
+	if(count <= 1) return null;
 
 	return (
 		<button
@@ -258,7 +260,9 @@ export const CarouselPrevious = ({ className = '', ...props }: CarouselPreviousP
 export type CarouselNextProps = ButtonHTMLAttributes<HTMLButtonElement>;
 
 export const CarouselNext = ({ className = '', ...props }: CarouselNextProps) => {
-	const { scrollNext, canScrollNext } = useCarouselContext();
+	const { scrollNext, canScrollNext, count } = useCarouselContext();
+
+	if(count <= 1) return null;
 
 	return (
 		<button

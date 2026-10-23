@@ -80,7 +80,7 @@ Extends `HTMLAttributes<HTMLDivElement>`.
 |-------------|----------|---------|--------------------------------------------------|
 | `className` | `string` | `""`    | Additional classes merged onto the button.       |
 
-Extends `ButtonHTMLAttributes<HTMLButtonElement>`. Automatically disabled when there is no previous/next slide (unless `loop` is enabled).
+Extends `ButtonHTMLAttributes<HTMLButtonElement>`. Automatically disabled when there is no previous/next slide (unless `loop` is enabled). Render nothing when there is only one slide.
 
 ### CarouselDots
 
@@ -108,7 +108,7 @@ Renders nothing when there is only one slide. Each dot is a `role="tab"` button;
 - Root has `role="region"` and `aria-roledescription="carousel"`. Provide a meaningful `aria-label` to make it a named landmark.
 - Each `CarouselItem` has `role="group"` and `aria-roledescription="slide"`.
 - A visually hidden `role="status"` live region announces "Slide N of M" on every transition.
-- `CarouselPrevious` and `CarouselNext` have `aria-label` values ("Previous slide" / "Next slide") and are disabled at boundaries.
+- `CarouselPrevious` and `CarouselNext` have `aria-label` values ("Previous slide" / "Next slide") and are disabled at boundaries and removed entirely when there is only one slide.
 - `CarouselDots` renders a `role="tablist"` with each dot as `role="tab"` and `aria-selected`.
 
 ### Keyboard
