@@ -55,4 +55,24 @@ export const registerPrompts = (server: McpServer): void => {
 			],
 		})
 	);
+
+	server.prompt(
+		'setup-project',
+		'Set up DaFink UI in a project without interactive prompts, using the init command flags',
+		{
+			style: z.string().optional().describe('minimal, neumorph, or brutalist (default: minimal)'),
+			palette: z.string().optional().describe('zinc, ocean, ember, forest, noir, or plum (default: zinc)'),
+		},
+		({ style, palette }) => ({
+			messages: [
+				{
+					role: 'user',
+					content: {
+						type: 'text',
+						text: `Set up DaFink UI in this project without interactive prompts.\n\nRun (drop --hook if the user does not want the lint hook): npx dafink-ui init --style ${style ?? 'minimal'} --palette ${palette ?? 'zinc'} --hook --yes\n\nOptional flags: --framework <next|react> (default: detected), --components-dir <path> (default: src/components/ui), --css-file <path> (required if no globals.css or index.css is detected), --eslint (install the DaFink ESLint rules), --hook (also add a Claude Code PostToolUse hook that lints every file you edit and feeds problems back to you; implies --eslint), --hook-fix (same, but the hook autofixes first). Recommend --hook for projects an agent will keep editing.\n\nIf the user has not said which style or palette they want, ask before running. Restart the Claude Code session afterward so the hook is picked up. Then add components with: npx dafink-ui add <slug>. Use search_components to find slugs.`,
+					},
+				},
+			],
+		})
+	);
 }

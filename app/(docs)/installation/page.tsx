@@ -122,6 +122,20 @@ const InstallationPage = () => {
                 imports work the same regardless of that setting. <InlineCode>@components</InlineCode>{' '}
                 itself is left free for your own composed components built on top of DaFink UI.
               </p>
+              <p>
+                Setting up from a script or an AI agent? Every prompt has a flag, so
+                nothing waits for input:
+              </p>
+              <CodeBlock code={pmCommand(pm, 'dlx', 'dafink-ui init --style minimal --palette ocean --hook --yes')} />
+              <p>
+                Also available: <InlineCode>--framework</InlineCode>,{' '}
+                <InlineCode>--components-dir</InlineCode>,{' '}
+                <InlineCode>--css-file</InlineCode>, <InlineCode>--eslint</InlineCode>, and{' '}
+                <InlineCode>--hook</InlineCode> (lints every file Claude Code edits; implies{' '}
+                <InlineCode>--eslint</InlineCode>).
+                Anything you leave out takes its default (or what init detects) under{' '}
+                <InlineCode>--yes</InlineCode>.
+              </p>
             </div>
           </TimelineItem>
 
