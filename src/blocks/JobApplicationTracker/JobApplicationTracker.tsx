@@ -6,11 +6,15 @@ import { SortableContext, arrayMove, sortableKeyboardCoordinates, verticalListSo
 import { ToggleGroup, ToggleGroupItem } from '../../components/ToggleGroup/ToggleGroup';
 import DataTable, { type ColumnDef } from '../../components/DataTable/DataTable';
 import ApplicationDetailsModal from './ApplicationDetailsModal';
+import { Skeleton } from '../../components/Skeleton/Skeleton';
 import { Select } from '../../components/Select/Select';
+import { Alert } from '../../components/Alert/Alert';
 import Button from '../../components/Button/Button';
+import { useApplications } from './useApplications';
 import Badge from '../../components/Badge/Badge';
 import Input from '../../components/Input/Input';
-import { useRef, useState } from 'react';
+import TrackerSkeleton from './TrackerSkeleton';
+import { useState } from 'react';
 
 // A single base CV shared across the whole search — distinct from the
 // per-application resume attached in each card's details modal.
@@ -18,85 +22,6 @@ const MASTER_CV = {
 	name: 'Resume_MasterCopy.pdf',
 	url:  'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
 };
-
-const INITIAL_APPLICATIONS: JobApplication[] = [
-	{
-		id: 'job-1',
-		role: 'Frontend Engineer',
-		company: 'Notion',
-		status: 'wishlist',
-		workType: 'Remote',
-		location: 'Remote (US)',
-		notes: 'Referred by a former teammate — reaching out before applying.',
-	},
-	{
-		id: 'job-2',
-		role: 'Product Designer',
-		company: 'Linear',
-		status: 'wishlist',
-		workType: 'Remote',
-		location: 'Remote (US)',
-		notes: 'Strong portfolio fit, role posted this week.',
-	},
-	{
-		id: 'job-3',
-		role: 'Senior Frontend Engineer',
-		company: 'Stripe',
-		status: 'applied',
-		workType: 'Hybrid',
-		location: 'San Francisco, CA',
-		salary: '$170k–$210k',
-		appliedDate: '2026-08-15T00:00:00.000Z',
-		url: 'https://stripe.com/jobs',
-		contact: 'Jamie Lin (referral)',
-		notes: 'Applied through a referral.',
-		resume: { name: 'Resume_SFE_Stripe.pdf', size: '214 KB', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-	},
-	{
-		id: 'job-4',
-		role: 'Full Stack Engineer',
-		company: 'Vercel',
-		status: 'applied',
-		workType: 'Remote',
-		location: 'Remote (US)',
-		appliedDate: '2026-08-20T00:00:00.000Z',
-		notes: 'Applied via the careers page.',
-	},
-	{
-		id: 'job-5',
-		role: 'Frontend Engineer',
-		company: 'Figma',
-		status: 'interviewing',
-		workType: 'Onsite',
-		location: 'San Francisco, CA',
-		salary: '$160k–$195k',
-		appliedDate: '2026-08-05T00:00:00.000Z',
-		contact: 'Priya Shah (recruiter)',
-		notes: 'Onsite loop scheduled after two strong screens.',
-		resume: { name: 'Resume_FE_Figma.pdf', size: '198 KB', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-	},
-	{
-		id: 'job-6',
-		role: 'Product Engineer',
-		company: 'Ramp',
-		status: 'offer',
-		workType: 'Hybrid',
-		location: 'New York, NY',
-		salary: '$185k + equity',
-		appliedDate: '2026-07-28T00:00:00.000Z',
-		notes: 'Offer received, negotiating start date and equity.',
-	},
-	{
-		id: 'job-7',
-		role: 'Frontend Engineer',
-		company: 'Airbnb',
-		status: 'rejected',
-		workType: 'Onsite',
-		location: 'San Francisco, CA',
-		appliedDate: '2026-07-10T00:00:00.000Z',
-		notes: 'Passed after the final round — asked for feedback.',
-	},
-];
 
 type TrackerView = 'board' | 'table';
 
@@ -186,12 +111,10 @@ const BoardColumn = ({ stage, applications, onOpen }: BoardColumnProps) => {
 };
 
 export const JobApplicationTracker = () => {
-	const [applications, setApplications] = useState<JobApplication[]>(INITIAL_APPLICATIONS);
+	const { applications, status, retry, syncError, dismissSyncError, addDraft, discardDraft, save, update, remove, setLocalApplications } = useApplications();
 	const [view, setView]                 = useState<TrackerView>('board');
 	const [selectedId, setSelectedId]     = useState<string | null>(null);
-	const [pendingNewId, setPendingNewId] = useState<string | null>(null);
 	const [activeId, setActiveId]         = useState<string | null>(null);
-	const newApplicationCounter           = useRef(0);
 
 	const selectedApplication = applications.find((a) => a.id === selectedId) ?? null;
 	const activeApplication   = applications.find((a) => a.id === activeId) ?? null;
@@ -200,36 +123,14 @@ export const JobApplicationTracker = () => {
 
 	const handleViewCv = () => window.open(MASTER_CV.url, '_blank', 'noopener,noreferrer');
 
-	const updateApplication = (id: string, patch: Partial<JobApplication>) => {
-		setApplications((prev) => prev.map((a) => a.id === id ? { ...a, ...patch } : a));
-	};
+	const updateApplication = (id: string, patch: Partial<JobApplication>) => update(id, patch);
 
-	const handleAddApplication = () => {
-		newApplicationCounter.current += 1;
-		const id = `job-new-${newApplicationCounter.current}`;
-		setApplications((prev) => [...prev, { id, role: '', company: '', status: 'wishlist', workType: 'Remote' }]);
-		setPendingNewId(id);
-		setSelectedId(id);
-	};
+	const handleAddApplication = () => setSelectedId(addDraft());
 
 	const handleModalOpenChange = (open: boolean) => {
 		if(open) return;
-		if(pendingNewId)
-		{
-			setApplications((prev) => prev.filter((a) => a.id !== pendingNewId));
-			setPendingNewId(null);
-		}
+		discardDraft();
 		setSelectedId(null);
-	};
-
-	const handleSaveApplication = (updated: JobApplication) => {
-		setApplications((prev) => prev.map((a) => a.id === updated.id ? updated : a));
-		setPendingNewId(null);
-	};
-
-	const handleDeleteApplication = (id: string) => {
-		setApplications((prev) => prev.filter((a) => a.id !== id));
-		if(pendingNewId === id) setPendingNewId(null);
 	};
 
 	const sensors = useSensors(
@@ -250,19 +151,31 @@ export const JobApplicationTracker = () => {
 		const overStatus = overApp ? overApp.status : STAGES.some((s) => s.id === over.id) ? (over.id as ApplicationStatus) : null;
 		if(!overStatus || overStatus === activeApp.status) return;
 
-		setApplications((prev) => prev.map((a) => a.id === active.id ? { ...a, status: overStatus } : a));
+		setLocalApplications((prev) => prev.map((a) => a.id === active.id ? { ...a, status: overStatus } : a));
+	};
+
+	const syncDraggedStatus = (id: string) => {
+		const dragged = applications.find((a) => a.id === id);
+		if(dragged) update(id, { status: dragged.status }, true);
+	};
+
+	const handleDragCancel = () => {
+		if(activeId) syncDraggedStatus(activeId);
+		setActiveId(null);
 	};
 
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
 		setActiveId(null);
+
+		syncDraggedStatus(active.id as string);
 		if(!over || active.id === over.id) return;
 
 		const activeApp = applications.find((a) => a.id === active.id);
 		const overApp   = applications.find((a) => a.id === over.id);
 		if(!activeApp || !overApp || activeApp.status !== overApp.status) return;
 
-		setApplications((prev) =>
+		setLocalApplications((prev) =>
 		{
 			const oldIndex = prev.findIndex((a) => a.id === active.id);
 			const newIndex = prev.findIndex((a) => a.id === over.id);
@@ -348,7 +261,7 @@ export const JobApplicationTracker = () => {
 	];
 
 	return (
-		<div className='flex flex-col gap-5 w-full'>
+		<div className='flex flex-col gap-5 w-full' aria-busy={status === 'loading'}>
 			<div className='flex flex-col gap-3'>
 				<div className='flex flex-col gap-1'>
 					<div className='flex flex-wrap items-center justify-between gap-3'>
@@ -370,9 +283,15 @@ export const JobApplicationTracker = () => {
 
 				<div className='flex flex-wrap items-center justify-between gap-3'>
 					<div className='flex items-center gap-2'>
-						<Badge variant='default'>{activeCount} active</Badge>
-						<Badge variant='warning'>{interviewingCount} interviewing</Badge>
-						<Badge variant='success'>{offerCount} offer{offerCount === 1 ? '' : 's'}</Badge>
+						{status === 'ready' ? (
+							<>
+								<Badge variant='default'>{activeCount} active</Badge>
+								<Badge variant='warning'>{interviewingCount} interviewing</Badge>
+								<Badge variant='success'>{offerCount} offer{offerCount === 1 ? '' : 's'}</Badge>
+							</>
+						) : (
+							<Skeleton width='15rem' height='1.5rem' aria-hidden='true' />
+						)}
 					</div>
 
 					<div className='flex items-center gap-2'>
@@ -380,13 +299,38 @@ export const JobApplicationTracker = () => {
 							<ToggleGroupItem value='board'>Board</ToggleGroupItem>
 							<ToggleGroupItem value='table'>Table</ToggleGroupItem>
 						</ToggleGroup>
-						<Button size='sm' variant='secondary' onClick={handleAddApplication}>+ Add application</Button>
+						<Button size='sm' variant='secondary' disabled={status !== 'ready'} onClick={handleAddApplication}>+ Add application</Button>
 					</div>
 				</div>
 			</div>
 
-			{view === 'board' ? (
-				<DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd}>
+			{syncError && (
+				<Alert variant='danger' title='Sync failed'>
+					<div className='flex flex-wrap items-center justify-between gap-3'>
+						<span>{syncError}</span>
+						<Button size='sm' variant='outlined' onClick={dismissSyncError}>Dismiss</Button>
+					</div>
+				</Alert>
+			)}
+
+			{status === 'loading' && (
+				<>
+					<span role='status' className='sr-only'>Loading applications…</span>
+					<TrackerSkeleton view={view} />
+				</>
+			)}
+
+			{status === 'error' && (
+				<Alert variant='danger' title='Could not load applications'>
+					<div className='flex flex-wrap items-center justify-between gap-3'>
+						<span>Something went wrong fetching your applications.</span>
+						<Button size='sm' variant='outlined' onClick={retry}>Try again</Button>
+					</div>
+				</Alert>
+			)}
+
+			{status === 'ready' && (view === 'board' ? (
+				<DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={handleDragStart} onDragOver={handleDragOver} onDragEnd={handleDragEnd} onDragCancel={handleDragCancel}>
 					<div role='application' aria-label='Job application board' className='flex gap-4 overflow-x-auto pb-2'>
 						{STAGES.map((stage) => (
 							<BoardColumn key={stage.id} stage={stage} applications={applications.filter((a) => a.status === stage.id)} onOpen={openDetails} />
@@ -401,14 +345,14 @@ export const JobApplicationTracker = () => {
 				</DndContext>
 			) : (
 				<DataTable data={applications} columns={tableColumns} keyField='id' pageSize={10} emptyMessage='No applications yet.' />
-			)}
+			))}
 
 			<ApplicationDetailsModal
 				open={selectedId !== null}
 				application={selectedApplication}
 				onOpenChange={handleModalOpenChange}
-				onSave={handleSaveApplication}
-				onDelete={handleDeleteApplication}
+				onSave={save}
+				onDelete={remove}
 			/>
 		</div>
 	);
