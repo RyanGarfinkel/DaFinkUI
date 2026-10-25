@@ -125,18 +125,8 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
 
-    case 'otp-input': {
-      const OTPPreview = () => {
-        const [code, setCode] = useState('');
-        return (
-          <div className='flex flex-col gap-6'>
-            <OTPInput label='Verification code' length={6} value={code} onChange={setCode} hint='Enter the 6-digit code from your email.' />
-            <OTPInput label='Expired code' length={6} value='123' onChange={() => {}} error='This code has expired.' />
-          </div>
-        );
-      };
-      return <OTPPreview />;
-    }
+    case 'otp-input':
+      return <OTPInputPreview />;
 
     case 'textarea':
       return (
@@ -468,16 +458,6 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
 
     case 'sidebar': {
-      const NavIcon = ({ d }: { d: string }) => (
-        <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-          <path d={d} />
-        </svg>
-      );
-      const StarIcon = ({ filled }: { filled: boolean }) => (
-        <svg width='14' height='14' viewBox='0 0 24 24' fill={filled ? 'currentColor' : 'none'} stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-          <path d='m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z' />
-        </svg>
-      );
       const favorited = sidebarFavorites;
       const toggleFavorite = (name: string) => setSidebarFavorites(prev => ({ ...prev, [name]: !prev[name] }));
 
@@ -1087,79 +1067,11 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         />
       );
 
-    case 'combobox': {
-      const LANG_OPTIONS = [
-        { value: 'ts',      label: 'TypeScript' },
-        { value: 'js',      label: 'JavaScript' },
-        { value: 'py',      label: 'Python'     },
-        { value: 'rs',      label: 'Rust'       },
-        { value: 'go',      label: 'Go'         },
-        { value: 'rb',      label: 'Ruby'       },
-        { value: 'swift',   label: 'Swift'      },
-        { value: 'kotlin',  label: 'Kotlin', disabled: true },
-        { value: 'elixir',  label: 'Elixir'     },
-        { value: 'haskell', label: 'Haskell'    },
-      ];
-
-      const ComboboxPreview = () => {
-        const [single, setSingle] = useState('');
-        const [multi, setMulti]   = useState<string[]>(['ts', 'py']);
-        return (
-          <div className='flex flex-col gap-6 w-full max-w-sm'>
-            <Combobox
-              label='Language (single)'
-              placeholder='Search languages…'
-              options={LANG_OPTIONS}
-              value={single}
-              onChange={setSingle}
-              hint='Type to filter. Kotlin is disabled.'
-            />
-            <Combobox
-              label='Languages (multi)'
-              placeholder='Search languages…'
-              options={LANG_OPTIONS}
-              multiple
-              value={multi}
-              onChange={setMulti}
-              hint='Backspace on empty input removes the last chip.'
-            />
-          </div>
-        );
-      }
-
+    case 'combobox':
       return <ComboboxPreview />;
-    }
 
-    case 'command-input': {
-      const COMMANDS: CommandOption[] = [
-        { name: 'compact', description: 'Summarize the conversation to save space' },
-        { name: 'clear',   description: 'Clear all messages' },
-        { name: 'rename',  description: 'Rename this chat' },
-      ];
-
-      const CommandInputPreview = () => {
-        const [value, setValue] = useState('');
-        const [lastCommand, setLastCommand] = useState<string | null>(null);
-
-        return (
-          <div className='flex flex-col gap-3 w-full max-w-sm'>
-            <CommandInput
-              value={value}
-              onChange={setValue}
-              commands={COMMANDS}
-              onCommand={(command) => setLastCommand(command.name)}
-              placeholder='Type a message, or / for commands…'
-              menuSide='bottom'
-            />
-            {lastCommand && (
-              <p className='text-sm text-text-muted'>Ran /{lastCommand}</p>
-            )}
-          </div>
-        );
-      }
-
+    case 'command-input':
       return <CommandInputPreview />;
-    }
 
     case 'date-picker':
       return (
@@ -1218,126 +1130,8 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
 
-    case 'data-table': {
-      interface DemoEmployee {
-        id:         number;
-        name:       string;
-        role:       string;
-        department: string;
-        status:     string;
-        salary:     number;
-      }
-
-      const EMPLOYEES: DemoEmployee[] = [
-        { id: 1,  name: 'Alice Chen',     role: 'Engineer',        department: 'Platform',   status: 'Active',   salary: 145000 },
-        { id: 2,  name: 'Bob Ruiz',       role: 'Designer',        department: 'Product',    status: 'Away',     salary: 130000 },
-        { id: 3,  name: 'Carol Smith',    role: 'Engineering Mgr', department: 'Platform',   status: 'Active',   salary: 165000 },
-        { id: 4,  name: 'Dave Park',      role: 'Data Analyst',    department: 'Analytics',  status: 'Active',   salary: 120000 },
-        { id: 5,  name: 'Eve Torres',     role: 'Designer',        department: 'Product',    status: 'Active',   salary: 128000 },
-        { id: 6,  name: 'Frank Lee',      role: 'Engineer',        department: 'Growth',     status: 'Away',     salary: 140000 },
-        { id: 7,  name: 'Grace Yoon',     role: 'Product Manager', department: 'Product',    status: 'Active',   salary: 155000 },
-        { id: 8,  name: 'Hugo Martins',   role: 'Engineer',        department: 'Growth',     status: 'Active',   salary: 138000 },
-        { id: 9,  name: 'Iris Nakamura',  role: 'Recruiter',       department: 'People',     status: 'Active',   salary: 115000 },
-        { id: 10, name: 'James Okafor',   role: 'Engineer',        department: 'Platform',   status: 'Inactive', salary: 148000 },
-        { id: 11, name: 'Kira Walsh',     role: 'Marketing Lead',  department: 'Growth',     status: 'Active',   salary: 125000 },
-        { id: 12, name: 'Leo Fernandez',  role: 'Data Scientist',  department: 'Analytics',  status: 'Active',   salary: 155000 },
-      ];
-
-      const STATUS_COLORS: Record<string, string> = {
-        Active:   'bg-success-bg text-success border border-success-border',
-        Away:     'bg-warning-bg text-warning border border-warning-border',
-        Inactive: 'bg-surface-active text-text-muted border border-surface-border',
-      };
-
-      const VARIANTS: { value: PaginatorVariant; label: string }[] = [
-        { value: 'default',  label: 'Default'  },
-        { value: 'numbered', label: 'Numbered' },
-        { value: 'compact',  label: 'Compact'  },
-        { value: 'minimal',  label: 'Minimal'  },
-      ];
-
-      const DataTablePreview = () => {
-        const [selected, setSelected] = useState<DemoEmployee[]>([]);
-        const [variant,  setVariant]  = useState<PaginatorVariant>('default');
-        const [remote, setRemote] = useState<Record<number, boolean>>({});
-
-        const EMP_COLUMNS: ColumnDef<DemoEmployee>[] = [
-          { key: 'name',       header: 'Name',       sortable: true  },
-          { key: 'role',       header: 'Role',       sortable: true  },
-          { key: 'department', header: 'Department', sortable: true  },
-          {
-            key: 'status',
-            header: 'Status',
-            sortable: false,
-            render: (val) => (
-              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[String(val)] ?? ''}`}>
-                {String(val)}
-              </span>
-            ),
-          },
-          {
-            key: 'salary',
-            header: 'Salary',
-            sortable: true,
-            render: (val) => `$${Number(val).toLocaleString()}`,
-          },
-          {
-            key: 'id',
-            header: 'Work type',
-            sortable: false,
-            render: (_val, row) => (
-              <Switch
-                id={`remote-${row.id}`}
-                checked={remote[row.id] ?? true}
-                onCheckedChange={(v) => setRemote(prev => ({ ...prev, [row.id]: v }))}
-                label={(remote[row.id] ?? true) ? 'Remote' : 'Office'}
-              />
-            ),
-          },
-        ];
-
-        return (
-          <div className='flex flex-col gap-3 w-full'>
-            <div className='flex items-center gap-2 flex-wrap'>
-              <span className='text-xs text-text-muted'>Paginator:</span>
-              {VARIANTS.map(v => (
-                <button
-                  key={v.value}
-                  type='button'
-                  onClick={() => setVariant(v.value)}
-                  className={[
-                    'px-2.5 py-1 rounded-md text-xs font-medium',
-                    'transition-colors duration-[var(--duration-fast)]',
-                    'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring',
-                    variant === v.value
-                      ? 'bg-surface-active text-text'
-                      : 'text-text-muted hover:bg-surface-hover hover:text-text',
-                  ].join(' ')}
-                >
-                  {v.label}
-                </button>
-              ))}
-              {selected.length > 0 && (
-                <span className='ml-auto text-xs text-text-muted'>
-                  {selected.length} selected
-                </span>
-              )}
-            </div>
-            <DataTable<DemoEmployee>
-              data={EMPLOYEES}
-              columns={EMP_COLUMNS}
-              keyField='id'
-              selectable
-              onSelectionChange={setSelected}
-              pageSize={5}
-              paginatorVariant={variant}
-            />
-          </div>
-        );
-      }
-
+    case 'data-table':
       return <DataTablePreview />;
-    }
 
     case 'avatar':
       return (
@@ -1407,111 +1201,14 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
 
-    case 'modal': {
-      const ModalPreview = () => {
-        const [open, setOpen] = useState(false);
-        const [size, setSize] = useState<ModalSize>('md');
-
-        const openWith = (s: ModalSize) => {
-          setSize(s);
-          setOpen(true);
-        };
-
-        return (
-          <div className='flex flex-wrap gap-2 justify-center'>
-            <Button variant='secondary' onClick={() => openWith('sm')}>Small</Button>
-            <Button variant='secondary' onClick={() => openWith('md')}>Medium</Button>
-            <Button variant='secondary' onClick={() => openWith('lg')}>Large</Button>
-
-            <Modal open={open} onOpenChange={setOpen} size={size}>
-              <ModalClose />
-              <ModalHeader>
-                <ModalTitle>Delete project</ModalTitle>
-              </ModalHeader>
-              <ModalContent>
-                This action cannot be undone. The project and all of its data will be
-                permanently removed.
-              </ModalContent>
-              <ModalFooter>
-                <Button variant='secondary' onClick={() => setOpen(false)}>Cancel</Button>
-                <Button variant='destructive' onClick={() => setOpen(false)}>Delete</Button>
-              </ModalFooter>
-            </Modal>
-          </div>
-        );
-      };
+    case 'modal':
       return <ModalPreview />;
-    }
 
-    case 'drawer': {
-      const DrawerPreview = () => {
-        const [open, setOpen] = useState(false);
-        const [side, setSide] = useState<DrawerSide>('right');
-
-        const openFrom = (s: DrawerSide) => {
-          setSide(s);
-          setOpen(true);
-        };
-
-        return (
-          <div className='flex flex-wrap gap-2 justify-center'>
-            <Button variant='secondary' onClick={() => openFrom('left')}>Left</Button>
-            <Button variant='secondary' onClick={() => openFrom('right')}>Right</Button>
-            <Button variant='secondary' onClick={() => openFrom('top')}>Top</Button>
-            <Button variant='secondary' onClick={() => openFrom('bottom')}>Bottom</Button>
-
-            <Drawer open={open} onOpenChange={setOpen} side={side}>
-              <DrawerClose />
-              <DrawerHeader>
-                <DrawerTitle>Notifications</DrawerTitle>
-              </DrawerHeader>
-              <DrawerContent>
-                You have no unread notifications.
-              </DrawerContent>
-              <DrawerFooter>
-                <Button variant='secondary' onClick={() => setOpen(false)}>Close</Button>
-              </DrawerFooter>
-            </Drawer>
-          </div>
-        );
-      };
+    case 'drawer':
       return <DrawerPreview />;
-    }
 
-    case 'side-panel': {
-      const SidePanelPreview = () => {
-        const [open, setOpen] = useState(false);
-        const [side, setSide] = useState<SidePanelSide>('right');
-
-        const openFrom = (s: SidePanelSide) => {
-          setSide(s);
-          setOpen(true);
-        };
-
-        return (
-          <div className='flex flex-wrap gap-2 justify-center'>
-            <Button variant='secondary' onClick={() => openFrom('left')}>Left</Button>
-            <Button variant='secondary' onClick={() => openFrom('right')}>Right</Button>
-            <Button variant='secondary' onClick={() => openFrom('top')}>Top</Button>
-            <Button variant='secondary' onClick={() => openFrom('bottom')}>Bottom</Button>
-
-            <SidePanel open={open} onOpenChange={setOpen} side={side}>
-              <SidePanelClose />
-              <SidePanelHeader>
-                <SidePanelTitle>Quick preview</SidePanelTitle>
-              </SidePanelHeader>
-              <SidePanelContent>
-                A floating panel, inset from every edge it does not anchor to.
-              </SidePanelContent>
-              <SidePanelFooter>
-                <Button variant='secondary' onClick={() => setOpen(false)}>Close</Button>
-              </SidePanelFooter>
-            </SidePanel>
-          </div>
-        );
-      };
+    case 'side-panel':
       return <SidePanelPreview />;
-    }
 
     case 'graph': {
       const GRAPH_NODES: GraphNode[] = [
@@ -1638,6 +1335,307 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
   }
 };
 
+
+const NavIcon = ({ d }: { d: string }) => (
+  <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+    <path d={d} />
+  </svg>
+);
+const StarIcon = ({ filled }: { filled: boolean }) => (
+  <svg width='14' height='14' viewBox='0 0 24 24' fill={filled ? 'currentColor' : 'none'} stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+    <path d='m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z' />
+  </svg>
+);
+
+const OTPInputPreview = () => {
+  const [code, setCode] = useState('');
+  return (
+    <div className='flex flex-col gap-6'>
+      <OTPInput label='Verification code' length={6} value={code} onChange={setCode} hint='Enter the 6-digit code from your email.' />
+      <OTPInput label='Expired code' length={6} value='123' onChange={() => {}} error='This code has expired.' />
+    </div>
+  );
+};
+
+const LANG_OPTIONS = [
+  { value: 'ts',      label: 'TypeScript' },
+  { value: 'js',      label: 'JavaScript' },
+  { value: 'py',      label: 'Python'     },
+  { value: 'rs',      label: 'Rust'       },
+  { value: 'go',      label: 'Go'         },
+  { value: 'rb',      label: 'Ruby'       },
+  { value: 'swift',   label: 'Swift'      },
+  { value: 'kotlin',  label: 'Kotlin', disabled: true },
+  { value: 'elixir',  label: 'Elixir'     },
+  { value: 'haskell', label: 'Haskell'    },
+];
+
+const ComboboxPreview = () => {
+  const [single, setSingle] = useState('');
+  const [multi, setMulti]   = useState<string[]>(['ts', 'py']);
+  return (
+    <div className='flex flex-col gap-6 w-full max-w-sm'>
+      <Combobox
+        label='Language (single)'
+        placeholder='Search languages…'
+        options={LANG_OPTIONS}
+        value={single}
+        onChange={setSingle}
+        hint='Type to filter. Kotlin is disabled.'
+      />
+      <Combobox
+        label='Languages (multi)'
+        placeholder='Search languages…'
+        options={LANG_OPTIONS}
+        multiple
+        value={multi}
+        onChange={setMulti}
+        hint='Backspace on empty input removes the last chip.'
+      />
+    </div>
+  );
+}
+
+const COMMANDS: CommandOption[] = [
+  { name: 'compact', description: 'Summarize the conversation to save space' },
+  { name: 'clear',   description: 'Clear all messages' },
+  { name: 'rename',  description: 'Rename this chat' },
+];
+
+const CommandInputPreview = () => {
+  const [value, setValue] = useState('');
+  const [lastCommand, setLastCommand] = useState<string | null>(null);
+
+  return (
+    <div className='flex flex-col gap-3 w-full max-w-sm'>
+      <CommandInput
+        value={value}
+        onChange={setValue}
+        commands={COMMANDS}
+        onCommand={(command) => setLastCommand(command.name)}
+        placeholder='Type a message, or / for commands…'
+        menuSide='bottom'
+      />
+      {lastCommand && (
+        <p className='text-sm text-text-muted'>Ran /{lastCommand}</p>
+      )}
+    </div>
+  );
+}
+
+interface DemoEmployee {
+  id:         number;
+  name:       string;
+  role:       string;
+  department: string;
+  status:     string;
+  salary:     number;
+}
+
+const EMPLOYEES: DemoEmployee[] = [
+  { id: 1,  name: 'Alice Chen',     role: 'Engineer',        department: 'Platform',   status: 'Active',   salary: 145000 },
+  { id: 2,  name: 'Bob Ruiz',       role: 'Designer',        department: 'Product',    status: 'Away',     salary: 130000 },
+  { id: 3,  name: 'Carol Smith',    role: 'Engineering Mgr', department: 'Platform',   status: 'Active',   salary: 165000 },
+  { id: 4,  name: 'Dave Park',      role: 'Data Analyst',    department: 'Analytics',  status: 'Active',   salary: 120000 },
+  { id: 5,  name: 'Eve Torres',     role: 'Designer',        department: 'Product',    status: 'Active',   salary: 128000 },
+  { id: 6,  name: 'Frank Lee',      role: 'Engineer',        department: 'Growth',     status: 'Away',     salary: 140000 },
+  { id: 7,  name: 'Grace Yoon',     role: 'Product Manager', department: 'Product',    status: 'Active',   salary: 155000 },
+  { id: 8,  name: 'Hugo Martins',   role: 'Engineer',        department: 'Growth',     status: 'Active',   salary: 138000 },
+  { id: 9,  name: 'Iris Nakamura',  role: 'Recruiter',       department: 'People',     status: 'Active',   salary: 115000 },
+  { id: 10, name: 'James Okafor',   role: 'Engineer',        department: 'Platform',   status: 'Inactive', salary: 148000 },
+  { id: 11, name: 'Kira Walsh',     role: 'Marketing Lead',  department: 'Growth',     status: 'Active',   salary: 125000 },
+  { id: 12, name: 'Leo Fernandez',  role: 'Data Scientist',  department: 'Analytics',  status: 'Active',   salary: 155000 },
+];
+
+const STATUS_COLORS: Record<string, string> = {
+  Active:   'bg-success-bg text-success border border-success-border',
+  Away:     'bg-warning-bg text-warning border border-warning-border',
+  Inactive: 'bg-surface-active text-text-muted border border-surface-border',
+};
+
+const VARIANTS: { value: PaginatorVariant; label: string }[] = [
+  { value: 'default',  label: 'Default'  },
+  { value: 'numbered', label: 'Numbered' },
+  { value: 'compact',  label: 'Compact'  },
+  { value: 'minimal',  label: 'Minimal'  },
+];
+
+const DataTablePreview = () => {
+  const [selected, setSelected] = useState<DemoEmployee[]>([]);
+  const [variant,  setVariant]  = useState<PaginatorVariant>('default');
+  const [remote, setRemote] = useState<Record<number, boolean>>({});
+
+  const EMP_COLUMNS: ColumnDef<DemoEmployee>[] = [
+    { key: 'name',       header: 'Name',       sortable: true  },
+    { key: 'role',       header: 'Role',       sortable: true  },
+    { key: 'department', header: 'Department', sortable: true  },
+    {
+      key: 'status',
+      header: 'Status',
+      sortable: false,
+      render: (val) => (
+        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[String(val)] ?? ''}`}>
+          {String(val)}
+        </span>
+      ),
+    },
+    {
+      key: 'salary',
+      header: 'Salary',
+      sortable: true,
+      render: (val) => `$${Number(val).toLocaleString()}`,
+    },
+    {
+      key: 'id',
+      header: 'Work type',
+      sortable: false,
+      render: (_val, row) => (
+        <Switch
+          id={`remote-${row.id}`}
+          checked={remote[row.id] ?? true}
+          onCheckedChange={(v) => setRemote(prev => ({ ...prev, [row.id]: v }))}
+          label={(remote[row.id] ?? true) ? 'Remote' : 'Office'}
+        />
+      ),
+    },
+  ];
+
+  return (
+    <div className='flex flex-col gap-3 w-full'>
+      <div className='flex items-center gap-2 flex-wrap'>
+        <span className='text-xs text-text-muted'>Paginator:</span>
+        {VARIANTS.map(v => (
+          <button
+            key={v.value}
+            type='button'
+            onClick={() => setVariant(v.value)}
+            className={[
+              'px-2.5 py-1 rounded-md text-xs font-medium',
+              'transition-colors duration-[var(--duration-fast)]',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring',
+              variant === v.value
+                ? 'bg-surface-active text-text'
+                : 'text-text-muted hover:bg-surface-hover hover:text-text',
+            ].join(' ')}
+          >
+            {v.label}
+          </button>
+        ))}
+        {selected.length > 0 && (
+          <span className='ml-auto text-xs text-text-muted'>
+            {selected.length} selected
+          </span>
+        )}
+      </div>
+      <DataTable<DemoEmployee>
+        data={EMPLOYEES}
+        columns={EMP_COLUMNS}
+        keyField='id'
+        selectable
+        onSelectionChange={setSelected}
+        pageSize={5}
+        paginatorVariant={variant}
+      />
+    </div>
+  );
+}
+
+const ModalPreview = () => {
+  const [open, setOpen] = useState(false);
+  const [size, setSize] = useState<ModalSize>('md');
+
+  const openWith = (s: ModalSize) => {
+    setSize(s);
+    setOpen(true);
+  };
+
+  return (
+    <div className='flex flex-wrap gap-2 justify-center'>
+      <Button variant='secondary' onClick={() => openWith('sm')}>Small</Button>
+      <Button variant='secondary' onClick={() => openWith('md')}>Medium</Button>
+      <Button variant='secondary' onClick={() => openWith('lg')}>Large</Button>
+
+      <Modal open={open} onOpenChange={setOpen} size={size}>
+        <ModalClose />
+        <ModalHeader>
+          <ModalTitle>Delete project</ModalTitle>
+        </ModalHeader>
+        <ModalContent>
+          This action cannot be undone. The project and all of its data will be
+          permanently removed.
+        </ModalContent>
+        <ModalFooter>
+          <Button variant='secondary' onClick={() => setOpen(false)}>Cancel</Button>
+          <Button variant='destructive' onClick={() => setOpen(false)}>Delete</Button>
+        </ModalFooter>
+      </Modal>
+    </div>
+  );
+};
+
+const DrawerPreview = () => {
+  const [open, setOpen] = useState(false);
+  const [side, setSide] = useState<DrawerSide>('right');
+
+  const openFrom = (s: DrawerSide) => {
+    setSide(s);
+    setOpen(true);
+  };
+
+  return (
+    <div className='flex flex-wrap gap-2 justify-center'>
+      <Button variant='secondary' onClick={() => openFrom('left')}>Left</Button>
+      <Button variant='secondary' onClick={() => openFrom('right')}>Right</Button>
+      <Button variant='secondary' onClick={() => openFrom('top')}>Top</Button>
+      <Button variant='secondary' onClick={() => openFrom('bottom')}>Bottom</Button>
+
+      <Drawer open={open} onOpenChange={setOpen} side={side}>
+        <DrawerClose />
+        <DrawerHeader>
+          <DrawerTitle>Notifications</DrawerTitle>
+        </DrawerHeader>
+        <DrawerContent>
+          You have no unread notifications.
+        </DrawerContent>
+        <DrawerFooter>
+          <Button variant='secondary' onClick={() => setOpen(false)}>Close</Button>
+        </DrawerFooter>
+      </Drawer>
+    </div>
+  );
+};
+
+const SidePanelPreview = () => {
+  const [open, setOpen] = useState(false);
+  const [side, setSide] = useState<SidePanelSide>('right');
+
+  const openFrom = (s: SidePanelSide) => {
+    setSide(s);
+    setOpen(true);
+  };
+
+  return (
+    <div className='flex flex-wrap gap-2 justify-center'>
+      <Button variant='secondary' onClick={() => openFrom('left')}>Left</Button>
+      <Button variant='secondary' onClick={() => openFrom('right')}>Right</Button>
+      <Button variant='secondary' onClick={() => openFrom('top')}>Top</Button>
+      <Button variant='secondary' onClick={() => openFrom('bottom')}>Bottom</Button>
+
+      <SidePanel open={open} onOpenChange={setOpen} side={side}>
+        <SidePanelClose />
+        <SidePanelHeader>
+          <SidePanelTitle>Quick preview</SidePanelTitle>
+        </SidePanelHeader>
+        <SidePanelContent>
+          A floating panel, inset from every edge it does not anchor to.
+        </SidePanelContent>
+        <SidePanelFooter>
+          <Button variant='secondary' onClick={() => setOpen(false)}>Close</Button>
+        </SidePanelFooter>
+      </SidePanel>
+    </div>
+  );
+};
 
 const FRAMEWORK_OPTIONS = [
   { value: 'next',      label: 'Next.js'   },

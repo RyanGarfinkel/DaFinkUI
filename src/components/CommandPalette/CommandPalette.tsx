@@ -110,6 +110,7 @@ export const CommandPalette = (
         children,
     }: CommandPaletteProps
 ) => {
+    const [prevOpen,     setPrevOpen]     = useState(false);
     const [mounted,      setMounted]      = useState(false);
     const [visible,      setVisible]      = useState(false);
     const [query,        setQuery]        = useState('');
@@ -158,12 +159,12 @@ export const CommandPalette = (
 
     useEffect(() => () => clearTimeout(closeTimerRef.current), []);
 
-    useEffect(() =>
+    if(open !== prevOpen)
 	{
-		clearTimeout(closeTimerRef.current);
+		setPrevOpen(open);
+
 		if(open)
 		{
-
 			setQuery('');
 			setActiveId(null);
 			setMounted(true);
@@ -171,13 +172,20 @@ export const CommandPalette = (
 		else
 		{
 			setVisible(false);
-			closeTimerRef.current = setTimeout(() =>
-			{
-				setMounted(false);
-				setQuery('');
-				setActiveId(null);
-			}, 150);
 		}
+	}
+
+    useEffect(() =>
+	{
+		clearTimeout(closeTimerRef.current);
+		if(open) return;
+
+		closeTimerRef.current = setTimeout(() =>
+		{
+			setMounted(false);
+			setQuery('');
+			setActiveId(null);
+		}, 150);
 	}, [open]);
 
     useEffect(() =>

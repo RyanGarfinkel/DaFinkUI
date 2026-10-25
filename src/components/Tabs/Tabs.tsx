@@ -26,11 +26,13 @@ export interface TabsProps {
 
 export const Tabs = ({ value, onValueChange, children, className = '' }: TabsProps) => {
 	const [rovingValue, setRovingValue] = useState(value);
+	const [prevValue, setPrevValue] = useState(value);
 
-	useEffect(() =>
+	if(value !== prevValue)
 	{
+		setPrevValue(value);
 		setRovingValue(value);
-	}, [value]);
+	}
 
 	return (
 		<TabsContext.Provider value={{ value, onValueChange, rovingValue, setRovingValue }}>
