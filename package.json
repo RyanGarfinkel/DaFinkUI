@@ -32,7 +32,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@hookform/resolvers": "^5.4.0",
-    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@types/d3-force": "^3.0.10",
     "@uiw/react-codemirror": "^4.25.10",
     "@xyflow/react": "^12.11.0",
@@ -40,7 +40,7 @@
     "katex": "^0.17.0",
     "loop-protect": "^2.1.6",
     "mathjs": "^15.2.0",
-    "next": "16.2.3",
+    "next": "^16.4.3",
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-hook-form": "^7.54.2",
@@ -48,7 +48,7 @@
     "recharts": "^3.8.1",
     "remark-gfm": "^4.0.1",
     "remark-math": "^6.0.0",
-    "zod": "^4.3.6"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.5.0",
@@ -67,7 +67,7 @@
     "@vitest/browser-playwright": "^4.1.4",
     "@vitest/coverage-v8": "^4.1.4",
     "eslint": "^9",
-    "eslint-config-next": "16.2.3",
+    "eslint-config-next": "^16.4.3",
     "eslint-plugin-perfectionist": "^5.9.0",
     "husky": "^9.1.7",
     "jsdom": "^29.0.2",
