@@ -64,7 +64,7 @@ const ThemeToggle = (
 			aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 			onClick={toggleTheme}
 			className={[
-				'flex h-9 w-9 md:h-8 md:w-8 items-center justify-center rounded-md text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
+				'flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-md text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 				className,
 			].join(' ').trim()}
 		>

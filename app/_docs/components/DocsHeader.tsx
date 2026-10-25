@@ -156,7 +156,7 @@ export const DocsHeader = ({ collapsed = false }: DocsHeaderProps) => {
 						aria-keyshortcuts='/ Meta+k'
 						className={[
 							'relative w-full max-w-sm flex items-center gap-2',
-							'rounded-lg border border-surface-border bg-surface-hover/40 px-3 py-2 md:py-1.5',
+							'rounded-lg border border-surface-border bg-surface-hover/40 min-h-11 md:min-h-0 px-3 py-2 md:py-1.5',
 							'text-sm text-text-subtle text-left',
 							'transition-colors duration-[var(--duration-fast)]',
 							'hover:border-surface-border-hover hover:bg-surface-hover',

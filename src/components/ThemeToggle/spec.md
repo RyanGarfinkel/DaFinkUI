@@ -22,7 +22,7 @@ A button that switches the site between light and dark mode, persisting the choi
 
 ## Visual Design
 
-- 36×36px (`h-9 w-9`) on mobile, 32×32px (`h-8 w-8`) at `md:` and up
+- 44×44px (`h-11 w-11`) on mobile, the minimum touch target, 32×32px (`h-8 w-8`) at `md:` and up
 - `rounded-md`, `text-text-muted` at rest, `text-text` on hover
 - Icon: 15×15px inline SVG, sun (light mode active) or moon (dark mode active), `aria-hidden="true"`
 

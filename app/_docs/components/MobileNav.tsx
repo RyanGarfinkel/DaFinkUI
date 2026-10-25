@@ -62,26 +62,26 @@ export const MobileNav = () => {
 				<DrawerHeader className='px-4'>
 					<DrawerTitle>Navigation</DrawerTitle>
 				</DrawerHeader>
-				<DrawerClose />
+				<DrawerClose className='!top-2 !right-2 flex h-11 w-11 items-center justify-center' />
 				<DrawerContent className='px-3'>
 					<div className='flex flex-col gap-4 pb-6'>
 						<nav className='flex flex-col gap-1'>
-							<DocsSidebarLink href='/' icon={<HomeIcon />} className='py-3'>Home</DocsSidebarLink>
-							<DocsSidebarLink href='/installation' icon={<InstallationIcon />} className='py-3'>Installation</DocsSidebarLink>
-							<DocsSidebarLink href='/theme' icon={<ThemeIcon />} className='py-3'>Theme</DocsSidebarLink>
-							<DocsSidebarLink href='/typography' icon={<TypographyIcon />} className='py-3'>Typography</DocsSidebarLink>
-							<DocsSidebarLink href='/mcp' icon={<McpIcon />} className='py-3'>MCP Server</DocsSidebarLink>
-							<DocsSidebarLink href='/skill' icon={<SkillIcon />} className='py-3'>Design Skill</DocsSidebarLink>
-							<DocsSidebarLink href='/reliability' icon={<ReliabilityIcon />} className='py-3'>Reliability</DocsSidebarLink>
-							<DocsSidebarLink href='/playground' icon={<PlaygroundIcon />} className='py-3'>Playground</DocsSidebarLink>
+							<DocsSidebarLink href='/' icon={<HomeIcon />} className='min-h-11 py-3'>Home</DocsSidebarLink>
+							<DocsSidebarLink href='/installation' icon={<InstallationIcon />} className='min-h-11 py-3'>Installation</DocsSidebarLink>
+							<DocsSidebarLink href='/theme' icon={<ThemeIcon />} className='min-h-11 py-3'>Theme</DocsSidebarLink>
+							<DocsSidebarLink href='/typography' icon={<TypographyIcon />} className='min-h-11 py-3'>Typography</DocsSidebarLink>
+							<DocsSidebarLink href='/mcp' icon={<McpIcon />} className='min-h-11 py-3'>MCP Server</DocsSidebarLink>
+							<DocsSidebarLink href='/skill' icon={<SkillIcon />} className='min-h-11 py-3'>Design Skill</DocsSidebarLink>
+							<DocsSidebarLink href='/reliability' icon={<ReliabilityIcon />} className='min-h-11 py-3'>Reliability</DocsSidebarLink>
+							<DocsSidebarLink href='/playground' icon={<PlaygroundIcon />} className='min-h-11 py-3'>Playground</DocsSidebarLink>
 						</nav>
 
 						<SidebarDivider />
 
 						<nav className='flex flex-col gap-1'>
-							<DocsSidebarLink href='/components' icon={<ComponentsIcon />} className='py-3'>All Components</DocsSidebarLink>
-							<DocsSidebarLink href='/blocks' icon={<BlocksIcon />} className='py-3'>All Blocks</DocsSidebarLink>
-							<DocsSidebarLink href='/effects' icon={<EffectsIcon />} className='py-3'>All Effects</DocsSidebarLink>
+							<DocsSidebarLink href='/components' icon={<ComponentsIcon />} className='min-h-11 py-3'>All Components</DocsSidebarLink>
+							<DocsSidebarLink href='/blocks' icon={<BlocksIcon />} className='min-h-11 py-3'>All Blocks</DocsSidebarLink>
+							<DocsSidebarLink href='/effects' icon={<EffectsIcon />} className='min-h-11 py-3'>All Effects</DocsSidebarLink>
 						</nav>
 
 						{showComponents && CATEGORIES.filter((cat) => byCategory[cat]).map((category) => (
@@ -90,7 +90,7 @@ export const MobileNav = () => {
 									<DocsSidebarLink
 										key={entry.slug}
 										href={`/components/${entry.slug}`}
-										className='py-3'
+										className='min-h-11 py-3'
 									>
 										{entry.name}
 									</DocsSidebarLink>
@@ -104,7 +104,7 @@ export const MobileNav = () => {
 									<DocsSidebarLink
 										key={entry.slug}
 										href={`/blocks/${entry.slug}`}
-										className='py-3'
+										className='min-h-11 py-3'
 									>
 										{entry.name}
 									</DocsSidebarLink>
@@ -118,7 +118,7 @@ export const MobileNav = () => {
 									<DocsSidebarLink
 										key={entry.slug}
 										href={`/effects/${entry.slug}`}
-										className='py-3'
+										className='min-h-11 py-3'
 									>
 										{entry.name}
 									</DocsSidebarLink>
@@ -129,12 +129,12 @@ export const MobileNav = () => {
 						<SidebarDivider />
 
 						<nav className='flex flex-col gap-1'>
-							<DocsSidebarLink href='/changelog' icon={<ChangelogIcon />} className='py-3'>Changelog</DocsSidebarLink>
+							<DocsSidebarLink href='/changelog' icon={<ChangelogIcon />} className='min-h-11 py-3'>Changelog</DocsSidebarLink>
 							<a
 								href='https://github.com/RyanGarfinkel/DaFinkUI'
 								target='_blank'
 								rel='noopener noreferrer'
-								className='flex w-full items-center gap-2 rounded-[var(--radius)] px-3 py-3 text-sm text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
+								className='flex w-full items-center gap-2 rounded-[var(--radius)] min-h-11 px-3 py-3 text-sm text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
 							>
 								<span aria-hidden='true' className='shrink-0 [&>svg]:h-4 [&>svg]:w-4'><GithubIcon /></span>
 								GitHub
@@ -143,7 +143,7 @@ export const MobileNav = () => {
 								href='https://www.npmjs.com/package/dafink-ui'
 								target='_blank'
 								rel='noopener noreferrer'
-								className='flex w-full items-center gap-2 rounded-[var(--radius)] px-3 py-3 text-sm text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
+								className='flex w-full items-center gap-2 rounded-[var(--radius)] min-h-11 px-3 py-3 text-sm text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
 							>
 								<span aria-hidden='true' className='shrink-0 [&>svg]:h-4 [&>svg]:w-4'><PackageIcon /></span>
 								npm
