@@ -4,7 +4,7 @@ import { runEslint } from './commands/eslint.js';
 import { runAudit } from './commands/audit.js';
 import { runSkill } from './commands/skill.js';
 import { runLint } from './commands/lint.js';
-import { runInit } from './commands/init.js';
+import { runInit, type InitOptions } from './commands/init.js';
 import { runAdd } from './commands/add.js';
 import { Command } from 'commander';
 
@@ -17,10 +17,19 @@ program
 
 program
 	.command('init')
-	.description('Interactive setup wizard, writes dafink.config.json and token CSS')
-	.action(async () =>
+	.description('Setup wizard, writes dafink.config.json and token CSS. Pass flags to skip prompts')
+	.option('--style <name>', 'minimal, neumorph, or brutalist')
+	.option('--palette <name>', 'zinc, ocean, ember, forest, noir, or plum')
+	.option('--framework <name>', 'next or react (default: detected)')
+	.option('--components-dir <path>', 'Where components are copied (default: src/components/ui)')
+	.option('--css-file <path>', 'Global CSS file to import tokens into (default: detected)')
+	.option('--eslint', 'Add the DaFink ESLint rules')
+	.option('--hook', 'Add the Claude Code lint hook to .claude/settings.json (implies --eslint)')
+	.option('--hook-fix', 'Like --hook, but the hook autofixes problems before reporting the rest')
+	.option('-y, --yes', 'Accept defaults for anything not passed as a flag, never prompt')
+	.action(async (options: InitOptions) =>
 	{
-		await runInit(process.cwd());
+		await runInit(options, process.cwd());
 	});
 
 program

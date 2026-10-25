@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { addComponentsAlias } from '../lib/tsconfig.js';
 import type { DaFinkConfig } from '../lib/config.js';
 import { resolve, dirname, basename } from 'path';
+import { runHookInstall } from './hook.js';
 import { installEslint } from './eslint.js';
 import { writeConfig } from '../lib/config.js';
 import { generateCss } from '../lib/css.js';
@@ -44,26 +45,68 @@ function prependImport(cssPath: string, importLine: string): void
 	writeFileSync(cssPath, importLine + '\n' + existing, 'utf8');
 }
 
-export async function runInit(cwd: string): Promise<void>
+export interface InitOptions
 {
+	style?: string;
+	palette?: string;
+	framework?: string;
+	componentsDir?: string;
+	cssFile?: string;
+	eslint?: boolean;
+	hook?: boolean;
+	hookFix?: boolean;
+	yes?: boolean;
+}
+
+const STYLES = ['minimal', 'neumorph', 'brutalist'];
+const PALETTES = ['zinc', 'ocean', 'ember', 'forest', 'noir', 'plum'];
+const FRAMEWORKS = ['next', 'react'];
+const DEFAULT_COMPONENTS_DIR = 'src/components/ui';
+
+function assertOneOf(flag: string, value: string | undefined, allowed: string[]): void
+{
+	if(value === undefined || allowed.includes(value)) return;
+
+	console.error(pc.red(`Invalid ${flag} "${value}". Expected one of: ${allowed.join(', ')}`));
+	process.exit(1);
+}
+
+function abortIfCancelled<T>(value: T | symbol): T
+{
+	if(!isCancel(value)) return value as T;
+
+	cancel('Setup cancelled.');
+	process.exit(0);
+}
+
+export async function runInit(options: InitOptions, cwd: string): Promise<void>
+{
+	assertOneOf('--style', options.style, STYLES);
+	assertOneOf('--palette', options.palette, PALETTES);
+	assertOneOf('--framework', options.framework, FRAMEWORKS);
+
+	const interactive = !options.yes && Boolean(process.stdin.isTTY);
+	const detectedFramework = detectFramework(cwd);
+	const detectedCss = detectCssFile(cwd);
+
+	if(!interactive && !options.cssFile && !detectedCss)
+	{
+		console.error(pc.red('No CSS file detected. Pass --css-file <path> (e.g. src/index.css).'));
+		process.exit(1);
+	}
+
 	intro(pc.bold('DaFink UI: Setup wizard'));
 
-	const style = await select({
+	const style = options.style ?? (interactive ? abortIfCancelled(await select({
 		message: 'Which style?',
 		options: [
 			{ value: 'minimal',   label: 'Minimal',   hint: 'clean, sharp, utility-first' },
 			{ value: 'neumorph',  label: 'Neumorph',  hint: 'soft shadows, rounded surfaces' },
 			{ value: 'brutalist', label: 'Brutalist', hint: 'bold borders, hard offsets' },
 		],
-	});
+	})) : 'minimal');
 
-	if(isCancel(style))
-	{
-		cancel('Setup cancelled.');
-		process.exit(0);
-	}
-
-	const palette = await select({
+	const palette = options.palette ?? (interactive ? abortIfCancelled(await select({
 		message: 'Which palette?',
 		options: [
 			{ value: 'zinc',   label: 'Zinc',   hint: 'default neutral' },
@@ -73,82 +116,45 @@ export async function runInit(cwd: string): Promise<void>
 			{ value: 'noir',   label: 'Noir',   hint: 'slate monochrome' },
 			{ value: 'plum',   label: 'Plum',   hint: 'purple violet' },
 		],
-	});
+	})) : 'zinc');
 
-	if(isCancel(palette))
-	{
-		cancel('Setup cancelled.');
-		process.exit(0);
-	}
-
-	const detectedFramework = detectFramework(cwd);
-
-	const framework = await select({
+	const framework = options.framework ?? (interactive ? abortIfCancelled(await select({
 		message: 'Which framework?',
 		options: [
 			{ value: 'next',  label: 'Next.js', hint: detectedFramework === 'next' ? 'detected' : undefined },
 			{ value: 'react', label: 'React',   hint: detectedFramework === 'react' ? 'detected' : undefined },
 		],
 		initialValue: detectedFramework,
-	});
+	})) : detectedFramework);
 
-	if(isCancel(framework))
-	{
-		cancel('Setup cancelled.');
-		process.exit(0);
-	}
-
-	const componentsDir = await text({
+	const componentsDir = options.componentsDir ?? (interactive ? abortIfCancelled(await text({
 		message: 'Components directory?',
-		placeholder: 'src/components/ui',
-		defaultValue: 'src/components/ui',
-	});
+		placeholder: DEFAULT_COMPONENTS_DIR,
+		defaultValue: DEFAULT_COMPONENTS_DIR,
+	})) : DEFAULT_COMPONENTS_DIR);
 
-	if(isCancel(componentsDir))
-	{
-		cancel('Setup cancelled.');
-		process.exit(0);
-	}
+	const cssFile = options.cssFile ?? detectedCss ?? abortIfCancelled(await text({
+		message: 'CSS file path (relative to project root)?',
+		placeholder: 'src/index.css',
+	}));
 
-	const detected = detectCssFile(cwd);
-	let cssFile: string;
+	const withHook = Boolean(options.hook || options.hookFix);
 
-	if(detected)
-	{
-		cssFile = detected;
-	}
-	else
-	{
-		const cssInput = await text({
-			message: 'CSS file path (relative to project root)?',
-			placeholder: 'src/index.css',
-		});
-
-		if(isCancel(cssInput))
-		{
-			cancel('Setup cancelled.');
-			process.exit(0);
-		}
-
-		cssFile = cssInput as string;
-	}
-
-	const withEslint = await confirm({
+	const withEslint = withHook || (options.eslint ?? (interactive ? abortIfCancelled(await confirm({
 		message: 'Add the DaFink ESLint rules?',
 		initialValue: false,
-	});
+	})) : false));
 
-	if(isCancel(withEslint))
-	{
-		cancel('Setup cancelled.');
-		process.exit(0);
-	}
+	const hookWanted = withHook || (options.hook === undefined && interactive && withEslint && abortIfCancelled(await confirm({
+		message: 'Lint every file Claude Code edits (adds a hook to .claude/settings.json)?',
+		initialValue: false,
+	})));
 
 	const config: DaFinkConfig = {
 		style:         style as DaFinkConfig['style'],
 		palette:       palette as DaFinkConfig['palette'],
 		framework:     framework as DaFinkConfig['framework'],
-		componentsDir: (componentsDir as string) || 'src/components/ui',
+		componentsDir: componentsDir || DEFAULT_COMPONENTS_DIR,
 		blocksDir:     'src/blocks',
 		cssFile,
 		// Not prompted, same as blocksDir above — most projects never install a block with a
@@ -178,6 +184,7 @@ export async function runInit(cwd: string): Promise<void>
 		: '  ' + pc.yellow(aliasResult.reason ?? 'skipped @components/ui alias setup') + '\n';
 
 	if(withEslint) installEslint(cwd);
+	if(hookWanted) await runHookInstall({ fix: options.hookFix }, cwd);
 
 	outro(
 		pc.green('Done!') + '\n\n' +
