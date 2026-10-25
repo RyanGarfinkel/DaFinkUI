@@ -1,7 +1,9 @@
 import type { ToolCallEntry, ToolCallLink } from '@/src/components/ToolCallTrace/ToolCallTrace';
-import type { AiChatHistoryMessage, AiChatReply } from '@/src/blocks/AiChat/AiChat';
 import type { ChartSpec, TableSpec } from '@/src/blocks/AiChat/StreamingMessage';
+import type { AiChatReply } from '@/src/blocks/AiChat/AiChat';
 import { NextResponse } from 'next/server';
+import { parseBody } from '../parseBody';
+import { z } from 'zod';
 
 // Docs-site-only infrastructure backing the /blocks/ai-chat live preview. Never listed in
 // the ai-chat block's registry `files`, so the CLI never ships this to consumers.
@@ -130,11 +132,16 @@ const CANNED_REPLIES: CannedReply[] = [
 	},
 ];
 
+const bodySchema = z.object({
+	message: z.string().trim().min(1, 'message is required').max(10000),
+	history: z.array(z.object({ role: z.enum(['user', 'assistant']), text: z.string().max(20000) })).max(500).default([]),
+});
+
 const randomReplyDelay = () => 600 + Math.random() * 300;
 
 export const POST = async (request: Request) => {
-	const { message } = (await request.json()) as { message: string; history: AiChatHistoryMessage[] };
-	if(!message?.trim()) return NextResponse.json({ error: 'message is required' }, { status: 400 });
+	const parsed = await parseBody(request, bodySchema);
+	if(!parsed.ok) return parsed.response;
 
 	await new Promise((resolve) => setTimeout(resolve, randomReplyDelay()));
 	const reply = CANNED_REPLIES[Math.floor(Math.random() * CANNED_REPLIES.length)];
