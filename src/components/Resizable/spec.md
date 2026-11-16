@@ -23,6 +23,7 @@ Extends all native `<div>` HTML attributes.
 | defaultSize | number    | -       | Initial size in pixels. When provided, this panel is a **sized** panel — it renders at an explicit width (horizontal) or height (vertical) and is the one a `ResizableHandle` next to it can drag. When omitted, the panel is the **flexible** panel: it renders `flex-1` with no explicit size and absorbs whatever space the sized panels don't use. A group is expected to have at most one flexible panel in practice — a handle only ever resizes the sized panel on one of its two sides — but nothing enforces that. |
 | minSize     | number    | `120`   | Minimum size in pixels a sized panel can be dragged or keyed down to.       |
 | maxSize     | number    | -       | Maximum size in pixels a sized panel can be dragged or keyed up to. Omit for no upper cap. |
+| onSnap      | () => void | -      | Called when a pointer drag is released at least 48px past `maxSize` (requires `maxSize`). The panel itself stays clamped at `maxSize`; what "snap" means (e.g. taking the full width and hiding its sibling) is up to the caller. Keyboard resizing never snaps, so the same layout needs a visible button as its keyboard path. |
 | className   | string    | `""`    | Additional CSS classes merged onto the panel's root div.                    |
 | children    | ReactNode | -       | Panel content. The panel clips overflow (`overflow-hidden`); content that needs its own scrolling should manage it internally (e.g. `ScrollFade`). |
 

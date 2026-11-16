@@ -103,6 +103,44 @@ describe('Resizable', () =>
 		expect(sidebar.style.width).toBe('320px');
 	});
 
+	describe('onSnap', () =>
+	{
+		const dragTo = (clientX: number, onSnap: () => void) => {
+			Element.prototype.setPointerCapture     = () => {};
+			Element.prototype.releasePointerCapture = () => {};
+
+			render(
+				<Resizable direction='horizontal'>
+					<ResizablePanel defaultSize={200} minSize={120} maxSize={320} onSnap={onSnap} data-testid='sidebar'>Sidebar</ResizablePanel>
+					<ResizableHandle />
+					<ResizablePanel>Main</ResizablePanel>
+				</Resizable>
+			);
+			const strip = screen.getByRole('separator').parentElement as HTMLElement;
+
+			fireEvent.pointerDown(strip, { pointerId: 1, clientX: 0 });
+			fireEvent.pointerUp(strip, { pointerId: 1, clientX });
+			return screen.getByTestId('sidebar');
+		};
+
+		it('fires when a drag is released 48px or more past maxSize, leaving the panel at maxSize', () =>
+		{
+			let snaps = 0;
+			const sidebar = dragTo(120 + 48, () => { snaps += 1; });
+
+			expect(snaps).toBe(1);
+			expect(sidebar.style.width).toBe('320px');
+		});
+
+		it('does not fire for a drag that stops short of the overshoot', () =>
+		{
+			let snaps = 0;
+			dragTo(120 + 47, () => { snaps += 1; });
+
+			expect(snaps).toBe(0);
+		});
+	});
+
 	it('reflects the clamped size in aria-valuenow, aria-valuemin, and aria-valuemax', () =>
 	{
 		renderGroup();
