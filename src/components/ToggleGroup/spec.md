@@ -35,6 +35,8 @@ Extends `ButtonHTMLAttributes<HTMLButtonElement>`: all native button attributes 
 | `children`  | `React.ReactNode`     | -       | Required. Content of the button: text, icon, or both.       |
 | `className` | `string`              | `''`    | Additional classes merged onto the button element.           |
 
+The group is as wide as its items (`w-fit max-w-full`), even inside a flex-column or grid parent that would otherwise stretch it. Pass `className='w-full'` to make it fill its container.
+
 ---
 
 ## Sizes

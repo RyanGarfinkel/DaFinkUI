@@ -26,6 +26,15 @@ describe('Tabs', () =>
 		expect(screen.getByRole('tablist')).toBeDefined();
 	});
 
+	it('sizes the list to its tabs instead of stretching inside a flex or grid parent', () =>
+	{
+		renderTabs();
+
+		const { className } = screen.getByRole('tablist');
+		expect(className).toContain('w-fit');
+		expect(className).toContain('max-w-full');
+	});
+
 	it('shows correct tab content when tab is active', () =>
 	{
 		renderTabs('one');

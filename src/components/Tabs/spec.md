@@ -51,6 +51,8 @@ The panel shown when its `value` matches the active tab. Hidden (unmounted) othe
 
 Accepts all native `<div>` HTML attributes.
 
+`TabsList` is as wide as its tabs (`w-fit max-w-full`), so its bottom border runs only under them, even inside a flex-column or grid parent. Pass `className='w-full'` for a baseline that spans the container.
+
 ## Behavior
 
 - **Controlled only**: `Tabs` requires both `value` and `onValueChange`. The parent owns the active state.

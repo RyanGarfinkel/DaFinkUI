@@ -238,7 +238,7 @@ export const ToggleGroup = (
 				aria-label={ariaLabel}
 				aria-labelledby={ariaLabelledBy}
 				onKeyDown={handleKeyDown}
-				className={`relative inline-flex items-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--inner-shadow)] backdrop-blur-[var(--backdrop-blur)] overflow-hidden ${className}`}
+				className={`relative inline-flex w-fit max-w-full items-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--inner-shadow)] backdrop-blur-[var(--backdrop-blur)] overflow-hidden ${className}`}
 			>
 				{type === 'single' && (
 					<div

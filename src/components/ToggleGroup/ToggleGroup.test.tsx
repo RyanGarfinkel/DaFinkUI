@@ -233,6 +233,19 @@ describe('ToggleGroup', () =>
 		expect(screen.getByRole('group').className).toContain('custom-group');
 	});
 
+	it('sizes to its items instead of stretching inside a flex or grid parent', () =>
+	{
+		render(
+			<ToggleGroup type='single' value='a' onValueChange={() => {}}>
+				<ToggleGroupItem value='a'>A</ToggleGroupItem>
+			</ToggleGroup>
+		);
+
+		const { className } = screen.getByRole('group');
+		expect(className).toContain('w-fit');
+		expect(className).toContain('max-w-full');
+	});
+
 	it('merges custom className on ToggleGroupItem', () =>
 	{
 		render(

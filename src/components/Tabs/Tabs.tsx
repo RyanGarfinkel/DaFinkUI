@@ -125,7 +125,7 @@ export const TabsList = ({ children, className = '', ...props }: TabsListProps) 
 			role='tablist'
 			ref={listRef}
 			onKeyDown={handleKeyDown}
-			className={`relative border-b-[length:var(--border-width)] border-surface-border flex gap-1 ${className}`}
+			className={`relative border-b-[length:var(--border-width)] border-surface-border flex w-fit max-w-full gap-1 ${className}`}
 			{...props}
 		>
 			{children}
