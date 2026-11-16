@@ -6,14 +6,17 @@ import { runSkill } from './commands/skill.js';
 import { runLint } from './commands/lint.js';
 import { runInit, type InitOptions } from './commands/init.js';
 import { runAdd } from './commands/add.js';
+import { readFileSync } from 'fs';
 import { Command } from 'commander';
+
+const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')) as { version: string };
 
 const program = new Command();
 
 program
 	.name('dafink-ui')
 	.description('Add DaFink UI components to your project')
-	.version('0.1.0');
+	.version(version);
 
 program
 	.command('init')
