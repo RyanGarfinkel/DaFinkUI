@@ -945,7 +945,7 @@ export default function ChartCard() {
 		slug: 'ai-chat',
 		name: 'AI chat',
 		category: 'AI',
-		description: 'A chat app with a history sidebar (new-chat button, rename, delete, and a footer profile card that opens a settings modal), streaming replies, and forkable reply threads in a resizable side panel. Installs as a folder with ToolCallTrace and Questionnaire as dependencies. Works with a real API: chats, threads, replies, and search all load from API routes, so point them at your own backend.',
+		description: 'A chat app with a history sidebar (new-chat button, rename, delete, and a footer profile card that opens a settings modal), streaming replies, and forkable reply threads in a resizable side panel. A reply can also edit a slide deck live in a slides panel (the DeckEditor component, with downloads), so you and an agent work on the same deck. Installs as a folder with ToolCallTrace and Questionnaire as dependencies. Works with a real API: chats, threads, replies, and search all load from API routes, so point them at your own backend.',
 		usage: `'use client';
 
 import { describeAttachments, buildHistory, findLastUserMessageId, hasPrecedingUserMessage, DRAFT_TITLE_MAX_LENGTH } from '@/src/blocks/AiChat/messageHelpers';
