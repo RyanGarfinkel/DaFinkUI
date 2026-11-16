@@ -192,7 +192,7 @@ function copyEntry(entry: { files: BlockFileEntry[] }, registryDir: URL, targetD
 		if(!withTests) continue;
 
 		const path = typeof file === 'string' ? file : file.path;
-		const testFile = path.replace(/\.tsx$/, '.test.tsx');
+		const testFile = path.replace(/\.(tsx?)$/, '.test.$1');
 		const testSrcPath = new URL(testFile, registryDir).pathname;
 
 		if(existsSync(testSrcPath))
