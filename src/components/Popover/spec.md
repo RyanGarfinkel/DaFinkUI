@@ -15,7 +15,7 @@ No npm dependencies. No registry dependencies.
 | Prop               | Type                                      | Default     | Description                                                  |
 |--------------------|-------------------------------------------|-------------|---------------------------------------------------------------|
 | `trigger`          | `ReactNode`                               | required    | Content of the built-in trigger button.                      |
-| `children`         | `ReactNode`                               | required    | Panel content. May contain interactive elements.             |
+| `children`         | `ReactNode \| ((close: () => void) => ReactNode)` | required | Panel content. May contain interactive elements. Pass a function to receive `close`, which closes the panel and returns focus to the trigger (e.g. for an Apply button). |
 | `side`             | `'top' \| 'right' \| 'bottom' \| 'left'`  | `'bottom'`  | Which side of the trigger the panel appears on.              |
 | `align`            | `'start' \| 'center' \| 'end'`            | `'center'`  | Alignment along the chosen side.                             |
 | `label`            | `string`                                  | `undefined` | Accessible name for the panel (`aria-label`).                |
@@ -23,6 +23,8 @@ No npm dependencies. No registry dependencies.
 | `disabled`         | `boolean`                                 | `false`     | Disables the trigger.                                        |
 | `className`        | `string`                                  | `''`        | Additional classes on the panel.                             |
 | `triggerClassName` | `string`                                  | `''`        | Additional classes on the trigger button.                    |
+| `triggerProps`     | `ButtonHTMLAttributes<HTMLButtonElement>` | `undefined` | Extra attributes for the trigger button, e.g. `aria-label` for an icon-only trigger. |
+| `unstyledTrigger`  | `boolean`                                 | `false`     | Drops the built-in trigger styles so `triggerClassName` fully defines the trigger (same as `Menu`). The trigger keeps its ARIA attributes. |
 
 ## Keyboard Behavior
 

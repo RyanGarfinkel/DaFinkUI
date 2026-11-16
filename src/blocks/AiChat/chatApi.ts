@@ -1,4 +1,4 @@
-import type { AiChatHistoryMessage, AiChatReply, ChatEntry, ChatMessage, ChatTextMessage, SearchCorpusEntry, SearchHit } from './types';
+import type { AiChatHistoryMessage, AiChatReply, ChatDeck, ChatEntry, ChatMessage, ChatTextMessage, SearchCorpusEntry, SearchHit } from './types';
 
 // Everything in this file talks to the docs-site API routes under app/api/ai-chat/. Point
 // these at your own backend and the rest of the block (typing indicator, streaming reveal,
@@ -19,11 +19,14 @@ export const fetchThread = async (threadId: string): Promise<ChatMessage[]> => {
 	return messages;
 };
 
-export const sendMessage = async (message: string, history: AiChatHistoryMessage[]): Promise<AiChatReply> => {
+// `decks` are the chat's slide decks as you've left them, each with its `deckId`, so an agent
+// edits your version (including your own changes since its last reply) and can reply with a
+// `deckEdit` for the same `deckId`.
+export const sendMessage = async (message: string, history: AiChatHistoryMessage[], decks: ChatDeck[] = []): Promise<AiChatReply> => {
 	const res = await fetch('/api/ai-chat', {
 		method:  'POST',
 		headers: { 'Content-Type': 'application/json' },
-		body:    JSON.stringify({ message, history }),
+		body:    JSON.stringify({ message, history, ...(decks.length ? { decks } : {}) }),
 	});
 	if(!res.ok) throw new Error('Failed to fetch AI reply');
 	return res.json();

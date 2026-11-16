@@ -53,6 +53,7 @@ This is the one place a block is allowed to take props: a sibling file exists sp
 - Export the block as a named export matching the file name, plus a default export
 - No props: a block takes no configuration. Internal state (form values, active step, selected period) is fine; anything a consumer would want to change is meant to be edited directly in the copied file
 - Not exported from `src/index.ts`, since blocks are never `npm install`ed, only copied via the CLI or by hand
+- Don't render a `<main>` landmark: the page that hosts the block already has one. Use `<section aria-label="...">` for the block's primary region
 - Build it entirely from existing components (`src/components/`). If the composition needs something that doesn't exist yet, add that as a proper component first, then use it in the block
 
 ## Registry Entry (app/_docs/registry/blocks.ts)

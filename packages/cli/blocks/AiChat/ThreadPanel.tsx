@@ -3,6 +3,7 @@
 import { KeyboardEvent, ReactNode, useEffect, useRef } from 'react';
 import { SkeletonCard } from '../../components/Skeleton/Skeleton';
 import ScrollFade from '../../components/ScrollFade/ScrollFade';
+import { CloseIcon, CollapseIcon, ExpandIcon } from './icons';
 import Composer, { type ComposerProps } from './Composer';
 import Button from '../../components/Button/Button';
 import type { ChatMessage } from './AiChat';
@@ -17,16 +18,12 @@ export interface ThreadPanelProps {
 	isTyping:       boolean;
 	renderRoot:     (message: ChatMessage) => ReactNode;
 	renderReply:    (message: ChatMessage, index: number) => ReactNode;
+	expanded:       boolean;
+	onToggleExpand: () => void;
 	onClose:        () => void;
 }
 
 const NEAR_BOTTOM_THRESHOLD_PX = 80;
-
-const CloseIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='M18 6 6 18M6 6l12 12' />
-	</svg>
-);
 
 const Divider = ({ label }: { label: string }) => (
 	<div className='flex items-center gap-3'>
@@ -41,7 +38,7 @@ const Divider = ({ label }: { label: string }) => (
 // contract in src/patterns/accessibility.md, since this never blocks the page behind it.
 export const ThreadPanel = (
 	{
-		title, rootMessages, threadMessages, loading, composer, isTyping, renderRoot, renderReply, onClose,
+		title, rootMessages, threadMessages, loading, composer, isTyping, renderRoot, renderReply, expanded, onToggleExpand, onClose,
 	}: ThreadPanelProps
 ) => {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -94,9 +91,14 @@ export const ThreadPanel = (
 					<p className='text-[11px] font-medium uppercase tracking-wide text-text-subtle'>Thread</p>
 					<h3 className='truncate text-base font-semibold text-text'>{title}</h3>
 				</div>
-				<Button variant='ghost' size='icon-sm' aria-label='Close thread' onClick={onClose}>
-					<CloseIcon />
-				</Button>
+				<div className='flex shrink-0 items-center gap-1'>
+					<Button variant='ghost' size='icon-sm' aria-label={expanded ? 'Show chat' : 'Expand thread'} data-expand-toggle onClick={onToggleExpand}>
+						{expanded ? <CollapseIcon /> : <ExpandIcon />}
+					</Button>
+					<Button variant='ghost' size='icon-sm' aria-label='Close thread' onClick={onClose}>
+						<CloseIcon />
+					</Button>
+				</div>
 			</div>
 
 			<div className='relative flex min-h-0 flex-1 flex-col'>

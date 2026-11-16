@@ -2516,7 +2516,7 @@ export default function Example() {
 }`,
     props: [
       { name: 'trigger',          type: 'ReactNode',                           default: '-',          description: 'Content of the built-in trigger button.' },
-      { name: 'children',         type: 'ReactNode',                           default: '-',          description: 'Panel content. May contain interactive elements.' },
+      { name: 'children',         type: 'ReactNode | ((close: () => void) => ReactNode)', default: '-', description: 'Panel content. Pass a function to receive close, which closes the panel and returns focus to the trigger.' },
       { name: 'side',             type: "'top' | 'right' | 'bottom' | 'left'", default: "'bottom'",   description: 'Which side of the trigger the panel appears on.' },
       { name: 'align',            type: "'start' | 'center' | 'end'",          default: "'center'",   description: 'Alignment along the chosen side.' },
       { name: 'label',            type: 'string',                              default: 'undefined',  description: 'Accessible name for the panel (aria-label).' },
@@ -2524,6 +2524,8 @@ export default function Example() {
       { name: 'disabled',         type: 'boolean',                             default: 'false',      description: 'Disables the trigger.' },
       { name: 'className',        type: 'string',                              default: "''",         description: 'Additional classes on the panel.' },
       { name: 'triggerClassName', type: 'string',                              default: "''",         description: 'Additional classes on the trigger button.' },
+      { name: 'triggerProps',     type: 'ButtonHTMLAttributes<HTMLButtonElement>', default: '-',        description: 'Extra attributes for the trigger button, e.g. aria-label for an icon-only trigger.' },
+      { name: 'unstyledTrigger',  type: 'boolean',                             default: 'false',      description: 'Drops the built-in trigger styles so triggerClassName fully defines the trigger.' },
     ],
     dependencies: [],
     registryDependencies: [],
@@ -2566,6 +2568,8 @@ export default function Example() {
       { name: 'disabled',         type: 'boolean',                             default: 'false',      description: 'Disables the trigger.' },
       { name: 'className',        type: 'string',                              default: "''",         description: 'Additional classes on the menu list.' },
       { name: 'triggerClassName', type: 'string',                              default: "''",         description: 'Additional classes on the trigger button.' },
+      { name: 'triggerProps',     type: 'ButtonHTMLAttributes<HTMLButtonElement>', default: '-',        description: 'Extra attributes for the trigger button, e.g. aria-label for an icon-only trigger.' },
+      { name: 'unstyledTrigger',  type: 'boolean',                             default: 'false',      description: 'Drops the built-in trigger styles so triggerClassName fully defines the trigger.' },
     ],
     dependencies: [],
     registryDependencies: [],
@@ -4045,6 +4049,249 @@ export default function Example() {
     dependencies:         [],
     registryDependencies: [],
     files:                ['Link/Link.tsx'],
+  },
+  {
+    slug: 'color-picker',
+    name: 'ColorPicker',
+    category: 'Inputs',
+    description: 'A saturation/brightness area, hue slider, hex input, and optional swatches for picking a color.',
+    usage: `'use client';
+
+import { useState } from 'react';
+import { ColorPicker } from '@components/ui';
+
+export default function Example() {
+  const [color, setColor] = useState('#3b82f6');
+
+  return (
+      <ColorPicker
+        label="Accent color"
+        value={color}
+        onValueChange={setColor}
+        swatches={['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899']}
+      />
+  );
+}`,
+    props: [
+      { name: 'value', type: 'string', default: '-', description: 'Controlled hex color (`#rrggbb` or `#rgb`).' },
+      { name: 'onValueChange', type: '(hex: string) => void', default: '-', description: 'Called with the new color as lowercase `#rrggbb`.' },
+      { name: 'swatches', type: 'string[]', default: '-', description: 'Preset hex colors rendered as a radio group below the picker.' },
+      { name: 'label', type: 'string', default: '-', description: 'Visible label; names the picker group.' },
+      { name: 'showInput', type: 'boolean', default: 'true', description: 'Shows the hex input and color preview.' },
+      { name: 'disabled', type: 'boolean', default: 'false', description: 'Disables every part of the picker.' },
+      { name: 'className', type: 'string', default: "''", description: 'Additional classes merged onto the root. Default width is `w-48`.' },
+    ],
+    dependencies:         [],
+    registryDependencies: ['input'],
+    files:                ['ColorPicker/ColorPicker.tsx', 'ColorPicker/color.ts'],
+  },
+  {
+    slug: 'slide-canvas',
+    name: 'SlideCanvas',
+    category: 'Canvas',
+    description: 'A fixed-ratio slide stage that scales to fit, with free-positioned elements you can select, drag, resize, and nudge with the keyboard.',
+    usage: `'use client';
+
+import { useState } from 'react';
+import { Badge, SlideCanvas } from '@components/ui';
+import type { SlideElement } from '@components/ui';
+
+interface DemoElement extends SlideElement {
+  kind:  "badge" | "title" | "subtitle" | "block";
+  text?: string;
+}
+
+const INITIAL_ELEMENTS: DemoElement[] = [
+  { id: "badge", label: "Status badge", kind: "badge", text: "Q3 2026", x: 96, y: 130, width: 120, height: 40 },
+  { id: "title", label: "Title", kind: "title", text: "Quarterly review", x: 96, y: 200, width: 760, height: 120 },
+  { id: "subtitle", label: "Subtitle", kind: "subtitle", text: "Growth, retention, and what is next", x: 96, y: 330, width: 640, height: 60 },
+  { id: "shape", label: "Accent block", kind: "block", x: 920, y: 160, width: 260, height: 400 },
+];
+
+const renderElement = (el: DemoElement) => {
+  switch (el.kind) {
+    case "badge":    return <Badge variant="success" className="text-lg">{el.text}</Badge>;
+    case "title":    return <h2 className="text-6xl font-semibold text-text">{el.text}</h2>;
+    case "subtitle": return <p className="text-3xl text-text-muted">{el.text}</p>;
+    case "block":    return <div className="h-full w-full rounded-[var(--radius-lg)] bg-surface-active" />;
+  }
+};
+
+export default function Example() {
+  const [elements, setElements] = useState(INITIAL_ELEMENTS);
+
+  return (
+    <div className="w-full max-w-3xl">
+      <SlideCanvas
+        elements={elements}
+        onElementsChange={setElements}
+        renderElement={renderElement}
+        gridSize={8}
+      />
+    </div>
+  );
+}`,
+    props: [
+      { name: 'elements', type: 'T[] (T extends SlideElement)', default: '-', description: 'Elements on the slide: `{ id, label, x, y, width, height }` in logical px, plus any fields of your own. Array order is stacking order.' },
+      { name: 'onElementsChange', type: '(elements: T[]) => void', default: '-', description: 'Called with the updated array on move, resize, or delete.' },
+      { name: 'renderElement', type: '(element: T, state: { selected, editing }) => ReactNode', default: '-', description: 'Renders an element. Content is non-interactive unless the element is being edited.' },
+      { name: 'renderToolbar', type: '(element: T, state) => ReactNode', default: '-', description: 'Floating toolbar shown above the selected element at normal size. Alt+F10 focuses it.' },
+      { name: 'width', type: 'number', default: '1280', description: 'Logical slide width. The stage scales to fit its container.' },
+      { name: 'height', type: 'number', default: '720', description: 'Logical slide height.' },
+      { name: 'stageStyle', type: 'CSSProperties', default: '-', description: 'Styles on the stage only (not the toolbar), e.g. token variables that theme the slide.' },
+      { name: 'backdrop', type: 'ReactNode', default: '-', description: 'Decorative layer behind the elements (e.g. an ambient effect). Hidden from assistive tech, never interactive.' },
+      { name: 'scale', type: 'number', default: '-', description: 'Fixed zoom (1 = 100%). Omit to fit the container width.' },
+      { name: 'onScaleChange', type: '(scale: number) => void', default: '-', description: 'Reports the effective scale, e.g. for a zoom percentage.' },
+      { name: 'background', type: 'string', default: '-', description: 'Any CSS background for the stage. Defaults to the surface token.' },
+      { name: 'gridSize', type: 'number', default: '-', description: 'Snap moves and resizes to this grid, in logical px.' },
+      { name: 'snapToElements', type: 'boolean', default: 'true', description: 'Snap pointer drags to other elements\' edges and centers, with guide lines. Hold Alt to bypass.' },
+      { name: 'selectedId', type: 'string | null', default: '-', description: 'Controlled selection. Omit to let the canvas manage it.' },
+      { name: 'onSelectedIdChange', type: '(id: string | null) => void', default: '-', description: 'Called when the selection changes.' },
+      { name: 'canEdit', type: '(element: T) => boolean', default: '-', description: 'Which elements can enter editing mode (double-click or Enter). Omit to disable editing.' },
+      { name: 'editingId', type: 'string | null', default: '-', description: 'Controlled editing element. Omit to let the canvas manage it.' },
+      { name: 'onEditingIdChange', type: '(id: string | null) => void', default: '-', description: 'Called when editing starts or stops.' },
+      { name: 'drawing', type: 'boolean', default: 'false', description: 'Draw mode: pointer drags draw a new region (crosshair + dashed preview) instead of moving elements.' },
+      { name: 'onDraw', type: '(from: SlidePoint, to: SlidePoint) => void', default: '-', description: 'Called when a draw-mode drag ends, with grid-snapped points in slide px.' },
+      { name: 'readOnly', type: 'boolean', default: 'false', description: 'Presentation mode: no selection, dragging, resizing, or keyboard editing.' },
+      { name: 'className', type: 'string', default: "''", description: 'Additional classes on the outer frame.' },
+    ],
+    dependencies:         [],
+    registryDependencies: [],
+    files:                ['SlideCanvas/SlideCanvas.tsx', 'SlideCanvas/geometry.ts'],
+  },
+  {
+    slug: 'context-menu',
+    name: 'ContextMenu',
+    category: 'Overlay',
+    description: 'A right-click menu for any element, opened at the cursor or from the keyboard with Shift+F10 or the Menu key.',
+    usage: `'use client';
+
+import { useState } from 'react';
+import { ContextMenu } from '@components/ui';
+
+export default function Example() {
+  const [contextAction, setContextAction] = useState('none');
+
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <ContextMenu
+        label="File actions"
+        items={[
+          { label: "Open", onSelect: () => setContextAction("Open") },
+          { label: "Rename", onSelect: () => setContextAction("Rename") },
+          { label: "Duplicate", onSelect: () => setContextAction("Duplicate") },
+          { separator: true },
+          { label: "Delete", onSelect: () => setContextAction("Delete") },
+        ]}
+      >
+        <button
+          type="button"
+          className="flex h-32 w-64 items-center justify-center rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-dashed border-input-border text-sm text-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring"
+        >
+          Right-click, or focus and press Shift+F10
+        </button>
+      </ContextMenu>
+      <p className="text-sm text-text-muted">Last action: {contextAction}</p>
+    </div>
+  );
+}`,
+    props: [
+      { name: 'items', type: 'MenuLeafEntry[]', default: '-', description: 'Entries: { label, onSelect?, disabled?, selected?, detail? } or { separator: true }. Submenus are not supported.' },
+      { name: 'children', type: 'ReactNode', default: '-', description: 'The region that opens the menu on right-click, or on Shift+F10 / the Menu key when focus is inside it.' },
+      { name: 'label', type: 'string', default: "'Context menu'", description: 'Accessible name for the menu.' },
+      { name: 'disabled', type: 'boolean', default: 'false', description: 'Never opens; the browser\'s native menu shows instead.' },
+      { name: 'onOpenChange', type: '(open: boolean) => void', default: '-', description: 'Called when the menu opens or closes.' },
+      { name: 'className', type: 'string', default: "''", description: 'Additional classes on the menu panel.' },
+    ],
+    dependencies:         [],
+    registryDependencies: ['menu'],
+    files:                ['ContextMenu/ContextMenu.tsx'],
+  },
+  {
+    slug: 'deck-editor',
+    name: 'DeckEditor',
+    category: 'Canvas',
+    description: 'A full slide deck editor: insert tools, a floating format toolbar, a settings sidebar, a reorderable slide rail, themes, and presenting. You own the deck and its undo history; it can also show what someone else (like an AI) is editing.',
+    usage: `'use client';
+
+import { DeckEditor } from '@components/ui';
+import type { Deck } from '@components/ui';
+import { createSlide } from '@components/ui';
+import { useState } from 'react';
+
+const START: Deck = {
+\ttitle:  'Launch plan',
+\ttheme:  'ocean',
+\tslides: [
+\t\t{
+\t\t\t...createSlide([
+\t\t\t\t{ id: 'title', label: 'Title', type: 'text', html: '<p>Launch plan</p>', bold: true, fontSize: 72, color: '', x: 96, y: 248, width: 1088, height: 120 },
+\t\t\t\t{ id: 'subtitle', label: 'Subtitle', type: 'text', html: '<p>Spring release, week by week</p>', fontSize: 32, color: 'var(--color-text-muted)', x: 96, y: 384, width: 1088, height: 56 },
+\t\t\t]),
+\t\t\tid: 'cover',
+\t\t},
+\t\t{ ...createSlide(), id: 'next' },
+\t],
+};
+
+interface History {
+\tpast:     Deck[];
+\tpresent:  Deck;
+\tfuture:   Deck[];
+\tlastKey?: string;
+}
+
+export const DeckEditorDemo = () => {
+\tconst [history, setHistory] = useState<History>({ past: [], present: START, future: [] });
+
+\t// A run of edits sharing a key (a drag, a typing burst) is one undo step.
+\tconst change = (deck: Deck, key?: string) => setHistory(h => ({
+\t\tpast:    key && key === h.lastKey ? h.past : [...h.past, h.present],
+\t\tpresent: deck,
+\t\tfuture:  [],
+\t\tlastKey: key,
+\t}));
+
+\tconst undo = () => setHistory(h => (h.past.length ? { past: h.past.slice(0, -1), present: h.past.at(-1)!, future: [h.present, ...h.future] } : h));
+\tconst redo = () => setHistory(h => (h.future.length ? { past: [...h.past, h.present], present: h.future[0], future: h.future.slice(1) } : h));
+
+\treturn (
+\t\t<div className='h-[560px] w-full'>
+\t\t\t<DeckEditor
+\t\t\t\tdeck={history.present}
+\t\t\t\tonChange={change}
+\t\t\t\tonUndo={undo}
+\t\t\t\tonRedo={redo}
+\t\t\t\tcanUndo={history.past.length > 0}
+\t\t\t\tcanRedo={history.future.length > 0}
+\t\t\t/>
+\t\t</div>
+\t);
+};`,
+    props: [
+      { name: 'deck', type: 'Deck', default: '—', description: 'The deck being edited (controlled).' },
+      { name: 'onChange', type: '(next: Deck, coalesceKey?: string) => void', default: '—', description: 'Every edit, as the whole next deck. Consecutive changes sharing a coalesceKey (a drag, typing) belong in one undo step.' },
+      { name: 'onUndo / onRedo', type: '() => void', default: '—', description: 'Undo and redo, from the toolbar and ⌘Z / ⇧⌘Z. Omit both to hide the undo controls.' },
+      { name: 'canUndo / canRedo', type: 'boolean', default: 'false', description: 'Enables the undo and redo buttons.' },
+      { name: 'toolbarEnd', type: 'ReactNode', default: '—', description: 'Host actions in the top-right cluster, before Present (e.g. a save status and a file menu). Style buttons with the exported TOOLBAR_BUTTON class to match.' },
+      { name: 'highlightIds', type: 'string[]', default: '[]', description: 'Elements someone else is editing right now: each gets a pulsing outline and a tag, and their slides get a dot in the rail.' },
+      { name: 'highlightLabel', type: 'string', default: "'AI'", description: 'Text on the highlight tag.' },
+      { name: 'activeSlideId', type: 'string', default: '—', description: 'Controlled active slide, e.g. to follow another editor. Omit to manage it internally.' },
+      { name: 'onActiveSlideChange', type: '(slideId: string) => void', default: '—', description: 'Called when the user picks a slide.' },
+      { name: 'status', type: 'string', default: '—', description: 'A host message for the polite status line (e.g. export progress).' },
+      { name: 'className', type: 'string', default: "''", description: 'Extra classes on the root. It fills its container, so give the container (or this) a height.' },
+    ],
+    dependencies:         ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', '@tiptap/react', '@tiptap/pm', '@tiptap/starter-kit', '@tiptap/extension-text-align', '@tiptap/extension-text-style', 'jspdf', 'jszip', 'pptxgenjs', 'svg2pdf.js'],
+    registryDependencies: ['button', 'charts', 'color-picker', 'context-menu', 'drawer', 'input', 'menu', 'meteors', 'particles', 'popover', 'reveal', 'select', 'slide-canvas', 'switch', 'table', 'text-scramble', 'textarea', 'toggle-group', 'typewriter'],
+    files:                [
+      'DeckEditor/DeckEditor.tsx', 'DeckEditor/FormatToolbar.tsx', 'DeckEditor/InsertTools.tsx', 'DeckEditor/Inspector.tsx', 'DeckEditor/ElementControls.tsx',
+      'DeckEditor/MotionControls.tsx', 'DeckEditor/fields.tsx', 'DeckEditor/SlideRail.tsx', 'DeckEditor/LayoutPicker.tsx', 'DeckEditor/ThemePicker.tsx',
+      'DeckEditor/CustomThemeEditor.tsx', 'DeckEditor/Presenter.tsx', 'DeckEditor/Entrance.tsx', 'DeckEditor/effects.ts', 'DeckEditor/elements.ts', 'DeckEditor/icons.tsx',
+      'DeckEditor/ExportMenu.tsx', 'DeckEditor/exporters.ts', 'DeckEditor/exportHelpers.ts', 'DeckEditor/htmlPresenter.ts', 'DeckEditor/pdf.ts',
+      'DeckEditor/pptx.ts', 'DeckEditor/pptxMotion.ts', 'DeckEditor/richText.ts',
+      'DeckEditor/deck.ts', 'DeckEditor/ops.ts', 'DeckEditor/layouts.ts', 'DeckEditor/themes.ts', 'DeckEditor/glyphs.tsx', 'DeckEditor/ElementView.tsx',
+      'DeckEditor/TextElement.tsx', 'DeckEditor/LineElement.tsx', 'DeckEditor/Ambient.tsx', 'DeckEditor/Highlight.tsx',
+    ],
   },
 ];
 

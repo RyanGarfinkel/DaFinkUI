@@ -40,10 +40,10 @@ export interface MenuProps {
 	unstyledTrigger?:  boolean;
 }
 
-const isSeparator = (entry: MenuEntry): entry is MenuSeparator =>
+export const isSeparator = (entry: MenuEntry): entry is MenuSeparator =>
 	'separator' in entry;
 
-const navigableIndexes = (entries: MenuEntry[]) => entries
+export const navigableIndexes = (entries: MenuEntry[]) => entries
 	.map((entry, i) => ({ entry, i }))
 	.filter(({ entry }) => !isSeparator(entry) && !entry.disabled)
 	.map(({ i }) => i);
@@ -60,7 +60,7 @@ const ChevronIcon = () => (
 	</svg>
 );
 
-interface MenuEntriesProps {
+export interface MenuEntriesProps {
 	entries:    MenuEntry[];
 	idPrefix:   string;
 	activeAt:   number | null;
@@ -69,7 +69,7 @@ interface MenuEntriesProps {
 	onPress:    (index: number) => void;
 }
 
-const MenuEntries = ({ entries, idPrefix, activeAt, expandedAt, onEnter, onPress }: MenuEntriesProps) => (
+export const MenuEntries = ({ entries, idPrefix, activeAt, expandedAt, onEnter, onPress }: MenuEntriesProps) => (
 	<>
 		{entries.map((entry, i) =>
 		{
@@ -111,6 +111,15 @@ const MenuEntries = ({ entries, idPrefix, activeAt, expandedAt, onEnter, onPress
 		})}
 	</>
 );
+
+/** Shared by Menu and ContextMenu so every menu panel looks and animates the same. */
+export const menuPanelClasses = (visible: boolean) => [
+	'max-h-72 overflow-y-auto rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel py-2 shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)] outline-none',
+	'transition-[opacity,transform]',
+	visible
+		? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'
+		: 'opacity-0 scale-95 duration-[var(--duration-fast)] ease-[var(--ease-exit)]',
+].join(' ');
 
 export const Menu = (
     {
@@ -460,14 +469,7 @@ export const Menu = (
 					aria-activedescendant={subActive !== null ? `${id}-sub-${subActive}` : `${id}-item-${activeIndex}`}
 					onKeyDown={handleMenuKeyDown}
 					style={{ position: 'fixed', top: position.top, left: position.left, zIndex: 50 }}
-					className={[
-						'min-w-48 max-h-72 overflow-y-auto rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel py-2 shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)] outline-none',
-						'transition-[opacity,transform]',
-						visible
-							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'
-							: 'opacity-0 scale-95 duration-[var(--duration-fast)] ease-[var(--ease-exit)]',
-						className,
-					].join(' ')}
+					className={`min-w-48 ${menuPanelClasses(visible)} ${className}`}
 				>
 					<MenuEntries
 						entries={items}
@@ -493,13 +495,7 @@ export const Menu = (
 					role='menu'
 					aria-label={parentEntry && !isSeparator(parentEntry) ? parentEntry.label : undefined}
 					style={{ position: 'fixed', top: subPosition.top, left: subPosition.left, zIndex: 51 }}
-					className={[
-						'min-w-40 max-h-72 overflow-y-auto rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel py-2 shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)] outline-none',
-						'transition-[opacity,transform]',
-						subVisible
-							? 'opacity-100 scale-100 duration-[var(--duration-base)] ease-[var(--ease-enter)]'
-							: 'opacity-0 scale-95 duration-[var(--duration-fast)] ease-[var(--ease-exit)]',
-					].join(' ')}
+					className={`min-w-40 ${menuPanelClasses(subVisible)}`}
 				>
 					<MenuEntries
 						entries={subItems}

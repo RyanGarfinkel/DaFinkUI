@@ -1,7 +1,7 @@
 'use client';
 
 import { buildHistory, describeAttachments, findPrecedingUserIndex, promptText, withVersion } from './messageHelpers';
-import type { AiChatHistoryMessage, ChatMessage, ChatTextMessage, MessageAttachment } from './types';
+import type { AiChatHistoryMessage, ChatDeck, ChatMessage, ChatTextMessage, MessageAttachment } from './types';
 import { useEffect, useRef, useState } from 'react';
 import { sendMessage } from './chatApi';
 
@@ -13,9 +13,13 @@ export interface UseConversationOptions {
 	nextMessageIdRef:  { current: number };
 	/** Thread replies need the root message's history prepended; the main chat has none. */
 	historyPrefix?: (id: string) => AiChatHistoryMessage[];
+	/** Fires when a reply (or a regenerated version) lands, with the messages before it. */
+	onReply?:       (id: string, message: ChatTextMessage, previous: ChatMessage[]) => void;
+	/** Slide decks to send with each request, as the user has left them. */
+	getDecks?:      (id: string) => ChatDeck[];
 }
 
-export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef, historyPrefix }: UseConversationOptions) => {
+export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef, historyPrefix, onReply, getDecks }: UseConversationOptions) => {
 	const [typingId, setTypingId] = useState<string | null>(null);
 	const [streamingId, setStreamingId] = useState<string | null>(null);
 	const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
@@ -29,14 +33,15 @@ export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef,
 		setTypingId(id);
 		const requestId = ++pendingReplyRef.current;
 
-		sendMessage(promptMessage, history)
+		sendMessage(promptMessage, history, getDecks?.(id))
 			.then((reply) => {
 				if(pendingReplyRef.current !== requestId) return;
 				setTypingId((prev) => (prev === id ? null : prev));
-				const aiMessage: ChatMessage = { id: nextMessageIdRef.current++, kind: 'message', sender: 'ai', text: reply.text, animate: true, toolCalls: reply.toolCalls };
+				const aiMessage: ChatTextMessage = { id: nextMessageIdRef.current++, kind: 'message', sender: 'ai', text: reply.text, animate: true, toolCalls: reply.toolCalls, deckEdit: reply.deckEdit };
 				updateMessages(id, (messages) => [...messages, aiMessage]);
 				setStreamingId(id);
 				setStreamingMessageId(aiMessage.id);
+				onReply?.(id, aiMessage, getMessages(id));
 			})
 			.catch(() => {
 				if(pendingReplyRef.current !== requestId) return;
@@ -102,15 +107,15 @@ export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef,
 		const history = [...(historyPrefix?.(id) ?? []), ...buildHistory(messages.slice(0, userIndex))];
 
 		setRegeneratingMessageId(messageId);
-		sendMessage(prompt, history)
+		sendMessage(prompt, history, getDecks?.(id))
 			.then((reply) => {
 				setRegeneratingMessageId((prev) => (prev === messageId ? null : prev));
-				updateMessages(id, (msgs) => msgs.map((m) => (m.kind === 'message' && m.id === messageId
-					? { ...withVersion(m, reply.text), toolCalls: reply.toolCalls, animate: true }
-					: m
-				)));
+				const nextVersion = (m: ChatTextMessage): ChatTextMessage => ({ ...withVersion(m, reply.text), toolCalls: reply.toolCalls, deckEdit: reply.deckEdit, animate: true });
+				const updated = nextVersion(messages[index] as ChatTextMessage);
+				updateMessages(id, (msgs) => msgs.map((m) => (m.kind === 'message' && m.id === messageId ? nextVersion(m) : m)));
 				setStreamingId(id);
 				setStreamingMessageId(messageId);
+				onReply?.(id, updated, messages.slice(0, index));
 			})
 			.catch(() => {
 				setRegeneratingMessageId((prev) => (prev === messageId ? null : prev));

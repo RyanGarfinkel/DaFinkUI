@@ -25,28 +25,33 @@ const SIDEBAR_TITLES: Record<SidebarView, string> = { files: 'Explorer', git: 'S
 
 const fileName = (path: string) => path.split('/').pop() ?? path;
 
-const renderNodes = (nodes: TerminalNode[], activeId: string | null, onOpen: (id: string) => void) =>
-	nodes.map((node) =>
-	{
-		if(node.type === 'folder')
-		{
-			return (
-				<TreeItem key={node.id} label={node.name} defaultOpen>
-					{renderNodes(node.children ?? [], activeId, onOpen)}
-				</TreeItem>
-			);
-		}
+interface NodeListProps {
+	nodes: TerminalNode[];
+	activeId: string | null;
+	onOpen: (id: string) => void;
+}
 
+const NodeList = ({ nodes, activeId, onOpen }: NodeListProps) => nodes.map((node) =>
+{
+	if(node.type === 'folder')
+	{
 		return (
-			<TreeItem
-				key={node.id}
-				label={node.name}
-				icon={<FileIcon />}
-				className={activeId === node.id ? 'bg-surface-active' : ''}
-				onSelect={() => onOpen(node.id)}
-			/>
+			<TreeItem key={node.id} label={node.name} defaultOpen>
+				<NodeList nodes={node.children ?? []} activeId={activeId} onOpen={onOpen} />
+			</TreeItem>
 		);
-	});
+	}
+
+	return (
+		<TreeItem
+			key={node.id}
+			label={node.name}
+			icon={<FileIcon />}
+			className={activeId === node.id ? 'bg-surface-active' : ''}
+			onSelect={() => onOpen(node.id)}
+		/>
+	);
+});
 
 export const Terminal = () => {
 	const [tree, setTree] = useState<TerminalNode[]>([]);
@@ -227,7 +232,7 @@ export const Terminal = () => {
 
 							{view === 'files' && treeStatus === 'ready' && (
 								<Tree>
-									{renderNodes(tree, activeId, openFile)}
+									<NodeList nodes={tree} activeId={activeId} onOpen={openFile} />
 								</Tree>
 							)}
 						</div>

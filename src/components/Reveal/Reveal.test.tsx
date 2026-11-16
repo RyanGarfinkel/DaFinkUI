@@ -138,6 +138,7 @@ describe('Reveal', () =>
 	it('uses motion tokens for duration and easing', () =>
 	{
 		render(<Reveal data-testid='reveal'>Content</Reveal>);
+		MockIntersectionObserver.instances[0].trigger(true);
 		const style = screen.getByTestId('reveal').style;
 		expect(style.transitionDuration).toBe('var(--duration-slow)');
 		expect(style.transitionTimingFunction).toBe('var(--ease-enter)');
@@ -146,7 +147,20 @@ describe('Reveal', () =>
 	it('applies the delay prop as a transition delay', () =>
 	{
 		render(<Reveal delay={250} data-testid='reveal'>Content</Reveal>);
+		MockIntersectionObserver.instances[0].trigger(true);
 		expect(screen.getByTestId('reveal').style.transitionDelay).toBe('250ms');
+	});
+
+	it('hides instantly, so content already in view on mount still plays its delayed entrance', () =>
+	{
+		render(<Reveal delay={600} data-testid='reveal'>Content</Reveal>);
+		const node = screen.getByTestId('reveal');
+		expect(node.style.transitionDuration).toBe('0ms');
+		expect(node.style.transitionDelay).toBe('0ms');
+
+		MockIntersectionObserver.instances[0].trigger(true);
+		expect(node.style.transitionDuration).toBe('var(--duration-slow)');
+		expect(node.style.transitionDelay).toBe('600ms');
 	});
 
 	it('forwards className and native HTML attributes', () =>
@@ -169,6 +183,7 @@ describe('RevealGroup', () =>
 				<Reveal data-testid='item-2'>Three</Reveal>
 			</RevealGroup>
 		);
+		MockIntersectionObserver.instances.forEach(observer => observer.trigger(true));
 		expect(screen.getByTestId('item-0').style.transitionDelay).toBe('0ms');
 		expect(screen.getByTestId('item-1').style.transitionDelay).toBe('100ms');
 		expect(screen.getByTestId('item-2').style.transitionDelay).toBe('200ms');
@@ -182,6 +197,7 @@ describe('RevealGroup', () =>
 				<Reveal data-testid='item-1'>Two</Reveal>
 			</RevealGroup>
 		);
+		MockIntersectionObserver.instances.forEach(observer => observer.trigger(true));
 		expect(screen.getByTestId('item-0').style.transitionDelay).toBe('200ms');
 		expect(screen.getByTestId('item-1').style.transitionDelay).toBe('250ms');
 	});
@@ -194,6 +210,7 @@ describe('RevealGroup', () =>
 				<Reveal delay={999} data-testid='item-1'>Two</Reveal>
 			</RevealGroup>
 		);
+		MockIntersectionObserver.instances.forEach(observer => observer.trigger(true));
 		expect(screen.getByTestId('item-1').style.transitionDelay).toBe('999ms');
 	});
 

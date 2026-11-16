@@ -1,3 +1,4 @@
+import { contrastRatio as contrastOf } from '../src/components/ColorPicker/color';
 import { readdirSync, readFileSync } from 'fs';
 import { join, dirname, basename } from 'path';
 import { fileURLToPath } from 'url';
@@ -8,26 +9,11 @@ const TOKENS_DIR = join(__dirname, '..', 'tokens');
 type TokenEntry = { $value: string; $type: string };
 type TokenFile = Record<string, unknown>;
 
-const hexToLinear = (hex: string): number => {
-	const c = parseInt(hex.slice(1), 16);
-	const r = (c >> 16) & 0xff;
-	const g = (c >> 8) & 0xff;
-	const b = c & 0xff;
-
-	const toLinear = (v: number): number => {
-		const s = v / 255;
-		return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-	};
-
-	return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
-};
-
+// Shared with the slide editor's custom-theme check, so both use the same math.
 const contrastRatio = (a: string, b: string): number => {
-	const l1 = hexToLinear(a);
-	const l2 = hexToLinear(b);
-	const lighter = Math.max(l1, l2);
-	const darker = Math.min(l1, l2);
-	return (lighter + 0.05) / (darker + 0.05);
+	const ratio = contrastOf(a, b);
+	if(ratio === null) throw new Error(`Not a hex color pair: ${a}, ${b}`);
+	return ratio;
 };
 
 const getToken = (obj: TokenFile, path: string): string | null => {

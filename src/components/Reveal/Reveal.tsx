@@ -103,10 +103,12 @@ export const Reveal = (
 				status === 'shown'  ? SHOWN_CLASSES : '',
 				className,
 			].filter(Boolean).join(' ')}
+			// Hiding snaps instantly: a delayed hide would leave content that's
+			// already in view on mount visible until the reveal, so it never animated.
 			style={{
-				transitionDuration:       'var(--duration-slow)',
+				transitionDuration:       status === 'hidden' ? '0ms' : 'var(--duration-slow)',
 				transitionTimingFunction: 'var(--ease-enter)',
-				transitionDelay:          `${delay}ms`,
+				transitionDelay:          status === 'hidden' ? '0ms' : `${delay}ms`,
 				...style,
 			}}
 		>

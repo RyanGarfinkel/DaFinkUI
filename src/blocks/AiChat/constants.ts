@@ -4,6 +4,7 @@ import type { SelectOption } from '../../components/Select/Select';
 export const COMMANDS: CommandOption[] = [
 	{ name: 'compact', description: 'Summarize this conversation to save space' },
 	{ name: 'new',     description: 'Start a new chat' },
+	{ name: 'slides',  description: 'Ask for a slide deck and watch it being built' },
 	{ name: 'thread',  description: 'Open or start a thread on the latest message' },
 	{ name: 'retry',   description: 'Regenerate the latest reply' },
 	{ name: 'edit',    description: 'Edit your latest message' },
@@ -12,6 +13,8 @@ export const COMMANDS: CommandOption[] = [
 	{ name: 'delete',  description: 'Delete this chat' },
 	{ name: 'clear',   description: 'Clear all messages in this chat' },
 ];
+
+export const SLIDES_PROMPT = 'Make a slide deck for our Q3 review';
 
 // The settings modal's one sample-only preference (autoTitleEnabled, in AiChat.tsx, is the
 // one that actually feeds back into handleSubmit).

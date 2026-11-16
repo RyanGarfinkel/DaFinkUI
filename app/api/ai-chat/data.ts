@@ -1,6 +1,7 @@
 import type { ChartSpec, TableSpec, WorkflowSpec } from '@/src/blocks/AiChat/StreamingMessage';
 import type { ChatEntry, ChatMessage, SearchCorpusEntry } from '@/src/blocks/AiChat/AiChat';
 import type { ToolCallLink } from '@/src/components/ToolCallTrace/ToolCallTrace';
+import { CREATE_REPLY } from './decks';
 
 // Docs-site-only sample store backing the /blocks/ai-chat live preview. Never listed in the
 // ai-chat block's registry `files`. In a real app this is your database: the chats route
@@ -188,7 +189,15 @@ const PLANNING_MESSAGES: ChatMessage[] = [
 	},
 ];
 
+// The same reply /slides produces, so this chat's card opens the finished deck (with Replay)
+// and asking here to change it continues from it.
+const DECK_MESSAGES: ChatMessage[] = [
+	{ id: 20, kind: 'message', sender: 'user', text: 'Make a slide deck for our Q3 review' },
+	{ id: 21, kind: 'message', sender: 'ai', ...CREATE_REPLY },
+];
+
 export const CHATS: ChatEntry[] = [
+	{ id: '6', title: 'Q3 review slides', messages: DECK_MESSAGES, threadRefs: [] },
 	{
 		id: '1', title: 'Installing components', messages: INSTALL_MESSAGES,
 		threadRefs: [

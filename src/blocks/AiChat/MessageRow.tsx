@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeftIcon, ChevronRightIcon, CheckIcon, CopyIcon, PencilIcon, ReplyIcon, RefreshIcon } from './icons';
+import { ChevronLeftIcon, ChevronRightIcon, CheckIcon, CopyIcon, PencilIcon, ReplyIcon, RefreshIcon, SlidesIcon } from './icons';
 import { Attachment, AttachmentGroup } from '../../components/Attachment/Attachment';
 import type { ChatMessage, ChatTextMessage, MessageAttachment } from './types';
 import Questionnaire from '../../components/Questionnaire/Questionnaire';
@@ -185,10 +185,34 @@ export const MessageAttachments = ({ attachments }: { attachments?: MessageAttac
 	);
 };
 
+export interface DeckCardProps {
+	messageId:  number;
+	title:      string;
+	/** e.g. "3 slides" or, while it plays, the current step. */
+	detail:     string;
+	onOpen:     () => void;
+}
+
+// The Open button's DOM id is how closing the deck panel hands focus back, like the thread trigger.
+export const DeckCard = ({ messageId, title, detail, onOpen }: DeckCardProps) => (
+	<div className='flex w-full max-w-md items-center gap-3 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface p-3'>
+		<span aria-hidden='true' className='flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-surface-hover text-text-muted'>
+			<SlidesIcon />
+		</span>
+		<div className='min-w-0 flex-1'>
+			<p className='truncate text-sm font-medium text-text'>{title}</p>
+			<p className='truncate text-xs text-text-muted'>{detail}</p>
+		</div>
+		<Button id={`deck-open-${messageId}`} variant='outlined' size='sm' onClick={onOpen} aria-label={`Open ${title}`}>Open</Button>
+	</div>
+);
+
 export interface ChatMessageRowProps {
 	message:               ChatMessage;
 	onStreamComplete:      (messageId: number) => void;
 	onQuestionnaireAnswer: (messageId: number, value: string) => void;
+	/** Something the reply produced, shown under its text (e.g. a `DeckCard`). */
+	renderArtifact?:       (m: ChatTextMessage) => ReactNode;
 	renderTrailing?:       (m: ChatTextMessage) => ReactNode;
 	/** Main-pane-only: replaces the bubble with an inline editor for the latest user message. */
 	editing?:              boolean;
@@ -199,7 +223,7 @@ export interface ChatMessageRowProps {
 }
 
 const ChatMessageRowContent = ({
-	message: m, onStreamComplete, onQuestionnaireAnswer, renderTrailing,
+	message: m, onStreamComplete, onQuestionnaireAnswer, renderArtifact, renderTrailing,
 	editing = false, editDraft = '', onEditDraftChange, onCancelEdit, onSubmitEdit,
 }: ChatMessageRowProps) => {
 	if(m.kind === 'checkpoint') return <Divider label={m.label} />;
@@ -251,6 +275,7 @@ const ChatMessageRowContent = ({
 					onComplete={() => onStreamComplete(m.id)}
 				/>
 			</Message>
+			{renderArtifact?.(m)}
 			{m.questionnaire && (
 				<Questionnaire
 					className='max-w-md'

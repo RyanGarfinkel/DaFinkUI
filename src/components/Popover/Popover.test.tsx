@@ -186,4 +186,22 @@ describe('Popover', () =>
 		expect(cancelSpy).toHaveBeenCalledWith(frameId);
 		vi.restoreAllMocks();
 	});
+
+	it('passes a close function to render-function children, returning focus to the trigger', () =>
+	{
+		render(<Popover trigger='Open'>{close => <button type='button' onClick={close}>Apply</button>}</Popover>);
+		openPopover();
+		fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
+		act(() => { vi.advanceTimersByTime(200); });
+		expect(screen.queryByRole('dialog')).toBeNull();
+		expect(screen.getByRole('button', { name: 'Open' })).toHaveFocus();
+	});
+
+	it('unstyledTrigger drops the built-in trigger styles and triggerProps reach the button', () =>
+	{
+		render(<Popover trigger='A' unstyledTrigger triggerClassName='h-7 w-7' triggerProps={{ 'aria-label': 'Text color' }}>Content</Popover>);
+		const trigger = screen.getByRole('button', { name: 'Text color' });
+		expect(trigger.className).toBe('h-7 w-7');
+		expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
+	});
 });

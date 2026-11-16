@@ -174,3 +174,20 @@ export type { ResizableDirection, ResizableProps, ResizablePanelProps, Resizable
 
 export { Link } from './components/Link/Link';
 export type { LinkProps } from './components/Link/Link';
+
+export { ColorPicker } from './components/ColorPicker/ColorPicker';
+export type { ColorPickerProps } from './components/ColorPicker/ColorPicker';
+
+export { SlideCanvas } from './components/SlideCanvas/SlideCanvas';
+export type { SlideCanvasProps, SlideElement, SlideElementState, SlidePoint } from './components/SlideCanvas/SlideCanvas';
+
+export { ContextMenu } from './components/ContextMenu/ContextMenu';
+export type { ContextMenuProps } from './components/ContextMenu/ContextMenu';
+
+export { applyOp, applyOps, applyOpsLenient, diffDecks, opTargets, DeckOpError } from './components/DeckEditor/ops';
+export type { DeckOp } from './components/DeckEditor/ops';
+export { createSlide, duplicateSlide, newId, SLIDE_WIDTH, SLIDE_HEIGHT } from './components/DeckEditor/deck';
+export type { Deck, Slide, DeckElement } from './components/DeckEditor/deck';
+
+export { DeckEditor, TOOLBAR_BUTTON } from './components/DeckEditor/DeckEditor';
+export type { DeckEditorProps } from './components/DeckEditor/DeckEditor';

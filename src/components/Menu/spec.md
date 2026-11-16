@@ -93,3 +93,7 @@ Menu enters with `opacity-0 scale-95` → `opacity-100 scale-100` over `var(--du
 ## When to Use
 
 Use Menu for a list of actions attached to a button: row actions, "more" menus, bulk operations. Use Select when the user is choosing a value that persists, Popover for arbitrary interactive content, and CommandPalette for global, searchable command lists.
+
+## Shared Internals
+
+`Menu.tsx` also exports `MenuEntries` (the item list), `isSeparator`, `navigableIndexes`, and `menuPanelClasses(visible)`. `ContextMenu` builds on these so both menus render and animate identically; change them with both in mind.

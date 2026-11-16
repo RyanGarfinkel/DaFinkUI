@@ -62,3 +62,32 @@ export const RefreshIcon = () => (
 		<path d='M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15' />
 	</svg>
 );
+
+export const CloseIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<path d='M18 6 6 18M6 6l12 12' />
+	</svg>
+);
+
+export const ExpandIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<polyline points='15 3 21 3 21 9' />
+		<polyline points='9 21 3 21 3 15' />
+		<path d='M21 3l-7 7M3 21l7-7' />
+	</svg>
+);
+
+export const CollapseIcon = () => (
+	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<polyline points='4 14 10 14 10 20' />
+		<polyline points='20 10 14 10 14 4' />
+		<path d='M14 10l7-7M3 21l7-7' />
+	</svg>
+);
+
+export const SlidesIcon = () => (
+	<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
+		<rect x='3' y='4' width='18' height='12' rx='2' />
+		<path d='M12 16v4M8 20h8' />
+	</svg>
+);

@@ -1068,4 +1068,100 @@ export const extraSections: Record<string, ExtraSection[]> = {
 			),
 		},
 	],
+	'color-picker': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<div className='flex flex-col gap-4'>
+					<p>
+						ColorPicker is a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;group&quot;</code> named by its label. The saturation/brightness area and the hue bar are each a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;slider&quot;</code> in the normal Tab order with a spoken <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-valuetext</code> (e.g. &quot;Saturation 72%, brightness 96%&quot;, &quot;217 degrees&quot;), so every color is reachable without a pointer. The hex field is a native input. Swatches are a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>radiogroup</code> using roving tabindex: one Tab stop for the whole set, arrow keys move focus, and Enter or Space selects. The selected swatch shows an offset ring, not just its fill, so selection doesn&apos;t rely on color alone.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['left arrow'], description: 'Area: lowers saturation by 1%. Hue: rotates hue back 1 degree.' },
+						{ keys: ['right arrow'], description: 'Area: raises saturation by 1%. Hue: rotates hue forward 1 degree.' },
+						{ keys: ['up arrow'], description: 'Area: raises brightness by 1%. Hue: rotates hue forward 1 degree.' },
+						{ keys: ['down arrow'], description: 'Area: lowers brightness by 1%. Hue: rotates hue back 1 degree.' },
+						{ keys: ['shift', 'arrow'], description: 'Moves in steps of 10 instead of 1.' },
+						{ keys: ['home'], description: 'Hue: jumps to 0 degrees. Swatches: focuses the first swatch.' },
+						{ keys: ['end'], description: 'Hue: jumps to 360 degrees. Swatches: focuses the last swatch.' },
+						{ keys: ['enter'], description: 'Hex field: applies the typed color. Swatches: selects the focused swatch.' },
+						{ keys: ['space'], description: 'Swatches: selects the focused swatch.' },
+					]} />
+				</div>
+			),
+		},
+	],
+	'slide-canvas': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<div className='flex flex-col gap-4'>
+					<p>
+						Each element is a focusable <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;button&quot;</code> named by its <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>label</code>, with <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-pressed</code> reflecting selection. Elements sit in the normal Tab order (stacking order), and focusing one selects it, so everything a pointer can do (move, resize, delete) is also available from the keyboard. After each keyboard move or pointer drag, a polite live region announces the element&apos;s new position and size. The corner resize handles are pointer-only and hidden from assistive tech; Alt + Arrow keys resize instead.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['tab'], description: 'Moves to the next element and selects it.' },
+						{ keys: ['arrow'], description: 'Moves the element 1px, or one grid step when gridSize is set.' },
+						{ keys: ['shift', 'arrow'], description: 'Moves the element 10px.' },
+						{ keys: ['alt', 'arrow'], description: 'Resizes the element from its bottom-right corner.' },
+						{ keys: ['enter'], description: 'Enters editing mode on an editable element, so keys go to its content.' },
+						{ keys: ['alt', 'f10'], description: 'Moves focus into the floating toolbar, when there is one. Escape returns to the element.' },
+						{ keys: ['delete'], description: 'Removes the element.' },
+						{ keys: ['escape'], description: 'Exits editing mode, or clears the selection when not editing.' },
+					]} />
+				</div>
+			),
+		},
+	],
+	'context-menu': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<div className='flex flex-col gap-4'>
+					<p>
+						Right-clicking anywhere in the wrapped region opens a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;menu&quot;</code> at the cursor; keyboard users open the same menu with Shift+F10 or the Menu key while focus is inside the region, anchored to the focused element. Focus moves into the menu, which uses <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-activedescendant</code> for the active item, and isn&apos;t trapped: Escape, Tab, or choosing an item closes it and returns focus to the element that opened it. A pointer press outside, a scroll, or a resize closes it without moving focus. Items and their disabled/selected states render through the same code as <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>Menu</code>, so the two can&apos;t drift apart.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['shift', 'f10'], description: 'Opens the menu for the focused element.' },
+						{ keys: ['menu'], description: 'Opens the menu for the focused element (the context menu key).' },
+						{ keys: ['down arrow'], description: 'Moves to the next item, skipping disabled items and wrapping.' },
+						{ keys: ['up arrow'], description: 'Moves to the previous item, wrapping.' },
+						{ keys: ['home'], description: 'Moves to the first item.' },
+						{ keys: ['end'], description: 'Moves to the last item.' },
+						{ keys: ['enter'], description: 'Activates the item and closes the menu.' },
+						{ keys: ['space'], description: 'Activates the item and closes the menu.' },
+						{ keys: ['escape'], description: 'Closes the menu and returns focus.' },
+						{ keys: ['tab'], description: 'Closes the menu and returns focus.' },
+					]} />
+					<p>
+						On touch screens, a half-second long-press opens the same menu at your finger; moving more than a few pixels cancels it, so scrolling and dragging still work.
+					</p>
+				</div>
+			),
+		},
+	],
+	'deck-editor': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<div className='flex flex-col gap-4'>
+					<p>
+						The editor is a named <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;region&quot;</code>. Every element on the slide is a focusable button: focusing one selects it, and its floating format toolbar is a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;toolbar&quot;</code> reached with Alt+F10. The slide rail is one Tab stop with roving tabindex, and each thumbnail has a context menu (Shift+F10 or the Menu key). Moves, resizes, and edits are announced through a polite status line, as is the progress of a download from the toolbar&apos;s Download menu (a standard menu button: Enter or Space opens it, arrow keys move, Escape closes). Settings open in a sidebar column when the editor is wide, or in a focus-trapped drawer when it&apos;s narrow (the editor&apos;s own width, not the window&apos;s). Elements someone else is editing get an outline, a tag, and &quot;being edited&quot; in their slide thumbnail&apos;s name, so the change isn&apos;t signalled by color or motion alone.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['cmd', 'z'], description: 'Undo (when the host passes onUndo).' },
+						{ keys: ['shift', 'cmd', 'z'], description: 'Redo.' },
+						{ keys: ['cmd', 'd'], description: 'Duplicates the selected element.' },
+						{ keys: ['arrow keys'], description: 'Moves the selected element; with Shift, in bigger steps.' },
+						{ keys: ['enter'], description: 'Starts editing the selected text box or table.' },
+						{ keys: ['escape'], description: 'Stops editing, or cancels a drawing tool.' },
+						{ keys: ['delete'], description: 'Deletes the selected element.' },
+						{ keys: ['alt', 'f10'], description: 'Moves focus into the selected element’s format toolbar.' },
+						{ keys: ['alt', 'arrow keys'], description: 'In the slide rail: moves the focused slide earlier or later.' },
+						{ keys: ['shift', 'f10'], description: 'In the slide rail: opens the slide’s actions menu.' },
+					]} />
+				</div>
+			),
+		},
+	],
 };

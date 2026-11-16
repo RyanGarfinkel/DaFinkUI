@@ -950,29 +950,31 @@ export default function ChartCard() {
 
 import { describeAttachments, buildHistory, findLastUserMessageId, hasPrecedingUserMessage, DRAFT_TITLE_MAX_LENGTH } from '@/src/blocks/AiChat/messageHelpers';
 import { Sidebar, SidebarButton, SidebarFooter, SidebarHeader, SidebarSection, SidebarSkeleton } from '@/src/components/Sidebar/Sidebar';
-import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
 import type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, SearchHit, MessageAttachment } from '@/src/blocks/AiChat/types';
-import CommandPalette, { CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
+import { MessageActionsRow, ChatMessageRow, buildVersionNav, Divider, DeckCard } from '@/src/blocks/AiChat/MessageRow';
+import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
 import { PlusIcon, PencilIcon, TrashIcon, ReplyIcon, SearchIcon, ChevronRightIcon } from '@/src/blocks/AiChat/icons';
-import { Resizable, ResizablePanel, ResizableHandle } from '@/src/components/Resizable/Resizable';
-import { MessageActionsRow, ChatMessageRow, buildVersionNav, Divider } from '@/src/blocks/AiChat/MessageRow';
+import { COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, CONNECTORS, SLIDES_PROMPT } from '@/src/blocks/AiChat/constants';
+import CommandPalette, { CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
 import { fetchChats, fetchThread, searchMessages, buildSearchCorpus } from '@/src/blocks/AiChat/chatApi';
+import { deckBefore, deckDocKey, resolveDeckEdit, useLiveDeck } from '@/src/blocks/AiChat/useLiveDeck';
+import { Resizable, ResizablePanel, ResizableHandle } from '@/src/components/Resizable/Resizable';
 import { type CommandOption } from '@/src/components/CommandInput/CommandInput';
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
-import ScrollFade from '@/src/components/ScrollFade/ScrollFade';
 import { Greeting, TypingPhrase, USER_NAME } from '@/src/blocks/AiChat/Phrases';
-import Spinner from '@/src/components/Spinner/Spinner';
-import { COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, CONNECTORS } from '@/src/blocks/AiChat/constants';
+import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { useConversation } from '@/src/blocks/AiChat/useConversation';
+import ScrollFade from '@/src/components/ScrollFade/ScrollFade';
+import ThreadPanel from '@/src/blocks/AiChat/ThreadPanel';
+import Spinner from '@/src/components/Spinner/Spinner';
+import DeckPanel from '@/src/blocks/AiChat/DeckPanel';
 import Button from '@/src/components/Button/Button';
 import Avatar from '@/src/components/Avatar/Avatar';
 import Switch from '@/src/components/Switch/Switch';
 import Select from '@/src/components/Select/Select';
-import Input from '@/src/components/Input/Input';
-import ThreadPanel from '@/src/blocks/AiChat/ThreadPanel';
 import Composer from '@/src/blocks/AiChat/Composer';
+import Input from '@/src/components/Input/Input';
 
-export type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, AiChatHistoryMessage, AiChatReply, SearchCorpusEntry, SearchHit, MessageAttachment } from '@/src/blocks/AiChat/types';
+export type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, AiChatHistoryMessage, AiChatReply, SearchCorpusEntry, SearchHit, MessageAttachment, DeckEdit, DeckEditStep } from '@/src/blocks/AiChat/types';
 
 const SEARCH_DEBOUNCE_MS = 200;
 
@@ -1009,6 +1011,10 @@ export const AiChat = () => {
 	const [pendingScrollMessageId, setPendingScrollMessageId] = useState<number | null>(null);
 	const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
 	const [editDraft, setEditDraft] = useState('');
+	// The slides panel shares the thread panel's column; opening one closes the other.
+	// \`messageId\` is the card that opened it, which gets focus back on close.
+	const [deckView, setDeckView] = useState<{ chatId: string; deckId: string; messageId: number } | null>(null);
+	const liveDeck = useLiveDeck();
 	const containerRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
 	const searchTriggerRef = useRef<HTMLButtonElement>(null);
@@ -1036,6 +1042,23 @@ export const AiChat = () => {
 		getMessages:    (chatId) => chats.find((c) => c.id === chatId)?.messages ?? [],
 		updateMessages: (chatId, updater) => setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: updater(c.messages) } : c))),
 		nextMessageIdRef,
+		// The AI edits from your current version of each deck in this chat.
+		getDecks: (chatId) => Object.entries(liveDeck.docs).filter(([key]) => key.startsWith(\`\${chatId}:\`)).map(([, deck]) => deck),
+		// A reply that edits slides lands live in the slides panel, opened without moving focus.
+		onReply: (chatId, message, previous) => {
+			const edit = message.deckEdit;
+			if(!edit) return;
+			const docKey = deckDocKey(chatId, edit.deckId);
+			if(!edit.base && !liveDeck.docs[docKey])
+			{
+				const start = deckBefore(edit, previous);
+				if(!start) return;
+				liveDeck.open(docKey, start);
+			}
+			liveDeck.apply(docKey, message.id, edit);
+			setActiveThread(null);
+			setDeckView({ chatId, deckId: edit.deckId, messageId: message.id });
+		},
 	});
 
 	const threadConversation = useConversation({
@@ -1250,11 +1273,12 @@ export const AiChat = () => {
 
 	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault();
-		if(chatsStatus !== 'ready' || isGenerating) return;
-		const text = draft.trim();
-		if(!text && attachedFiles.length === 0) return;
+		sendText(draft.trim(), attachedFiles.map((file) => ({ name: file.name })));
+	};
 
-		const attachments: MessageAttachment[] = attachedFiles.map((file) => ({ name: file.name }));
+	const sendText = (text: string, attachments: MessageAttachment[]) => {
+		if(chatsStatus !== 'ready' || isGenerating) return;
+		if(!text && attachments.length === 0) return;
 
 		if(activeChat)
 		{
@@ -1323,7 +1347,69 @@ export const AiChat = () => {
 		return rootMessage ? [rootMessage] : [];
 	};
 
+	// The chat's latest version of a deck, rebuilt from its edit history (before anyone has opened it live).
+	const latestDeck = (chatId: string, deckId: string) => {
+		const messages = chats.find((c) => c.id === chatId)?.messages ?? [];
+		try
+		{
+			return deckBefore({ deckId, title: '', steps: [] }, messages);
+		}
+		catch
+		{
+			return null;
+		}
+	};
+
+	// Every card for a deck opens the same live document, not a snapshot of that reply.
+	const handleOpenDeck = (chatId: string, message: ChatTextMessage) => {
+		const edit = message.deckEdit;
+		if(!edit) return;
+		const docKey = deckDocKey(chatId, edit.deckId);
+		if(!liveDeck.docs[docKey])
+		{
+			const deck = latestDeck(chatId, edit.deckId);
+			if(!deck) return;
+			liveDeck.open(docKey, deck);
+		}
+		setActiveThread(null);
+		setDeckView({ chatId, deckId: edit.deckId, messageId: message.id });
+	};
+
+	const openDocKey = deckView && deckView.chatId === activeChat?.id ? deckDocKey(deckView.chatId, deckView.deckId) : null;
+	const openDeck = openDocKey ? liveDeck.docs[openDocKey] : undefined;
+	const deckActivity = liveDeck.activity?.docKey === openDocKey ? liveDeck.activity : null;
+	const lastDeckReply = activeChat?.messages.findLast((m): m is ChatTextMessage => m.kind === 'message' && m.deckEdit?.deckId === deckView?.deckId);
+	const skippedLast = lastDeckReply ? liveDeck.skipped(lastDeckReply.id) : 0;
+	const deckNote = skippedLast ? \`\${skippedLast} change\${skippedLast === 1 ? '' : 's'} skipped: you’d already removed what \${skippedLast === 1 ? 'it' : 'they'} would edit.\` : '';
+
+	const handleCloseDeck = () => {
+		const messageId = deckView?.messageId;
+		setDeckView(null);
+		if(messageId !== undefined) document.getElementById(\`deck-open-\${messageId}\`)?.focus();
+	};
+
+	const renderDeckCard = (chatId: string, message: ChatTextMessage, previous: ChatMessage[]) => {
+		const edit = message.deckEdit;
+		if(!edit) return null;
+		const deck = liveDeck.docs[deckDocKey(chatId, edit.deckId)] ?? resolveDeckEdit(edit, previous)?.final;
+		const slides = deck?.slides.length ?? 0;
+		const skipped = liveDeck.skipped(message.id);
+		const detail = liveDeck.activity?.messageId === message.id ? \`\${liveDeck.activity.label}…\`
+			: !deck ? 'Couldn’t apply these edits'
+				: \`\${slides} slide\${slides === 1 ? '' : 's'}\${skipped ? \` · \${skipped} change\${skipped === 1 ? '' : 's'} skipped\` : ''}\`;
+
+		return (
+			<DeckCard
+				messageId={message.id}
+				title={deck?.title || edit.title}
+				detail={detail}
+				onOpen={() => handleOpenDeck(chatId, message)}
+			/>
+		);
+	};
+
 	const handleOpenThread = (chatId: string, threadId: string, rootMessageId: number) => {
+		setDeckView(null);
 		setActiveThread({ chatId, threadId, rootMessageId });
 		if(activeId !== chatId) setActiveId(chatId);
 		setThreadDraft('');
@@ -1350,6 +1436,7 @@ export const AiChat = () => {
 		const threadRef: ThreadRef = { id: threadId, rootMessageId, snippet, createdAt: 'Just now', replyCount: 0 };
 		setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, threadRefs: [...c.threadRefs, threadRef] } : c)));
 		setThreadMessages((prev) => ({ ...prev, [threadId]: [] }));
+		setDeckView(null);
 		setActiveThread({ chatId, threadId, rootMessageId });
 		setThreadDraft('');
 		setThreadAttachedFiles([]);
@@ -1420,6 +1507,13 @@ export const AiChat = () => {
 		if(command.name === 'new')
 		{
 			handleNewChat();
+			return;
+		}
+
+		if(command.name === 'slides')
+		{
+			setDraft('');
+			sendText(SLIDES_PROMPT, []);
 			return;
 		}
 
@@ -1684,6 +1778,7 @@ export const AiChat = () => {
 																onEditDraftChange={setEditDraft}
 																onCancelEdit={handleCancelEditMessage}
 																onSubmitEdit={() => handleResendEdit(activeChat.id, m.id)}
+																renderArtifact={(msg) => renderDeckCard(activeChat.id, msg, activeChat.messages.slice(0, index))}
 																renderTrailing={(msg) => {
 																	const threadRef    = activeChat.threadRefs.find((t) => t.rootMessageId === msg.id);
 																	const replyCount    = threadRef ? (threadMessages[threadRef.id]?.length ?? threadRef.replyCount) : 0;
@@ -1787,6 +1882,26 @@ export const AiChat = () => {
 						</ResizablePanel>
 					</>
 				)}
+
+				{openDocKey && openDeck && (
+					<>
+						<ResizableHandle aria-label='Resize slides panel' />
+						<ResizablePanel defaultSize={560} minSize={360} maxSize={900} className='flex'>
+							<DeckPanel
+								key={openDocKey}
+								deck={openDeck}
+								activity={deckActivity}
+								note={deckNote}
+								onChange={(next, coalesceKey) => liveDeck.change(openDocKey, next, coalesceKey)}
+								onUndo={() => liveDeck.undo(openDocKey)}
+								onRedo={() => liveDeck.redo(openDocKey)}
+								canUndo={liveDeck.canUndo(openDocKey)}
+								canRedo={liveDeck.canRedo(openDocKey)}
+								onClose={handleCloseDeck}
+							/>
+						</ResizablePanel>
+					</>
+				)}
 				</Resizable>
 			</div>
 
@@ -1879,13 +1994,14 @@ export const AiChat = () => {
 export default AiChat;
 `,
 		dependencies: ['react-markdown', 'remark-gfm', 'remark-math'],
-		registryDependencies: ['sidebar', 'scroll-fade', 'message', 'typewriter', 'attachment', 'button', 'input', 'textarea', 'command-input', 'command-palette', 'badge', 'tooltip', 'spinner', 'collapsible', 'timeline', 'modal', 'charts', 'function-plotter', 'table', 'date-picker', 'slider', 'formula', 'code-block', 'audioplayer', 'skeleton', 'questionnaire', 'tool-call-trace', 'resizable', 'workflow-builder', 'avatar', 'select', 'switch', 'menu'],
+		registryDependencies: ['sidebar', 'scroll-fade', 'message', 'typewriter', 'attachment', 'button', 'input', 'textarea', 'command-input', 'command-palette', 'badge', 'tooltip', 'spinner', 'collapsible', 'timeline', 'modal', 'charts', 'function-plotter', 'table', 'date-picker', 'slider', 'formula', 'code-block', 'audioplayer', 'skeleton', 'questionnaire', 'tool-call-trace', 'resizable', 'workflow-builder', 'avatar', 'select', 'switch', 'menu', 'deck-editor'],
 		files: [
-			'AiChat/AiChat.tsx', 'AiChat/ChatMarkdown.tsx', 'AiChat/StreamingMessage.tsx', 'AiChat/ThreadPanel.tsx',
+			'AiChat/AiChat.tsx', 'AiChat/ChatMarkdown.tsx', 'AiChat/StreamingMessage.tsx', 'AiChat/ThreadPanel.tsx', 'AiChat/DeckPanel.tsx',
 			'AiChat/Composer.tsx', 'AiChat/ModelPicker.tsx', 'AiChat/Phrases.tsx', 'AiChat/icons.tsx', 'AiChat/constants.ts', 'AiChat/messageHelpers.ts', 'AiChat/MessageRow.tsx',
 			{ path: 'AiChat/types.ts', kind: 'model' },
 			{ path: 'AiChat/chatApi.ts', kind: 'api' },
 			{ path: 'AiChat/useConversation.ts', kind: 'hook' },
+			{ path: 'AiChat/useLiveDeck.ts', kind: 'hook' },
 			'AiChat/CLAUDE.md',
 		],
 		promptSnippet: `Most of your reply can just be normal GitHub-flavored markdown — the chat already
@@ -4248,6 +4364,105 @@ export default Terminal;`,
 			{ path: 'Terminal/types.ts', kind: 'model' },
 			{ path: 'Terminal/terminalApi.ts', kind: 'api' },
 			'Terminal/CLAUDE.md',
+		],
+	},
+	{
+		slug: 'slide-editor',
+		name: 'Slide Editor',
+		category: 'Editors',
+		description: 'A slide deck editor with a reorderable slide rail, free-positioned text, images, icons, shapes, tables, and charts, rich-text editing, an inspector, undo/redo, speaker notes, and a fullscreen presenter.',
+		usage: `'use client';
+
+import { DeckEditor, TOOLBAR_BUTTON } from '@/src/components/DeckEditor/DeckEditor';
+import { exportJson } from '@/src/components/DeckEditor/exporters';
+import { Skeleton } from '@/src/components/Skeleton/Skeleton';
+import type { DeckDocument } from '@/src/blocks/SlideEditor/useDeckDocument';
+import Button from '@/src/components/Button/Button';
+import { useDeckDocument } from '@/src/blocks/SlideEditor/useDeckDocument';
+import { SaveIndicator } from '@/src/blocks/SlideEditor/SaveIndicator';
+import { DeckMenu } from '@/src/blocks/SlideEditor/DeckMenu';
+import { useState } from 'react';
+
+const FRAME = 'flex h-[760px] max-h-[100dvh] w-full flex-col overflow-hidden rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel';
+
+/** The editor for one loaded deck: undo history, autosave, and the deck menu around DeckEditor (which has its own Download menu). */
+const LoadedDeck = ({ doc }: { doc: DeckDocument }) => {
+	const { history, dispatch } = doc;
+	const deck = history.present;
+	const [status, setStatus] = useState('');
+
+	const runExportJson = () => {
+		exportJson(deck);
+		setStatus('Deck file downloaded.');
+		setTimeout(() => setStatus(''), 4000);
+	};
+
+	return (
+		<DeckEditor
+			deck={deck}
+			onChange={(next, coalesceKey) => dispatch({ type: 'change', deck: next, coalesceKey })}
+			onUndo={() => dispatch({ type: 'undo' })}
+			onRedo={() => dispatch({ type: 'redo' })}
+			canUndo={history.past.length > 0}
+			canRedo={history.future.length > 0}
+			status={status}
+			toolbarEnd={(
+				<>
+					<SaveIndicator state={doc.saveState} onRetry={doc.retrySave} />
+					<DeckMenu
+						doc={doc}
+						title={deck.title}
+						onRename={title => dispatch({ type: 'change', deck: { ...deck, title } })}
+						onExportJson={runExportJson}
+						onStatus={setStatus}
+						buttonClass={TOOLBAR_BUTTON}
+					/>
+				</>
+			)}
+			className='h-[760px] max-h-[100dvh]'
+		/>
+	);
+};
+
+export const SlideEditor = () => {
+	const doc = useDeckDocument();
+
+	// Keyed by deck id, so opening another deck starts fresh (slide, selection, zoom).
+	if(doc.load.kind === 'ready' && doc.deckId) return <LoadedDeck key={doc.deckId} doc={doc} />;
+
+	return (
+		<div className={FRAME}>
+			{doc.load.kind === 'loading' ? (
+				<div role='status' aria-label='Loading deck' className='flex flex-1 flex-col gap-4 bg-surface-active p-6'>
+					<Skeleton className='mx-auto aspect-video w-full max-w-3xl' />
+					<div className='flex gap-3'>
+						{[0, 1, 2].map(i => <Skeleton key={i} className='aspect-video w-36' />)}
+					</div>
+				</div>
+			) : (
+				<div role='alert' className='flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center'>
+					<p className='text-sm text-text'>Couldn&apos;t load the deck.</p>
+					<p className='max-w-md text-sm text-text-muted'>{doc.load.kind === 'error' ? doc.load.message : ''}</p>
+					<Button variant='outlined' size='sm' onClick={doc.retry}>Try again</Button>
+				</div>
+			)}
+		</div>
+	);
+};
+
+export default SlideEditor;
+`,
+		dependencies: [],
+		registryDependencies: ['button', 'deck-editor', 'input', 'menu', 'modal', 'skeleton'],
+		files: [
+			'SlideEditor/SlideEditor.tsx',
+			'SlideEditor/DeckMenu.tsx',
+			'SlideEditor/SaveIndicator.tsx',
+			'SlideEditor/deck.ts',
+			'SlideEditor/deckApi.ts',
+			'SlideEditor/templates.ts',
+			'SlideEditor/useDeckDocument.ts',
+			'SlideEditor/CLAUDE.md',
 		],
 	},
 ];

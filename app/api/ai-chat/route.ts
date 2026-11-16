@@ -1,8 +1,10 @@
 import type { ToolCallEntry, ToolCallLink } from '@/src/components/ToolCallTrace/ToolCallTrace';
 import type { ChartSpec, TableSpec } from '@/src/blocks/AiChat/StreamingMessage';
 import type { AiChatReply } from '@/src/blocks/AiChat/AiChat';
+import { deckSchema } from '../slide-editor/schema';
 import { NextResponse } from 'next/server';
 import { parseBody } from '../parseBody';
+import { deckReply } from './decks';
 import { z } from 'zod';
 
 // Docs-site-only infrastructure backing the /blocks/ai-chat live preview. Never listed in
@@ -135,6 +137,10 @@ const CANNED_REPLIES: CannedReply[] = [
 const bodySchema = z.object({
 	message: z.string().trim().min(1, 'message is required').max(10000),
 	history: z.array(z.object({ role: z.enum(['user', 'assistant']), text: z.string().max(20000) })).max(500).default([]),
+	// The chat's decks as the user left them, with their ids. A real agent edits from these and
+	// replies with a `deckEdit` for the same `deckId`; the demo's scripted steps target fixed
+	// ids instead, and the client skips any you've removed.
+	decks:   z.array(z.object({ deckId: z.string().min(1).max(100), deck: deckSchema })).max(20).optional(),
 });
 
 const randomReplyDelay = () => 600 + Math.random() * 300;
@@ -144,6 +150,9 @@ export const POST = async (request: Request) => {
 	if(!parsed.ok) return parsed.response;
 
 	await new Promise((resolve) => setTimeout(resolve, randomReplyDelay()));
+	const scripted = deckReply(parsed.data.message, parsed.data.history);
+	if(scripted) return NextResponse.json(scripted);
+
 	const reply = CANNED_REPLIES[Math.floor(Math.random() * CANNED_REPLIES.length)];
 	const body: AiChatReply = { text: reply.text, toolCalls: reply.toolCalls };
 	return NextResponse.json(body);

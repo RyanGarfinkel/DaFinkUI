@@ -11,7 +11,7 @@ Scroll-triggered entrance animation driven by IntersectionObserver, with a Revea
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | effect | `'fade' \| 'slide-up' \| 'slide-left' \| 'slide-right' \| 'scale'` | `'fade'` | Entrance effect applied when the element scrolls into view. |
-| delay | `number` | `0` | Delay in milliseconds before the transition starts. |
+| delay | `number` | `0` | Delay in milliseconds before the reveal transition starts. Hiding is always instant (no duration or delay), so content already in view on mount still plays its delayed entrance. |
 | once | `boolean` | `true` | Reveal only on first entry. When `false`, content re-hides on exit and re-reveals on re-entry. |
 | className | `string` | `''` | Additional CSS classes. |
 | children | `ReactNode` | n/a | Content to reveal. |

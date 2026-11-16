@@ -1,6 +1,6 @@
 'use client';
 
-import { KeyboardEvent, FocusEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
+import { ButtonHTMLAttributes, KeyboardEvent, FocusEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { ReactNode } from 'react';
 
@@ -9,7 +9,8 @@ export type PopoverAlign = 'start' | 'center' | 'end';
 
 export interface PopoverProps {
 	trigger:           ReactNode;
-	children:          ReactNode;
+	/** Panel content, or a function receiving `close` for content that should dismiss the popover itself (e.g. an Apply button). */
+	children:          ReactNode | ((close: () => void) => ReactNode);
 	side?:             PopoverSide;
 	align?:            PopoverAlign;
 	label?:            string;
@@ -17,6 +18,9 @@ export interface PopoverProps {
 	disabled?:         boolean;
 	className?:        string;
 	triggerClassName?: string;
+	triggerProps?:     ButtonHTMLAttributes<HTMLButtonElement>;
+	/** Drops the built-in trigger styles so `triggerClassName` fully defines the trigger, e.g. an icon button in a toolbar. */
+	unstyledTrigger?:  boolean;
 }
 
 const FOCUSABLE = [
@@ -27,6 +31,10 @@ const FOCUSABLE = [
 	'textarea:not([disabled])',
 	'[tabindex]:not([tabindex="-1"])',
 ].join(', ');
+
+// A component boundary (rather than calling children(close) inline) so `close`,
+// which touches refs, is only ever invoked from the panel's own event handlers.
+const PanelContent = ({ render, close }: { render: (close: () => void) => ReactNode; close: () => void }) => <>{render(close)}</>;
 
 export const Popover = (
     {
@@ -39,6 +47,8 @@ export const Popover = (
         disabled         = false,
         className        = '',
         triggerClassName = '',
+        triggerProps,
+        unstyledTrigger  = false,
     }: PopoverProps
 ) => {
     const [mounted,  setMounted]  = useState(false);
@@ -170,13 +180,14 @@ export const Popover = (
 				aria-expanded={mounted}
 				aria-controls={mounted ? panelId : undefined}
 				onClick={() => (mounted ? closePopover() : openPopover())}
-				className={[
+				className={unstyledTrigger ? triggerClassName : [
 					'inline-flex items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-input-border bg-surface px-3 py-2 text-sm text-text',
 					'transition-colors duration-[var(--duration-fast)]',
 					'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 					disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : 'cursor-pointer hover:border-brand',
 					triggerClassName,
 				].join(' ')}
+				{...triggerProps}
 			>
 				{trigger}
 			</button>
@@ -200,7 +211,7 @@ export const Popover = (
 						className,
 					].join(' ')}
 				>
-					{children}
+					{typeof children === 'function' ? <PanelContent render={children} close={closePopover} /> : children}
 				</div>,
 				document.body
 			)}

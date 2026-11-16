@@ -25,11 +25,16 @@ import ToggleGroup, { ToggleGroupItem } from '@/src/components/ToggleGroup/Toggl
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/Tabs/Tabs';
 import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
 import { Attachment, AttachmentGroup } from '@/src/components/Attachment/Attachment';
+import { DeckEditorDemo } from '@/app/_docs/components/examples/DeckEditorDemo';
 import TableOfContents from '@/src/components/TableOfContents/TableOfContents';
 import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
 import WorkflowBuilder from '@/src/components/WorkflowBuilder/WorkflowBuilder';
+import type { SlideElement } from '@/src/components/SlideCanvas/SlideCanvas';
 import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
 import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
+import { ContextMenu } from '@/src/components/ContextMenu/ContextMenu';
+import { SlideCanvas } from '@/src/components/SlideCanvas/SlideCanvas';
+import { ColorPicker } from '@/src/components/ColorPicker/ColorPicker';
 import { ToastProvider, useToast } from '@/src/components/Toast/Toast';
 import Avatar, { AvatarGroup } from '@/src/components/Avatar/Avatar';
 import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
@@ -69,6 +74,27 @@ interface ComponentLivePreviewProps {
   slug: string;
 }
 
+interface DemoSlideElement extends SlideElement {
+  kind:  'badge' | 'title' | 'subtitle' | 'block';
+  text?: string;
+}
+
+const INITIAL_SLIDE_ELEMENTS: DemoSlideElement[] = [
+  { id: 'badge', label: 'Status badge', kind: 'badge', text: 'Q3 2026', x: 96, y: 130, width: 120, height: 40 },
+  { id: 'title', label: 'Title', kind: 'title', text: 'Quarterly review', x: 96, y: 200, width: 760, height: 120 },
+  { id: 'subtitle', label: 'Subtitle', kind: 'subtitle', text: 'Growth, retention, and what is next', x: 96, y: 330, width: 640, height: 60 },
+  { id: 'shape', label: 'Accent block', kind: 'block', x: 920, y: 160, width: 260, height: 400 },
+];
+
+const renderDemoSlideElement = (el: DemoSlideElement) => {
+  switch (el.kind) {
+    case 'badge':    return <Badge variant='success' className='text-lg'>{el.text}</Badge>;
+    case 'title':    return <h2 className='text-6xl font-semibold text-text'>{el.text}</h2>;
+    case 'subtitle': return <p className='text-3xl text-text-muted'>{el.text}</p>;
+    case 'block':    return <div className='h-full w-full rounded-[var(--radius-lg)] bg-surface-active' />;
+  }
+};
+
 export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
   const [dashboardLayout, setDashboardLayout] = useState<MosaicTileLayout[]>([
     { id: 'revenue', col: 1, row: 1, colSpan: 2, rowSpan: 1 },
@@ -78,6 +104,9 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
   ]);
   const [switchChecked, setSwitchChecked] = useState(false);
   const [sliderValue, setSliderValue]     = useState(40);
+  const [colorPickerValue, setColorPickerValue] = useState('#3b82f6');
+  const [contextAction, setContextAction] = useState('none');
+  const [slideElements, setSlideElements] = useState(INITIAL_SLIDE_ELEMENTS);
   const [radioValue, setRadioValue] = useState('option-1');
   const [toggleValue, setToggleValue] = useState<string | string[]>('left');
   const [tabValue, setTabValue] = useState('account');
@@ -1325,6 +1354,55 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
           Read the <Link href='/components'>component docs</Link> to get started.
         </p>
       );
+
+    case 'color-picker':
+      return (
+        <ColorPicker
+          label='Accent color'
+          value={colorPickerValue}
+          onValueChange={setColorPickerValue}
+          swatches={['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899']}
+        />
+      );
+
+    case 'slide-canvas':
+      return (
+        <div className='w-full max-w-3xl'>
+          <SlideCanvas
+            elements={slideElements}
+            onElementsChange={setSlideElements}
+            renderElement={renderDemoSlideElement}
+            gridSize={8}
+          />
+        </div>
+      );
+
+    case 'context-menu':
+      return (
+        <div className='flex flex-col items-center gap-3'>
+          <ContextMenu
+            label='File actions'
+            items={[
+              { label: 'Open', onSelect: () => setContextAction('Open') },
+              { label: 'Rename', onSelect: () => setContextAction('Rename') },
+              { label: 'Duplicate', onSelect: () => setContextAction('Duplicate') },
+              { separator: true },
+              { label: 'Delete', onSelect: () => setContextAction('Delete') },
+            ]}
+          >
+            <button
+              type='button'
+              className='flex h-32 w-64 items-center justify-center rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-dashed border-input-border text-sm text-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
+            >
+              Right-click, or focus and press Shift+F10
+            </button>
+          </ContextMenu>
+          <p className='text-sm text-text-muted'>Last action: {contextAction}</p>
+        </div>
+      );
+
+    case 'deck-editor':
+      return <DeckEditorDemo />;
 
     default:
       return (

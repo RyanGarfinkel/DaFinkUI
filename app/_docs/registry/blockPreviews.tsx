@@ -11,6 +11,7 @@ import { ChartCardRadar } from '@/src/blocks/ChartCardRadar/ChartCardRadar';
 import { SettingsForm } from '@/src/blocks/SettingsForm/SettingsForm';
 import { CheckoutForm } from '@/src/blocks/CheckoutForm/CheckoutForm';
 import { ChartCardBar } from '@/src/blocks/ChartCardBar/ChartCardBar';
+import { SlideEditor } from '@/src/blocks/SlideEditor/SlideEditor';
 import { ProjectHub } from '@/src/blocks/ProjectHub/ProjectHub';
 import { ChartCard } from '@/src/blocks/ChartCard/ChartCard';
 import { Dashboard } from '@/src/blocks/Dashboard/Dashboard';
@@ -40,4 +41,5 @@ export const blockPreviews: Record<string, React.ReactNode> = {
 	'project-hub': <ProjectHub />,
 	'job-application-tracker': <JobApplicationTracker />,
 	terminal: <Terminal />,
+	'slide-editor': <SlideEditor />,
 };

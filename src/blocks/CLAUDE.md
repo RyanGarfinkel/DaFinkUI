@@ -40,6 +40,7 @@ Then run `npm run sync-registry`.
 - **Hardcoded runtime data**: sample data in blocks is fine because the file gets copied and edited, but real endpoints, keys, and IDs are not. `AiChat` talks to `app/api/ai-chat/route.ts`; keep environment-specific values out of the block file.
 - **Docs demo wrappers** for prop-taking sibling files live in `app/_docs/components/examples/` and are docs-only, never in `files`.
 - **Dead Tailwind utilities**: confirm any color class has a `--color-*` token inside `@theme {}` in `app/globals.css`.
+- **No `<main>` (or `<header>`/`<footer>` used as page landmarks) in a block.** The docs page and any consumer app already have a `main` landmark, so a block's own `<main>` creates a second one. Use `<section aria-label="...">` instead. `SlideEditor` hit this.
 
 ## Adding a block
 
