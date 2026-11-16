@@ -110,7 +110,6 @@ export const CommandPalette = (
         children,
     }: CommandPaletteProps
 ) => {
-    const [prevOpen,     setPrevOpen]     = useState(false);
     const [mounted,      setMounted]      = useState(false);
     const [visible,      setVisible]      = useState(false);
     const [query,        setQuery]        = useState('');
@@ -159,26 +158,21 @@ export const CommandPalette = (
 
     useEffect(() => () => clearTimeout(closeTimerRef.current), []);
 
-    if(open !== prevOpen)
+    useEffect(() =>
 	{
-		setPrevOpen(open);
+		clearTimeout(closeTimerRef.current);
 
+		/* eslint-disable react-hooks/set-state-in-effect -- mount/unmount is driven by the controlled `open` prop, with an exit delay */
 		if(open)
 		{
 			setQuery('');
 			setActiveId(null);
 			setMounted(true);
+			return;
 		}
-		else
-		{
-			setVisible(false);
-		}
-	}
 
-    useEffect(() =>
-	{
-		clearTimeout(closeTimerRef.current);
-		if(open) return;
+		setVisible(false);
+		/* eslint-enable react-hooks/set-state-in-effect */
 
 		closeTimerRef.current = setTimeout(() =>
 		{
