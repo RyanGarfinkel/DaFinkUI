@@ -50,6 +50,19 @@ function copyDirs(root, destRoot, label)
 			console.log(`  copied: ${name}/${file}`);
 			count++;
 		}
+
+		// Copying alone never deletes: a file moved or removed from the source (e.g.
+		// SlideEditor's renderers moving into the SlideDeck component) would otherwise
+		// linger in the shipped copy, still importing names that no longer exist.
+		const destDir = resolve(destRoot, name);
+		const stale = readdirSync(destDir).filter(f =>
+			(extname(f) === '.tsx' || extname(f) === '.ts' || f === 'CLAUDE.md') && !files.includes(f)
+		);
+		for(const file of stale)
+		{
+			unlinkSync(resolve(destDir, file));
+			console.log(`  removed stale: ${name}/${file}`);
+		}
 	}
 
 	console.log(`\n${label} built: ${count} file(s) copied.`);
