@@ -49,7 +49,7 @@ export const Heatmap = ({
 	return (
 		<div {...props} className={`flex w-full flex-col gap-3 ${className}`}>
 			<div className='overflow-x-auto'>
-				<table aria-label={label} className='border-separate border-spacing-1 text-xs text-text-muted'>
+				<table aria-label={label} className='mx-auto border-separate border-spacing-1 text-xs text-text-muted'>
 					{columnLabels && (
 						<thead>
 							<tr>
@@ -92,7 +92,7 @@ export const Heatmap = ({
 				</table>
 			</div>
 			{showLegend && hasData && (
-				<div className='flex items-center gap-2 text-xs text-text-muted' aria-hidden='true'>
+				<div className='flex items-center justify-center gap-2 text-xs text-text-muted' aria-hidden='true'>
 					<span className='tabular-nums'>{formatValue(low)}</span>
 					<span className='h-2 w-32 rounded-full' style={{ background: `linear-gradient(to right, ${fillFor(0)}, ${fillFor(1)})` }} />
 					<span className='tabular-nums'>{formatValue(high)}</span>
