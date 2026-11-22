@@ -21,6 +21,8 @@ export interface ThreadPanelProps {
 	expanded:       boolean;
 	onToggleExpand: () => void;
 	onClose:        () => void;
+	/** Rendered inside a Drawer (mobile): the Drawer owns Escape and the expand button is hidden. */
+	inDrawer?:      boolean;
 }
 
 const NEAR_BOTTOM_THRESHOLD_PX = 80;
@@ -38,7 +40,7 @@ const Divider = ({ label }: { label: string }) => (
 // contract in src/patterns/accessibility.md, since this never blocks the page behind it.
 export const ThreadPanel = (
 	{
-		title, rootMessages, threadMessages, loading, composer, isTyping, renderRoot, renderReply, expanded, onToggleExpand, onClose,
+		title, rootMessages, threadMessages, loading, composer, isTyping, renderRoot, renderReply, expanded, onToggleExpand, onClose, inDrawer = false,
 	}: ThreadPanelProps
 ) => {
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -77,7 +79,7 @@ export const ThreadPanel = (
 	}, [rootMessages, threadMessages, loading, isTyping]);
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-		if(e.key === 'Escape')
+		if(e.key === 'Escape' && !inDrawer)
 		{
 			e.preventDefault();
 			onClose();
@@ -85,16 +87,18 @@ export const ThreadPanel = (
 	};
 
 	return (
-		<div onKeyDown={handleKeyDown} className='flex min-w-0 flex-1 flex-col border-l-[length:var(--border-width)] border-surface-border'>
+		<div onKeyDown={handleKeyDown} className={`flex min-w-0 flex-1 flex-col ${inDrawer ? '' : 'border-l-[length:var(--border-width)] border-surface-border'}`}>
 			<div className='flex items-center justify-between gap-2 border-b-[length:var(--border-width)] border-surface-border px-4 py-3'>
 				<div className='min-w-0'>
 					<p className='text-[11px] font-medium uppercase tracking-wide text-text-subtle'>Thread</p>
 					<h3 className='truncate text-base font-semibold text-text'>{title}</h3>
 				</div>
 				<div className='flex shrink-0 items-center gap-1'>
-					<Button variant='ghost' size='icon-sm' aria-label={expanded ? 'Show chat' : 'Expand thread'} data-expand-toggle onClick={onToggleExpand}>
-						{expanded ? <CollapseIcon /> : <ExpandIcon />}
-					</Button>
+					{!inDrawer && (
+						<Button variant='ghost' size='icon-sm' aria-label={expanded ? 'Show chat' : 'Expand thread'} data-expand-toggle onClick={onToggleExpand}>
+							{expanded ? <CollapseIcon /> : <ExpandIcon />}
+						</Button>
+					)}
 					<Button variant='ghost' size='icon-sm' aria-label='Close thread' onClick={onClose}>
 						<CloseIcon />
 					</Button>

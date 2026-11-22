@@ -1,6 +1,8 @@
 import type { CommandOption } from '../../components/CommandInput/CommandInput';
 import type { SelectOption } from '../../components/Select/Select';
 
+export const APP_NAME = 'DaFink Chat';
+
 export const COMMANDS: CommandOption[] = [
 	{ name: 'compact', description: 'Summarize this conversation to save space' },
 	{ name: 'new',     description: 'Start a new chat' },

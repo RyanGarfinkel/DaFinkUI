@@ -623,6 +623,7 @@ export default function Example() {
       { name: 'hint',        type: 'string',                     default: 'undefined',  description: 'Helper text (hidden when error is set).' },
       { name: 'error',       type: 'string',                     default: 'undefined',  description: 'Error message; switches trigger to error state.' },
       { name: 'size',        type: "'sm' | 'md'",                default: "'md'",       description: 'Trigger height and text size.' },
+      { name: 'side',        type: "'top' | 'bottom'",           default: "'bottom'",   description: 'Edge of the trigger the list opens from; use top for controls at the bottom of a container.' },
       { name: 'disabled',    type: 'boolean',                    default: 'false',      description: 'Prevents interaction.' },
       { name: 'className',   type: 'string',                     default: "''",         description: 'Additional classes on the root wrapper.' },
       { name: 'triggerClassName', type: 'string',                default: "''",         description: 'Additional classes on the trigger button itself, for restyling the control (className only reaches the outer wrapper).' },
@@ -1444,7 +1445,6 @@ export default function Example() {
       { name: 'collapsed',         type: 'boolean',                      default: 'undefined', description: 'Controlled collapsed state. Omit to let Sidebar manage its own state.' },
       { name: 'defaultCollapsed',  type: 'boolean',                      default: 'false',     description: 'Initial collapsed state when uncontrolled.' },
       { name: 'onCollapsedChange', type: '(collapsed: boolean) => void', default: 'undefined', description: 'Called whenever the toggle button changes the collapsed state.' },
-      { name: 'togglePosition',    type: "'top' | 'middle' | 'bottom'",  default: "'middle'",  description: 'Where the collapse toggle button sits along the right border.' },
       { name: 'className',         type: 'string',                       default: "''",        description: 'Additional CSS classes.' },
       { name: 'children',          type: 'ReactNode',                    default: 'undefined', description: 'Sidebar content (header, sections, links, dividers, footer).' },
     ],
@@ -2677,6 +2677,8 @@ export default function Example() {
       { name: 'onCommand',  type: '(command: CommandOption) => void', default: '-',         description: 'Called when a command is executed (Enter or pointer-select on a menu item).' },
       { name: 'trigger',    type: 'string',                          default: "'/'",        description: 'Character that opens the command menu when it is the first character typed.' },
       { name: 'menuSide',   type: "'top' | 'bottom'",                default: "'top'",      description: 'Which side of the input the menu opens on.' },
+      { name: 'inputClassName', type: 'string',                     default: "''",         description: "Appended to the field's own classes so the consumer sets its size (padding, text). Override a default with Tailwind's important modifier, e.g. py-3!." },
+      { name: 'endContent', type: 'ReactNode',                       default: '-',          description: "Rendered inside the field's right edge, e.g. a send or stop button. The input reserves right padding for it." },
       { name: 'className',  type: 'string',                          default: "''",         description: 'Additional classes on the root wrapper element.' },
     ],
     dependencies: [],
@@ -3514,7 +3516,7 @@ export default function Example() {
     slug: 'drawer',
     name: 'Drawer',
     category: 'Overlay',
-    description: 'A blocking side-panel overlay that slides in from an edge of the screen, with the full modal accessibility contract: focus trap, scroll lock, Escape-to-close, backdrop dismissal, and focus return.',
+    description: 'A blocking side-panel overlay that slides in from an edge of the screen, with the full modal accessibility contract: focus trap, scroll lock, Escape-to-close, backdrop dismissal, and focus return. Bottom and top drawers can add a DrawerHandle so touch users can swipe them closed.',
     usage: `'use client';
 
 import { useState } from 'react';
@@ -3525,6 +3527,7 @@ import {
   DrawerContent,
   DrawerFooter,
   DrawerClose,
+  DrawerHandle,
   Button,
 } from '@components/ui';
 import type { DrawerSide } from '@components/ui';
@@ -3546,6 +3549,7 @@ export default function Example() {
       <Button variant="secondary" onClick={() => openFrom('bottom')}>Bottom</Button>
 
       <Drawer open={open} onOpenChange={setOpen} side={side}>
+        {side === 'bottom' && <DrawerHandle />}
         <DrawerClose />
         <DrawerHeader>
           <DrawerTitle>Notifications</DrawerTitle>
@@ -3589,7 +3593,7 @@ export default function Example() {
         name: 'children',
         type: 'ReactNode',
         default: '-',
-        description: 'Drawer subcomponents (DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose) and arbitrary content.',
+        description: 'Drawer subcomponents (DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, and DrawerHandle for bottom or top drawers) and arbitrary content.',
       },
     ],
     dependencies: [],
@@ -4214,25 +4218,58 @@ export default function Example() {
     description: 'A full slide deck editor: insert tools, a floating format toolbar, a settings sidebar, a reorderable slide rail, themes, and presenting. You own the deck and its undo history; it can also show what someone else (like an AI) is editing.',
     usage: `'use client';
 
-import { DeckEditor } from '@components/ui';
-import type { Deck } from '@components/ui';
-import { createSlide } from '@components/ui';
+import { DeckEditor, TOOLBAR_BUTTON, applyOps, createSlide, textStyleFields } from '@components/ui';
+import type { Deck, DeckElement, DeckOp, TextStyleId } from '@components/ui';
 import { useState } from 'react';
 
-const START: Deck = {
-\ttitle:  'Launch plan',
-\ttheme:  'ocean',
-\tslides: [
-\t\t{
-\t\t\t...createSlide([
-\t\t\t\t{ id: 'title', label: 'Title', type: 'text', html: '<p>Launch plan</p>', bold: true, fontSize: 72, color: '', x: 96, y: 248, width: 1088, height: 120 },
-\t\t\t\t{ id: 'subtitle', label: 'Subtitle', type: 'text', html: '<p>Spring release, week by week</p>', fontSize: 32, color: 'var(--color-text-muted)', x: 96, y: 384, width: 1088, height: 56 },
-\t\t\t]),
-\t\t\tid: 'cover',
+const text = (id: string, style: TextStyleId, html: string, box: Pick<DeckElement, 'x' | 'y' | 'width' | 'height'>, extra: Partial<DeckElement> = {}) => (
+\t{ id, label: id, type: 'text', style, html, ...textStyleFields(style), ...box, ...extra } as DeckElement
+);
+
+const LOGO = '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="24" cy="24" r="20"/><path d="M14 30l8-8 5 5 8-10"/><path d="M29 17h6v6"/></svg>';
+
+const footer = (slideId: string): DeckOp => ({
+\ttype: 'addElement', slideId, element: text(\`\${slideId}-footer\`, 'footer', '<p>Acme · Q3 review</p>', { x: 96, y: 664, width: 700, height: 32 }),
+});
+
+// The deck is built the way an agent would build it: a few validated ops.
+const BUILD: DeckOp[] = [
+\t{ type: 'updateTheme', patch: { colors: { accent: '#f97316' }, headingFont: 'serif', radius: 20 } },
+\t{ type: 'addElement', slideId: 'cover', element: { id: 'logo', label: 'Logo', type: 'svg', svg: LOGO, color: 'var(--color-brand)', x: 592, y: 112, width: 96, height: 96 } },
+\t{ type: 'addElement', slideId: 'cover', element: text('cover-title', 'title', '<p style="text-align: center">Q3 review</p>', { x: 96, y: 248, width: 1088, height: 120 }) },
+\t{ type: 'addElement', slideId: 'cover', element: text('cover-sub', 'body', '<p style="text-align: center">Growth, retention, and what\\'s next</p>', { x: 96, y: 384, width: 1088, height: 56 }, { fontSize: 32, color: 'var(--color-text-muted)' }) },
+\t{ type: 'addSlideFromLayout', layout: 'chart', slideId: 'metrics' },
+\t{ type: 'updateElement', slideId: 'metrics', elementId: 'metrics:title', patch: { html: '<p>Signups by month</p>' } },
+\t{
+\t\ttype: 'updateElement', slideId: 'metrics', elementId: 'metrics:chart',
+\t\tpatch: { chart: 'area', seriesLabel: 'Signups', width: 660, data: [{ label: 'Jul', value: 1200 }, { label: 'Aug', value: 980 }, { label: 'Sep', value: 1640 }, { label: 'Oct', value: 2100 }] },
+\t},
+\t{ type: 'addElement', slideId: 'metrics', element: { id: 'card', label: 'Card', type: 'shape', shape: 'rect', fill: 'var(--color-surface-active)', x: 800, y: 184, width: 384, height: 440 } },
+\t{ type: 'addElement', slideId: 'metrics', element: text('takeaways', 'body', '<ul><li><p>October is our best month</p></li><li><p>Activation up 12%</p></li><li><p>Churn flat at 2.1%</p></li></ul>', { x: 824, y: 208, width: 336, height: 392 }, { fontSize: 24 }) },
+\t{ type: 'updateSlide', slideId: 'metrics', patch: { notes: 'Lead with October, then the activation story.' } },
+\t{ type: 'addSlideFromLayout', layout: 'titleContent', slideId: 'plan' },
+\t{ type: 'updateElement', slideId: 'plan', elementId: 'plan:title', patch: { html: '<p>Next quarter</p>' } },
+\t{ type: 'updateElement', slideId: 'plan', elementId: 'plan:body', patch: { width: 500, html: '<ul><li><p>Self-serve onboarding</p></li><li><p>Usage-based pricing</p></li><li><p>Team workspaces</p></li></ul>' } },
+\t{
+\t\ttype: 'addElement', slideId: 'plan', element: {
+\t\t\tid: 'plan-table', label: 'Plan', type: 'table', header: true, fontSize: 22, x: 640, y: 184, width: 544, height: 240,
+\t\t\trows: [['Initiative', 'Owner', 'Target'], ['Onboarding', 'Growth', 'Nov 30'], ['Pricing', 'Billing', 'Dec 15'], ['Workspaces', 'Platform', 'Jan 20']],
 \t\t},
-\t\t{ ...createSlide(), id: 'next' },
-\t],
-};
+\t},
+\t...['cover', 'metrics', 'plan'].map(footer),
+\t{ type: 'updateSlides', patch: { transition: { type: 'fade', duration: 500 } } },
+\t{ type: 'updateSlide', slideId: 'cover', patch: { ambient: 'particles' } },
+\t{ type: 'updateElements', elementType: 'text', patch: { effect: { type: 'fade', delay: 150 } } },
+];
+
+const BASE: Deck = { title: 'Q3 review', theme: 'midnight', slides: [{ ...createSlide(), id: 'cover' }] };
+const START = applyOps(BASE, BUILD);
+
+// Each press restyles the whole deck with a couple of ops, and is one undo step.
+const LOOKS: DeckOp[][] = [
+\t[{ type: 'updateTheme', patch: { colors: { accent: '#22d3ee' }, headingFont: 'mono', radius: 4, margin: 80 } }, { type: 'updateSlide', slideId: 'cover', patch: { ambient: 'meteors' } }],
+\t[{ type: 'updateTheme', patch: { colors: { accent: '#f97316' }, headingFont: 'serif', radius: 20, margin: 96 } }, { type: 'updateSlide', slideId: 'cover', patch: { ambient: 'particles' } }],
+];
 
 interface History {
 \tpast:     Deck[];
@@ -4243,6 +4280,7 @@ interface History {
 
 export const DeckEditorDemo = () => {
 \tconst [history, setHistory] = useState<History>({ past: [], present: START, future: [] });
+\tconst [look, setLook] = useState(0);
 
 \t// A run of edits sharing a key (a drag, a typing burst) is one undo step.
 \tconst change = (deck: Deck, key?: string) => setHistory(h => ({
@@ -4255,8 +4293,13 @@ export const DeckEditorDemo = () => {
 \tconst undo = () => setHistory(h => (h.past.length ? { past: h.past.slice(0, -1), present: h.past.at(-1)!, future: [h.present, ...h.future] } : h));
 \tconst redo = () => setHistory(h => (h.future.length ? { past: [...h.past, h.present], present: h.future[0], future: h.future.slice(1) } : h));
 
+\tconst restyle = () => {
+\t\tchange(applyOps(history.present, LOOKS[look % LOOKS.length]));
+\t\tsetLook(look + 1);
+\t};
+
 \treturn (
-\t\t<div className='h-[560px] w-full'>
+\t\t<div className='h-[640px] w-full'>
 \t\t\t<DeckEditor
 \t\t\t\tdeck={history.present}
 \t\t\t\tonChange={change}
@@ -4264,6 +4307,7 @@ export const DeckEditorDemo = () => {
 \t\t\t\tonRedo={redo}
 \t\t\t\tcanUndo={history.past.length > 0}
 \t\t\t\tcanRedo={history.future.length > 0}
+\t\t\t\ttoolbarEnd={<button type='button' className={TOOLBAR_BUTTON} onClick={restyle}>Restyle deck</button>}
 \t\t\t/>
 \t\t</div>
 \t);
@@ -4279,18 +4323,106 @@ export const DeckEditorDemo = () => {
       { name: 'activeSlideId', type: 'string', default: '—', description: 'Controlled active slide, e.g. to follow another editor. Omit to manage it internally.' },
       { name: 'onActiveSlideChange', type: '(slideId: string) => void', default: '—', description: 'Called when the user picks a slide.' },
       { name: 'status', type: 'string', default: '—', description: 'A host message for the polite status line (e.g. export progress).' },
+      { name: 'onAsk', type: '(context: DeckAskContext) => void', default: '—', description: 'Adds an "Ask AI" button beside the floating format toolbar. Called with the selected element (slide number, element id, label, type, and its text), or just the text highlighted inside a text box.' },
       { name: 'className', type: 'string', default: "''", description: 'Extra classes on the root. It fills its container, so give the container (or this) a height.' },
     ],
     dependencies:         ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', '@tiptap/react', '@tiptap/pm', '@tiptap/starter-kit', '@tiptap/extension-text-align', '@tiptap/extension-text-style', 'jspdf', 'jszip', 'pptxgenjs', 'svg2pdf.js'],
-    registryDependencies: ['button', 'charts', 'color-picker', 'context-menu', 'drawer', 'input', 'menu', 'meteors', 'particles', 'popover', 'reveal', 'select', 'slide-canvas', 'switch', 'table', 'text-scramble', 'textarea', 'toggle-group', 'typewriter'],
+    registryDependencies: ['button', 'charts', 'color-picker', 'context-menu', 'input', 'menu', 'meteors', 'particles', 'popover', 'reveal', 'select', 'slide-canvas', 'switch', 'table', 'text-scramble', 'textarea', 'toggle-group', 'typewriter'],
     files:                [
       'DeckEditor/DeckEditor.tsx', 'DeckEditor/FormatToolbar.tsx', 'DeckEditor/InsertTools.tsx', 'DeckEditor/Inspector.tsx', 'DeckEditor/ElementControls.tsx',
       'DeckEditor/MotionControls.tsx', 'DeckEditor/fields.tsx', 'DeckEditor/SlideRail.tsx', 'DeckEditor/LayoutPicker.tsx', 'DeckEditor/ThemePicker.tsx',
       'DeckEditor/CustomThemeEditor.tsx', 'DeckEditor/Presenter.tsx', 'DeckEditor/Entrance.tsx', 'DeckEditor/effects.ts', 'DeckEditor/elements.ts', 'DeckEditor/icons.tsx',
       'DeckEditor/ExportMenu.tsx', 'DeckEditor/exporters.ts', 'DeckEditor/exportHelpers.ts', 'DeckEditor/htmlPresenter.ts', 'DeckEditor/pdf.ts',
-      'DeckEditor/pptx.ts', 'DeckEditor/pptxMotion.ts', 'DeckEditor/richText.ts',
+      'DeckEditor/pptx.ts', 'DeckEditor/pptxMotion.ts', 'DeckEditor/richText.ts', 'DeckEditor/askcontext.ts', 'DeckEditor/AskButton.tsx',
       'DeckEditor/deck.ts', 'DeckEditor/ops.ts', 'DeckEditor/layouts.ts', 'DeckEditor/themes.ts', 'DeckEditor/glyphs.tsx', 'DeckEditor/ElementView.tsx',
       'DeckEditor/TextElement.tsx', 'DeckEditor/LineElement.tsx', 'DeckEditor/Ambient.tsx', 'DeckEditor/Highlight.tsx',
+      'DeckEditor/svg.ts', 'DeckEditor/textstyles.ts', 'DeckEditor/reference.ts',
+    ],
+  },
+  {
+    slug: 'sheet-editor',
+    name: 'SheetEditor',
+    category: 'Canvas',
+    description: 'A spreadsheet editor: a cell grid with formulas, a formula bar, formatting, selection stats, and CSV export. You own the sheet and its undo history.',
+    usage: `'use client';
+
+import { SheetEditor, createSheet } from '@components/ui';
+import type { Cell, Sheet } from '@components/ui';
+import { useState } from 'react';
+
+const HEADER: Partial<Cell> = { bold: true, fill: '#f4f4f5' };
+
+const cells: Sheet['cells'] = {
+\tA1: { value: 'Item', ...HEADER }, B1: { value: 'Q1', ...HEADER, align: 'right' }, C1: { value: 'Q2', ...HEADER, align: 'right' },
+\tD1: { value: 'Q3', ...HEADER, align: 'right' }, E1: { value: 'Total', ...HEADER, align: 'right' },
+\tA2: { value: 'Hosting' }, B2: { value: '1200', format: 'currency' }, C2: { value: '1350', format: 'currency' }, D2: { value: '1500', format: 'currency' },
+\tA3: { value: 'Salaries' }, B3: { value: '48000', format: 'currency' }, C3: { value: '48000', format: 'currency' }, D3: { value: '51000', format: 'currency' },
+\tA4: { value: 'Marketing' }, B4: { value: '6200', format: 'currency' }, C4: { value: '7800', format: 'currency' }, D4: { value: '9100', format: 'currency' },
+\tA5: { value: 'Software' }, B5: { value: '2400', format: 'currency' }, C5: { value: '2400', format: 'currency' }, D5: { value: '2650', format: 'currency' },
+\tE2: { value: '=SUM(B2:D2)', format: 'currency' }, E3: { value: '=SUM(B3:D3)', format: 'currency' },
+\tE4: { value: '=SUM(B4:D4)', format: 'currency' }, E5: { value: '=SUM(B5:D5)', format: 'currency' },
+\tA6: { value: 'Total', bold: true },
+\tB6: { value: '=SUM(B2:B5)', bold: true, format: 'currency' }, C6: { value: '=SUM(C2:C5)', bold: true, format: 'currency' },
+\tD6: { value: '=SUM(D2:D5)', bold: true, format: 'currency' }, E6: { value: '=SUM(E2:E5)', bold: true, format: 'currency' },
+\tA8: { value: 'Q3 vs Q1', italic: true }, B8: { value: '=D6/B6-1', italic: true, format: 'percent' },
+\tA9: { value: 'Over budget?', italic: true }, B9: { value: '=IF(E6>130000,"Yes","No")', italic: true, align: 'right' },
+};
+
+const START: Sheet = { ...createSheet(60, 12, 'Q3 budget'), cells, colWidths: { 0: 140 } };
+
+interface History {
+\tpast:     Sheet[];
+\tpresent:  Sheet;
+\tfuture:   Sheet[];
+\tlastKey?: string;
+}
+
+export const SheetEditorDemo = () => {
+\tconst [history, setHistory] = useState<History>({ past: [], present: START, future: [] });
+
+\t// A run of edits sharing a key (a column drag) is one undo step.
+\tconst change = (sheet: Sheet, key?: string) => setHistory(h => ({
+\t\tpast:    key && key === h.lastKey ? h.past : [...h.past, h.present],
+\t\tpresent: sheet,
+\t\tfuture:  [],
+\t\tlastKey: key,
+\t}));
+
+\tconst undo = () => setHistory(h => (h.past.length ? { past: h.past.slice(0, -1), present: h.past.at(-1)!, future: [h.present, ...h.future] } : h));
+\tconst redo = () => setHistory(h => (h.future.length ? { past: [...h.past, h.present], present: h.future[0], future: h.future.slice(1) } : h));
+
+\treturn (
+\t\t<div className='h-[480px] w-full'>
+\t\t\t<SheetEditor
+\t\t\t\tsheet={history.present}
+\t\t\t\tonChange={change}
+\t\t\t\tonUndo={undo}
+\t\t\t\tonRedo={redo}
+\t\t\t\tcanUndo={history.past.length > 0}
+\t\t\t\tcanRedo={history.future.length > 0}
+\t\t\t/>
+\t\t</div>
+\t);
+};`,
+    props: [
+      { name: 'sheet', type: 'Sheet', default: '—', description: 'The sheet being edited (controlled): a title, row and column counts, a cells map keyed by A1 address, and column widths. A cell\'s value is what was typed, so formulas are stored as "=SUM(A1:A5)".' },
+      { name: 'onChange', type: '(next: Sheet, coalesceKey?: string) => void', default: '—', description: 'Every edit, as the whole next sheet. Consecutive changes sharing a coalesceKey (typing in one cell, dragging a column edge) belong in one undo step.' },
+      { name: 'onUndo / onRedo', type: '() => void', default: '—', description: 'Undo and redo, from the toolbar and ⌘Z / ⇧⌘Z. Omit both to hide the undo controls.' },
+      { name: 'canUndo / canRedo', type: 'boolean', default: 'false', description: 'Enables the undo and redo buttons.' },
+      { name: 'toolbarEnd', type: 'ReactNode', default: '—', description: 'Host actions in the top-right cluster, before Download (e.g. a save status). Style buttons with the exported SHEET_TOOLBAR_BUTTON class to match.' },
+      { name: 'status', type: 'string', default: '—', description: 'A host message for the polite status line. Shown instead of the editor\'s own messages while set.' },
+      { name: 'highlight', type: 'string', default: '—', description: 'Cells someone else (like an AI) is editing right now, in A1 notation ("B2:C5"): outlined, pulsing, and scrolled into view.' },
+      { name: 'highlightLabel', type: 'string', default: "'AI'", description: 'Text on the tag over the highlighted range.' },
+      { name: 'onAsk', type: '(context: SheetAskContext) => void', default: '—', description: 'Adds an "Ask AI" button to the toolbar. Called with the selected range, the active cell, and the typed values in the selection.' },
+      { name: 'className', type: 'string', default: "''", description: 'Extra classes on the root. It fills its container, so give the container (or this) a height.' },
+    ],
+    dependencies:         [],
+    registryDependencies: ['menu', 'popover', 'select', 'charts', 'modal', 'button', 'input', 'color-picker'],
+    files:                [
+      'SheetEditor/SheetEditor.tsx', 'SheetEditor/Grid.tsx', 'SheetEditor/Toolbar.tsx', 'SheetEditor/icons.tsx',
+      'SheetEditor/ChartStrip.tsx', 'SheetEditor/charts.ts', 'SheetEditor/Actions.tsx', 'SheetEditor/FormulaInput.tsx', 'SheetEditor/refs.ts', 'SheetEditor/functions.ts', 'SheetEditor/FunctionHints.tsx', 'SheetEditor/FormatDialog.tsx', 'SheetEditor/CustomColor.tsx',
+      'SheetEditor/sheet.ts', 'SheetEditor/formulas.ts', 'SheetEditor/ops.ts', 'SheetEditor/format.ts',
+      'SheetEditor/sheetops.ts', 'SheetEditor/askcontext.ts', 'SheetEditor/reference.ts',
     ],
   },
 ];

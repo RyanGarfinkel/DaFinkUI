@@ -6,7 +6,7 @@ import Typewriter from '../Typewriter/Typewriter';
 import { prefersReducedMotion } from './effects';
 import type { DeckElement } from './deck';
 import { Reveal } from '../Reveal/Reveal';
-import { FONTS } from './themes';
+import { textFontFamily } from './themes';
 
 const SCRAMBLE_MS = 900;
 const TYPE_SPEED_MS = 35;
@@ -46,7 +46,7 @@ const TextEntrance = ({ element, kind, delay, children }: { element: Extract<Dec
 	return (
 		<div
 			className={`h-full w-full whitespace-pre-line leading-tight ${element.color ? '' : 'text-text'}`}
-			style={{ fontSize: element.fontSize, fontFamily: element.font && FONTS[element.font].stack, fontWeight: element.bold ? 700 : undefined, color: element.color || undefined }}
+			style={{ fontSize: element.fontSize, fontFamily: textFontFamily(element), fontWeight: element.bold ? 700 : undefined, color: element.color || undefined }}
 		>
 			{phase === 'playing' && kind === 'typewriter' && <Typewriter text={text} speed={TYPE_SPEED_MS} onComplete={() => setPhase('done')} />}
 			{phase === 'playing' && kind === 'scramble' && <TextScramble text={text} duration={SCRAMBLE_MS} />}

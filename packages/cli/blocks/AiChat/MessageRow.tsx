@@ -1,11 +1,12 @@
 'use client';
 
-import { ChevronLeftIcon, ChevronRightIcon, CheckIcon, CopyIcon, PencilIcon, ReplyIcon, RefreshIcon, SlidesIcon } from './icons';
+import { ChevronLeftIcon, ChevronRightIcon, CheckIcon, CopyIcon, PencilIcon, ReplyIcon, RefreshIcon, SheetIcon, SlidesIcon } from './icons';
+import type { ChatArtifact, ChatMessage, ChatTextMessage, MessageAttachment } from './types';
 import { Attachment, AttachmentGroup } from '../../components/Attachment/Attachment';
-import type { ChatMessage, ChatTextMessage, MessageAttachment } from './types';
 import Questionnaire from '../../components/Questionnaire/Questionnaire';
 import ToolCallTrace from '../../components/ToolCallTrace/ToolCallTrace';
 import { useEffect, useRef, useState, ReactNode } from 'react';
+import { KIND_ICONS, KIND_LABELS } from './artifactKinds';
 import Textarea from '../../components/Textarea/Textarea';
 import Message from '../../components/Message/Message';
 import Tooltip from '../../components/Tooltip/Tooltip';
@@ -186,6 +187,8 @@ export const MessageAttachments = ({ attachments }: { attachments?: MessageAttac
 };
 
 export interface DeckCardProps {
+	/** A slide deck (default) or a sheet; picks the icon and the Open button's DOM id. */
+	kind?:      'deck' | 'sheet';
 	messageId:  number;
 	title:      string;
 	/** e.g. "3 slides" or, while it plays, the current step. */
@@ -193,17 +196,36 @@ export interface DeckCardProps {
 	onOpen:     () => void;
 }
 
-// The Open button's DOM id is how closing the deck panel hands focus back, like the thread trigger.
-export const DeckCard = ({ messageId, title, detail, onOpen }: DeckCardProps) => (
+// The Open button's DOM id (`deck-open-…` or `sheet-open-…`) is how closing the panel hands focus back, like the thread trigger.
+export const DeckCard = ({ kind = 'deck', messageId, title, detail, onOpen }: DeckCardProps) => (
 	<div className='flex w-full max-w-md items-center gap-3 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface p-3'>
 		<span aria-hidden='true' className='flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-surface-hover text-text-muted'>
-			<SlidesIcon />
+			{kind === 'sheet' ? <SheetIcon /> : <SlidesIcon />}
 		</span>
 		<div className='min-w-0 flex-1'>
 			<p className='truncate text-sm font-medium text-text'>{title}</p>
 			<p className='truncate text-xs text-text-muted'>{detail}</p>
 		</div>
-		<Button id={`deck-open-${messageId}`} variant='outlined' size='sm' onClick={onOpen} aria-label={`Open ${title}`}>Open</Button>
+		<Button id={`${kind}-open-${messageId}`} variant='outlined' size='sm' onClick={onOpen} aria-label={`Open ${title}`}>Open</Button>
+	</div>
+);
+
+export interface ArtifactCardProps {
+	artifact: ChatArtifact;
+	onOpen:   () => void;
+}
+
+// The Open button's DOM id is how closing the artifacts panel hands focus back, like the deck and thread triggers.
+export const ArtifactCard = ({ artifact, onOpen }: ArtifactCardProps) => (
+	<div className='flex w-full max-w-md items-center gap-3 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface p-3'>
+		<span aria-hidden='true' className='flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--radius-sm)] bg-surface-hover text-text-muted'>
+			{KIND_ICONS[artifact.kind]}
+		</span>
+		<div className='min-w-0 flex-1'>
+			<p className='truncate text-sm font-medium text-text'>{artifact.title}</p>
+			<p className='truncate text-xs text-text-muted'>{KIND_LABELS[artifact.kind]}</p>
+		</div>
+		<Button id={`artifact-open-${artifact.id}`} variant='outlined' size='sm' onClick={onOpen} aria-label={`Open ${artifact.title}`}>Open</Button>
 	</div>
 );
 

@@ -945,44 +945,67 @@ export default function ChartCard() {
 		slug: 'ai-chat',
 		name: 'AI chat',
 		category: 'AI',
-		description: 'A chat app with a history sidebar (new-chat button, rename, delete, and a footer profile card that opens a settings modal), streaming replies, and forkable reply threads in a resizable side panel. A reply can also edit a slide deck live in a slides panel (the DeckEditor component, with downloads), so you and an agent work on the same deck. Installs as a folder with ToolCallTrace and Questionnaire as dependencies. Works with a real API: chats, threads, replies, and search all load from API routes, so point them at your own backend.',
+		description: 'A chat app with a history sidebar (new-chat button, rename, delete, and a footer profile card that opens a settings modal), streaming replies, and forkable reply threads in a resizable side panel. A reply can also edit a slide deck live in a slides panel (the DeckEditor component, with downloads), so you and an agent work on the same deck, or edit a spreadsheet the same way in a sheet panel (the SheetEditor component, with formulas). Installs as a folder with ToolCallTrace and Questionnaire as dependencies. Works with a real API: chats, threads, replies, and search all load from API routes, so point them at your own backend.',
 		usage: `'use client';
 
-import { describeAttachments, buildHistory, findLastUserMessageId, hasPrecedingUserMessage, DRAFT_TITLE_MAX_LENGTH } from '@/src/blocks/AiChat/messageHelpers';
+import { describeAttachments, buildHistory, buildPrompt, collectArtifacts, findLastUserMessageId, hasPrecedingUserMessage, slideReference, DRAFT_TITLE_MAX_LENGTH } from '@/src/blocks/AiChat/messageHelpers';
 import { Sidebar, SidebarButton, SidebarFooter, SidebarHeader, SidebarSection, SidebarSkeleton } from '@/src/components/Sidebar/Sidebar';
-import type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, SearchHit, MessageAttachment } from '@/src/blocks/AiChat/types';
-import { MessageActionsRow, ChatMessageRow, buildVersionNav, Divider, DeckCard } from '@/src/blocks/AiChat/MessageRow';
+import { PlusIcon, PencilIcon, TrashIcon, ReplyIcon, SearchIcon, ChevronRightIcon, MenuIcon, FileIcon } from '@/src/blocks/AiChat/icons';
 import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
-import { PlusIcon, PencilIcon, TrashIcon, ReplyIcon, SearchIcon, ChevronRightIcon } from '@/src/blocks/AiChat/icons';
-import { COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, CONNECTORS, SLIDES_PROMPT } from '@/src/blocks/AiChat/constants';
+import { MessageActionsRow, ChatMessageRow, buildVersionNav, Divider, DeckCard, ArtifactCard } from '@/src/blocks/AiChat/MessageRow';
+import type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, SearchHit, MessageAttachment } from '@/src/blocks/AiChat/types';
 import CommandPalette, { CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
+import { APP_NAME, COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, CONNECTORS, SLIDES_PROMPT } from '@/src/blocks/AiChat/constants';
+import { Resizable, ResizablePanel, ResizableHandle } from '@/src/components/Resizable/Resizable';
+import { FormEvent, KeyboardEvent, ReactNode, useEffect, useRef, useState } from 'react';
 import { fetchChats, fetchThread, searchMessages, buildSearchCorpus } from '@/src/blocks/AiChat/chatApi';
 import { deckBefore, deckDocKey, resolveDeckEdit, useLiveDeck } from '@/src/blocks/AiChat/useLiveDeck';
-import { Resizable, ResizablePanel, ResizableHandle } from '@/src/components/Resizable/Resizable';
 import { type CommandOption } from '@/src/components/CommandInput/CommandInput';
-import { Greeting, TypingPhrase, USER_NAME } from '@/src/blocks/AiChat/Phrases';
-import { FormEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
-import { useConversation } from '@/src/blocks/AiChat/useConversation';
+import type { DeckAskContext } from '@/src/components/DeckEditor/askcontext';
+import Drawer, { DrawerHandle } from '@/src/components/Drawer/Drawer';
 import ScrollFade from '@/src/components/ScrollFade/ScrollFade';
-import ThreadPanel from '@/src/blocks/AiChat/ThreadPanel';
+import { Greeting, TypingPhrase, USER_NAME } from '@/src/blocks/AiChat/Phrases';
 import Spinner from '@/src/components/Spinner/Spinner';
-import DeckPanel from '@/src/blocks/AiChat/DeckPanel';
+import { useConversation } from '@/src/blocks/AiChat/useConversation';
 import Button from '@/src/components/Button/Button';
 import Avatar from '@/src/components/Avatar/Avatar';
 import Switch from '@/src/components/Switch/Switch';
 import Select from '@/src/components/Select/Select';
-import Composer from '@/src/blocks/AiChat/Composer';
+import { resolveSheetChart } from '@/src/blocks/AiChat/chartSource';
 import Input from '@/src/components/Input/Input';
+import { useSheetPanel } from '@/src/blocks/AiChat/useSheetPanel';
+import ArtifactsPanel from '@/src/blocks/AiChat/ArtifactsPanel';
+import type { ArtifactEntry } from '@/src/blocks/AiChat/types';
+import { useIsMobile } from '@/src/blocks/AiChat/useIsMobile';
+import ThreadPanel from '@/src/blocks/AiChat/ThreadPanel';
+import DeckPanel from '@/src/blocks/AiChat/DeckPanel';
+import Composer from '@/src/blocks/AiChat/Composer';
 
-export type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, AiChatHistoryMessage, AiChatReply, SearchCorpusEntry, SearchHit, MessageAttachment, DeckEdit, DeckEditStep } from '@/src/blocks/AiChat/types';
+export type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, AiChatHistoryMessage, AiChatReply, SearchCorpusEntry, SearchHit, MessageAttachment, ChatDeck, DeckEdit, DeckEditStep, ChatSheet, SheetEdit, SheetEditStep, ChatArtifact, ArtifactKind } from '@/src/blocks/AiChat/types';
 
 const SEARCH_DEBOUNCE_MS = 200;
 
 const SKELETON_CHAT_ROWS = 7;
 
+const MAIN_COMPOSER_ID = 'main-composer';
+
+const DRAWER_EXIT_MS = 250;
+
 const COPY_NOTICE_MS = 2000;
 
 const NEAR_BOTTOM_THRESHOLD_PX = 80;
+
+interface SidebarSlotProps {
+	mobile:       boolean;
+	open:         boolean;
+	onOpenChange: (open: boolean) => void;
+	children:     ReactNode;
+}
+
+const SidebarSlot = ({ mobile, open, onOpenChange, children }: SidebarSlotProps) => {
+	if(!mobile) return <>{children}</>;
+	return <Drawer open={open} onOpenChange={onOpenChange} side='left' aria-label='Chats'>{children}</Drawer>;
+};
 
 export const AiChat = () => {
 	const [chats, setChats] = useState<ChatEntry[]>([]);
@@ -992,6 +1015,8 @@ export const AiChat = () => {
 	const [draftTitle, setDraftTitle] = useState('');
 	const [draft, setDraft] = useState('');
 	const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
+	// Slide elements the user pointed at with Ask AI, sent with the next message like attachments.
+	const [slideRefs, setSlideRefs] = useState<MessageAttachment[]>([]);
 	const [threadAttachedFiles, setThreadAttachedFiles] = useState<File[]>([]);
 	const [chatPendingDeletion, setChatPendingDeletion] = useState<ChatEntry | null>(null);
 	const [threadMessages, setThreadMessages] = useState<Record<string, ChatMessage[]>>({});
@@ -1000,6 +1025,8 @@ export const AiChat = () => {
 	const [threadDraft, setThreadDraft] = useState('');
 	const [copyNoticeVisible, setCopyNoticeVisible] = useState(false);
 	const [settingsOpen, setSettingsOpen] = useState(false);
+	const [sidebarOpen, setSidebarOpen] = useState(false);
+	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [displayName, setDisplayName] = useState(USER_NAME);
 	const [model, setModel] = useState(MODEL_OPTIONS[1].value);
 	const [effort, setEffort] = useState(EFFORT_OPTIONS[1].value);
@@ -1014,7 +1041,30 @@ export const AiChat = () => {
 	// The slides panel shares the thread panel's column; opening one closes the other.
 	// \`messageId\` is the card that opened it, which gets focus back on close.
 	const [deckView, setDeckView] = useState<{ chatId: string; deckId: string; messageId: number } | null>(null);
+	// The artifacts panel shares the same column too. \`key\` is the open artifact (null shows the list);
+	// \`triggerId\` is the element that opened it, which gets focus back on close.
+	const [artifactView, setArtifactView] = useState<{ chatId: string; key: string | null; triggerId: string } | null>(null);
+	// Which side panel (if any) has taken the full width, hiding the chat column.
+	const [expandedKey, setExpandedKey] = useState<string | null>(null);
+	const isMobile = useIsMobile();
+	const railCollapsed = !isMobile && sidebarCollapsed;
 	const liveDeck = useLiveDeck();
+	const sheetPanel = useSheetPanel({
+		chats,
+		activeChatId: activeId,
+		isMobile,
+		closeOthers:  () =>
+		{
+			setActiveThread(null);
+			setArtifactView(null);
+			setDeckView(null);
+		},
+		onReference:  (reference) =>
+		{
+			setSlideRefs((prev) => (prev.some((r) => r.detail === reference.detail) ? prev : [...prev, reference]));
+			window.setTimeout(() => document.getElementById(MAIN_COMPOSER_ID)?.querySelector('input')?.focus(), isMobile ? DRAWER_EXIT_MS : 0);
+		},
+	});
 	const containerRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
 	const searchTriggerRef = useRef<HTMLButtonElement>(null);
@@ -1043,9 +1093,13 @@ export const AiChat = () => {
 		updateMessages: (chatId, updater) => setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, messages: updater(c.messages) } : c))),
 		nextMessageIdRef,
 		// The AI edits from your current version of each deck in this chat.
-		getDecks: (chatId) => Object.entries(liveDeck.docs).filter(([key]) => key.startsWith(\`\${chatId}:\`)).map(([, deck]) => deck),
+		getDecks: (chatId) => Object.entries(liveDeck.docs)
+			.filter(([key]) => key.startsWith(\`\${chatId}:\`))
+			.map(([key, deck]) => ({ deckId: key.slice(chatId.length + 1), deck })),
+		getSheets: sheetPanel.getSheets,
 		// A reply that edits slides lands live in the slides panel, opened without moving focus.
 		onReply: (chatId, message, previous) => {
+			sheetPanel.onReply(chatId, message, previous);
 			const edit = message.deckEdit;
 			if(!edit) return;
 			const docKey = deckDocKey(chatId, edit.deckId);
@@ -1057,6 +1111,8 @@ export const AiChat = () => {
 			}
 			liveDeck.apply(docKey, message.id, edit);
 			setActiveThread(null);
+			setArtifactView(null);
+			sheetPanel.hide();
 			setDeckView({ chatId, deckId: edit.deckId, messageId: message.id });
 		},
 	});
@@ -1212,6 +1268,7 @@ export const AiChat = () => {
 		}
 		if(activeThread?.chatId !== hit.chatId) setActiveThread(null);
 		setActiveId(hit.chatId);
+		setSidebarOpen(false);
 	};
 
 	// Doesn't touch \`chats\` — the draft only becomes a real, sidebar-visible chat once its
@@ -1221,6 +1278,8 @@ export const AiChat = () => {
 		setActiveId(null);
 		setDraft('');
 		setAttachedFiles([]);
+		setSlideRefs([]);
+		setSidebarOpen(false);
 	};
 
 	const handleSelectChat = (id: string) => {
@@ -1228,6 +1287,8 @@ export const AiChat = () => {
 		setActiveId(id);
 		setDraft('');
 		setAttachedFiles([]);
+		setSlideRefs([]);
+		setSidebarOpen(false);
 	};
 
 	const handleStartEdit = (chat: ChatEntry) => {
@@ -1273,7 +1334,7 @@ export const AiChat = () => {
 
 	const handleSubmit = (e: FormEvent) => {
 		e.preventDefault();
-		sendText(draft.trim(), attachedFiles.map((file) => ({ name: file.name })));
+		sendText(draft.trim(), [...slideRefs, ...attachedFiles.map((file) => ({ name: file.name }))]);
 	};
 
 	const sendText = (text: string, attachments: MessageAttachment[]) => {
@@ -1298,12 +1359,13 @@ export const AiChat = () => {
 				: 'New chat';
 			setChats((prev) => [{ id: chatId, title, messages: [userMessage], threadRefs: [] }, ...prev]);
 			setActiveId(chatId);
-			mainConversation.queueReply(chatId, text || describeAttachments(attachments), []);
+			mainConversation.queueReply(chatId, buildPrompt(text, attachments), []);
 		}
 
 		shouldAutoScrollRef.current = true;
 		setDraft('');
 		setAttachedFiles([]);
+		setSlideRefs([]);
 	};
 
 	const handleQuestionnaireAnswer = (messageId: number, value: string) => {
@@ -1372,6 +1434,8 @@ export const AiChat = () => {
 			liveDeck.open(docKey, deck);
 		}
 		setActiveThread(null);
+		setArtifactView(null);
+		sheetPanel.hide();
 		setDeckView({ chatId, deckId: edit.deckId, messageId: message.id });
 	};
 
@@ -1382,10 +1446,70 @@ export const AiChat = () => {
 	const skippedLast = lastDeckReply ? liveDeck.skipped(lastDeckReply.id) : 0;
 	const deckNote = skippedLast ? \`\${skippedLast} change\${skippedLast === 1 ? '' : 's'} skipped: you’d already removed what \${skippedLast === 1 ? 'it' : 'they'} would edit.\` : '';
 
+	const artifactEntries = collectArtifacts(activeChat?.messages ?? []);
+	const openArtifacts = artifactView && artifactView.chatId === activeChat?.id ? artifactView : null;
+
+	const sideKey = activeThread && activeChat ? \`thread:\${activeThread.threadId}\`
+		: openDocKey && openDeck ? \`deck:\${openDocKey}\`
+			: sheetPanel.sideKey ?? (openArtifacts ? \`artifacts:\${openArtifacts.chatId}\` : null);
+	const expanded = !isMobile && sideKey !== null && expandedKey === sideKey;
+
+	const handleToggleExpand = () => setExpandedKey(expanded ? null : sideKey);
+
+	const handleSnapExpand = () => {
+		setExpandedKey(sideKey);
+		requestAnimationFrame(() => document.querySelector<HTMLElement>('[data-expand-toggle]')?.focus());
+	};
+
+	// The chat column is display:none while expanded, so a trigger inside it can only take focus after the re-render.
+	const focusAfterClose = (id: string) => {
+		setExpandedKey(null);
+		if(expanded) requestAnimationFrame(() => document.getElementById(id)?.focus());
+		else document.getElementById(id)?.focus();
+	};
+
 	const handleCloseDeck = () => {
 		const messageId = deckView?.messageId;
 		setDeckView(null);
-		if(messageId !== undefined) document.getElementById(\`deck-open-\${messageId}\`)?.focus();
+		if(messageId !== undefined) focusAfterClose(\`deck-open-\${messageId}\`);
+	};
+
+	// On desktop the chat sits beside the slides, so the panel stays open; on mobile the sheet closes to land on the chat.
+	const handleAskAboutSlide = (context: DeckAskContext) => {
+		if(!deckView || !openDeck) return;
+		const reference = slideReference(context, { deckId: deckView.deckId, title: openDeck.title });
+		setSlideRefs((prev) => (prev.some((r) => r.detail === reference.detail) ? prev : [...prev, reference]));
+		if(isMobile) setDeckView(null);
+		window.setTimeout(() => document.getElementById(MAIN_COMPOSER_ID)?.querySelector('input')?.focus(), isMobile ? DRAWER_EXIT_MS : 0);
+	};
+
+	const handleOpenArtifacts = (chatId: string, key: string | null, triggerId: string) => {
+		setActiveThread(null);
+		setDeckView(null);
+		sheetPanel.hide();
+		setArtifactView({ chatId, key, triggerId });
+	};
+
+	const handleCloseArtifacts = () => {
+		const triggerId = artifactView?.triggerId;
+		setArtifactView(null);
+		if(triggerId) focusAfterClose(triggerId);
+	};
+
+	const handleCloseSheet = () => {
+		const messageId = sheetPanel.messageId;
+		sheetPanel.hide();
+		if(messageId !== undefined) focusAfterClose(\`sheet-open-\${messageId}\`);
+	};
+
+	const handleOpenDocumentEntry = (entry: ArtifactEntry) => {
+		if(entry.kind === 'sheet')
+		{
+			sheetPanel.openEntry(entry);
+			return;
+		}
+		const message = activeChat?.messages.find((m): m is ChatTextMessage => m.kind === 'message' && m.id === entry.messageId);
+		if(activeChat && message) handleOpenDeck(activeChat.id, message);
 	};
 
 	const renderDeckCard = (chatId: string, message: ChatTextMessage, previous: ChatMessage[]) => {
@@ -1410,6 +1534,8 @@ export const AiChat = () => {
 
 	const handleOpenThread = (chatId: string, threadId: string, rootMessageId: number) => {
 		setDeckView(null);
+		sheetPanel.hide();
+		setArtifactView(null);
 		setActiveThread({ chatId, threadId, rootMessageId });
 		if(activeId !== chatId) setActiveId(chatId);
 		setThreadDraft('');
@@ -1437,6 +1563,8 @@ export const AiChat = () => {
 		setChats((prev) => prev.map((c) => (c.id === chatId ? { ...c, threadRefs: [...c.threadRefs, threadRef] } : c)));
 		setThreadMessages((prev) => ({ ...prev, [threadId]: [] }));
 		setDeckView(null);
+		sheetPanel.hide();
+		setArtifactView(null);
 		setActiveThread({ chatId, threadId, rootMessageId });
 		setThreadDraft('');
 		setThreadAttachedFiles([]);
@@ -1445,7 +1573,7 @@ export const AiChat = () => {
 	const handleCloseThread = () => {
 		const rootMessageId = activeThread?.rootMessageId;
 		setActiveThread(null);
-		if(rootMessageId !== undefined) document.getElementById(\`thread-trigger-\${rootMessageId}\`)?.focus();
+		if(rootMessageId !== undefined) focusAfterClose(\`thread-trigger-\${rootMessageId}\`);
 	};
 
 	const handleThreadStop = () => {
@@ -1646,34 +1774,137 @@ export const AiChat = () => {
 		/>
 	);
 
+	const threadPanel = activeThread && activeChat ? (
+		<ThreadPanel
+			inDrawer={isMobile}
+			title={activeChat.title}
+			rootMessages={getThreadRootMessage(activeThread.chatId, activeThread.rootMessageId)}
+			threadMessages={threadMessages[activeThread.threadId] ?? []}
+			loading={loadingThreadId === activeThread.threadId}
+			isTyping={isThreadTyping}
+			composer={{
+				draft:         threadDraft,
+				onDraftChange: setThreadDraft,
+				onSubmit:      handleThreadSubmit,
+				isGenerating:  isThreadGenerating,
+				onStop:        handleThreadStop,
+				attachedFiles: threadAttachedFiles,
+				onAttach:      setThreadAttachedFiles,
+				commands:      [],
+				onCommand:     () => {},
+				placeholder:   'Reply in thread…',
+				inputLabel:    'Thread reply',
+				sendLabel:     'Send reply',
+				modelPicker,
+			}}
+			renderRoot={renderRootMessage}
+			renderReply={renderReplyMessage}
+			expanded={expanded}
+			onToggleExpand={handleToggleExpand}
+			onClose={handleCloseThread}
+		/>
+	) : null;
+
+	const chatSheetMap = sheetPanel.sheetsOf(activeChat?.id);
+	const chatSheets = [...chatSheetMap];
+
+	const deckPanel = openDocKey && openDeck ? (
+		<DeckPanel
+			inDrawer={isMobile}
+			key={openDocKey}
+			deck={openDeck}
+			activity={deckActivity}
+			note={deckNote}
+			onChange={(next, coalesceKey) => liveDeck.change(openDocKey, next, coalesceKey)}
+			onUndo={() => liveDeck.undo(openDocKey)}
+			onRedo={() => liveDeck.redo(openDocKey)}
+			canUndo={liveDeck.canUndo(openDocKey)}
+			canRedo={liveDeck.canRedo(openDocKey)}
+			expanded={expanded}
+			onToggleExpand={handleToggleExpand}
+			onClose={handleCloseDeck}
+			onAsk={handleAskAboutSlide}
+			sheets={chatSheets.map(([id, sheet]) => ({ id, title: sheet.title }))}
+			resolveChartSource={source => resolveSheetChart(chatSheetMap, source)}
+		/>
+	) : null;
+
+	const sheetPanelNode = sheetPanel.renderPanel({ expanded, onToggleExpand: handleToggleExpand, onClose: handleCloseSheet });
+
+	const artifactsPanel = openArtifacts ? (
+		<ArtifactsPanel
+			inDrawer={isMobile}
+			entries={artifactEntries}
+			openKey={openArtifacts.key}
+			onSelect={(key) => setArtifactView({ ...openArtifacts, key })}
+			onOpenDocument={handleOpenDocumentEntry}
+			expanded={expanded}
+			onToggleExpand={handleToggleExpand}
+			onClose={handleCloseArtifacts}
+		/>
+	) : null;
+
 	return (
 		<div className='w-full'>
 			<div className='flex h-[32rem] w-full max-w-6xl overflow-hidden rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border'>
-				<Sidebar width='w-64' height='h-full' headerHeight='h-16'>
+				<SidebarSlot mobile={isMobile} open={sidebarOpen} onOpenChange={setSidebarOpen}>
+				<Sidebar
+					width={isMobile ? 'w-full' : 'w-64'}
+					height='h-full'
+					headerHeight='h-16'
+					collapsible={!isMobile}
+					collapsed={railCollapsed}
+					onCollapsedChange={setSidebarCollapsed}
+				>
 					<SidebarHeader>
-						<div className='flex w-full items-center gap-1.5'>
+						<span className='truncate px-1 text-sm font-semibold text-text'>{APP_NAME}</span>
+					</SidebarHeader>
+					{!railCollapsed && (
+						<div className='flex items-center gap-1.5'>
+							<button
+							ref={searchTriggerRef}
+							type='button'
+							aria-label='Search all messages'
+							aria-keyshortcuts='Meta+K Control+K'
+							onClick={() => setSearchOpen(true)}
+							className={[
+								'flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border px-2.5 text-sm text-text-subtle',
+								'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
+								'hover:bg-surface-hover hover:text-text-muted',
+								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2',
+							].join(' ')}
+						>
+							<SearchIcon />
+							<span className='min-w-0 flex-1 truncate text-left'>Search…</span>
+							<kbd className='shrink-0 rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-surface-border px-1.5 py-0.5 text-[11px] font-medium text-text-muted select-none'>⌘K</kbd>
+						</button>
+						<button
+							type='button'
+							aria-label='Start a new chat'
+							onClick={handleNewChat}
+							className='flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
+						>
+							<PlusIcon />
+						</button>
+						</div>
+					)}
+					{railCollapsed && (
+						<div className='flex flex-col items-center gap-2'>
+							<Button variant='ghost' size='icon-sm' aria-label='Start a new chat' onClick={handleNewChat}>
+								<PlusIcon />
+							</Button>
 							<button
 								ref={searchTriggerRef}
 								type='button'
 								aria-label='Search all messages'
 								aria-keyshortcuts='Meta+K Control+K'
 								onClick={() => setSearchOpen(true)}
-								className={[
-									'flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border px-2.5 text-sm text-text-subtle',
-									'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
-									'hover:bg-surface-hover hover:text-text-muted',
-									'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2',
-								].join(' ')}
+								className='flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
 							>
 								<SearchIcon />
-								<span className='min-w-0 flex-1 truncate text-left'>Search messages…</span>
-								<kbd className='shrink-0 rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-surface-border px-1.5 py-0.5 text-[11px] font-medium text-text-muted select-none'>⌘K</kbd>
 							</button>
-							<Button variant='primary' size='icon-sm' aria-label='Start a new chat' onClick={handleNewChat}>
-								<PlusIcon />
-							</Button>
 						</div>
-					</SidebarHeader>
+					)}
 					<SidebarSection label='Chats'>
 						{chats.map((chat) => (
 							editingId === chat.id ? (
@@ -1729,32 +1960,59 @@ export const AiChat = () => {
 						<button
 							type='button'
 							aria-haspopup='dialog'
+							aria-label={railCollapsed ? \`\${displayName}, settings\` : undefined}
 							onClick={() => setSettingsOpen(true)}
 							className={[
-								'flex w-full items-center gap-2.5 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel p-2 text-left shadow-[var(--shadow-sm)]',
+								\`flex w-full items-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel text-left shadow-[var(--shadow-sm)] \${railCollapsed ? 'justify-center p-1' : 'gap-2.5 p-2'}\`,
 								'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 								'hover:border-surface-border-hover hover:bg-surface-hover',
 								'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
 							].join(' ')}
 						>
 							<Avatar name={displayName} shape='square' size='md' />
-							<span className='flex min-w-0 flex-1 flex-col items-start'>
-								<span className='w-full truncate text-sm font-medium text-text'>{displayName}</span>
-								<span className='w-full truncate text-xs text-text-muted'>{modelLabel} model</span>
-							</span>
-							<ChevronRightIcon className='shrink-0 text-text-muted' />
+							{!railCollapsed && (
+								<>
+									<span className='flex min-w-0 flex-1 flex-col items-start'>
+										<span className='w-full truncate text-sm font-medium text-text'>{displayName}</span>
+										<span className='w-full truncate text-xs text-text-muted'>{modelLabel} model</span>
+									</span>
+									<ChevronRightIcon className='shrink-0 text-text-muted' />
+								</>
+							)}
 						</button>
 					</SidebarFooter>
 				</Sidebar>
+				</SidebarSlot>
 
 				<Resizable direction='horizontal' className='flex-1 min-w-0'>
-					<ResizablePanel minSize={280} className='flex'>
+					<ResizablePanel minSize={280} className={expanded ? 'hidden' : 'flex'}>
 						<div className='flex min-w-0 flex-1 flex-col'>
 							{chatsStatus === 'ready' ? (
 								<>
-									<div className='flex h-16 flex-col justify-center border-b-[length:var(--border-width)] border-surface-border px-4'>
-										<h3 className='text-base font-semibold text-text'>{activeChat?.title ?? 'New chat'}</h3>
-										<p className='text-xs text-text-muted'>{modelLabel} model</p>
+									<div className='flex h-16 items-center gap-2 border-b-[length:var(--border-width)] border-surface-border px-4'>
+										{isMobile && (
+											<Button variant='ghost' size='icon-sm' aria-label='Open chats' aria-haspopup='dialog' onClick={() => setSidebarOpen(true)}>
+												<MenuIcon />
+											</Button>
+										)}
+										<div className='min-w-0'>
+											<h3 className='truncate text-base font-semibold text-text'>{activeChat?.title ?? 'New chat'}</h3>
+											<p className='text-xs text-text-muted'>{modelLabel} model</p>
+										</div>
+										{activeChat && artifactEntries.length > 0 && (
+											<Button
+												id='artifacts-trigger'
+												variant='ghost'
+												size='sm'
+												className='ml-auto shrink-0 gap-1.5'
+												aria-haspopup='dialog'
+												aria-label={\`Artifacts, \${artifactEntries.length}\`}
+												onClick={() => handleOpenArtifacts(activeChat.id, null, 'artifacts-trigger')}
+											>
+												<FileIcon />
+												<span aria-hidden='true'>{artifactEntries.length}</span>
+											</Button>
+										)}
 									</div>
 									<div className='relative flex min-h-0 flex-1 flex-col'>
 										<ScrollFade ref={containerRef} direction='vertical' className='h-full' wrapperClassName='min-h-0 flex-1'>
@@ -1778,7 +2036,19 @@ export const AiChat = () => {
 																onEditDraftChange={setEditDraft}
 																onCancelEdit={handleCancelEditMessage}
 																onSubmitEdit={() => handleResendEdit(activeChat.id, m.id)}
-																renderArtifact={(msg) => renderDeckCard(activeChat.id, msg, activeChat.messages.slice(0, index))}
+																renderArtifact={(msg) => (
+																<>
+																	{renderDeckCard(activeChat.id, msg, activeChat.messages.slice(0, index))}
+																	{sheetPanel.renderCard(activeChat.id, msg, activeChat.messages.slice(0, index))}
+																	{msg.artifacts?.map((artifact) => (
+																		<ArtifactCard
+																			key={artifact.id}
+																			artifact={artifact}
+																			onOpen={() => handleOpenArtifacts(activeChat.id, artifact.id, \`artifact-open-\${artifact.id}\`)}
+																		/>
+																	))}
+																</>
+															)}
 																renderTrailing={(msg) => {
 																	const threadRef    = activeChat.threadRefs.find((t) => t.rootMessageId === msg.id);
 																	const replyCount    = threadRef ? (threadMessages[threadRef.id]?.length ?? threadRef.replyCount) : 0;
@@ -1833,6 +2103,9 @@ export const AiChat = () => {
 												placeholder='Message… (try /compact)'
 												inputLabel='Message'
 												sendLabel='Send message'
+											references={slideRefs}
+											onRemoveReference={(index) => setSlideRefs((prev) => prev.filter((_, i) => i !== index))}
+											id={MAIN_COMPOSER_ID}
 												modelPicker={modelPicker}
 											/>
 										</div>
@@ -1850,60 +2123,70 @@ export const AiChat = () => {
 						</div>
 					</ResizablePanel>
 
-				{activeThread && activeChat && (
+				{!isMobile && activeThread && activeChat && (
 					<>
-						<ResizableHandle aria-label='Resize thread panel' />
-						<ResizablePanel defaultSize={320} minSize={240} maxSize={480} className='flex'>
-							<ThreadPanel
-								title={activeChat.title}
-								rootMessages={getThreadRootMessage(activeThread.chatId, activeThread.rootMessageId)}
-								threadMessages={threadMessages[activeThread.threadId] ?? []}
-								loading={loadingThreadId === activeThread.threadId}
-								isTyping={isThreadTyping}
-								composer={{
-									draft:         threadDraft,
-									onDraftChange: setThreadDraft,
-									onSubmit:      handleThreadSubmit,
-									isGenerating:  isThreadGenerating,
-									onStop:        handleThreadStop,
-									attachedFiles: threadAttachedFiles,
-									onAttach:      setThreadAttachedFiles,
-									commands:      [],
-									onCommand:     () => {},
-									placeholder:   'Reply in thread…',
-									inputLabel:    'Thread reply',
-									sendLabel:     'Send reply',
-									modelPicker,
-								}}
-								renderRoot={renderRootMessage}
-								renderReply={renderReplyMessage}
-								onClose={handleCloseThread}
-							/>
+						{!expanded && <ResizableHandle aria-label='Resize thread panel' />}
+						<ResizablePanel defaultSize={320} minSize={240} maxSize={480} onSnap={handleSnapExpand} style={expanded ? { width: 'auto', flexGrow: 1, flexShrink: 1 } : undefined} className='flex'>
+							{threadPanel}
 						</ResizablePanel>
 					</>
 				)}
 
-				{openDocKey && openDeck && (
+				{!isMobile && openDocKey && openDeck && (
 					<>
-						<ResizableHandle aria-label='Resize slides panel' />
-						<ResizablePanel defaultSize={560} minSize={360} maxSize={900} className='flex'>
-							<DeckPanel
-								key={openDocKey}
-								deck={openDeck}
-								activity={deckActivity}
-								note={deckNote}
-								onChange={(next, coalesceKey) => liveDeck.change(openDocKey, next, coalesceKey)}
-								onUndo={() => liveDeck.undo(openDocKey)}
-								onRedo={() => liveDeck.redo(openDocKey)}
-								canUndo={liveDeck.canUndo(openDocKey)}
-								canRedo={liveDeck.canRedo(openDocKey)}
-								onClose={handleCloseDeck}
-							/>
+						{!expanded && <ResizableHandle aria-label='Resize slides panel' />}
+						<ResizablePanel defaultSize={560} minSize={360} maxSize={900} onSnap={handleSnapExpand} style={expanded ? { width: 'auto', flexGrow: 1, flexShrink: 1 } : undefined} className='flex'>
+							{deckPanel}
+						</ResizablePanel>
+					</>
+				)}
+
+				{!isMobile && sheetPanel.isOpen && (
+					<>
+						{!expanded && <ResizableHandle aria-label='Resize sheet panel' />}
+						<ResizablePanel defaultSize={620} minSize={360} maxSize={900} onSnap={handleSnapExpand} style={expanded ? { width: 'auto', flexGrow: 1, flexShrink: 1 } : undefined} className='flex'>
+							{sheetPanelNode}
+						</ResizablePanel>
+					</>
+				)}
+
+				{!isMobile && openArtifacts && (
+					<>
+						{!expanded && <ResizableHandle aria-label='Resize artifacts panel' />}
+						<ResizablePanel defaultSize={480} minSize={320} maxSize={900} onSnap={handleSnapExpand} style={expanded ? { width: 'auto', flexGrow: 1, flexShrink: 1 } : undefined} className='flex'>
+							{artifactsPanel}
 						</ResizablePanel>
 					</>
 				)}
 				</Resizable>
 			</div>
+
+			{isMobile && (
+				<Drawer open={Boolean(activeThread && activeChat)} onOpenChange={(open) => !open && handleCloseThread()} side='right' aria-label='Thread' className='!w-full !max-w-full'>
+					{threadPanel}
+				</Drawer>
+			)}
+
+			{isMobile && (
+				<Drawer open={Boolean(openDocKey && openDeck)} onOpenChange={(open) => !open && handleCloseDeck()} side='bottom' aria-label='Slides' className='!h-[92dvh] !max-h-[92dvh] rounded-t-[var(--radius-lg)]'>
+					<DrawerHandle />
+					{deckPanel}
+				</Drawer>
+			)}
+
+			{isMobile && (
+				<Drawer open={sheetPanel.isOpen} onOpenChange={(open) => !open && handleCloseSheet()} side='bottom' aria-label='Sheet' className='!h-[92dvh] !max-h-[92dvh] rounded-t-[var(--radius-lg)]'>
+					<DrawerHandle />
+					{sheetPanelNode}
+				</Drawer>
+			)}
+
+			{isMobile && (
+				<Drawer open={Boolean(openArtifacts)} onOpenChange={(open) => !open && handleCloseArtifacts()} side='bottom' aria-label='Artifacts' className='!h-[92dvh] !max-h-[92dvh] rounded-t-[var(--radius-lg)]'>
+					<DrawerHandle />
+					{artifactsPanel}
+				</Drawer>
+			)}
 
 			<Modal open={chatPendingDeletion !== null} onOpenChange={handleDeleteOpenChange}>
 				<ModalClose />
@@ -1994,14 +2277,20 @@ export const AiChat = () => {
 export default AiChat;
 `,
 		dependencies: ['react-markdown', 'remark-gfm', 'remark-math'],
-		registryDependencies: ['sidebar', 'scroll-fade', 'message', 'typewriter', 'attachment', 'button', 'input', 'textarea', 'command-input', 'command-palette', 'badge', 'tooltip', 'spinner', 'collapsible', 'timeline', 'modal', 'charts', 'function-plotter', 'table', 'date-picker', 'slider', 'formula', 'code-block', 'audioplayer', 'skeleton', 'questionnaire', 'tool-call-trace', 'resizable', 'workflow-builder', 'avatar', 'select', 'switch', 'menu', 'deck-editor'],
+		registryDependencies: ['sidebar', 'scroll-fade', 'message', 'typewriter', 'attachment', 'button', 'input', 'textarea', 'command-input', 'command-palette', 'badge', 'tooltip', 'spinner', 'collapsible', 'timeline', 'modal', 'charts', 'function-plotter', 'table', 'date-picker', 'slider', 'formula', 'code-block', 'audioplayer', 'skeleton', 'questionnaire', 'tool-call-trace', 'resizable', 'workflow-builder', 'avatar', 'select', 'switch', 'menu', 'deck-editor', 'sheet-editor', 'drawer'],
 		files: [
-			'AiChat/AiChat.tsx', 'AiChat/ChatMarkdown.tsx', 'AiChat/StreamingMessage.tsx', 'AiChat/ThreadPanel.tsx', 'AiChat/DeckPanel.tsx',
+			'AiChat/AiChat.tsx', 'AiChat/ChatMarkdown.tsx', 'AiChat/StreamingMessage.tsx', 'AiChat/ThreadPanel.tsx', 'AiChat/DeckPanel.tsx', 'AiChat/SheetPanel.tsx',
+			'AiChat/ArtifactsPanel.tsx', 'AiChat/ArtifactViewer.tsx', 'AiChat/artifactKinds.tsx',
 			'AiChat/Composer.tsx', 'AiChat/ModelPicker.tsx', 'AiChat/Phrases.tsx', 'AiChat/icons.tsx', 'AiChat/constants.ts', 'AiChat/messageHelpers.ts', 'AiChat/MessageRow.tsx',
 			{ path: 'AiChat/types.ts', kind: 'model' },
 			{ path: 'AiChat/chatApi.ts', kind: 'api' },
 			{ path: 'AiChat/useConversation.ts', kind: 'hook' },
+			{ path: 'AiChat/liveDocs.ts', kind: 'hook' },
 			{ path: 'AiChat/useLiveDeck.ts', kind: 'hook' },
+			{ path: 'AiChat/useLiveSheet.ts', kind: 'hook' },
+			{ path: 'AiChat/useSheetPanel.tsx', kind: 'hook' },
+			{ path: 'AiChat/chartSource.ts', kind: 'hook' },
+			{ path: 'AiChat/useIsMobile.ts', kind: 'hook' },
 			'AiChat/CLAUDE.md',
 		],
 		promptSnippet: `Most of your reply can just be normal GitHub-flavored markdown — the chat already

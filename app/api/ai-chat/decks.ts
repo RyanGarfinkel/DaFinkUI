@@ -8,6 +8,7 @@ import { NO_TRANSITION } from '@/src/components/DeckEditor/deck';
 // agent's tool calls would produce these DeckOps instead.
 
 const DECK_ID = 'q3-review';
+const BUDGET_SHEET_ID = 'q3-budget';
 export const DECK_TITLE = 'Q3 review';
 
 const slide = (id: string, elements: DeckElement[] = []): Slide => ({
@@ -74,6 +75,38 @@ const REVISE_REPLY: AiChatReply = {
 	text:      'Done: a punchier title, October in the chart (now a line), a closing slide, and the Ocean theme.',
 	toolCalls: trace(REVISE_STEPS),
 	deckEdit:  { deckId: DECK_ID, title: DECK_TITLE, steps: REVISE_STEPS },
+};
+
+const LINK_STEPS: DeckEditStep[] = [
+	{ label: 'Adding a budget slide', op: { type: 'addSlide', slide: slide('budget') } },
+	{ label: 'Titling the budget slide', op: { type: 'addElement', slideId: 'budget', element: text('budget-title', 'Title', '<p>Q1 costs by line</p>', { x: 96, y: 64, width: 1088, height: 88 }, 48, true) } },
+	{
+		label: 'Linking a chart to the Q3 budget sheet',
+		op:    {
+			type: 'addElement', slideId: 'budget', element: {
+				id: 'budget-chart', label: 'Budget chart', type: 'chart', chart: 'bar', seriesLabel: 'Q1', x: 96, y: 184, width: 1088, height: 440,
+				data: [{ label: 'Hosting', value: 1200 }, { label: 'Salaries', value: 48000 }, { label: 'Marketing', value: 6200 }, { label: 'Software', value: 2400 }],
+				source: { sheetId: BUDGET_SHEET_ID, range: 'A1:B5' },
+			},
+		},
+	},
+];
+
+const LINK_REPLY: AiChatReply = {
+	text:      'Added a slide with a chart that reads the Q3 budget sheet (A1:B5). Edit the sheet and the chart follows; pick the chart and change its range in the settings to chart another column.',
+	toolCalls: trace(LINK_STEPS),
+	deckEdit:  { deckId: DECK_ID, title: DECK_TITLE, steps: LINK_STEPS },
+};
+
+const LINK_WORDS = /\b(link|connect|chart|graph|plot)\b/i;
+const BUDGET_WORDS = /\b(sheets?|spreadsheets?|budget)\b/i;
+
+/** A chart linked to the budget sheet: only once the chat has both that sheet and the deck, and only once per deck. */
+export const linkChartReply = (message: string, history: { role: string; text: string }[], sheetIds: string[]): AiChatReply | null => {
+	if(!LINK_WORDS.test(message) || !BUDGET_WORDS.test(message) || !sheetIds.includes(BUDGET_SHEET_ID)) return null;
+	const deckTexts = [CREATE_REPLY.text, REVISE_REPLY.text];
+	const lastDeck = history.findLast(h => h.role === 'assistant' && (deckTexts.includes(h.text) || h.text === LINK_REPLY.text));
+	return lastDeck && lastDeck.text !== LINK_REPLY.text ? LINK_REPLY : null;
 };
 
 const DECK_WORDS = /\b(slides?|deck|presentation)\b/i;

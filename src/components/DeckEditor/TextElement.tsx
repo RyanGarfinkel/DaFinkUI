@@ -4,6 +4,7 @@ import { Color, TextStyle } from '@tiptap/extension-text-style';
 import { EditorContent, useEditor } from '@tiptap/react';
 import TextAlign from '@tiptap/extension-text-align';
 import StarterKit from '@tiptap/starter-kit';
+import type { VerticalAlign } from './deck';
 import type { Editor } from '@tiptap/react';
 import { useEffect, useRef } from 'react';
 
@@ -17,6 +18,8 @@ interface TextElementProps {
 	bold?:          boolean;
 	/** Shown over the box while it has no text. */
 	placeholder?:   string;
+	/** Where the text sits when the box is taller than it. Defaults to the top. */
+	valign?:        VerticalAlign;
 	selected:       boolean;
 	editing:        boolean;
 	/** `height` is the content's natural height in slide px, so the box can grow to fit. */
@@ -36,7 +39,11 @@ const isBlank = (html: string) => !html.replace(/<[^>]*>/g, '').replace(/&nbsp;/
 
 const alignmentOf = (html: string) => (/text-align:\s*(center|right)/.exec(html)?.[1] ?? 'left') as 'left' | 'center' | 'right';
 
-export const TextElement = ({ html, fontSize, font, color, bold, placeholder, selected, editing, onChange, onEditorChange }: TextElementProps) => {
+const JUSTIFY = { top: 'justify-start', middle: 'justify-center', bottom: 'justify-end' } as const;
+
+const PLACEHOLDER_POSITION = { top: 'top-0', middle: 'top-1/2 -translate-y-1/2', bottom: 'bottom-0' } as const;
+
+export const TextElement = ({ html, fontSize, font, color, bold, placeholder, valign = 'top', selected, editing, onChange, onEditorChange }: TextElementProps) => {
 	// useEditor captures its options once; refs keep the callbacks current.
 	const onChangeRef = useRef(onChange);
 	const onEditorChangeRef = useRef(onEditorChange);
@@ -90,15 +97,15 @@ export const TextElement = ({ html, fontSize, font, color, bold, placeholder, se
 
 	return (
 		<div
-			className={`relative h-full w-full ${color ? '' : 'text-text'}`}
+			className={`relative flex h-full w-full flex-col ${JUSTIFY[valign]} ${color ? '' : 'text-text'}`}
 			style={{ fontSize, fontFamily: font, fontWeight: bold ? 700 : undefined, color: color || undefined }}
 		>
-			<EditorContent editor={editor} className='h-full' />
+			<EditorContent editor={editor} className={valign === 'top' ? 'h-full' : ''} />
 			{empty && (
 				<span
 					aria-hidden='true'
 					// List boxes indent their text past the bullet; the placeholder follows suit.
-					className={`pointer-events-none absolute inset-x-0 top-0 leading-tight text-text-subtle ${/^<(ul|ol)/.test(html) ? 'pl-[1.2em]' : ''}`}
+					className={`pointer-events-none absolute inset-x-0 ${PLACEHOLDER_POSITION[valign]} leading-tight text-text-subtle ${/^<(ul|ol)/.test(html) ? 'pl-[1.2em]' : ''}`}
 					style={{ textAlign: alignmentOf(html) }}
 				>
 					{placeholder}

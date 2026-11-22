@@ -1,9 +1,12 @@
 'use client';
 
-import type { CustomTheme, ThemeColors } from './themes';
+import { DEFAULT_MARGIN, DEFAULT_RADIUS, FONT_OPTIONS } from './themes';
+import type { CustomTheme, FontId, ThemeColors } from './themes';
 import { ColorPicker } from '../ColorPicker/ColorPicker';
 import { contrastRatio } from '../ColorPicker/color';
 import { FontSelect } from './FormatToolbar';
+import { NumberField } from './fields';
+import Select from '../Select/Select';
 import { useState } from 'react';
 import { Glyph } from './icons';
 
@@ -69,6 +72,17 @@ export const CustomThemeEditor = ({ value, onChange }: CustomThemeEditorProps) =
 			/>
 
 			<FontSelect value={value.font} onChange={font => onChange({ ...value, font })} />
+			<Select
+				label='Heading font'
+				size='sm'
+				options={[{ value: 'body', label: 'Same as body' }, ...FONT_OPTIONS.filter(o => o.value !== 'theme')]}
+				value={value.headingFont ?? 'body'}
+				onChange={next => onChange({ ...value, headingFont: next === 'body' ? undefined : next as FontId })}
+			/>
+			<div className='grid grid-cols-2 gap-2'>
+				<NumberField label='Corner radius' value={value.radius ?? DEFAULT_RADIUS} min={0} max={200} onChange={radius => onChange({ ...value, radius: Math.min(200, Math.max(0, radius)) }, 'custom-radius')} />
+				<NumberField label='Margin' value={value.margin ?? DEFAULT_MARGIN} min={0} max={300} onChange={margin => onChange({ ...value, margin: Math.min(300, Math.max(0, margin)) }, 'custom-margin')} />
+			</div>
 
 			<div role='status' aria-live='polite'>
 				{failures.length > 0 && (

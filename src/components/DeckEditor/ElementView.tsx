@@ -2,12 +2,13 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../Table/Table';
 import { AreaChart, BarChart, LineChart } from '../Charts/Charts';
+import { FONTS, textFontFamily } from './themes';
 import { TextElement } from './TextElement';
 import { LineElement } from './LineElement';
 import type { Editor } from '@tiptap/react';
 import type { DeckElement } from './deck';
 import { ElementGlyph } from './glyphs';
-import { FONTS } from './themes';
+import { checkSvg } from './svg';
 
 interface ElementViewProps {
 	element:         DeckElement;
@@ -37,10 +38,11 @@ export const ElementView = ({ element, selected = false, editing, onChange, onEd
 			<TextElement
 				html={element.html}
 				fontSize={element.fontSize}
-				font={element.font && FONTS[element.font].stack}
+				font={textFontFamily(element)}
 				color={element.color}
 				bold={element.bold}
 				placeholder={showPlaceholders ? element.placeholder : undefined}
+				valign={element.valign}
 				selected={selected}
 				editing={editing}
 				onChange={(html, height) => onChange(height > element.height ? { html, height } : { html })}
@@ -54,7 +56,7 @@ export const ElementView = ({ element, selected = false, editing, onChange, onEd
 				className='h-full w-full'
 				style={{
 					background:   element.fill || 'var(--color-brand)',
-					borderRadius: element.shape === 'ellipse' ? '50%' : element.radius,
+					borderRadius: element.shape === 'ellipse' ? '50%' : (element.radius ?? 'var(--deck-radius, 0px)'),
 				}}
 			/>
 		);
@@ -72,11 +74,29 @@ export const ElementView = ({ element, selected = false, editing, onChange, onEd
 
 		return (
 			// eslint-disable-next-line @next/next/no-img-element -- slide images are user-supplied URLs or data URIs, not optimizable static assets
-			<img src={element.src} alt={element.alt} draggable={false} className='h-full w-full' style={{ objectFit: element.fit }} />
+			<img src={element.src} alt={element.alt} draggable={false} className='h-full w-full' style={{ objectFit: element.fit, borderRadius: 'var(--deck-radius, 0px)' }} />
 		);
 
 	case 'icon':
 		return <ElementGlyph name={element.icon} size='100%' style={{ color: element.color || 'var(--color-brand)' }} />;
+
+	case 'svg': {
+		const problem = checkSvg(element.svg);
+		if(problem)
+		{
+			return <div role='img' aria-label='Invalid SVG' className='flex h-full w-full items-center justify-center rounded-[var(--radius)] border-2 border-dashed border-danger text-sm text-danger'>Invalid SVG</div>;
+		}
+
+		return (
+			<div
+				role='img'
+				aria-label={element.label}
+				className='h-full w-full [&>svg]:block [&>svg]:h-full [&>svg]:w-full'
+				style={{ color: element.color || 'var(--color-text)' }}
+				dangerouslySetInnerHTML={{ __html: element.svg }}
+			/>
+		);
+	}
 
 	case 'line':
 		return <LineElement element={element} />;
@@ -92,7 +112,7 @@ export const ElementView = ({ element, selected = false, editing, onChange, onEd
 			: value);
 
 		return (
-			<div className={`h-full w-full overflow-hidden bg-surface ${TABLE_SCALE}`} style={{ fontSize: element.fontSize, fontFamily: element.font && FONTS[element.font].stack }}>
+			<div className={`h-full w-full overflow-hidden bg-surface ${TABLE_SCALE}`} style={{ fontSize: element.fontSize, fontFamily: element.font && FONTS[element.font].stack, borderRadius: 'var(--deck-radius, 0px)' }}>
 				<Table>
 					{head && (
 						<TableHead>
@@ -116,7 +136,7 @@ export const ElementView = ({ element, selected = false, editing, onChange, onEd
 	case 'chart': {
 		const Chart = CHARTS[element.chart];
 		return (
-			<div className={`h-full w-full ${CHART_SCALE}`}>
+			<div className={`h-full w-full overflow-hidden ${CHART_SCALE}`} style={{ borderRadius: 'var(--deck-radius, 0px)' }}>
 				<Chart
 					data={element.data.map(row => ({ label: row.label, value: row.value }))}
 					xKey='label'

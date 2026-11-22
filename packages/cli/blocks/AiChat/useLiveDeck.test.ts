@@ -53,7 +53,7 @@ describe('editFrames', () =>
 
 describe('liveDecksReducer', () =>
 {
-	const opened = run(EMPTY_LIVE_DECKS, { type: 'open', docKey: 'd', deck: BASE });
+	const opened = run(EMPTY_LIVE_DECKS, { type: 'open', docKey: 'd', doc: BASE });
 
 	it('queues AI steps and lands them one change at a time', () =>
 	{
@@ -78,7 +78,7 @@ describe('liveDecksReducer', () =>
 		state = liveDecksReducer(state, { type: 'tick' });
 
 		const withoutBox = { ...state.docs.d, title: 'Mine', slides: [{ ...state.docs.d.slides[0], elements: [] }] };
-		state = drain(liveDecksReducer(state, { type: 'change', docKey: 'd', deck: withoutBox }));
+		state = drain(liveDecksReducer(state, { type: 'change', docKey: 'd', doc: withoutBox }));
 
 		expect(state.docs.d).toMatchObject({ title: 'Mine', theme: 'paper' });
 		expect(state.docs.d.slides[0].elements).toHaveLength(0);
@@ -88,7 +88,7 @@ describe('liveDecksReducer', () =>
 	it('undoes only your own change, leaving the AI\'s later ones', () =>
 	{
 		const mine = { ...BASE, title: 'Mine' };
-		let state = run(opened, { type: 'change', docKey: 'd', deck: mine });
+		let state = run(opened, { type: 'change', docKey: 'd', doc: mine });
 		state = run(state, { type: 'edit', docKey: 'd', messageId: 2, steps: [STEPS[1]], instant: true });
 		state = run(state, { type: 'undo', docKey: 'd' });
 
@@ -98,7 +98,7 @@ describe('liveDecksReducer', () =>
 
 	it('coalesces a run of changes sharing a key into one undo step', () =>
 	{
-		const move = (x: number): LiveDecksAction => ({ type: 'change', docKey: 'd', deck: { ...BASE, slides: [{ ...BASE.slides[0], elements: [{ ...shape('box'), x }] }] }, coalesceKey: 'drag' });
+		const move = (x: number): LiveDecksAction => ({ type: 'change', docKey: 'd', doc: { ...BASE, slides: [{ ...BASE.slides[0], elements: [{ ...shape('box'), x }] }] }, coalesceKey: 'drag' });
 		let state = run(opened, move(10), move(20), move(30));
 		expect(state.history.d.past).toHaveLength(1);
 		state = run(state, { type: 'undo', docKey: 'd' });
@@ -107,7 +107,7 @@ describe('liveDecksReducer', () =>
 
 	it('a fresh deck (with a base) starts the document and its history over', () =>
 	{
-		const edited = run(opened, { type: 'change', docKey: 'd', deck: { ...BASE, title: 'Mine' } });
+		const edited = run(opened, { type: 'change', docKey: 'd', doc: { ...BASE, title: 'Mine' } });
 		const fresh = run(edited, { type: 'edit', docKey: 'd', messageId: 3, base: { ...BASE, title: 'New' }, steps: [], instant: true });
 		expect(fresh.docs.d.title).toBe('New');
 		expect(fresh.history.d.past).toHaveLength(0);
@@ -115,7 +115,7 @@ describe('liveDecksReducer', () =>
 
 	it('ignores no-op changes', () =>
 	{
-		expect(run(opened, { type: 'change', docKey: 'd', deck: BASE })).toBe(opened);
+		expect(run(opened, { type: 'change', docKey: 'd', doc: BASE })).toBe(opened);
 	});
 });
 

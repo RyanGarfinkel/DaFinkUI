@@ -1,3 +1,5 @@
+import type { TextStyleId } from './textstyles';
+import { usesHeadingFont } from './textstyles';
 import type { CSSProperties } from 'react';
 
 /** `'custom'` resolves to the deck's own `customTheme`. */
@@ -16,12 +18,22 @@ export interface ThemeColors {
 }
 
 export interface SlideTheme {
-	id:     ThemeId;
-	label:  string;
+	id:          ThemeId;
+	label:       string;
 	/** Null follows the app's own light/dark tokens. */
-	colors: ThemeColors | null;
-	font:   string | null;
+	colors:      ThemeColors | null;
+	/** CSS font stack for body text; null follows the app. */
+	font:        string | null;
+	/** CSS font stack for heading text styles (Title, Heading, Subheading); null uses the body font. */
+	headingFont: string | null;
+	/** Corner radius in px for shapes (unless they set their own), images, tables, and charts. */
+	radius:      number;
+	/** Slide margin in px. Layouts, headers, and footers inset by this much. */
+	margin:      number;
 }
+
+export const DEFAULT_RADIUS = 12;
+export const DEFAULT_MARGIN = 96;
 
 export type FontId = 'sans' | 'serif' | 'mono' | 'rounded' | 'arial' | 'helvetica' | 'times' | 'courier' | 'verdana';
 
@@ -54,26 +66,28 @@ export const FONT_OPTIONS = [
 const SANS = FONTS.sans.stack;
 const SERIF = FONTS.serif.stack;
 
+const ROUNDED = FONTS.rounded.stack;
+
 export const THEMES: SlideTheme[] = [
-	{ id: 'app', label: 'Match app', colors: null, font: null },
+	{ id: 'app', label: 'Match app', colors: null, font: null, headingFont: null, radius: DEFAULT_RADIUS, margin: DEFAULT_MARGIN },
 	{
-		id: 'paper', label: 'Paper', font: SERIF,
+		id: 'paper', label: 'Paper', font: SANS, headingFont: SERIF, radius: 4, margin: 112,
 		colors: { background: '#fbf8f3', surface: '#f1ebe1', border: '#e2d9cb', text: '#2b2622', muted: '#6b6157', accent: '#b4532a' },
 	},
 	{
-		id: 'midnight', label: 'Midnight', font: SANS,
+		id: 'midnight', label: 'Midnight', font: SANS, headingFont: SANS, radius: 16, margin: 96,
 		colors: { background: '#0f1220', surface: '#1a1f35', border: '#2a3150', text: '#f1f3f9', muted: '#9aa3bf', accent: '#7c9cff' },
 	},
 	{
-		id: 'ocean', label: 'Ocean', font: SANS,
+		id: 'ocean', label: 'Ocean', font: SANS, headingFont: ROUNDED, radius: 20, margin: 96,
 		colors: { background: '#f0f7fb', surface: '#dcecf5', border: '#c3dceb', text: '#0c2a3a', muted: '#3f6577', accent: '#0e7c9e' },
 	},
 	{
-		id: 'sunset', label: 'Sunset', font: SANS,
+		id: 'sunset', label: 'Sunset', font: SANS, headingFont: ROUNDED, radius: 28, margin: 80,
 		colors: { background: '#fff6ef', surface: '#ffe7d6', border: '#f8cdb0', text: '#3b1d12', muted: '#8a4b33', accent: '#e8590c' },
 	},
 	{
-		id: 'forest', label: 'Forest', font: SERIF,
+		id: 'forest', label: 'Forest', font: SERIF, headingFont: SERIF, radius: 8, margin: 104,
 		colors: { background: '#f3f7f2', surface: '#e1ecdf', border: '#c9dbc6', text: '#1d2b1c', muted: '#4f6a4c', accent: '#2f7d32' },
 	},
 ];
@@ -93,8 +107,12 @@ export const THEME_COLOR_REFS = [
 export const themeColorLabel = (color: string) => THEME_COLOR_REFS.find(r => r.value === color)?.label;
 
 export interface CustomTheme {
-	colors: ThemeColors;
-	font?:  FontId;
+	colors:       ThemeColors;
+	font?:        FontId;
+	/** Omit to use the body font for headings too. */
+	headingFont?: FontId;
+	radius?:      number;
+	margin?:      number;
 }
 
 /** Starting colors for a custom theme when the current one (Match app) has none of its own. */
@@ -105,17 +123,50 @@ export const DEFAULT_CUSTOM_COLORS: ThemeColors = {
 /** The theme a deck renders with: a preset, or its custom theme (falling back to Match app if it has none). */
 export const resolveTheme = (theme: ThemeId, custom?: CustomTheme): SlideTheme =>
 	(theme === 'custom' && custom
-		? { id: 'custom', label: 'Custom', colors: custom.colors, font: custom.font ? FONTS[custom.font].stack : null }
+		? {
+			id:          'custom',
+			label:       'Custom',
+			colors:      custom.colors,
+			font:        custom.font ? FONTS[custom.font].stack : null,
+			headingFont: custom.headingFont ? FONTS[custom.headingFont].stack : null,
+			radius:      custom.radius ?? DEFAULT_RADIUS,
+			margin:      custom.margin ?? DEFAULT_MARGIN,
+		}
 		: getTheme(theme));
+
+const fontIdFor = (stack: string | null) => Object.entries(FONTS).find(([, f]) => f.stack === stack)?.[0] as FontId | undefined;
+
+/** A custom theme that starts as a copy of `theme`, so changing one thing about a preset is an edit, not a blank slate. */
+export const customFromTheme = (theme: SlideTheme): CustomTheme => ({
+	colors:      theme.colors ?? DEFAULT_CUSTOM_COLORS,
+	font:        fontIdFor(theme.font),
+	headingFont: fontIdFor(theme.headingFont),
+	radius:      theme.radius,
+	margin:      theme.margin,
+});
+
+/**
+ * The CSS font-family for a text element: its own font, else the theme's
+ * heading font for headings, else nothing (it inherits the theme's body font).
+ */
+export const textFontFamily = (element: { font?: FontId; style?: TextStyleId }) =>
+	(element.font ? FONTS[element.font].stack : usesHeadingFont(element.style) ? 'var(--deck-heading-font, inherit)' : undefined);
 
 // Themes re-point the design tokens that slide content already uses, scoped to
 // the stage, so every default-colored element follows the theme without
 // knowing about it.
-export const themeStageStyle = (theme: SlideTheme): CSSProperties | undefined => {
-	if(!theme.colors) return undefined;
+export const themeStageStyle = (theme: SlideTheme): CSSProperties => {
+	const layout = {
+		['--deck-radius' as string]:       `${theme.radius}px`,
+		['--deck-margin' as string]:       `${theme.margin}px`,
+		['--deck-heading-font' as string]: theme.headingFont ?? undefined,
+		fontFamily:                        theme.font ?? undefined,
+	};
+	if(!theme.colors) return layout;
 	const { background, surface, border, text, muted, accent } = theme.colors;
 
 	return {
+		...layout,
 		['--color-surface' as string]:        background,
 		['--color-surface-active' as string]: surface,
 		['--color-surface-hover' as string]:  surface,
@@ -127,6 +178,5 @@ export const themeStageStyle = (theme: SlideTheme): CSSProperties | undefined =>
 		['--color-brand' as string]:          accent,
 		['--color-brand-ring' as string]:     accent,
 		color:                                text,
-		fontFamily:                           theme.font ?? undefined,
 	};
 };

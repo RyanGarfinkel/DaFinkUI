@@ -152,6 +152,7 @@ Pointer accuracy on touch is coarse. Small targets are an accessibility failure,
 - **Inputs use a 16px font size minimum on mobile.** Smaller values trigger iOS auto-zoom on focus, which disorients the user.
 - **Respect safe areas.** Fixed or sticky chrome accounts for `env(safe-area-inset-*)` on notched devices.
 - **Overlays adapt.** Modals that center as a card on desktop may take the full width (with margin) on phones; drawers may become bottom sheets. The accessibility contract is identical at every size.
+- **Side content is a column on desktop and a drawer on mobile.** A navigation sidebar, a thread or detail pane, or an editor the user works beside should stay a persistent column (or a non-modal `SidePanel`) when there is room, because a `Drawer` is modal and hides or locks the page. Only below the mobile breakpoint, where a second column doesn't fit, move that same content into a `Drawer` behind a visible toggle. Choose by the container's own width, not the device. A drawer on desktop is for short interrupting tasks (filters, cart, settings), not for content the user keeps working next to. Bottom sheets add a `DrawerHandle` so touch users can swipe them away.
 
 ---
 

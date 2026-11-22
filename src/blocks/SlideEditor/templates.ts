@@ -23,5 +23,5 @@ export const TEMPLATES: Template[] = [
 export const buildTemplate = (template: Template): Deck => ({
 	title:  template.label,
 	theme:  template.theme,
-	slides: template.layouts.map(createSlideFromLayout),
+	slides: template.layouts.map(layout => createSlideFromLayout(layout)),
 });

@@ -68,8 +68,8 @@ export type { PaginatorProps, PaginatorVariant } from './components/DataTable/Pa
 export { DatePicker } from './components/DatePicker/DatePicker';
 export type { DatePickerProps } from './components/DatePicker/DatePicker';
 
-export { default as Drawer, DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose } from './components/Drawer/Drawer';
-export type { DrawerProps, DrawerSide, DrawerHeaderProps, DrawerTitleProps, DrawerContentProps, DrawerFooterProps, DrawerCloseProps } from './components/Drawer/Drawer';
+export { default as Drawer, DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, DrawerHandle } from './components/Drawer/Drawer';
+export type { DrawerProps, DrawerSide, DrawerHeaderProps, DrawerTitleProps, DrawerContentProps, DrawerFooterProps, DrawerCloseProps, DrawerHandleProps } from './components/Drawer/Drawer';
 
 export { default as SidePanel, SidePanelHeader, SidePanelTitle, SidePanelContent, SidePanelFooter, SidePanelClose } from './components/SidePanel/SidePanel';
 export type { SidePanelProps, SidePanelSide, SidePanelHeaderProps, SidePanelTitleProps, SidePanelContentProps, SidePanelFooterProps, SidePanelCloseProps } from './components/SidePanel/SidePanel';
@@ -185,9 +185,23 @@ export { ContextMenu } from './components/ContextMenu/ContextMenu';
 export type { ContextMenuProps } from './components/ContextMenu/ContextMenu';
 
 export { applyOp, applyOps, applyOpsLenient, diffDecks, opTargets, DeckOpError } from './components/DeckEditor/ops';
-export type { DeckOp } from './components/DeckEditor/ops';
+export type { DeckOp, SlidePatch, ElementPatch } from './components/DeckEditor/ops';
+export { DECK_REFERENCE } from './components/DeckEditor/reference';
+export { TEXT_STYLES, TEXT_STYLE_IDS, textStyleFields } from './components/DeckEditor/textstyles';
+export type { TextStyleId } from './components/DeckEditor/textstyles';
 export { createSlide, duplicateSlide, newId, SLIDE_WIDTH, SLIDE_HEIGHT } from './components/DeckEditor/deck';
 export type { Deck, Slide, DeckElement } from './components/DeckEditor/deck';
 
+export type { DeckAskContext } from './components/DeckEditor/askcontext';
 export { DeckEditor, TOOLBAR_BUTTON } from './components/DeckEditor/DeckEditor';
 export type { DeckEditorProps } from './components/DeckEditor/DeckEditor';
+
+export { SheetEditor, SHEET_TOOLBAR_BUTTON } from './components/SheetEditor/SheetEditor';
+export type { SheetEditorProps } from './components/SheetEditor/SheetEditor';
+export { createSheet, colName, addr } from './components/SheetEditor/sheet';
+export type { Sheet, Cell, CellStyle, NumberFormat, SheetChart, ChartType, Side } from './components/SheetEditor/sheet';
+export { createEvaluator } from './components/SheetEditor/formulas';
+export { applySheetOp, applySheetOps, applySheetOpsLenient, diffSheets, SheetOpError } from './components/SheetEditor/sheetops';
+export type { SheetOp, StylePatch } from './components/SheetEditor/sheetops';
+export { SHEET_REFERENCE } from './components/SheetEditor/reference';
+export type { SheetAskContext } from './components/SheetEditor/askcontext';

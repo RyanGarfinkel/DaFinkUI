@@ -1,7 +1,7 @@
 'use client';
 
 import SidePanel, { SidePanelHeader, SidePanelTitle, SidePanelContent, SidePanelFooter, SidePanelClose, type SidePanelSide } from '@/src/components/SidePanel/SidePanel';
-import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, type DrawerSide } from '@/src/components/Drawer/Drawer';
+import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, DrawerHandle, type DrawerSide } from '@/src/components/Drawer/Drawer';
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots } from '@/src/components/Carousel/Carousel';
 import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
 import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose, type ModalSize } from '@/src/components/Modal/Modal';
@@ -25,6 +25,7 @@ import ToggleGroup, { ToggleGroupItem } from '@/src/components/ToggleGroup/Toggl
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/Tabs/Tabs';
 import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
 import { Attachment, AttachmentGroup } from '@/src/components/Attachment/Attachment';
+import { SheetEditorDemo } from '@/app/_docs/components/examples/SheetEditorDemo';
 import { DeckEditorDemo } from '@/app/_docs/components/examples/DeckEditorDemo';
 import TableOfContents from '@/src/components/TableOfContents/TableOfContents';
 import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
@@ -1404,6 +1405,9 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
     case 'deck-editor':
       return <DeckEditorDemo />;
 
+    case 'sheet-editor':
+      return <SheetEditorDemo />;
+
     default:
       return (
         <div className='text-sm text-text-muted'>
@@ -1668,6 +1672,7 @@ const DrawerPreview = () => {
       <Button variant='secondary' onClick={() => openFrom('bottom')}>Bottom</Button>
 
       <Drawer open={open} onOpenChange={setOpen} side={side}>
+        {side === 'bottom' && <DrawerHandle />}
         <DrawerClose />
         <DrawerHeader>
           <DrawerTitle>Notifications</DrawerTitle>

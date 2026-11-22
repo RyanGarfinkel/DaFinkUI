@@ -109,7 +109,6 @@ export const DocsSidebar = ({ collapsed, onCollapsedChange }: DocsSidebarProps) 
 			height='h-screen'
 			className='hidden md:block fixed left-0 top-0 z-30'
 			collapsible
-			togglePosition='top'
 			collapsed={collapsed}
 			onCollapsedChange={onCollapsedChange}
 		>

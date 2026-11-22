@@ -64,7 +64,7 @@ Dark mode is class-based (`.dark` on `<html>`). The active mode is stored in bot
   - On `/blocks` or `/blocks/*`: a flat list of every block renders under "All Blocks", no category grouping (only the `/blocks` gallery page itself groups by category; the sidebar list intentionally doesn't, since the block count doesn't warrant it).
   - On `/effects` or `/effects/*`: a flat list of every effect renders under "All Effects", same rationale as blocks (only the `/effects` gallery page groups by category).
   - On every other route, all three links show with nothing expanded beneath them.
-- Sidebar is `collapsible` (`togglePosition="top"`) and full viewport height (`h-screen`, `top-0`) on desktop (`md:` and up), hidden below `md:`. `DocsShell` lifts the collapsed state so `DocsHeader` and the main content margin shift in sync. On mobile, navigation lives in `MobileNav`, a hamburger button in the `DocsHeader` that opens the library's `Drawer` (side `left`) with the same links and the same always-visible-link/conditional-list behavior. The drawer closes on route change and follows the standard overlay accessibility contract
+- Sidebar is `collapsible` and full viewport height (`h-screen`, `top-0`) on desktop (`md:` and up), hidden below `md:`. `DocsShell` lifts the collapsed state so `DocsHeader` and the main content margin shift in sync. On mobile, navigation lives in `MobileNav`, a hamburger button in the `DocsHeader` that opens the library's `Drawer` (side `left`) with the same links and the same always-visible-link/conditional-list behavior. The drawer closes on route change and follows the standard overlay accessibility contract
 
 ## Component Registry
 

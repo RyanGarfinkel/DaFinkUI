@@ -1,3 +1,7 @@
+import type { TextStyleId } from './textstyles';
+import { usesHeadingFont } from './textstyles';
+import type { FontId } from './themes';
+import { FONTS } from './themes';
 // Shared by the PowerPoint and PDF exporters: color resolution, the slide's
 // computed theme, and rasterizing SVG for formats that need bitmaps.
 
@@ -32,12 +36,28 @@ export interface ExportTheme {
 	font:       string;
 	/** The full CSS stack, for picking a PDF base font. */
 	fontStack:  string;
+	/** Same two, for text marked `heading` (the body font when the theme has no heading font). */
+	headingFont:      string;
+	headingFontStack: string;
+	/** Theme corner radius in px. */
+	radius:     number;
 }
+
+const firstFamily = (stack: string) => stack.split(',')[0].replace(/["']/g, '').trim();
+
+/** The font stack for one text element: its own font, else the theme's heading or body font. */
+export const elementFontStack = (el: { font?: FontId; style?: TextStyleId }, theme: ExportTheme) =>
+	(el.font ? FONTS[el.font].stack : usesHeadingFont(el.style) ? theme.headingFontStack : theme.fontStack);
+
+/** The PowerPoint font name for one text element. */
+export const elementFontFace = (el: { font?: FontId; style?: TextStyleId }, theme: ExportTheme) =>
+	(el.font ? FONTS[el.font].face : usesHeadingFont(el.style) ? theme.headingFont : theme.font);
 
 /** A slide's theme as hex colors, read from its rendered stage (so custom themes and overrides are included). */
 export const readTheme = (stage: HTMLElement): ExportTheme => {
 	const css = getComputedStyle(stage);
 	const token = (name: string, fallback: string) => toHex(css.getPropertyValue(name)) ?? fallback;
+	const heading = css.getPropertyValue('--deck-heading-font').trim();
 	return {
 		background: token('--color-surface', 'FFFFFF'),
 		text:       token('--color-text', '18181B'),
@@ -45,8 +65,11 @@ export const readTheme = (stage: HTMLElement): ExportTheme => {
 		border:     token('--color-surface-border', 'E4E4E7'),
 		muted:      token('--color-text-muted', '52525B'),
 		accent:     token('--color-brand', '18181B'),
-		font:       css.fontFamily.split(',')[0].replace(/["']/g, '').trim(),
+		font:       firstFamily(css.fontFamily),
 		fontStack:  css.fontFamily,
+		headingFont:      firstFamily(heading || css.fontFamily),
+		headingFontStack: heading || css.fontFamily,
+		radius:     parseFloat(css.getPropertyValue('--deck-radius')) || 0,
 	};
 };
 
@@ -72,10 +95,12 @@ export const rasterize = (src: string, width: number, height: number) => new Pro
 });
 
 /** A standalone copy of an inline SVG: namespaced (required outside HTML), sized, and with an explicit stroke color. */
-export const standaloneSvg = (svg: SVGSVGElement, color: string, size: { width: number; height: number }) => {
+export const standaloneSvg = (svg: SVGSVGElement, color: string, size: { width: number; height: number }, apply: 'stroke' | 'color' = 'stroke') => {
 	const clone = svg.cloneNode(true) as SVGSVGElement;
 	clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-	clone.setAttribute('stroke', color);
+	// Icons are stroke-drawn, so the root stroke colors them. A free-form drawing sets only
+	// `color`, which is what `currentColor` inside it resolves to; a root stroke would outline its fills.
+	clone.setAttribute(apply, color);
 	clone.setAttribute('width', String(size.width));
 	clone.setAttribute('height', String(size.height));
 	return clone;
@@ -87,5 +112,5 @@ export const chartParts = (node: Element) => ({
 	legend: [...node.querySelectorAll<HTMLElement>('.recharts-legend-item')],
 });
 
-export const svgToPng =(svg: SVGSVGElement, color: string, size: { width: number; height: number }) =>
-	rasterize(`data:image/svg+xml,${encodeURIComponent(standaloneSvg(svg, color, size).outerHTML)}`, size.width, size.height);
+export const svgToPng = (svg: SVGSVGElement, color: string, size: { width: number; height: number }, apply: 'stroke' | 'color' = 'stroke') =>
+	rasterize(`data:image/svg+xml,${encodeURIComponent(standaloneSvg(svg, color, size, apply).outerHTML)}`, size.width, size.height);

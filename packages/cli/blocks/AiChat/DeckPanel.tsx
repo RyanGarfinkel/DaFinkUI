@@ -1,8 +1,9 @@
 'use client';
 
+import type { ChartSource, Deck, ResolvedChart, SheetChoice } from '../../components/DeckEditor/deck';
+import type { DeckAskContext } from '../../components/DeckEditor/askcontext';
 import { DeckEditor } from '../../components/DeckEditor/DeckEditor';
 import { CloseIcon, CollapseIcon, ExpandIcon } from './icons';
-import type { Deck } from '../../components/DeckEditor/deck';
 import Button from '../../components/Button/Button';
 import { KeyboardEvent, useState } from 'react';
 
@@ -28,13 +29,20 @@ export interface DeckPanelProps {
 	expanded:       boolean;
 	onToggleExpand: () => void;
 	onClose:   () => void;
+	/** Rendered inside a Drawer (mobile): the Drawer owns Escape and the expand button is hidden. */
+	inDrawer?: boolean;
+	/** Adds an Ask AI button to the editor; called with what the user selected or highlighted. */
+	onAsk?:    (context: DeckAskContext) => void;
+	/** The chat's spreadsheets, which a chart can take its data from. */
+	sheets?:             SheetChoice[];
+	resolveChartSource?: (source: ChartSource) => ResolvedChart | null;
 }
 
 // Shares the thread panel's column (only one is open at a time) and, like it, is a
 // persistent column rather than an overlay: no focus trap, Escape is a nicety.
 // You and the AI edit the same deck: the view follows the AI's changes until you
 // pick a slide or start working yourself, then stays put for the rest of that reply.
-export const DeckPanel = ({ deck, activity, note, onChange, onUndo, onRedo, canUndo, canRedo, expanded, onToggleExpand, onClose }: DeckPanelProps) => {
+export const DeckPanel = ({ deck, activity, note, onChange, onUndo, onRedo, canUndo, canRedo, expanded, onToggleExpand, onClose, inDrawer = false, onAsk, sheets, resolveChartSource }: DeckPanelProps) => {
 	const [viewSlideId, setViewSlideId] = useState<string | undefined>(undefined);
 	const [stoppedFollowing, setStoppedFollowing] = useState<number | null>(null);
 	const following = activity !== null && stoppedFollowing !== activity.messageId;
@@ -48,23 +56,31 @@ export const DeckPanel = ({ deck, activity, note, onChange, onUndo, onRedo, canU
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
 		if(e.key !== 'Escape' || e.defaultPrevented) return;
-		// Escape inside the editor (leaving a text box, cancelling a tool) is the editor's.
-		if(e.target !== e.currentTarget && (e.target as HTMLElement).closest('[role="region"]')) return;
+		const insideEditor = e.target !== e.currentTarget && (e.target as HTMLElement).closest('[role="region"]');
+		// Escape inside the editor (leaving a text box, cancelling a tool) is the editor's; the Drawer must not close on it either.
+		if(insideEditor)
+		{
+			if(inDrawer) e.stopPropagation();
+			return;
+		}
+		if(inDrawer) return;
 		e.preventDefault();
 		onClose();
 	};
 
 	return (
-		<div onKeyDown={handleKeyDown} className='flex min-w-0 flex-1 flex-col border-l-[length:var(--border-width)] border-surface-border'>
+		<div onKeyDown={handleKeyDown} className={`flex min-w-0 flex-1 flex-col ${inDrawer ? '' : 'border-l-[length:var(--border-width)] border-surface-border'}`}>
 			<div className='flex items-center justify-between gap-2 border-b-[length:var(--border-width)] border-surface-border px-4 py-3'>
 				<div className='min-w-0'>
 					<p className='text-[11px] font-medium uppercase tracking-wide text-text-subtle'>Slides</p>
 					<h3 className='truncate text-base font-semibold text-text'>{deck.title}</h3>
 				</div>
 				<div className='flex shrink-0 items-center gap-1'>
-					<Button variant='ghost' size='icon-sm' aria-label={expanded ? 'Show chat' : 'Expand slides'} data-expand-toggle onClick={onToggleExpand}>
-						{expanded ? <CollapseIcon /> : <ExpandIcon />}
-					</Button>
+					{!inDrawer && (
+						<Button variant='ghost' size='icon-sm' aria-label={expanded ? 'Show chat' : 'Expand slides'} data-expand-toggle onClick={onToggleExpand}>
+							{expanded ? <CollapseIcon /> : <ExpandIcon />}
+						</Button>
+					)}
 					<Button variant='ghost' size='icon-sm' aria-label='Close slides' onClick={onClose}>
 						<CloseIcon />
 					</Button>
@@ -83,6 +99,9 @@ export const DeckPanel = ({ deck, activity, note, onChange, onUndo, onRedo, canU
 					activeSlideId={shownSlideId}
 					onActiveSlideChange={setViewSlideId}
 					status={activity ? `${activity.label}…` : note}
+					onAsk={onAsk}
+						sheets={sheets}
+						resolveChartSource={resolveChartSource}
 				/>
 			</div>
 		</div>

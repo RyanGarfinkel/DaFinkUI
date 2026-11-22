@@ -1,4 +1,4 @@
-import { chartParts, rasterize, readTheme, standaloneSvg, themeResolver, toHex } from './exportHelpers';
+import { chartParts, elementFontStack, rasterize, readTheme, standaloneSvg, themeResolver, toHex } from './exportHelpers';
 import { downloadBlob, fileName, findStage } from './exporters';
 import type { ExportTheme, Resolve } from './exportHelpers';
 import { SLIDE_HEIGHT, SLIDE_WIDTH } from './deck';
@@ -30,18 +30,23 @@ const fontStyle = (bold?: boolean, italic?: boolean) => (bold && italic ? 'boldi
 const hex = (color: string) => `#${color}`;
 
 const drawText = (doc: jsPDF, el: Extract<DeckElement, { type: 'text' }>, theme: ExportTheme, resolve: Resolve) => {
-	const family = baseFont(el.font ? FONTS[el.font].stack : theme.fontStack);
+	const family = baseFont(elementFontStack(el, theme));
 	const size = el.fontSize * PT;
 	const lineHeight = size * LINE_HEIGHT;
 	const boxX = el.x * PT;
 	const boxWidth = el.width * PT;
 	const baseColor = toHex(resolve(el.color)) ?? theme.text;
-	let y = el.y * PT;
 	let number = 0;
 
 	doc.setFontSize(size);
 
-	for(const paragraph of parseRichText(el.html, resolve))
+	const measure = (w: { text: string; bold?: boolean; italic?: boolean }) => {
+		doc.setFont(family, fontStyle(w.bold, w.italic));
+		return doc.getTextWidth(w.text);
+	};
+
+	// Laid out first, drawn second: where the text starts depends on its total height (vertical alignment).
+	const blocks = parseRichText(el.html, resolve).map(paragraph =>
 	{
 		number = paragraph.list === 'number' ? number + 1 : 0;
 		const indent = paragraph.list ? size * 1.2 : 0;
@@ -49,10 +54,6 @@ const drawText = (doc: jsPDF, el: Extract<DeckElement, { type: 'text' }>, theme:
 
 		// Break runs into styled words, then fill lines up to the box width.
 		const words = paragraph.runs.flatMap(run => run.text.split(/(\s+)/).filter(Boolean).map(text => ({ ...run, text, bold: run.bold ?? el.bold })));
-		const measure = (w: typeof words[number]) => {
-			doc.setFont(family, fontStyle(w.bold, w.italic));
-			return doc.getTextWidth(w.text);
-		};
 		const lines: (typeof words)[] = [[]];
 		let lineWidth = 0;
 		for(const word of words)
@@ -69,6 +70,15 @@ const drawText = (doc: jsPDF, el: Extract<DeckElement, { type: 'text' }>, theme:
 			lineWidth += w;
 		}
 
+		return { paragraph, indent, width, lines, listNumber: number };
+	});
+
+	const textHeight = blocks.reduce((sum, block) => sum + block.lines.length * lineHeight, 0);
+	const spare = Math.max(0, el.height * PT - textHeight);
+	let y = el.y * PT + (el.valign === 'middle' ? spare / 2 : el.valign === 'bottom' ? spare : 0);
+
+	for(const { paragraph, indent, width, lines, listNumber } of blocks)
+	{
 		lines.forEach((line, li) =>
 		{
 			const total = line.reduce((sum, w) => sum + measure(w), 0);
@@ -78,7 +88,7 @@ const drawText = (doc: jsPDF, el: Extract<DeckElement, { type: 'text' }>, theme:
 			{
 				doc.setFont(family, fontStyle(el.bold));
 				doc.setTextColor(hex(baseColor));
-				doc.text(paragraph.list === 'number' ? `${number}.` : '•', boxX, y, { baseline: 'top' });
+				doc.text(paragraph.list === 'number' ? `${listNumber}.` : '•', boxX, y, { baseline: 'top' });
 			}
 
 			for(const word of line)
@@ -169,9 +179,9 @@ const stageBox = (node: Element, stage: HTMLElement): Box => {
 	return { x: (r.left - stageRect.left) / scale, y: (r.top - stageRect.top) / scale, width: r.width / scale, height: r.height / scale };
 };
 
-const drawSvg = async (doc: jsPDF, svg: SVGSVGElement, box: Box, stroke?: string) => {
+const drawSvg = async (doc: jsPDF, svg: SVGSVGElement, box: Box, stroke?: string, apply: 'stroke' | 'color' = 'stroke') => {
 	const { svg2pdf } = await import('svg2pdf.js');
-	const clone = standaloneSvg(svg, stroke ?? 'currentColor', { width: box.width, height: box.height });
+	const clone = standaloneSvg(svg, stroke ?? 'currentColor', { width: box.width, height: box.height }, apply);
 	if(!stroke) inlineComputedStyles(svg, clone);
 	if(!clone.getAttribute('viewBox')) clone.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
 	await svg2pdf(clone, doc, { x: box.x * PT, y: box.y * PT, width: box.width * PT, height: box.height * PT });
@@ -239,7 +249,7 @@ const drawElement = async (doc: jsPDF, el: DeckElement, stage: HTMLElement, them
 	case 'shape':
 		doc.setFillColor(hex(toHex(resolve(el.fill)) ?? theme.accent));
 		if(el.shape === 'ellipse') doc.ellipse(x + w / 2, y + h / 2, w / 2, h / 2, 'F');
-		else doc.roundedRect(x, y, w, h, el.radius * PT, el.radius * PT, 'F');
+		else doc.roundedRect(x, y, w, h, (el.radius ?? theme.radius) * PT, (el.radius ?? theme.radius) * PT, 'F');
 		return;
 
 	case 'line': {
@@ -274,6 +284,12 @@ const drawElement = async (doc: jsPDF, el: DeckElement, stage: HTMLElement, them
 	case 'icon': {
 		const svg = node?.querySelector('svg');
 		if(svg) await drawSvg(doc, svg, el, el.color ? resolve(el.color) : hex(theme.accent));
+		return;
+	}
+
+	case 'svg': {
+		const svg = node?.querySelector('svg');
+		if(svg) await drawSvg(doc, svg, el, el.color ? resolve(el.color) : hex(theme.text), 'color');
 		return;
 	}
 

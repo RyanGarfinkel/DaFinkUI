@@ -419,6 +419,9 @@ export const extraSections: Record<string, ExtraSection[]> = {
 					<p>
 						Drawer shares Modal&apos;s full blocking-overlay contract — native <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>{'<dialog>'}</code> with <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>showModal()</code>, <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;dialog&quot;</code>, <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-modal=&quot;true&quot;</code>, <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-labelledby</code> — just with a translate-based slide-in animation instead of fade + scale. Focus moves to the first focusable element in the panel on open, is trapped inside it (Tab/Shift+Tab wrap, re-queried on every press), and returns to the trigger on any close path (Escape, backdrop click, `DrawerClose`, or unmount).
 					</p>
+					<p>
+						A bottom or top drawer can include a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>DrawerHandle</code> so touch and pen users can swipe it closed. The handle is <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-hidden</code> and not focusable: swiping is only a pointer shortcut, so keyboard and screen-reader users still close the drawer with Escape or the close button. Keep one of those in any drawer that has a handle.
+					</p>
 					<KeyboardShortcutsTable rows={[
 						{ keys: ['escape'], description: 'Closes the drawer and returns focus to the trigger.' },
 						{ keys: ['tab'], description: 'Moves focus to the next focusable element inside the panel, wrapping from the last back to the first (focus trap).' },
@@ -1146,7 +1149,7 @@ export const extraSections: Record<string, ExtraSection[]> = {
 			description: (
 				<div className='flex flex-col gap-4'>
 					<p>
-						The editor is a named <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;region&quot;</code>. Every element on the slide is a focusable button: focusing one selects it, and its floating format toolbar is a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;toolbar&quot;</code> reached with Alt+F10. The slide rail is one Tab stop with roving tabindex, and each thumbnail has a context menu (Shift+F10 or the Menu key). Moves, resizes, and edits are announced through a polite status line, as is the progress of a download from the toolbar&apos;s Download menu (a standard menu button: Enter or Space opens it, arrow keys move, Escape closes). Settings open in a sidebar column when the editor is wide, or in a focus-trapped drawer when it&apos;s narrow (the editor&apos;s own width, not the window&apos;s). Elements someone else is editing get an outline, a tag, and &quot;being edited&quot; in their slide thumbnail&apos;s name, so the change isn&apos;t signalled by color or motion alone.
+						The editor is a named <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;region&quot;</code>. Every element on the slide is a focusable button: focusing one selects it, and its floating format toolbar is a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;toolbar&quot;</code> reached with Alt+F10. It holds only the quick controls plus a More options button that opens the settings panel; while the panel is open the bar is hidden and the panel follows the selected element instead. When the host passes <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>onAsk</code>, the bar also carries an Ask AI (lasso) button, which stays reachable on its own while the panel hides the bar. The slide rail is one Tab stop with roving tabindex, and each thumbnail has a context menu (Shift+F10 or the Menu key). Moves, resizes, and edits are announced through a polite status line, as is the progress of a download from the toolbar&apos;s Download menu (a standard menu button: Enter or Space opens it, arrow keys move, Escape closes). Settings are a non-modal region that opens as a column beside the slide when the editor is wide, or slides over its right edge when it&apos;s narrow (the editor&apos;s own width, not the window&apos;s). It doesn&apos;t trap focus, and it is inert while closed. Elements someone else is editing get an outline, a tag, and &quot;being edited&quot; in their slide thumbnail&apos;s name, so the change isn&apos;t signalled by color or motion alone.
 					</p>
 					<KeyboardShortcutsTable rows={[
 						{ keys: ['cmd', 'z'], description: 'Undo (when the host passes onUndo).' },
@@ -1159,6 +1162,33 @@ export const extraSections: Record<string, ExtraSection[]> = {
 						{ keys: ['alt', 'f10'], description: 'Moves focus into the selected element’s format toolbar.' },
 						{ keys: ['alt', 'arrow keys'], description: 'In the slide rail: moves the focused slide earlier or later.' },
 						{ keys: ['shift', 'f10'], description: 'In the slide rail: opens the slide’s actions menu.' },
+					]} />
+				</div>
+			),
+		},
+	],
+	'sheet-editor': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<div className='flex flex-col gap-4'>
+					<p>
+						The editor is a named <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;region&quot;</code> with three tab stops: the formula bar input, the grid, and the floating formatting toolbar at the bottom (a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;toolbar&quot;</code> where the arrow keys move between buttons). The grid is a single tab stop using <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-activedescendant</code>: focus stays on the grid while the active cell is announced, and every cell is a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>gridcell</code> with its row and column index and <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-selected</code> when it is in the selection. Only the visible rows are rendered, so <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-rowcount</code> reports the real size. Editing opens a text input in the cell (or in the formula bar); committing or cancelling returns focus to the grid. Errors are always shown as their code (#DIV/0!, #REF!) and not just in red. Copy, cut, and paste use the system clipboard as tab-separated text, so they work with other spreadsheets. Tab leaves the grid from the last column rather than trapping focus.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['arrow keys'], description: 'Move the active cell; with Shift, extend the selection.' },
+						{ keys: ['cmd', 'arrow keys'], description: 'Jump to the edge of the sheet.' },
+						{ keys: ['tab'], description: 'Move right (Shift+Tab: left). At the edge, focus moves on to the next control.' },
+						{ keys: ['enter'], description: 'Start editing the active cell. While editing, commit and move down (Shift+Enter: up).' },
+						{ keys: ['f2'], description: 'Start editing the active cell.' },
+						{ keys: ['escape'], description: 'Cancel an edit, or collapse the selection to the active cell.' },
+						{ keys: ['delete'], description: 'Clear the selected cells’ contents (formatting stays).' },
+						{ keys: ['cmd', 'a'], description: 'Select every cell.' },
+						{ keys: ['cmd', 'b'], description: 'Bold the selection (⌘I for italic).' },
+						{ keys: ['cmd', 'c'], description: 'Copy the selection (⌘X cuts, ⌘V pastes at its top-left cell).' },
+						{ keys: ['cmd', 'z'], description: 'Undo (when the host passes onUndo). ⇧⌘Z redoes.' },
+						{ keys: ['home'], description: 'Jump to the first column of the row; End jumps to the last.' },
+						{ keys: ['page down'], description: 'Move ten rows down (Page Up: up).' },
 					]} />
 				</div>
 			),

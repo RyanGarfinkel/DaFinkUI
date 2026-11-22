@@ -1,7 +1,7 @@
 'use client';
 
-import { buildHistory, describeAttachments, findPrecedingUserIndex, promptText, withVersion } from './messageHelpers';
-import type { AiChatHistoryMessage, ChatDeck, ChatMessage, ChatTextMessage, MessageAttachment } from './types';
+import type { AiChatHistoryMessage, ChatDeck, ChatMessage, ChatSheet, ChatTextMessage, MessageAttachment } from './types';
+import { buildHistory, buildPrompt, findPrecedingUserIndex, promptText, withVersion } from './messageHelpers';
 import { useEffect, useRef, useState } from 'react';
 import { sendMessage } from './chatApi';
 
@@ -17,9 +17,11 @@ export interface UseConversationOptions {
 	onReply?:       (id: string, message: ChatTextMessage, previous: ChatMessage[]) => void;
 	/** Slide decks to send with each request, as the user has left them. */
 	getDecks?:      (id: string) => ChatDeck[];
+	/** Spreadsheets to send with each request, as the user has left them. */
+	getSheets?:     (id: string) => ChatSheet[];
 }
 
-export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef, historyPrefix, onReply, getDecks }: UseConversationOptions) => {
+export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef, historyPrefix, onReply, getDecks, getSheets }: UseConversationOptions) => {
 	const [typingId, setTypingId] = useState<string | null>(null);
 	const [streamingId, setStreamingId] = useState<string | null>(null);
 	const [streamingMessageId, setStreamingMessageId] = useState<number | null>(null);
@@ -33,11 +35,11 @@ export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef,
 		setTypingId(id);
 		const requestId = ++pendingReplyRef.current;
 
-		sendMessage(promptMessage, history, getDecks?.(id))
+		sendMessage(promptMessage, history, getDecks?.(id), getSheets?.(id))
 			.then((reply) => {
 				if(pendingReplyRef.current !== requestId) return;
 				setTypingId((prev) => (prev === id ? null : prev));
-				const aiMessage: ChatTextMessage = { id: nextMessageIdRef.current++, kind: 'message', sender: 'ai', text: reply.text, animate: true, toolCalls: reply.toolCalls, deckEdit: reply.deckEdit };
+				const aiMessage: ChatTextMessage = { id: nextMessageIdRef.current++, kind: 'message', sender: 'ai', text: reply.text, animate: true, toolCalls: reply.toolCalls, deckEdit: reply.deckEdit, sheetEdit: reply.sheetEdit, artifacts: reply.artifacts };
 				updateMessages(id, (messages) => [...messages, aiMessage]);
 				setStreamingId(id);
 				setStreamingMessageId(aiMessage.id);
@@ -59,7 +61,7 @@ export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef,
 		const history = [...(historyPrefix?.(id) ?? []), ...buildHistory(getMessages(id))];
 		const userMessage: ChatMessage = { id: nextMessageIdRef.current++, kind: 'message', sender: 'user', text, attachments };
 		updateMessages(id, (messages) => [...messages, userMessage]);
-		queueReply(id, text || describeAttachments(attachments), history);
+		queueReply(id, buildPrompt(text, attachments), history);
 	};
 
 	const stop = (id: string) => {
@@ -107,10 +109,10 @@ export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef,
 		const history = [...(historyPrefix?.(id) ?? []), ...buildHistory(messages.slice(0, userIndex))];
 
 		setRegeneratingMessageId(messageId);
-		sendMessage(prompt, history, getDecks?.(id))
+		sendMessage(prompt, history, getDecks?.(id), getSheets?.(id))
 			.then((reply) => {
 				setRegeneratingMessageId((prev) => (prev === messageId ? null : prev));
-				const nextVersion = (m: ChatTextMessage): ChatTextMessage => ({ ...withVersion(m, reply.text), toolCalls: reply.toolCalls, deckEdit: reply.deckEdit, animate: true });
+				const nextVersion = (m: ChatTextMessage): ChatTextMessage => ({ ...withVersion(m, reply.text), toolCalls: reply.toolCalls, deckEdit: reply.deckEdit, sheetEdit: reply.sheetEdit, artifacts: reply.artifacts, animate: true });
 				const updated = nextVersion(messages[index] as ChatTextMessage);
 				updateMessages(id, (msgs) => msgs.map((m) => (m.kind === 'message' && m.id === messageId ? nextVersion(m) : m)));
 				setStreamingId(id);

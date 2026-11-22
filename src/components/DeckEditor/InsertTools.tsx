@@ -13,6 +13,8 @@ interface InsertToolsProps {
 	onInsert:     (element: DeckElement) => void;
 	buttonClass:  string;
 	onError:      (message: string) => void;
+	/** Drops the toolbar's own box (border, background, layout) so its buttons flow in the bar that shares it. */
+	bare?:        boolean;
 }
 
 const readImage = (file: File) => new Promise<{ src: string; width: number; height: number }>((resolve, reject) =>
@@ -30,7 +32,7 @@ const readImage = (file: File) => new Promise<{ src: string; width: number; heig
 	reader.readAsDataURL(file);
 });
 
-export const InsertTools = ({ tool, onToolChange, onInsert, buttonClass, onError }: InsertToolsProps) => {
+export const InsertTools = ({ tool, onToolChange, onInsert, buttonClass, onError, bare = false }: InsertToolsProps) => {
 	const fileRef = useRef<HTMLInputElement>(null);
 	// Drawing needs a pointer. When a tool is picked from the keyboard, insert a
 	// default-size element instead, so every tool works without a mouse.
@@ -64,7 +66,7 @@ export const InsertTools = ({ tool, onToolChange, onInsert, buttonClass, onError
 			aria-label='Insert'
 			onPointerDownCapture={() => { keyboardRef.current = false; }}
 			onKeyDownCapture={() => { keyboardRef.current = true; }}
-			className='flex items-center gap-0.5 rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface p-1'
+			className={`flex items-center gap-0.5 ${bare ? 'contents' : 'rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface p-1'}`}
 		>
 			<button
 				type='button'

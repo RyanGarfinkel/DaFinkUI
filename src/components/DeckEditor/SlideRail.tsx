@@ -210,8 +210,7 @@ export const SlideRail = ({ slides, activeId, actions, stageStyle, busyIds = [] 
 										menu={menuFor(slide, i)}
 										onSelect={() => actions.select(slide.id)}
 										onKeyDown={e => handleKey(e, i)}
-										stageStyle={stageStyle}
-									/>
+										stageStyle={stageStyle}									/>
 								))}
 							</ol>
 						</SortableContext>

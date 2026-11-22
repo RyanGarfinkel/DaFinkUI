@@ -1,22 +1,24 @@
 'use client';
 
-import { ToggleGroup, ToggleGroupItem } from '../ToggleGroup/ToggleGroup';
 import { FormEvent, KeyboardEvent, ReactNode, useState } from 'react';
+import { TEXT_STYLE_OPTIONS, textStyleFields } from './textstyles';
 import type { ChainedCommands, Editor } from '@tiptap/react';
 import { FONT_OPTIONS, THEME_COLOR_REFS } from './themes';
 import { ColorPicker } from '../ColorPicker/ColorPicker';
+import type { TextStyleId } from './textstyles';
 import { useEditorState } from '@tiptap/react';
 import { Popover } from '../Popover/Popover';
 import type { DeckElement } from './deck';
 import type { GlyphName } from './icons';
+import { NumberField } from './fields';
 import type { FontId } from './themes';
 import Button from '../Button/Button';
 import Select from '../Select/Select';
+import { Menu } from '../Menu/Menu';
 import Input from '../Input/Input';
 import { Glyph } from './icons';
 
 type Patch = (patch: Partial<DeckElement>, coalesceKey?: string) => void;
-type Of<T extends DeckElement['type']> = Extract<DeckElement, { type: T }>;
 
 export const SWATCHES = ['#18181b', '#ffffff', '#ef4444', '#f59e0b', '#22c55e', '#06b6d4', '#6366f1', '#ec4899'];
 
@@ -26,7 +28,8 @@ const ICON_BUTTON = [
 	'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring',
 ].join(' ');
 
-const Divider = () => <span aria-hidden='true' className='mx-0.5 h-5 w-px bg-surface-border' />;
+// Keeps the text selection: a mousedown would otherwise blur the editor first.
+const keepSelection = { onMouseDown: (e: { preventDefault: () => void }) => e.preventDefault() };
 
 // Arrow keys move between controls, the standard toolbar pattern. Tab still
 // reaches every control so popovers and the size field stay one keystroke away.
@@ -40,7 +43,16 @@ const handleToolbarKeys = (e: KeyboardEvent<HTMLDivElement>) => {
 	controls[(index + (e.key === 'ArrowRight' ? 1 : -1) + controls.length) % controls.length]?.focus();
 };
 
-const Shell = ({ label, children }: { label: string; children: ReactNode }) => (
+interface ShellProps {
+	label:    string;
+	/** Opens the settings panel on this element. */
+	onMore:   () => void;
+	/** Adds the lasso button that sends the selection to an agent. */
+	onAsk?:   () => void;
+	children: ReactNode;
+}
+
+const Shell = ({ label, onMore, onAsk, children }: ShellProps) => (
 	<div
 		role='toolbar'
 		aria-label={label}
@@ -56,6 +68,14 @@ const Shell = ({ label, children }: { label: string; children: ReactNode }) => (
 		].join(' ')}
 	>
 		{children}
+		{onAsk && (
+			<button type='button' aria-label='Ask AI' title='Ask AI about this' {...keepSelection} onClick={onAsk} className={ICON_BUTTON}>
+				<Glyph name='lasso' />
+			</button>
+		)}
+		<button type='button' aria-label='More options' title='More options: open settings' {...keepSelection} onClick={onMore} className={ICON_BUTTON}>
+			<Glyph name='more' />
+		</button>
 	</div>
 );
 
@@ -72,8 +92,7 @@ const ToggleButton = ({ label, glyph, active, onPress }: ToggleButtonProps) => (
 		aria-label={label}
 		title={label}
 		aria-pressed={active}
-		// Keeps the text selection: a mousedown would otherwise blur the editor first.
-		onMouseDown={e => e.preventDefault()}
+		{...keepSelection}
 		onClick={onPress}
 		className={`${ICON_BUTTON} ${active ? 'bg-surface-active' : ''}`}
 	>
@@ -86,17 +105,25 @@ interface ColorButtonProps {
 	value:     string;
 	onChange:  (hex: string) => void;
 	onReset?:  () => void;
+	/** A full-width, field-like button (for settings rows) instead of a toolbar icon button. */
+	field?:    boolean;
 	children:  ReactNode;
 }
 
-export const ColorButton = ({ label, value, onChange, onReset, children }: ColorButtonProps) => (
+const FIELD_BUTTON = [
+	'inline-flex h-8 w-full items-center justify-start gap-2 rounded-[var(--radius)] bg-surface-hover px-2 text-text',
+	'hover:bg-surface-active motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
+	'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring',
+].join(' ');
+
+export const ColorButton = ({ label, value, onChange, onReset, field = false, children }: ColorButtonProps) => (
 	<Popover
 		label={label}
 		side='bottom'
 		align='start'
 		unstyledTrigger
-		triggerClassName={ICON_BUTTON}
-		triggerProps={{ 'aria-label': label, title: label, onMouseDown: e => e.preventDefault() }}
+		triggerClassName={field ? FIELD_BUTTON : ICON_BUTTON}
+		triggerProps={{ 'aria-label': label, title: label, ...keepSelection }}
 		trigger={children}
 		className='min-w-0 p-2'
 	>
@@ -136,49 +163,44 @@ export const ColorButton = ({ label, value, onChange, onReset, children }: Color
 	</Popover>
 );
 
-/** Overrides the theme's font for one element; "Theme font" clears the override. */
-export const FontSelect = ({ value, onChange, compact = false }: { value: FontId | undefined; onChange: (font: FontId | undefined) => void; compact?: boolean }) => {
-	const select = (
-		<Select
-			aria-label={compact ? 'Font' : undefined}
-			label={compact ? undefined : 'Font'}
-			size='sm'
-			options={FONT_OPTIONS}
-			value={value ?? 'theme'}
-			onChange={next => onChange(next === 'theme' ? undefined : next as FontId)}
-			triggerClassName={compact ? 'h-7' : ''}
-		/>
-	);
-	// Select fills its container (w-full), so the toolbar gives it a fixed, non-shrinking slot.
-	return compact ? <div className='w-32 shrink-0'>{select}</div> : select;
-};
+/** A filled square of a color, for color buttons; empty falls back to `fallback`. */
+const Swatch = ({ color, fallback }: { color: string; fallback: string }) => (
+	<span aria-hidden='true' className='h-5 w-5 rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-input-border' style={{ background: color || fallback }} />
+);
 
-// Input always renders a collapsed hint row under the field; its column gap would
-// still push the field up off the toolbar's center line, hence `[&>div]:gap-0`.
-const SizeField = ({ value, onChange }: { value: number; onChange: (size: number) => void }) => (
-	<div className='w-16 shrink-0 [&>div]:gap-0'>
-		<Input
-			aria-label='Font size'
-			type='number'
-			min={8}
-			max={240}
-			value={value}
-			onChange={e => e.target.value !== '' && onChange(Math.min(240, Math.max(8, Number(e.target.value))))}
-			className='h-7 px-2 py-0 text-xs tabular-nums'
-		/>
-	</div>
+/** Overrides the theme's font for one element; "Theme font" clears the override. */
+export const FontSelect = ({ value, onChange, inline = false }: { value: FontId | undefined; onChange: (font: FontId | undefined) => void; inline?: boolean }) => (
+	<Select
+		label={inline ? undefined : 'Font'}
+		aria-label={inline ? 'Font' : undefined}
+		size='sm'
+		options={FONT_OPTIONS}
+		value={value ?? 'theme'}
+		onChange={next => onChange(next === 'theme' ? undefined : next as FontId)}
+	/>
+);
+
+/** Sets a text box from a preset (Title, Heading, Body, Footer, …): its size, weight, and color, and the theme font it uses. */
+export const StyleSelect = ({ value, onChange, inline = false }: { value: TextStyleId | undefined; onChange: (patch: Partial<DeckElement>) => void; inline?: boolean }) => (
+	<Select
+		label={inline ? undefined : 'Text style'}
+		aria-label={inline ? 'Text style' : undefined}
+		size='sm'
+		options={TEXT_STYLE_OPTIONS}
+		value={value ?? 'none'}
+		onChange={next => onChange(next === 'none' ? { style: undefined } : { style: next as TextStyleId, ...textStyleFields(next as TextStyleId) })}
+	/>
 );
 
 const MARKS = [
-	{ name: 'bold',      label: 'Bold',          glyph: 'bold',      toggle: (c: ChainedCommands) => c.toggleBold() },
-	{ name: 'italic',    label: 'Italic',        glyph: 'italic',    toggle: (c: ChainedCommands) => c.toggleItalic() },
-	{ name: 'underline', label: 'Underline',     glyph: 'underline', toggle: (c: ChainedCommands) => c.toggleUnderline() },
-	{ name: 'strike',    label: 'Strikethrough', glyph: 'strike',    toggle: (c: ChainedCommands) => c.toggleStrike() },
+	{ name: 'bold',      label: 'Bold',      glyph: 'bold',      toggle: (c: ChainedCommands) => c.toggleBold() },
+	{ name: 'italic',    label: 'Italic',    glyph: 'italic',    toggle: (c: ChainedCommands) => c.toggleItalic() },
+	{ name: 'underline', label: 'Underline', glyph: 'underline', toggle: (c: ChainedCommands) => c.toggleUnderline() },
 ] as const;
 
 const BLOCKS = [
-	{ name: 'bulletList',  label: 'Bulleted list', glyph: 'list',        toggle: (c: ChainedCommands) => c.toggleBulletList() },
-	{ name: 'orderedList', label: 'Numbered list', glyph: 'orderedList', toggle: (c: ChainedCommands) => c.toggleOrderedList() },
+	{ name: 'bulletList',  label: 'Bulleted list', toggle: (c: ChainedCommands) => c.toggleBulletList() },
+	{ name: 'orderedList', label: 'Numbered list', toggle: (c: ChainedCommands) => c.toggleOrderedList() },
 ] as const;
 
 const ALIGNS = [
@@ -186,6 +208,14 @@ const ALIGNS = [
 	{ value: 'center', label: 'Align center', glyph: 'alignCenter' },
 	{ value: 'right',  label: 'Align right',  glyph: 'alignRight' },
 ] as const;
+
+const VALIGNS = [
+	{ value: 'top',    label: 'Align top',    glyph: 'alignTop' },
+	{ value: 'middle', label: 'Align middle', glyph: 'alignMiddle' },
+	{ value: 'bottom', label: 'Align bottom', glyph: 'alignBottom' },
+] as const;
+
+const Divider = () => <span aria-hidden='true' className='mx-0.5 h-5 w-px bg-surface-border' />;
 
 const normalizeUrl = (input: string) => {
 	const url = input.trim();
@@ -208,7 +238,7 @@ const LinkButton = ({ editor, href }: { editor: Editor; href: string | undefined
 			align='start'
 			unstyledTrigger
 			triggerClassName={`${ICON_BUTTON} ${href ? 'bg-surface-active' : ''}`}
-			triggerProps={{ 'aria-label': href ? 'Edit link' : 'Add link', title: 'Link', onMouseDown: e => e.preventDefault() }}
+			triggerProps={{ 'aria-label': href ? 'Edit link' : 'Add link', title: 'Link', ...keepSelection }}
 			trigger={<Glyph name='link' />}
 			onOpenChange={open => open && setDraft(href ?? '')}
 			className='w-72'
@@ -239,7 +269,45 @@ const LinkButton = ({ editor, href }: { editor: Editor; href: string | undefined
 	);
 };
 
-const TextToolbar = ({ element, editor, onPatch }: { element: Of<'text'>; editor: Editor; onPatch: Patch }) => {
+/** "Font · size" opening the typography controls: style, font, and size. */
+const TypographyButton = ({ element, onPatch }: { element: Extract<DeckElement, { type: 'text' }>; onPatch: Patch }) => {
+	const fontLabel = FONT_OPTIONS.find(option => option.value === (element.font ?? 'theme'))?.label ?? 'Theme font';
+
+	return (
+		<Popover
+			label='Text'
+			side='bottom'
+			align='start'
+			unstyledTrigger
+			triggerClassName={`${ICON_BUTTON} max-w-48`}
+			triggerProps={{ 'aria-label': `Text: ${fontLabel}, ${element.fontSize}`, title: 'Font and size', ...keepSelection }}
+			trigger={(
+				<>
+					<Glyph name='text' />
+					<span className='truncate'>{fontLabel} · {element.fontSize}</span>
+					<Glyph name='chevronDown' size={12} className='text-text-muted' />
+				</>
+			)}
+			className='w-60'
+		>
+			<div className='flex flex-col gap-3'>
+				<StyleSelect value={element.style} onChange={patch => onPatch(patch)} />
+				<FontSelect value={element.font} onChange={font => onPatch({ font })} />
+				<NumberField label='Size' value={element.fontSize} min={8} max={240} onChange={fontSize => onPatch({ fontSize }, 'fontSize')} />
+			</div>
+		</Popover>
+	);
+};
+
+interface TextToolbarProps {
+	element: Extract<DeckElement, { type: 'text' }>;
+	editor:  Editor;
+	onPatch: Patch;
+	onMore:  () => void;
+	onAsk?:  () => void;
+}
+
+const TextToolbar = ({ element, editor, onPatch, onMore, onAsk }: TextToolbarProps) => {
 	const state = useEditorState({
 		editor,
 		selector: ({ editor: e }) => ({
@@ -251,35 +319,69 @@ const TextToolbar = ({ element, editor, onPatch }: { element: Of<'text'>; editor
 	});
 
 	const textColor = state.color ?? element.color;
+	const alignGlyph = ALIGNS.find(a => a.value === state.align)?.glyph ?? 'alignLeft';
+	const listActive = BLOCKS.some(block => state.marks.includes(block.name));
 
 	return (
-		<Shell label='Text formatting'>
-			<FontSelect compact value={element.font} onChange={font => onPatch({ font })} />
-			<SizeField value={element.fontSize} onChange={fontSize => onPatch({ fontSize }, 'fontSize')} />
+		<Shell label='Text formatting' onMore={onMore} onAsk={onAsk}>
+			<TypographyButton element={element} onPatch={onPatch} />
 			<ColorButton
 				label='Text color'
 				value={textColor}
 				onChange={hex => run(editor, c => c.setColor(hex))}
 				onReset={() => run(editor, c => c.unsetColor())}
 			>
-				<span className='flex flex-col items-center leading-none'>
-					<span className='text-sm font-semibold'>A</span>
-					<span className={`mt-0.5 h-1 w-4 rounded-full ${textColor ? '' : 'bg-text'}`} style={textColor ? { background: textColor } : undefined} />
-				</span>
+				<Swatch color={textColor} fallback='var(--color-text)' />
 			</ColorButton>
-			<Divider />
 			{MARKS.map(mark => (
 				<ToggleButton key={mark.name} label={mark.label} glyph={mark.glyph} active={state.marks.includes(mark.name)} onPress={() => run(editor, mark.toggle)} />
 			))}
 			<LinkButton editor={editor} href={state.href} />
-			<Divider />
-			{BLOCKS.map(block => (
-				<ToggleButton key={block.name} label={block.label} glyph={block.glyph} active={state.marks.includes(block.name)} onPress={() => run(editor, block.toggle)} />
-			))}
-			<Divider />
-			{ALIGNS.map(align => (
-				<ToggleButton key={align.value} label={align.label} glyph={align.glyph} active={state.align === align.value} onPress={() => run(editor, c => c.setTextAlign(align.value))} />
-			))}
+			<Menu
+				unstyledTrigger
+				triggerClassName={`${ICON_BUTTON} ${listActive ? 'bg-surface-active' : ''}`}
+				triggerProps={{ 'aria-label': 'List', title: 'List', ...keepSelection }}
+				trigger={<Glyph name='list' />}
+				items={BLOCKS.map(block => ({ label: block.label, selected: state.marks.includes(block.name), onSelect: () => run(editor, block.toggle) }))}
+			/>
+			<Popover
+				label='Alignment'
+				side='bottom'
+				align='start'
+				unstyledTrigger
+				triggerClassName={ICON_BUTTON}
+				triggerProps={{ 'aria-label': 'Alignment', title: 'Alignment', ...keepSelection }}
+				trigger={<Glyph name={alignGlyph} />}
+				className='min-w-0 p-1'
+			>
+				{close => (
+					<div className='flex items-center gap-0.5'>
+						<div role='group' aria-label='Horizontal alignment' className='flex gap-0.5'>
+							{ALIGNS.map(align => (
+								<ToggleButton
+									key={align.value}
+									label={align.label}
+									glyph={align.glyph}
+									active={state.align === align.value}
+									onPress={() => { run(editor, c => c.setTextAlign(align.value)); close(); }}
+								/>
+							))}
+						</div>
+						<Divider />
+						<div role='group' aria-label='Vertical alignment' className='flex gap-0.5'>
+							{VALIGNS.map(valign => (
+								<ToggleButton
+									key={valign.value}
+									label={valign.label}
+									glyph={valign.glyph}
+									active={(element.valign ?? 'top') === valign.value}
+									onPress={() => { onPatch({ valign: valign.value }); close(); }}
+								/>
+							))}
+						</div>
+					</div>
+				)}
+			</Popover>
 		</Shell>
 	);
 };
@@ -288,21 +390,23 @@ interface FormatToolbarProps {
 	element: DeckElement;
 	editor:  Editor | null;
 	onPatch: Patch;
+	/** Opens the settings panel on the selected element. */
+	onMore:  () => void;
+	/** When set, the bar gets a lasso button that calls it. */
+	onAsk?:  () => void;
 }
 
-export const FormatToolbar = ({ element, editor, onPatch }: FormatToolbarProps) => {
+// Only the quick, in-place controls live here; everything else is in the settings panel, one "…" away.
+export const FormatToolbar = ({ element, editor, onPatch, onMore, onAsk }: FormatToolbarProps) => {
 	switch(element.type)
 	{
 	case 'text':
-		return editor ? <TextToolbar element={element} editor={editor} onPatch={onPatch} /> : null;
+		return editor ? <TextToolbar element={element} editor={editor} onPatch={onPatch} onMore={onMore} onAsk={onAsk} /> : null;
 
 	case 'table': {
 		const columns = element.rows[0]?.length ?? 0;
 		return (
-			<Shell label='Table formatting'>
-				<FontSelect compact value={element.font} onChange={font => onPatch({ font })} />
-				<SizeField value={element.fontSize} onChange={fontSize => onPatch({ fontSize }, 'fontSize')} />
-				<Divider />
+			<Shell label='Table formatting' onMore={onMore} onAsk={onAsk}>
 				<button type='button' className={ICON_BUTTON} onClick={() => onPatch({ rows: [...element.rows, Array(columns).fill('')] })}>
 					<Glyph name='plus' /> Row
 				</button>
@@ -315,62 +419,45 @@ export const FormatToolbar = ({ element, editor, onPatch }: FormatToolbarProps) 
 
 	case 'shape':
 		return (
-			<Shell label='Shape formatting'>
+			<Shell label='Shape formatting' onMore={onMore} onAsk={onAsk}>
 				<ColorButton label='Fill' value={element.fill} onChange={fill => onPatch({ fill }, 'fill')} onReset={() => onPatch({ fill: '' })}>
-					<span className='h-4 w-4 rounded-full border-[length:var(--border-width)] border-input-border' style={{ background: element.fill || 'var(--color-brand)' }} />
+					<Swatch color={element.fill} fallback='var(--color-brand)' />
 				</ColorButton>
 			</Shell>
 		);
 
 	case 'icon':
 		return (
-			<Shell label='Icon formatting'>
+			<Shell label='Icon formatting' onMore={onMore} onAsk={onAsk}>
 				<ColorButton label='Icon color' value={element.color} onChange={color => onPatch({ color }, 'color')} onReset={() => onPatch({ color: '' })}>
-					<span className='h-4 w-4 rounded-full border-[length:var(--border-width)] border-input-border' style={{ background: element.color || 'var(--color-brand)' }} />
+					<Swatch color={element.color} fallback='var(--color-brand)' />
+				</ColorButton>
+			</Shell>
+		);
+
+	case 'svg':
+		return (
+			<Shell label='SVG formatting' onMore={onMore} onAsk={onAsk}>
+				<ColorButton label='SVG color' value={element.color} onChange={color => onPatch({ color }, 'color')} onReset={() => onPatch({ color: '' })}>
+					<Swatch color={element.color} fallback='var(--color-text)' />
 				</ColorButton>
 			</Shell>
 		);
 
 	case 'line':
 		return (
-			<Shell label='Line formatting'>
+			<Shell label='Line formatting' onMore={onMore} onAsk={onAsk}>
 				<ColorButton label='Line color' value={element.stroke} onChange={stroke => onPatch({ stroke }, 'stroke')} onReset={() => onPatch({ stroke: '' })}>
-					<span className='h-1 w-5 rounded-full' style={{ background: element.stroke || 'var(--color-text)' }} />
+					<Swatch color={element.stroke} fallback='var(--color-text)' />
 				</ColorButton>
-				<div className='w-16 shrink-0 [&>div]:gap-0'>
-					<Input
-						aria-label='Line width'
-						type='number'
-						min={1}
-						max={40}
-						value={element.strokeWidth}
-						onChange={e => e.target.value !== '' && onPatch({ strokeWidth: Math.min(40, Math.max(1, Number(e.target.value))) }, 'strokeWidth')}
-						className='h-7 px-2 py-0 text-xs tabular-nums'
-					/>
-				</div>
 				<ToggleButton label='Arrowhead' glyph='arrow' active={element.arrow} onPress={() => onPatch({ arrow: !element.arrow })} />
 			</Shell>
 		);
 
 	case 'chart':
-		return (
-			<Shell label='Chart formatting'>
-				<ToggleGroup type='single' size='sm' aria-label='Chart type' value={element.chart} onValueChange={v => onPatch({ chart: v as Of<'chart'>['chart'] })}>
-					<ToggleGroupItem value='bar'>Bar</ToggleGroupItem>
-					<ToggleGroupItem value='line'>Line</ToggleGroupItem>
-					<ToggleGroupItem value='area'>Area</ToggleGroupItem>
-				</ToggleGroup>
-			</Shell>
-		);
+		return <Shell label='Chart formatting' onMore={onMore} onAsk={onAsk}>{null}</Shell>;
 
 	case 'image':
-		return (
-			<Shell label='Image formatting'>
-				<ToggleGroup type='single' size='sm' aria-label='Image fit' value={element.fit} onValueChange={v => onPatch({ fit: v as Of<'image'>['fit'] })}>
-					<ToggleGroupItem value='cover'>Fill</ToggleGroupItem>
-					<ToggleGroupItem value='contain'>Fit</ToggleGroupItem>
-				</ToggleGroup>
-			</Shell>
-		);
+		return <Shell label='Image formatting' onMore={onMore} onAsk={onAsk}>{null}</Shell>;
 	}
 };

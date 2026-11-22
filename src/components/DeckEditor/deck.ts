@@ -1,11 +1,15 @@
 import type { SlideElement } from '../SlideCanvas/SlideCanvas';
 import type { CustomTheme, FontId, ThemeId } from './themes';
 import type { RevealEffect } from '../Reveal/Reveal';
+import type { TextStyleId } from './textstyles';
 import type { IconName } from './glyphs';
 
 export type TextAlign = 'left' | 'center' | 'right';
 export type ShapeKind = 'rect' | 'ellipse';
 export type ImageFit = 'cover' | 'contain';
+
+export const VERTICAL_ALIGNS = ['top', 'middle', 'bottom'] as const;
+export type VerticalAlign = typeof VERTICAL_ALIGNS[number];
 export type ChartKind = 'bar' | 'line' | 'area';
 
 export type TransitionType = 'none' | 'fade' | 'push' | 'zoom' | 'wipe';
@@ -30,17 +34,38 @@ export interface ChartRow {
 	value: number;
 }
 
+/** A chart's data read from a spreadsheet instead of typed in: `range` is A1 notation (`A1:B6`). */
+export interface ChartSource {
+	sheetId: string;
+	range:   string;
+}
+
+export interface SheetChoice {
+	id:    string;
+	title: string;
+}
+
+export interface ResolvedChart {
+	seriesLabel?: string;
+	data:         ChartRow[];
+}
+
 export type DeckElement = SlideElement & { effect?: ElementEffect } & (
 	/** `font` overrides the theme's font for this element; omit to follow the theme. */
-	/** `bold` is the box's base weight (marks can still bold or unbold runs); `placeholder` shows while it's empty in the editor. */
-	| { type: 'text';  html: string; fontSize: number; color: string; font?: FontId; bold?: boolean; placeholder?: string }
-	| { type: 'shape'; shape: ShapeKind; fill: string; radius: number }
+	/** `bold` is the box's base weight (marks can still bold or unbold runs); `placeholder` shows while it's empty in the editor; `valign` is where the text sits in a box taller than it (default `top`). */
+	/** `style` is the preset it was set from (Title, Heading, Body, Footer, …); heading styles use the theme's heading font unless `font` is set. */
+	| { type: 'text';  html: string; fontSize: number; color: string; font?: FontId; style?: TextStyleId; bold?: boolean; placeholder?: string; valign?: VerticalAlign }
+	/** `radius` rounds a rect's corners in px; omit it to follow the theme's radius. */
+	| { type: 'shape'; shape: ShapeKind; fill: string; radius?: number }
 	| { type: 'image'; src: string; alt: string; fit: ImageFit }
 	| { type: 'icon';  icon: IconName; color: string }
+	/** `svg` is one complete `<svg viewBox="…">…</svg>`. `currentColor` inside it takes `color` (empty follows the theme's text). */
+	| { type: 'svg';   svg: string; color: string }
 	/** Endpoints are fractions (0–1) of the element's box, so resizing the box scales the line. */
 	| { type: 'line';  x1: number; y1: number; x2: number; y2: number; stroke: string; strokeWidth: number; arrow: boolean }
 	| { type: 'table'; rows: string[][]; header: boolean; fontSize: number; font?: FontId }
-	| { type: 'chart'; chart: ChartKind; seriesLabel: string; data: ChartRow[] }
+	/** With a `source`, the host's `resolveChartSource` supplies the rows and `data` is the last snapshot, shown when the sheet can't be read. */
+	| { type: 'chart'; chart: ChartKind; seriesLabel: string; data: ChartRow[]; source?: ChartSource }
 );
 
 export type ElementType = DeckElement['type'];
@@ -81,3 +106,29 @@ export const duplicateSlide = (slide: Slide): Slide => ({
 	id:       newId(),
 	elements: slide.elements.map(el => ({ ...el, id: newId() })),
 });
+
+const sameRows = (a: ChartRow[], b: ChartRow[]) => a.length === b.length && a.every((row, i) => row.label === b[i].label && row.value === b[i].value);
+
+/** The deck with every sourced chart's rows read from `resolve`. A source that can't be read keeps its last snapshot, and unchanged elements keep their identity. */
+export const linkChartSources = (deck: Deck, resolve?: (source: ChartSource) => ResolvedChart | null): Deck => {
+	if(!resolve) return deck;
+	let changed = false;
+	const slides = deck.slides.map(slide =>
+	{
+		let slideChanged = false;
+		const elements = slide.elements.map(el =>
+		{
+			if(el.type !== 'chart' || !el.source) return el;
+			const resolved = resolve(el.source);
+			if(!resolved) return el;
+			const seriesLabel = resolved.seriesLabel ?? el.seriesLabel;
+			if(seriesLabel === el.seriesLabel && sameRows(resolved.data, el.data)) return el;
+			slideChanged = true;
+			return { ...el, seriesLabel, data: resolved.data };
+		});
+		if(!slideChanged) return slide;
+		changed = true;
+		return { ...slide, elements };
+	});
+	return changed ? { ...deck, slides } : deck;
+};

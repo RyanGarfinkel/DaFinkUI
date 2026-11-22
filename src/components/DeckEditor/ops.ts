@@ -1,5 +1,18 @@
-import type { Deck, DeckElement, Slide } from './deck';
-import type { CustomTheme, ThemeId } from './themes';
+import type { Deck, DeckElement, ElementEffect, ElementType, Slide, SlideTransition } from './deck';
+import { AMBIENT_OPTIONS, EFFECT_OPTIONS, TRANSITION_OPTIONS } from './effects';
+import { FONTS, THEMES, customFromTheme, resolveTheme } from './themes';
+import type { CustomTheme, ThemeColors, ThemeId } from './themes';
+import { TEXT_STYLE_IDS, textStyleFields } from './textstyles';
+import { LAYOUTS, createSlideFromLayout } from './layouts';
+import type { LayoutId } from './layouts';
+import { VERTICAL_ALIGNS } from './deck';
+import { checkSvg } from './svg';
+
+/** A slide patch. `transition` merges into the slide's current one, so `{ transition: { type: 'fade' } }` keeps its duration. */
+export type SlidePatch = Partial<Omit<Slide, 'id' | 'elements' | 'transition'>> & { transition?: Partial<SlideTransition> };
+
+/** An element patch. `effect` merges into the element's current one; `effect: undefined` clears it. */
+export type ElementPatch = (DeckElement extends infer E ? (E extends unknown ? Omit<Partial<E>, 'effect'> : never) : never) & { effect?: Partial<ElementEffect> };
 
 /**
  * Every structural change to a deck, as data. Editors, scripted demos, an API,
@@ -9,12 +22,20 @@ import type { CustomTheme, ThemeId } from './themes';
 export type DeckOp =
 	| { type: 'addSlide';      slide: Slide; index?: number }
 	| { type: 'removeSlide';   slideId: string }
-	| { type: 'updateSlide';   slideId: string; patch: Partial<Omit<Slide, 'id' | 'elements'>> }
+	| { type: 'updateSlide';   slideId: string; patch: SlidePatch }
+	/** Apply one patch to several slides at once (every slide when `slideIds` is omitted), e.g. a transition for the whole deck. */
+	| { type: 'updateSlides';  slideIds?: string[]; patch: SlidePatch }
 	| { type: 'moveSlide';     slideId: string; index: number }
 	| { type: 'addElement';    slideId: string; element: DeckElement; index?: number }
-	| { type: 'updateElement'; slideId: string; elementId: string; patch: Partial<DeckElement> }
+	| { type: 'updateElement'; slideId: string; elementId: string; patch: ElementPatch }
+	/** Apply one patch to every matching element (all slides, all types, when the filters are omitted), e.g. an entrance for every title. */
+	| { type: 'updateElements'; slideIds?: string[]; elementType?: ElementType; patch: ElementPatch }
 	| { type: 'removeElement'; slideId: string; elementId: string }
+	/** A slide from a layout (title, titleContent, …) using the deck theme's margin. Its elements get ids `<slideId>:title`, `<slideId>:body`, … so later ops can fill them. */
+	| { type: 'addSlideFromLayout'; layout: LayoutId; slideId: string; index?: number }
 	| { type: 'setTheme';      theme: ThemeId; customTheme?: CustomTheme }
+	/** Tweak the current theme: switches the deck to a custom theme seeded from the current one, then merges `patch` (colors merge per slot). */
+	| { type: 'updateTheme';   patch: Partial<Omit<CustomTheme, 'colors'>> & { colors?: Partial<ThemeColors> } }
 	| { type: 'setTitle';      title: string };
 
 export class DeckOpError extends Error
@@ -38,6 +59,76 @@ const findElement = (slide: Slide, elementId: string) => {
 	return index;
 };
 
+const oneOf = (label: string, value: unknown, allowed: readonly string[]) => {
+	if(!allowed.includes(value as string)) throw new DeckOpError(`Invalid ${label} "${String(value)}". Use one of: ${allowed.join(', ')}.`);
+};
+
+const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+const COLOR_SLOTS = ['background', 'surface', 'border', 'text', 'muted', 'accent'];
+
+const checkSlidePatch = (patch: SlidePatch) => {
+	if(patch.transition?.type !== undefined) oneOf('transition type', patch.transition.type, TRANSITION_OPTIONS.map(o => o.value));
+	if(patch.ambient !== undefined) oneOf('ambient', patch.ambient, AMBIENT_OPTIONS.map(o => o.value));
+	const duration = patch.transition?.duration;
+	if(duration !== undefined && (!Number.isFinite(duration) || duration < 0)) throw new DeckOpError('Transition duration must be a number of milliseconds, 0 or more.');
+};
+
+const checkElementPatch = (patch: ElementPatch, type?: ElementType) => {
+	if(patch.effect?.type !== undefined)
+	{
+		oneOf('effect type', patch.effect.type, EFFECT_OPTIONS.filter(o => !o.textOnly || !type || type === 'text').map(o => o.value));
+	}
+	if(patch.effect?.delay !== undefined && (!Number.isFinite(patch.effect.delay) || patch.effect.delay < 0)) throw new DeckOpError('Effect delay must be a number of milliseconds, 0 or more.');
+	if('font' in patch && patch.font !== undefined) oneOf('font', patch.font, Object.keys(FONTS));
+	if('style' in patch && patch.style !== undefined) oneOf('text style', patch.style, TEXT_STYLE_IDS);
+	if('valign' in patch && patch.valign !== undefined) oneOf('vertical alignment', patch.valign, VERTICAL_ALIGNS);
+	if('svg' in patch && patch.svg !== undefined)
+	{
+		const problem = checkSvg(patch.svg);
+		if(problem) throw new DeckOpError(`Invalid svg: ${problem}`);
+	}
+};
+
+/** Validates a new element, and fills a text style's size, weight, and color wherever the element doesn't set them. */
+const prepareNewElement = (element: DeckElement): DeckElement => {
+	checkElementPatch(element, element.type);
+	return element.type === 'text' && element.style ? { ...textStyleFields(element.style), ...element } : element;
+};
+
+const checkTheme = (theme: ThemeId, custom: CustomTheme | undefined) => {
+	oneOf('theme', theme, ['custom', ...THEMES.map(t => t.id)]);
+	if(!custom) return;
+	COLOR_SLOTS.forEach(slot =>
+	{
+		const value = (custom.colors as unknown as Record<string, string> | undefined)?.[slot];
+		if(!HEX.test(value ?? '')) throw new DeckOpError(`customTheme.colors.${slot} must be a #rgb or #rrggbb color, got "${String(value)}". Slots: ${COLOR_SLOTS.join(', ')}.`);
+	});
+	if(custom.font !== undefined) oneOf('customTheme.font', custom.font, Object.keys(FONTS));
+	if(custom.headingFont !== undefined) oneOf('customTheme.headingFont', custom.headingFont, Object.keys(FONTS));
+	if(custom.radius !== undefined && !(custom.radius >= 0 && custom.radius <= 200)) throw new DeckOpError('customTheme.radius must be 0 to 200 (px).');
+	if(custom.margin !== undefined && !(custom.margin >= 0 && custom.margin <= 300)) throw new DeckOpError('customTheme.margin must be 0 to 300 (px).');
+};
+
+const mergeSlide = (slide: Slide, patch: SlidePatch): Slide => {
+	checkSlidePatch(patch);
+	return { ...slide, ...patch, transition: { ...slide.transition, ...patch.transition } };
+};
+
+const mergeElement = (current: DeckElement, patch: ElementPatch): DeckElement => {
+	if(patch.type && patch.type !== current.type) throw new DeckOpError(`Can't change element "${current.id}" from ${current.type} to ${patch.type}.`);
+	checkElementPatch(patch, current.type);
+	const { effect, ...rest } = patch;
+	const styled = 'style' in rest && rest.style ? textStyleFields(rest.style) : {};
+	const merged = { ...current, ...styled, ...rest, id: current.id } as DeckElement;
+	if('effect' in patch) merged.effect = effect && { type: 'none', delay: 0, ...current.effect, ...effect };
+	return merged;
+};
+
+const targetSlides = (deck: Deck, slideIds: string[] | undefined) => {
+	slideIds?.forEach(id => findSlide(deck, id));
+	return deck.slides.filter(s => !slideIds || slideIds.includes(s.id)).map(s => s.id);
+};
+
 const clampIndex = (index: number | undefined, length: number) =>
 	(index === undefined ? length : Math.min(length, Math.max(0, index)));
 
@@ -52,7 +143,7 @@ export const applyOp = (deck: Deck, op: DeckOp): Deck => {
 	{
 	case 'addSlide':
 		if(deck.slides.some(s => s.id === op.slide.id)) throw new DeckOpError(`A slide with id "${op.slide.id}" already exists.`);
-		return { ...deck, slides: deck.slides.toSpliced(clampIndex(op.index, deck.slides.length), 0, op.slide) };
+		return { ...deck, slides: deck.slides.toSpliced(clampIndex(op.index, deck.slides.length), 0, { ...op.slide, elements: op.slide.elements.map(prepareNewElement) }) };
 
 	case 'removeSlide': {
 		const index = findSlide(deck, op.slideId);
@@ -61,7 +152,12 @@ export const applyOp = (deck: Deck, op: DeckOp): Deck => {
 	}
 
 	case 'updateSlide':
-		return withSlide(deck, op.slideId, slide => ({ ...slide, ...op.patch }));
+		return withSlide(deck, op.slideId, slide => mergeSlide(slide, op.patch));
+
+	case 'updateSlides': {
+		const ids = targetSlides(deck, op.slideIds);
+		return ids.reduce((current, slideId) => withSlide(current, slideId, slide => mergeSlide(slide, op.patch)), deck);
+	}
 
 	case 'moveSlide': {
 		const from = findSlide(deck, op.slideId);
@@ -73,22 +169,44 @@ export const applyOp = (deck: Deck, op: DeckOp): Deck => {
 		return withSlide(deck, op.slideId, slide =>
 		{
 			if(slide.elements.some(el => el.id === op.element.id)) throw new DeckOpError(`An element with id "${op.element.id}" already exists on slide "${slide.id}".`);
-			return { ...slide, elements: slide.elements.toSpliced(clampIndex(op.index, slide.elements.length), 0, op.element) };
+			return { ...slide, elements: slide.elements.toSpliced(clampIndex(op.index, slide.elements.length), 0, prepareNewElement(op.element)) };
 		});
 
 	case 'updateElement':
 		return withSlide(deck, op.slideId, slide =>
 		{
 			const index = findElement(slide, op.elementId);
-			const current = slide.elements[index];
-			if(op.patch.type && op.patch.type !== current.type) throw new DeckOpError(`Can't change element "${current.id}" from ${current.type} to ${op.patch.type}.`);
-			return { ...slide, elements: slide.elements.with(index, { ...current, ...op.patch, id: current.id } as DeckElement) };
+			return { ...slide, elements: slide.elements.with(index, mergeElement(slide.elements[index], op.patch)) };
 		});
+
+	case 'updateElements': {
+		if(op.elementType) oneOf('elementType', op.elementType, ['text', 'shape', 'image', 'icon', 'svg', 'line', 'table', 'chart']);
+		checkElementPatch(op.patch, op.elementType);
+		return targetSlides(deck, op.slideIds).reduce((current, slideId) => withSlide(current, slideId, slide => ({
+			...slide,
+			elements: slide.elements.map(el => (!op.elementType || el.type === op.elementType ? mergeElement(el, op.patch) : el)),
+		})), deck);
+	}
 
 	case 'removeElement':
 		return withSlide(deck, op.slideId, slide => ({ ...slide, elements: slide.elements.toSpliced(findElement(slide, op.elementId), 1) }));
 
+	case 'addSlideFromLayout': {
+		oneOf('layout', op.layout, LAYOUTS.map(l => l.id));
+		if(deck.slides.some(s => s.id === op.slideId)) throw new DeckOpError(`A slide with id "${op.slideId}" already exists.`);
+		const slide = createSlideFromLayout(op.layout, { slideId: op.slideId, margin: resolveTheme(deck.theme, deck.customTheme).margin });
+		return { ...deck, slides: deck.slides.toSpliced(clampIndex(op.index, deck.slides.length), 0, slide) };
+	}
+
+	case 'updateTheme': {
+		const base = deck.theme === 'custom' && deck.customTheme ? deck.customTheme : customFromTheme(resolveTheme(deck.theme));
+		const customTheme = { ...base, ...op.patch, colors: { ...base.colors, ...op.patch.colors } };
+		checkTheme('custom', customTheme);
+		return { ...deck, theme: 'custom', customTheme };
+	}
+
 	case 'setTheme':
+		checkTheme(op.theme, op.customTheme);
 		// Present-but-undefined clears the custom theme; an absent key keeps it.
 		return { ...deck, theme: op.theme, ...('customTheme' in op ? { customTheme: op.customTheme } : {}) };
 
@@ -205,6 +323,7 @@ export const opTargets = (op: DeckOp): { slideId?: string; elementId?: string } 
 	switch(op.type)
 	{
 	case 'addSlide':      return { slideId: op.slide.id };
+	case 'addSlideFromLayout': return { slideId: op.slideId };
 	case 'addElement':    return { slideId: op.slideId, elementId: op.element.id };
 	case 'updateElement':
 	case 'removeElement': return { slideId: op.slideId, elementId: op.elementId };

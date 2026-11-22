@@ -1,7 +1,7 @@
 'use client';
 
-import { DEFAULT_CUSTOM_COLORS, FONTS, THEMES, resolveTheme, themeStageStyle } from './themes';
-import type { CustomTheme, FontId, SlideTheme, ThemeId } from './themes';
+import { THEMES, customFromTheme, resolveTheme, themeStageStyle } from './themes';
+import type { CustomTheme, SlideTheme, ThemeId } from './themes';
 import { CustomThemeEditor } from './CustomThemeEditor';
 import { Popover } from '../Popover/Popover';
 import { Glyph } from './icons';
@@ -12,12 +12,6 @@ interface ThemePickerProps {
 	onChange:    (theme: ThemeId, customTheme?: CustomTheme, coalesceKey?: string) => void;
 	buttonClass: string;
 }
-
-// A custom theme starts as a copy of whatever theme is active, so it's an edit, not a blank slate.
-const seedFrom = (theme: SlideTheme): CustomTheme => ({
-	colors: theme.colors ?? DEFAULT_CUSTOM_COLORS,
-	font:   (Object.entries(FONTS).find(([, f]) => f.stack === theme.font)?.[0] as FontId | undefined),
-});
 
 const ThemeCard = ({ theme, selected, onSelect }: { theme: SlideTheme; selected: boolean; onSelect: () => void }) => (
 	<button
@@ -37,10 +31,10 @@ const ThemeCard = ({ theme, selected, onSelect }: { theme: SlideTheme; selected:
 			className='flex aspect-video w-full flex-col justify-between rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-surface-border bg-surface p-2'
 			style={themeStageStyle(theme)}
 		>
-			<span className='text-lg font-semibold leading-none text-text'>Aa</span>
+			<span className='text-lg font-semibold leading-none text-text' style={{ fontFamily: 'var(--deck-heading-font, inherit)' }}>Aa</span>
 			<span className='flex items-center gap-1'>
 				<span className='h-1.5 w-8 rounded-full bg-text-muted' />
-				<span className='h-3 w-3 rounded-full bg-brand' />
+				<span className='h-3 w-5 bg-brand' style={{ borderRadius: 'min(var(--deck-radius), 6px)' }} />
 			</span>
 		</span>
 		<span className='px-0.5 text-xs font-medium text-text'>{theme.label}</span>
@@ -48,7 +42,7 @@ const ThemeCard = ({ theme, selected, onSelect }: { theme: SlideTheme; selected:
 );
 
 export const ThemePicker = ({ value, customTheme, onChange, buttonClass }: ThemePickerProps) => {
-	const custom = customTheme ?? seedFrom(resolveTheme(value));
+	const custom = customTheme ?? customFromTheme(resolveTheme(value));
 
 	return (
 		<Popover

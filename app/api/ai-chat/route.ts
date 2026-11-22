@@ -2,9 +2,12 @@ import type { ToolCallEntry, ToolCallLink } from '@/src/components/ToolCallTrace
 import type { ChartSpec, TableSpec } from '@/src/blocks/AiChat/StreamingMessage';
 import type { AiChatReply } from '@/src/blocks/AiChat/AiChat';
 import { deckSchema } from '../slide-editor/schema';
+import { deckReply, linkChartReply } from './decks';
+import { artifactReply } from './artifacts';
+import { sheetSchema } from './sheetSchema';
 import { NextResponse } from 'next/server';
 import { parseBody } from '../parseBody';
-import { deckReply } from './decks';
+import { sheetReply } from './sheets';
 import { z } from 'zod';
 
 // Docs-site-only infrastructure backing the /blocks/ai-chat live preview. Never listed in
@@ -141,6 +144,8 @@ const bodySchema = z.object({
 	// replies with a `deckEdit` for the same `deckId`; the demo's scripted steps target fixed
 	// ids instead, and the client skips any you've removed.
 	decks:   z.array(z.object({ deckId: z.string().min(1).max(100), deck: deckSchema })).max(20).optional(),
+	// The same for spreadsheets: reply with a `sheetEdit` for the same `sheetId`.
+	sheets:  z.array(z.object({ sheetId: z.string().min(1).max(100), sheet: sheetSchema })).max(20).optional(),
 });
 
 const randomReplyDelay = () => 600 + Math.random() * 300;
@@ -150,8 +155,12 @@ export const POST = async (request: Request) => {
 	if(!parsed.ok) return parsed.response;
 
 	await new Promise((resolve) => setTimeout(resolve, randomReplyDelay()));
-	const scripted = deckReply(parsed.data.message, parsed.data.history);
+	const { message, history, sheets = [] } = parsed.data;
+	const scripted = linkChartReply(message, history, sheets.map(s => s.sheetId)) ?? sheetReply(message, history) ?? deckReply(message, history);
 	if(scripted) return NextResponse.json(scripted);
+
+	const withArtifact = artifactReply(parsed.data.message);
+	if(withArtifact) return NextResponse.json(withArtifact);
 
 	const reply = CANNED_REPLIES[Math.floor(Math.random() * CANNED_REPLIES.length)];
 	const body: AiChatReply = { text: reply.text, toolCalls: reply.toolCalls };

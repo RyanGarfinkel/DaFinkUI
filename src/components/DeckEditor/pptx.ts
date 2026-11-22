@@ -1,4 +1,4 @@
-import { rasterize, readTheme, svgToPng, themeResolver, toHex } from './exportHelpers';
+import { elementFontFace, rasterize, readTheme, svgToPng, themeResolver, toHex } from './exportHelpers';
 import { downloadBlob, fileName, findStage } from './exporters';
 import type { ExportTheme, Resolve } from './exportHelpers';
 import type { Deck, DeckElement } from './deck';
@@ -42,9 +42,9 @@ const addElement = async (pptx: PptxGenJS, slide: PptxGenJS.Slide, el: DeckEleme
 	{
 	case 'text':
 		slide.addText(toTextProps(parseRichText(el.html, resolve)), {
-			...box, margin: 0, valign: 'top', fit: 'none',
+			...box, margin: 0, valign: el.valign ?? 'top', fit: 'none',
 			fontSize: el.fontSize * PT_PER_PX,
-			fontFace: el.font ? FONTS[el.font].face : theme.font,
+			fontFace: elementFontFace(el, theme),
 			color:    toHex(resolve(el.color)) ?? theme.text,
 			bold:     el.bold,
 		});
@@ -55,7 +55,7 @@ const addElement = async (pptx: PptxGenJS, slide: PptxGenJS.Slide, el: DeckEleme
 			...box,
 			fill:       { color: toHex(resolve(el.fill)) ?? theme.accent },
 			line:       { type: 'none' },
-			rectRadius: el.shape === 'rect' ? Math.min(1, el.radius / (Math.min(el.width, el.height) / 2)) : undefined,
+			rectRadius: el.shape === 'rect' ? Math.min(1, (el.radius ?? theme.radius) / (Math.min(el.width, el.height) / 2)) : undefined,
 		});
 		return;
 
@@ -71,6 +71,14 @@ const addElement = async (pptx: PptxGenJS, slide: PptxGenJS.Slide, el: DeckEleme
 		const svg = stage.querySelector<SVGSVGElement>(`[data-slide-element="${CSS.escape(el.id)}"] svg`);
 		if(!svg) return;
 		const data = await svgToPng(svg, el.color ? resolve(el.color) : `#${theme.accent}`, el);
+		slide.addImage({ ...box, data, altText: el.label });
+		return;
+	}
+
+	case 'svg': {
+		const svg = stage.querySelector<SVGSVGElement>(`[data-slide-element="${CSS.escape(el.id)}"] svg`);
+		if(!svg) return;
+		const data = await svgToPng(svg, el.color ? resolve(el.color) : `#${theme.text}`, el, 'color');
 		slide.addImage({ ...box, data, altText: el.label });
 		return;
 	}

@@ -15,6 +15,32 @@ const fixture = (): Deck => ({
 	],
 });
 
+const textBox = (): Extract<DeckElement, { type: 'text' }> => ({ id: 't', label: 'Text', type: 'text', html: '<p>Hi</p>', fontSize: 32, color: '', x: 0, y: 0, width: 400, height: 200 });
+
+describe('vertical alignment', () =>
+{
+	const withText = (): Deck => ({ ...fixture(), slides: [{ ...createSlide([textBox()]), id: 's1' }] });
+
+	it('sets a text box\'s valign', () =>
+	{
+		const next = applyOp(withText(), { type: 'updateElement', slideId: 's1', elementId: 't', patch: { valign: 'middle' } });
+		expect(next.slides[0].elements[0]).toMatchObject({ id: 't', valign: 'middle' });
+	});
+
+	it('accepts valign when adding an element', () =>
+	{
+		const next = applyOp(fixture(), { type: 'addElement', slideId: 's1', element: { ...textBox(), valign: 'bottom' } });
+		expect(next.slides[0].elements.at(-1)).toMatchObject({ valign: 'bottom' });
+	});
+
+	it('rejects an unknown valign and lists the valid ones', () =>
+	{
+		const apply = () => applyOp(withText(), { type: 'updateElement', slideId: 's1', elementId: 't', patch: { valign: 'center' as 'middle' } });
+		expect(apply).toThrow(DeckOpError);
+		expect(apply).toThrow(/top, middle, bottom/);
+	});
+});
+
 describe('applyOp', () =>
 {
 	it('adds a slide at an index, clamped to the deck', () =>

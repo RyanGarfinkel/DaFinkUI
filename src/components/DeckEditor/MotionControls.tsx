@@ -2,7 +2,7 @@
 
 import type { AmbientType, DeckElement, EffectType, Slide, TransitionType } from './deck';
 import { AMBIENT_OPTIONS, EFFECT_OPTIONS, TRANSITION_OPTIONS } from './effects';
-import { NumberField, Section } from './fields';
+import { NumberInput, Row, Section } from './fields';
 import Select from '../Select/Select';
 import Button from '../Button/Button';
 import { Glyph } from './icons';
@@ -21,36 +21,42 @@ interface SlideMotionProps {
 }
 
 export const SlideMotion = ({ slide, onSlide, onPreview }: SlideMotionProps) => (
-	<Section title='Motion'>
-		<Select
-			label='Transition'
-			size='sm'
-			options={TRANSITION_OPTIONS}
-			value={slide.transition.type}
-			onChange={type => onSlide({ transition: { ...slide.transition, type: type as TransitionType } })}
-		/>
+	<Section title='Motion' collapsible>
+		<Row label='Transition'>
+			<Select
+				aria-label='Transition'
+				size='sm'
+				options={TRANSITION_OPTIONS}
+				value={slide.transition.type}
+				onChange={type => onSlide({ transition: { ...slide.transition, type: type as TransitionType } })}
+			/>
+		</Row>
 		{slide.transition.type !== 'none' && (
-			<div className='flex items-end gap-2'>
-				<div className='flex-1'>
-					<NumberField
-						label='Duration (ms)'
-						value={slide.transition.duration}
-						min={100}
-						max={3000}
-						onChange={duration => onSlide({ transition: { ...slide.transition, duration: Math.min(3000, Math.max(100, duration)) } }, 'transition-duration')}
-					/>
+			<Row label='Duration'>
+				<div className='flex items-center gap-2'>
+					<div className='min-w-0 flex-1'>
+						<NumberInput
+							label='Transition duration'
+							suffix='ms'
+							value={slide.transition.duration}
+							min={100}
+							max={3000}
+							onChange={duration => onSlide({ transition: { ...slide.transition, duration: Math.min(3000, Math.max(100, duration)) } }, 'transition-duration')}
+						/>
+					</div>
+					<PreviewButton label='Preview transition' onPreview={onPreview} />
 				</div>
-				<PreviewButton label='Preview transition' onPreview={onPreview} />
-			</div>
+			</Row>
 		)}
-		<Select
-			label='Ambient background'
-			hint='Plays behind the content of this slide.'
-			size='sm'
-			options={AMBIENT_OPTIONS}
-			value={slide.ambient}
-			onChange={ambient => onSlide({ ambient: ambient as AmbientType })}
-		/>
+		<Row label='Ambient'>
+			<Select
+				aria-label='Ambient background'
+				size='sm'
+				options={AMBIENT_OPTIONS}
+				value={slide.ambient}
+				onChange={ambient => onSlide({ ambient: ambient as AmbientType })}
+			/>
+		</Row>
 	</Section>
 );
 
@@ -65,28 +71,32 @@ export const ElementMotion = ({ element, onPatch, onPreview }: ElementMotionProp
 	const options = EFFECT_OPTIONS.filter(o => !o.textOnly || element.type === 'text');
 
 	return (
-		<Section title='Animation'>
-			<Select
-				label='Entrance'
-				hint='Plays when the slide appears while presenting.'
-				size='sm'
-				options={options}
-				value={effect.type}
-				onChange={type => onPatch({ effect: { ...effect, type: type as EffectType } })}
-			/>
+		<Section title='Animation' collapsible>
+			<Row label='Entrance'>
+				<Select
+					aria-label='Entrance animation'
+					size='sm'
+					options={options}
+					value={effect.type}
+					onChange={type => onPatch({ effect: { ...effect, type: type as EffectType } })}
+				/>
+			</Row>
 			{effect.type !== 'none' && (
-				<div className='flex items-end gap-2'>
-					<div className='flex-1'>
-						<NumberField
-							label='Delay (ms)'
-							value={effect.delay}
-							min={0}
-							max={10000}
-							onChange={delay => onPatch({ effect: { ...effect, delay: Math.min(10000, Math.max(0, delay)) } }, 'effect-delay')}
-						/>
+				<Row label='Delay'>
+					<div className='flex items-center gap-2'>
+						<div className='min-w-0 flex-1'>
+							<NumberInput
+								label='Entrance delay'
+								suffix='ms'
+								value={effect.delay}
+								min={0}
+								max={10000}
+								onChange={delay => onPatch({ effect: { ...effect, delay: Math.min(10000, Math.max(0, delay)) } }, 'effect-delay')}
+							/>
+						</div>
+						<PreviewButton label='Preview entrance' onPreview={onPreview} />
 					</div>
-					<PreviewButton label='Preview entrance' onPreview={onPreview} />
-				</div>
+				</Row>
 			)}
 		</Section>
 	);

@@ -1,17 +1,17 @@
 'use client';
 
-import { HTMLAttributes, KeyboardEvent, ReactNode, useCallback, useId, useLayoutEffect, useRef, useState } from 'react';
+import { HTMLAttributes, KeyboardEvent, ReactNode, useCallback, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import type { ChartSource, Deck, DeckElement, ResolvedChart, SheetChoice, Slide } from './deck';
+import { SLIDE_HEIGHT, SLIDE_WIDTH, duplicateSlide, linkChartSources, newId } from './deck';
 import { EDITABLE_TYPES, GRID_SIZE, TOOL_LABELS, createFromDraw } from './elements';
-import Drawer, { DrawerClose, DrawerHeader, DrawerTitle } from '../Drawer/Drawer';
-import { SLIDE_HEIGHT, SLIDE_WIDTH, duplicateSlide, newId } from './deck';
+import { askContext, selectedEditorText, type DeckAskContext } from './askcontext';
 import { resolveTheme, themeStageStyle } from './themes';
 import { SlideCanvas } from '../SlideCanvas/SlideCanvas';
-import type { Deck, DeckElement, Slide } from './deck';
 import { createSlideFromLayout } from './layouts';
 import { FormatToolbar } from './FormatToolbar';
 import type { SlideActions } from './SlideRail';
-import { ElementView } from './ElementView';
 import { ambientBackdrop } from './Ambient';
+import { ElementView } from './ElementView';
 import { InsertTools } from './InsertTools';
 import { ThemePicker } from './ThemePicker';
 import type { Editor } from '@tiptap/react';
@@ -21,6 +21,7 @@ import { ExportMenu } from './ExportMenu';
 import { Highlight } from './Highlight';
 import { SlideRail } from './SlideRail';
 import { Presenter } from './Presenter';
+import { AskButton } from './AskButton';
 import { Inspector } from './Inspector';
 import { Entrance } from './Entrance';
 import { Menu } from '../Menu/Menu';
@@ -45,6 +46,12 @@ export interface DeckEditorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'o
 	onActiveSlideChange?: (slideId: string) => void;
 	/** A host message for the status line (e.g. an export's progress). */
 	status?:              string;
+	/** Adds an "Ask AI" button beside the format toolbar. It reports the selected element, or the text highlighted inside one, so the host can send it to an agent. */
+	onAsk?:               (context: DeckAskContext) => void;
+	/** Spreadsheets a chart can take its data from. Give this with `resolveChartSource` to add a "Sheet" data option to the chart settings. */
+	sheets?:              SheetChoice[];
+	/** Reads a sourced chart's rows. Called on every render, so keep it cheap. Return null when the sheet or range can't be read. */
+	resolveChartSource?:  (source: ChartSource) => ResolvedChart | null;
 }
 
 type Zoom = 'fit' | number;
@@ -60,7 +67,13 @@ const ZOOM_MAX = 3;
 const FIT_PADDING = { x: 16, bottom: 16, belowToolbar: 8 };
 const DEFAULT_TOOLBAR_HEIGHT = 56;
 // Below this editor width (not window width), settings open in a drawer.
-const WIDE_MIN = 768;
+// From this editor width up, settings get their own column beside the slide (288px, leaving the slide at least ~230px).
+// Below it there isn't room for both, so settings slide over the slide's right edge instead.
+const WIDE_MIN = 520;
+// Below this editor width the insert tools and the actions no longer fit on one row, so they share one bar instead of two.
+const COMPACT_MAX = 560;
+
+const BAR_CHROME = 'rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface p-1';
 
 /** The toolbar's button style, for host actions passed in `toolbarEnd` to match. */
 export const TOOLBAR_BUTTON = [
@@ -77,9 +90,10 @@ const isEmptyText = (html: string) => !new DOMParser().parseFromString(html, 'te
 
 /** A full slide deck editor. The host owns the deck and its undo history; see spec.md. */
 export const DeckEditor = ({
-	deck, onChange, onUndo, onRedo, canUndo = false, canRedo = false, toolbarEnd, highlightIds = [], highlightLabel = 'AI',
-	activeSlideId: controlledSlideId, onActiveSlideChange, status: hostStatus, className = '', ...props
+	deck: authoredDeck, onChange, onUndo, onRedo, canUndo = false, canRedo = false, toolbarEnd, highlightIds = [], highlightLabel = 'AI',
+	activeSlideId: controlledSlideId, onActiveSlideChange, status: hostStatus, onAsk, sheets, resolveChartSource, className = '', ...props
 }: DeckEditorProps) => {
+	const deck = useMemo(() => linkChartSources(authoredDeck, resolveChartSource), [authoredDeck, resolveChartSource]);
 	const [internalSlideId, setInternalSlideId] = useState(deck.slides[0].id);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [editingId, setEditingId] = useState<string | null>(null);
@@ -94,6 +108,7 @@ export const DeckEditor = ({
 	const [preview, setPreview] = useState<{ id: string; run: number } | null>(null);
 	const [toolbarHeight, setToolbarHeight] = useState(DEFAULT_TOOLBAR_HEIGHT);
 	const [wide, setWide] = useState(true);
+	const [compact, setCompact] = useState(false);
 
 	const rootRef = useRef<HTMLDivElement>(null);
 	const viewportRef = useRef<HTMLElement>(null);
@@ -104,7 +119,8 @@ export const DeckEditor = ({
 	const slide = deck.slides.find(s => s.id === (controlledSlideId ?? internalSlideId)) ?? deck.slides[0];
 	const selected = slide.elements.find(el => el.id === selectedId) ?? null;
 	const scale = zoom === 'fit' ? fitScale : zoom;
-	const stageStyle = themeStageStyle(resolveTheme(deck.theme, deck.customTheme));
+	const theme = resolveTheme(deck.theme, deck.customTheme);
+	const stageStyle = themeStageStyle(theme);
 	const topPadding = toolbarHeight + FIT_PADDING.belowToolbar;
 	const highlights = new Set(highlightIds);
 	const busySlides = deck.slides.filter(s => s.elements.some(el => highlights.has(el.id))).map(s => s.id);
@@ -120,6 +136,7 @@ export const DeckEditor = ({
 		const measure = () => {
 			const top = toolbar.offsetHeight + FIT_PADDING.belowToolbar;
 			setWide(root.clientWidth >= WIDE_MIN);
+			setCompact(root.clientWidth < COMPACT_MAX);
 			setToolbarHeight(toolbar.offsetHeight);
 			setFitScale(Math.max(FIT_MIN, Math.min(
 				(viewport.clientWidth - FIT_PADDING.x * 2) / SLIDE_WIDTH,
@@ -170,29 +187,12 @@ export const DeckEditor = ({
 		setEditingId(id);
 	};
 
-	const arrange = (action: 'forward' | 'backward' | 'duplicate' | 'delete') => {
+	const duplicateSelected = () => {
 		if(!selected) return;
-		const index = slide.elements.indexOf(selected);
 		const elements = [...slide.elements];
-
-		if(action === 'delete')
-		{
-			elements.splice(index, 1);
-			setSelectedId(null);
-		}
-		else if(action === 'duplicate')
-		{
-			const copy = { ...selected, id: newId(), x: selected.x + GRID_SIZE * 3, y: selected.y + GRID_SIZE * 3 };
-			elements.splice(index + 1, 0, copy);
-			setSelectedId(copy.id);
-		}
-		else
-		{
-			const target = action === 'forward' ? index + 1 : index - 1;
-			if(target < 0 || target >= elements.length) return;
-			[elements[index], elements[target]] = [elements[target], elements[index]];
-		}
-
+		const copy = { ...selected, id: newId(), x: selected.x + GRID_SIZE * 3, y: selected.y + GRID_SIZE * 3 };
+		elements.splice(elements.indexOf(selected) + 1, 0, copy);
+		setSelectedId(copy.id);
 		setElements(elements);
 	};
 
@@ -204,7 +204,7 @@ export const DeckEditor = ({
 	const slideActions: SlideActions = {
 		select:    goToSlide,
 		reorder:   slides => onChange({ ...deck, slides }),
-		addAt:     (index, layout = 'titleContent') => insertSlideAt(index, createSlideFromLayout(layout)),
+		addAt:     (index, layout = 'titleContent') => insertSlideAt(index, createSlideFromLayout(layout, { margin: theme.margin })),
 		duplicate: id =>
 		{
 			const index = deck.slides.findIndex(s => s.id === id);
@@ -223,9 +223,6 @@ export const DeckEditor = ({
 
 	// Skipped slides stay in the deck but are left out of the presentation.
 	const presentedSlides = deck.slides.filter(s => !s.skipped);
-	// Start from the current slide, or the next one that isn't skipped (else the last presented one).
-	const nextPresented = presentedSlides.findIndex(s => deck.slides.indexOf(s) >= deck.slides.indexOf(slide));
-	const presentFrom = nextPresented === -1 ? presentedSlides.length - 1 : nextPresented;
 
 	const stepZoom = (direction: 1 | -1) => {
 		const next = direction > 0 ? scale * ZOOM_STEP : scale / ZOOM_STEP;
@@ -252,7 +249,7 @@ export const DeckEditor = ({
 
 		if(key === 'z' && onUndo && onRedo) (e.shiftKey ? onRedo : onUndo)();
 		else if(key === 'y' && onRedo) onRedo();
-		else if(key === 'd' && selected) arrange('duplicate');
+		else if(key === 'd' && selected) duplicateSelected();
 		else return;
 
 		e.preventDefault();
@@ -262,10 +259,12 @@ export const DeckEditor = ({
 	const inspector = (
 		<Inspector
 			slide={slide}
+			themeRadius={theme.radius}
+			sheets={resolveChartSource ? sheets : undefined}
+			resolveChartSource={resolveChartSource}
 			element={selected}
 			onPatch={(patch, key) => selected && patchElement(selected.id, patch, key)}
 			onSlide={(patch, key) => changeSlide(s => ({ ...s, ...patch }), key)}
-			onArrange={arrange}
 			onPreviewTransition={() =>
 			{
 				// The frame, not the stage: the stage's own transform is its zoom scale.
@@ -293,22 +292,25 @@ export const DeckEditor = ({
 			<div
 				className={[
 					'grid min-h-0 flex-1',
-					'motion-safe:transition-[grid-template-columns] motion-safe:duration-[var(--duration-base)] motion-safe:ease-[var(--ease-standard)]',
+					'relative motion-safe:transition-[grid-template-columns] motion-safe:duration-[var(--duration-base)] motion-safe:ease-[var(--ease-standard)]',
+					// Wide editors give the settings their own column; narrow ones slide them over the slide area's right edge.
 					!wide ? 'grid-cols-[minmax(0,1fr)]' : sidebarOpen ? 'grid-cols-[minmax(0,1fr)_288px]' : 'grid-cols-[minmax(0,1fr)_0px]',
 				].join(' ')}
 			>
 				<div className='flex min-h-0 min-w-0 flex-col'>
 					<div className='relative flex min-h-0 flex-1 flex-col'>
 						<div ref={toolbarRef} className='pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-wrap items-start gap-2 p-2 sm:p-3 [&>*]:pointer-events-auto'>
+							<div className={compact ? `flex w-fit max-w-full flex-wrap items-center gap-0.5 ${BAR_CHROME}` : 'contents'}>
 							<InsertTools
 								tool={tool}
 								onToolChange={setTool}
 								onInsert={insertElement}
 								onError={setOwnStatus}
 								buttonClass={TOOLBAR_BUTTON}
+								bare={compact}
 							/>
 
-							<div className='ml-auto flex max-w-full items-center gap-0.5 overflow-x-auto rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface p-1'>
+							<div className={compact ? 'contents' : `ml-auto flex max-w-full items-center gap-0.5 overflow-x-auto ${BAR_CHROME}`}>
 								{onUndo && onRedo && (
 									<>
 										<button type='button' aria-label='Undo' title='Undo (⌘Z)' disabled={!canUndo} onClick={onUndo} className={TOOLBAR_BUTTON}>
@@ -369,6 +371,7 @@ export const DeckEditor = ({
 									]}
 								/>
 							</div>
+							</div>
 
 							<p role='status' aria-live='polite' className='!pointer-events-none basis-full text-xs text-text-muted empty:hidden'>
 								{tool ? `Drag on the slide to draw a ${TOOL_LABELS[tool].toLowerCase()}. Esc cancels.` : status}
@@ -399,13 +402,21 @@ export const DeckEditor = ({
 										}
 										return highlights.has(el.id) ? <Highlight label={highlightLabel}>{view}</Highlight> : view;
 									}}
-									renderToolbar={el => (
-										<FormatToolbar
-											element={el}
-											editor={el.type === 'text' ? activeEditor : null}
-											onPatch={(patch, key) => patchElement(el.id, patch, key)}
-										/>
-									)}
+									renderToolbar={(el, state) =>
+									{
+										const ask = onAsk && (() => onAsk(askContext(slide, deck.slides.indexOf(slide) + 1, deck.slides.length, el, state.editing && el.type === 'text' ? selectedEditorText(activeEditor) : '')));
+										// While the settings panel is open the format bar is hidden, so Ask AI stays on its own.
+										if(sidebarOpen) return ask ? <AskButton onAsk={ask} /> : null;
+										return (
+											<FormatToolbar
+												element={el}
+												editor={el.type === 'text' ? activeEditor : null}
+												onPatch={(patch, key) => patchElement(el.id, patch, key)}
+												onMore={() => setSidebarOpen(true)}
+												onAsk={ask}
+											/>
+										);
+									}}
 									width={SLIDE_WIDTH}
 									height={SLIDE_HEIGHT}
 									scale={scale}
@@ -429,29 +440,24 @@ export const DeckEditor = ({
 					<SlideRail slides={deck.slides} activeId={slide.id} actions={slideActions} stageStyle={stageStyle} busyIds={busySlides} />
 				</div>
 
-				{wide && (
-					<aside
-						id={sidebarId}
-						aria-label='Settings'
-						inert={!sidebarOpen}
-						className='min-h-0 overflow-hidden border-l border-surface-border'
-					>
-						<div className='h-full w-72 overflow-y-auto'>{inspector}</div>
-					</aside>
-				)}
+				<aside
+					id={sidebarId}
+					aria-label='Settings'
+					inert={!sidebarOpen}
+					className={[
+						'min-h-0 min-w-0 overflow-hidden border-l border-surface-border',
+						wide ? '' : [
+							'absolute inset-y-0 right-0 z-20 w-72 max-w-[85%] bg-surface-panel shadow-[var(--shadow-lg)]',
+							'motion-safe:transition-transform motion-safe:duration-[var(--duration-base)] motion-safe:ease-[var(--ease-standard)]',
+							sidebarOpen ? 'translate-x-0' : 'translate-x-full',
+						].join(' '),
+					].join(' ')}
+				>
+					<div className={`h-full overflow-y-auto ${wide ? 'w-72' : 'w-full'}`}>{inspector}</div>
+				</aside>
 			</div>
 
-			{!wide && (
-				<Drawer id={sidebarId} open={sidebarOpen} onOpenChange={setSidebarOpen} side='right' aria-label='Settings'>
-					<DrawerHeader>
-						<DrawerTitle>Settings</DrawerTitle>
-					</DrawerHeader>
-					<DrawerClose />
-					<div className='flex-1 overflow-y-auto'>{inspector}</div>
-				</Drawer>
-			)}
-
-			{presenting && <Presenter slides={presentedSlides} startIndex={presentFrom} stageStyle={stageStyle} onClose={closePresenter} />}
+			{presenting && <Presenter slides={presentedSlides} startIndex={0} stageStyle={stageStyle} onClose={closePresenter} />}
 		</div>
 	);
 };

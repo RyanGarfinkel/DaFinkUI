@@ -4,8 +4,8 @@ import { CSSProperties, KeyboardEvent, useEffect, useLayoutEffect, useRef, useSt
 import { playTransition, transitionDelay } from './effects';
 import { SlideCanvas } from '../SlideCanvas/SlideCanvas';
 import { SLIDE_HEIGHT, SLIDE_WIDTH } from './deck';
-import { ElementView } from './ElementView';
 import { ambientBackdrop } from './Ambient';
+import { ElementView } from './ElementView';
 import Button from '../Button/Button';
 import { Entrance } from './Entrance';
 import type { Slide } from './deck';
