@@ -6,7 +6,6 @@ export interface TextScrambleProps extends HTMLAttributes<HTMLSpanElement> {
 	text:        string;
 	/** Total duration of the scramble-to-resolve animation in milliseconds. */
 	duration?:   number;
-	/** Charset used for scrambling filler characters. */
 	characters?: string;
 	className?:  string;
 }

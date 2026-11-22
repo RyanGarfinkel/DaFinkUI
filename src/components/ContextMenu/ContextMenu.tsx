@@ -10,11 +10,9 @@ export interface ContextMenuProps {
 	items:         MenuLeafEntry[];
 	/** The region that opens the menu on right-click (or Shift+F10 / the Menu key when focus is inside it). */
 	children:      ReactNode;
-	/** Accessible name for the menu. */
 	label?:        string;
 	disabled?:     boolean;
 	onOpenChange?: (open: boolean) => void;
-	/** Additional classes on the menu panel. */
 	className?:    string;
 }
 

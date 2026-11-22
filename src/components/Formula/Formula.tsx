@@ -10,7 +10,6 @@ export interface FormulaProps extends Omit<HTMLAttributes<HTMLElement>, 'childre
 	expression: string;
 	/** "inline" flows with surrounding text; "block" centers the equation on its own line. */
 	display?:   FormulaDisplay;
-	/** Font size of the rendered formula. */
 	size?:      FormulaSize;
 }
 

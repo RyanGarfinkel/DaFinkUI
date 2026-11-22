@@ -21,7 +21,6 @@ export interface CodeBlockProps {
 	className?:       string;
 	/** Renders an editable textarea instead of a read-only block. */
 	editable?:        boolean;
-	/** Fires with the updated value whenever the user edits the code. */
 	onCodeChange?:    (code: string) => void;
 }
 
