@@ -44,6 +44,38 @@ const GITLAB_WORKFLOW_YAML = `dafink-audit:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
     - if: '$CI_COMMIT_BRANCH == "main"'`;
 
+const HOOK_LAYERS: { title: string; when: string; desc: string }[] = [
+	{ title: 'While code is written', when: 'Claude Code PostToolUse', desc: 'Lints the one file just written or edited and sends problems straight back, so they are fixed in the same turn. Seconds.' },
+	{ title: 'When you commit', when: 'Git pre-commit and commit-msg', desc: 'Lints only the staged files and checks the commit message. Keep it under about ten seconds, or people will skip it.' },
+	{ title: 'When you push, and in CI', when: 'Git pre-push, then your CI workflow', desc: 'Runs typecheck, the audit and the full test suite. CI repeats all of it and is the one layer that cannot be skipped.' },
+];
+
+const STOP_HOOK = `{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "npm run typecheck && npm test", "timeout": 300 }
+        ]
+      }
+    ]
+  }
+}`;
+
+const PRE_COMMIT_HOOK = 'npx lint-staged';
+
+const LINT_STAGED_CONFIG = `{
+  "lint-staged": {
+    "*.{ts,tsx,mjs}": "eslint --fix"
+  }
+}`;
+
+const COMMIT_MSG_HOOK = 'npx --no -- commitlint --edit $1';
+
+const PRE_PUSH_HOOK = `node scripts/dafink-audit.mjs
+npm run typecheck
+npm test`;
+
 const ReliabilityPage = () => {
 	return (
 		<div className='flex flex-col gap-12'>
@@ -194,6 +226,135 @@ const ReliabilityPage = () => {
 				</p>
 			</section>
 
+			{/* Hooks */}
+			<section className='flex flex-col gap-4'>
+				<h2 className='text-xl font-semibold text-text'>Hooks</h2>
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					CI catches a violation after the push. Hooks catch it earlier, at the
+					moment the code is written or committed, so the feedback arrives while
+					the change is still small. Use all three layers, each doing only what
+					is cheap enough for its moment:
+				</p>
+				<div className='grid grid-cols-1 gap-3 sm:grid-cols-3'>
+					{HOOK_LAYERS.map((layer) => (
+						<div
+							key={layer.title}
+							className='rounded-lg border border-surface-border bg-surface p-4 flex flex-col gap-1.5'
+						>
+							<p className='text-sm font-semibold text-text'>{layer.title}</p>
+							<p className='text-xs text-text-subtle'>{layer.when}</p>
+							<p className='text-sm text-text-muted leading-relaxed'>{layer.desc}</p>
+						</div>
+					))}
+				</div>
+
+				<h3 className='text-base font-semibold text-text'>Claude Code lint hook</h3>
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					A <code className='font-mono text-xs'>PostToolUse</code> hook that runs
+					ESLint with the DaFink rules on every file Claude Code writes or edits,
+					and shows Claude any problems straight away so it fixes them in the same
+					turn instead of leaving them for review. It lints only the edited file,
+					so it stays fast.
+				</p>
+				<CodeBlock code='npx dafink-ui hook install' />
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					This adds the hook to <code className='font-mono text-xs'>.claude/settings.json</code>.
+					Pass <code className='font-mono text-xs'>--fix</code> to have it autofix
+					what it can before reporting the rest, or set it up during setup with{' '}
+					<code className='font-mono text-xs'>npx dafink-ui init --hook</code>. It
+					needs the ESLint setup from <code className='font-mono text-xs'>npx dafink-ui lint --init</code>;
+					without one it skips every file. Restart any running Claude Code session
+					to pick it up.
+				</p>
+				<ul className='flex max-w-2xl list-disc flex-col gap-2 pl-5 text-sm leading-relaxed text-text-muted'>
+					<li>
+						Keep it to the one edited file. Anything slow, like a typecheck or the
+						test suite, belongs in a <code className='font-mono text-xs'>Stop</code> hook
+						that runs once when Claude finishes, not after every edit.
+					</li>
+					<li>
+						Exit with code 2 to send the problems back to Claude. Any other
+						non-zero exit only shows them to you.
+					</li>
+					<li>
+						Skip generated and vendored paths such as{' '}
+						<code className='font-mono text-xs'>node_modules</code>,{' '}
+						<code className='font-mono text-xs'>.next</code> and installed registry copies,
+						so Claude never fixes files you will overwrite.
+					</li>
+					<li>
+						Commit <code className='font-mono text-xs'>.claude/settings.json</code> so
+						the whole team gets the same hooks, and keep personal permissions in{' '}
+						<code className='font-mono text-xs'>.claude/settings.local.json</code>.
+					</li>
+				</ul>
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					A <code className='font-mono text-xs'>Stop</code> hook that runs the heavier checks once per turn:
+				</p>
+				<CodeBlock code={STOP_HOOK} />
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					If the command fails and exits with code 2, Claude keeps working instead of
+					stopping, so make sure it can pass. The hook input includes{' '}
+					<code className='font-mono text-xs'>stop_hook_active</code>; a script can read it
+					to avoid blocking twice in a row.
+				</p>
+
+				<h3 className='text-base font-semibold text-text'>Git hooks</h3>
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					With{' '}
+					<a
+						href='https://typicode.github.io/husky'
+						target='_blank'
+						rel='noopener noreferrer'
+						className='text-brand underline underline-offset-4 hover:text-brand-hover'
+					>
+						Husky
+					</a>{' '}
+					and <code className='font-mono text-xs'>lint-staged</code>, the commit stays fast
+					because only the files you changed are checked. In{' '}
+					<code className='font-mono text-xs'>.husky/pre-commit</code>:
+				</p>
+				<CodeBlock code={PRE_COMMIT_HOOK} />
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					and in <code className='font-mono text-xs'>package.json</code>:
+				</p>
+				<CodeBlock code={LINT_STAGED_CONFIG} />
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					Check the commit message in <code className='font-mono text-xs'>.husky/commit-msg</code> with{' '}
+					<code className='font-mono text-xs'>commitlint</code>, so history stays readable and
+					changelogs can be generated from it:
+				</p>
+				<CodeBlock code={COMMIT_MSG_HOOK} />
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					Put the slower checks, which are the audit, the typecheck and the tests, in{' '}
+					<code className='font-mono text-xs'>.husky/pre-push</code>:
+				</p>
+				<CodeBlock code={PRE_PUSH_HOOK} />
+				<ul className='flex max-w-2xl list-disc flex-col gap-2 pl-5 text-sm leading-relaxed text-text-muted'>
+					<li>
+						Add <code className='font-mono text-xs'>&quot;prepare&quot;: &quot;husky&quot;</code> to
+						your scripts so the hooks install on every{' '}
+						<code className='font-mono text-xs'>npm install</code>. Hooks that need a manual
+						step are hooks nobody has.
+					</li>
+					<li>
+						Run the same commands in hooks and in CI. When they differ, a commit passes
+						locally and fails in review.
+					</li>
+					<li>
+						Don&apos;t put autofixers that rewrite files outside the staged set in a hook.{' '}
+						<code className='font-mono text-xs'>lint-staged</code> re-stages what it fixes;
+						a bare <code className='font-mono text-xs'>eslint --fix .</code> does not.
+					</li>
+					<li>
+						Hooks run on your machine and can be skipped with{' '}
+						<code className='font-mono text-xs'>--no-verify</code>, so they are a convenience,
+						not a guarantee. Keep the CI workflow above as the check that can&apos;t be bypassed,
+						and protect the main branch so it has to pass.
+					</li>
+				</ul>
+			</section>
+
 			{/* Google Lighthouse */}
 			<section className='flex flex-col gap-4'>
 				<h2 className='text-xl font-semibold text-text'>Google Lighthouse</h2>
@@ -213,6 +374,13 @@ const ReliabilityPage = () => {
 					DOM in a real browser, so it also catches contrast failures,
 					malformed ARIA, and performance/SEO issues neither static tool
 					looks for at all.
+				</p>
+				<p className='text-sm text-text-muted leading-relaxed max-w-2xl'>
+					You can run the same engine, <code className='font-mono text-xs'>axe-core</code>,
+					inside your unit tests too. Render a component, run axe on the result, and fail on
+					any violation. That catches missing names, bad ARIA and invalid roles per component,
+					on every <code className='font-mono text-xs'>npm test</code>, long before a page
+					exists to audit. jsdom has no layout, so leave contrast to Lighthouse.
 				</p>
 			</section>
 
