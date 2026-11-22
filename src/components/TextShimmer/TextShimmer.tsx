@@ -3,10 +3,9 @@
 import { HTMLAttributes } from 'react';
 
 export interface TextShimmerProps extends HTMLAttributes<HTMLSpanElement> {
-	/** Duration of one shimmer sweep in milliseconds. Defaults to 8× --duration-slow (2400ms). */
-	duration?:  number;
-	children:   React.ReactNode;
-	className?: string;
+	/** Milliseconds per sweep. */
+	duration?: number;
+	children:  React.ReactNode;
 }
 
 /**

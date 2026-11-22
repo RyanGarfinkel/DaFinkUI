@@ -5,10 +5,7 @@ type BlockSummary = Pick<BlockEntry, 'slug' | 'name' | 'category' | 'description
 const toSummary = ({ slug, name, category, description }: BlockEntry): BlockSummary =>
 	({ slug, name, category, description });
 
-// `full: true` returns every field (usage source, deps) for all blocks — this
-// is well over 100KB of JSON. Default to name/category/description only;
-// callers that need one block's full entry should use
-// get_block_registry_entry(name) instead of dumping everything.
+// `full` is over 100KB of JSON, so the default is a summary; use get_block_registry_entry for one block.
 export const getFullBlockRegistry = (full = false): BlockEntry[] | BlockSummary[] => {
 	return full ? blocks : blocks.map(toSummary);
 };

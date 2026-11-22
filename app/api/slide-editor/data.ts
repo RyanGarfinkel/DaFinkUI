@@ -1,10 +1,7 @@
 import type { Deck } from '@/src/components/DeckEditor/deck';
 import { SAMPLE_DECK } from '@/src/blocks/SlideEditor/deck';
 
-// Docs-site-only sample store backing the /blocks/slide-editor live preview. Never
-// listed in the block's registry `files`; in a real app this is your database. It
-// lives on globalThis so every route handler shares one copy (dev mode can bundle
-// each route separately) and resets whenever the server restarts.
+// Docs-only sample store (your database in a real app). It lives on globalThis because dev mode can bundle each route separately.
 
 export interface StoredDeck {
 	id:        string;

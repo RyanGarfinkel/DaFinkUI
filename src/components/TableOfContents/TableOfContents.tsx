@@ -69,10 +69,7 @@ const TableOfContents = (
 		setHeadings(found);
 	}, [containerId, pathname]);
 
-	// Tracks scroll position, not the URL; bolds the last heading whose top has
-	// scrolled past the trigger line just below the sticky MenuBar. Geometry-based
-	// rather than an IntersectionObserver band, since a band fails to ever trigger
-	// for a trailing heading that's too close to the bottom of a short page.
+	// Geometry, not an IntersectionObserver band: a band never triggers for a trailing heading near the bottom of a short page.
 	useEffect(() =>
 	{
 		if(headings.length === 0) return;

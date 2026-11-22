@@ -1,10 +1,6 @@
 import type { ShellResult } from '@/src/blocks/Terminal/types';
 
-// Docs-site-only mock backing the /blocks/terminal live preview. Never listed in the
-// terminal block's registry `files`. Like the ai-chat demo, nothing real happens: each
-// command is matched against a canned pattern and answered with plausible sample output.
-// Nothing is executed and no file is read. In a real app, run commands in a sandboxed
-// container and return their output.
+// Docs-only mock: commands are matched against canned patterns and nothing is executed. A real app runs them in a sandboxed container.
 
 interface MockReply {
 	pattern: RegExp;

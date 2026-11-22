@@ -2,10 +2,7 @@ import type { JobApplication } from '@/src/blocks/JobApplicationTracker/Applicat
 import { NextResponse } from 'next/server';
 import { delay, getStore } from './data';
 
-// Docs-site-only infrastructure backing the /blocks/job-application-tracker live preview. Never
-// listed in the block's registry `files`. GET lists the signed-in user's applications and POST
-// creates one; in a real app these are queries against your jobs store. The delay stands in for
-// network latency.
+// Docs-only demo route: a real app queries its jobs store. The delay stands in for network latency.
 
 const LIST_LATENCY_MS = 900;
 

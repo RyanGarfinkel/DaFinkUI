@@ -3,10 +3,8 @@
 import { HTMLAttributes, useMemo } from 'react';
 
 export interface MeteorsProps extends HTMLAttributes<HTMLDivElement> {
-	/** Number of meteor streaks rendered. Defaults to 10. */
-	count?:     number;
-	children?:  React.ReactNode;
-	className?: string;
+	count?:    number;
+	children?: React.ReactNode;
 }
 
 interface Meteor {

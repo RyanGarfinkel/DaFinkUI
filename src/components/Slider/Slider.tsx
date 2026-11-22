@@ -23,11 +23,7 @@ export interface SliderProps {
 	className?: string;
 }
 
-// Matches the thumb's CSS width/height below. The browser positions a range
-// input's thumb inset by half its own width at each end of the track (so its
-// center never quite reaches the track's edges) -- the fill width has to
-// account for that same inset or its edge drifts away from the thumb's actual
-// center as the thumb gets bigger, instead of touching it.
+// Matches the thumb's CSS size. Browsers inset the thumb by half its width at each end, and the fill must use the same inset to meet it.
 const THUMB_SIZE = 16;
 
 const SIZE_CLASSES: Record<SliderSize, { row: string; track: string }> = {
@@ -35,14 +31,7 @@ const SIZE_CLASSES: Record<SliderSize, { row: string; track: string }> = {
 	sm:      { row: 'h-4', track: 'h-1' },
 };
 
-// Matches Button's primary-variant focus ring (ring-offset-2 ring-brand-ring) in color,
-// but as outline/outline-offset rather than box-shadow: box-shadow's "offset" trick works
-// by painting an opaque gap-colored layer on top of the ring color, which would paint
-// straight over the fill bar where it touches the thumb. outline-offset instead leaves
-// that gap genuinely unpainted, so the fill stays visible running right up to the thumb
-// underneath the ring. --color-brand-ring is safe to use directly here (unlike the
-// box-shadow attempt) precisely because outline-offset doesn't need a fill color to fake
-// the gap with.
+// The focus ring is an outline, not a box-shadow: a shadow's offset gap is painted, and would cover the fill where it meets the thumb.
 const TONE_CLASSES: Record<SliderTone, { track: string; fill: string; thumbColor: string; ring: string }> = {
 	brand:   { track: 'bg-surface-active', fill: 'bg-brand',   thumbColor: 'var(--color-brand)', ring: 'var(--color-brand-ring)' },
 	current: { track: 'bg-current/20',     fill: 'bg-current', thumbColor: 'currentColor',       ring: 'currentColor' },
@@ -69,12 +58,7 @@ const Slider = ({
 	const hintId  = hint  ? `slider-hint-${uid}` : undefined;
 
 	const [isDragging, setIsDragging] = useState(false);
-	// Keyboard step changes (arrow keys, Home/End, Page Up/Down) move the native thumb
-	// instantly, same as a pointer drag -- but unlike a drag, there's no pointerdown/up
-	// pair bracketing them. Tracking focus instead means the fill stays snapped to the
-	// thumb for the whole time a key press could move it, not just mid-drag, so the two
-	// never visibly separate. The transition still applies to a value changed
-	// programmatically while the slider isn't focused (e.g. a "reset" button elsewhere).
+	// Keys move the thumb instantly with no pointerdown/up pair, so focus also keeps the fill snapped to it.
 	const [isFocused,  setIsFocused]  = useState(false);
 
 	const pct       = ((value - min) / (max - min)) * 100;

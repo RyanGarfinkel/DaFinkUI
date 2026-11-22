@@ -33,21 +33,10 @@ const WORK_TYPE_OPTIONS = [
 
 const STAGE_OPTIONS = STAGES.map((stage) => ({ value: stage.id, label: stage.title }));
 
-// The table doubles as an editable grid using the same Input/Select components as
-// the details modal — no need to open the modal just to fix a role, stage, or
-// salary. At rest a cell reads as plain text; hovering or focusing it reveals the
-// component's normal bordered, editable look. The `:not(:hover):not(:focus)`
-// scoping (rather than fighting Input/Select's own hover/focus classes with more
-// `!important`) means those default styles apply completely untouched the moment
-// either state is true — no cascade tug-of-war with the component's own classes.
+// A cell reads as plain text until hovered or focused. Scoping the overrides to `:not(:hover):not(:focus)` leaves the component's own hover and focus styles untouched.
 const CLEAN_FIELD_CLASS = '!px-1.5 !py-1 [&:not(:hover):not(:focus)]:!border-transparent [&:not(:hover):not(:focus)]:!bg-transparent [&:not(:hover):not(:focus)]:!shadow-none';
 
-// Applied date is the one exception: there's no headless-friendly (no visible
-// label required) date component in the library yet, so it falls back to a
-// native date input — fully accessible on its own, styled to match the same
-// text-until-hover look via ordinary (non-important) Tailwind variants, since
-// there's no competing component style here to override.
-
+// The applied date is a native date input: the library has no date component that works without a visible label.
 interface InlineDateFieldProps {
 	value:     string | undefined;
 	onChange:  (value: string | undefined) => void;

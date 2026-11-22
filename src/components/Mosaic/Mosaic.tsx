@@ -300,10 +300,7 @@ const SizePicker = (
 					const c         = (i % pickerCols) + 1;
 					const r         = Math.floor(i / pickerCols) + 1;
 					const isValid   = c >= minCol && r >= minRow;
-					// Lit state mirrors the full hovered rectangle (1..hoverCol, 1..hoverRow), not
-					// just the individually-selectable cells — otherwise columns/rows below the min
-					// span never light up and the highlighted block looks smaller than the "W × H"
-					// label below it (e.g. label reads "3 × 2" but only 2 columns glow).
+					// Lit covers the whole hovered rectangle, including cells below the minimum span, so the block matches the "W × H" label.
 					const isLit     = c <= hoverCol && r <= hoverRow;
 					const isCurrent = c === currentCol && r === currentRow;
 

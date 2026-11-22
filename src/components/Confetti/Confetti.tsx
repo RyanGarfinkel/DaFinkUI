@@ -3,15 +3,13 @@
 import { useEffect, useRef, useState, type HTMLAttributes, type MouseEventHandler } from 'react';
 
 export interface ConfettiProps extends HTMLAttributes<HTMLDivElement> {
-	/** Content to wrap, typically a button. Clicking it triggers the burst. */
+	/** Clicking it triggers the burst. */
 	children:       React.ReactNode;
-	/** Number of confetti pieces rendered per burst. Defaults to 60. */
 	particleCount?: number;
-	/** Hex colors randomly assigned to pieces. Defaults to a vivid, varied palette. */
+	/** Hex colors picked at random for each piece. */
 	colors?:        string[];
-	/** Milliseconds for one burst's full fall-and-fade animation. Defaults to 1500. */
+	/** Milliseconds per burst. */
 	duration?:      number;
-	className?:     string;
 }
 
 interface Piece {
@@ -110,10 +108,7 @@ export const Confetti = (
 
 	useEffect(() => {
 		return () => {
-			// timersRef is a persistent mutable accumulator pushed to by every
-			// click, not a per-render snapshot — reading .current here at unmount
-			// time (not mount time) is exactly what clears every timer that's
-			// accrued since, which is the intended behavior.
+			// The ref collects timers across clicks; reading it at unmount clears them all.
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 			timersRef.current.forEach(clearTimeout);
 		};

@@ -11,7 +11,6 @@ export interface RevealProps extends HTMLAttributes<HTMLDivElement> {
 	/** Reveal only the first time it scrolls into view. */
 	once?:      boolean;
 	children?:  React.ReactNode;
-	className?: string;
 }
 
 export interface RevealGroupProps extends HTMLAttributes<HTMLDivElement> {

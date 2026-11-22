@@ -4,18 +4,16 @@ import { useEffect, useRef, useState, HTMLAttributes } from 'react';
 
 export interface TypewriterProps extends HTMLAttributes<HTMLSpanElement> {
 	text:             string;
-	/** Milliseconds between each character. Default: 50. */
+	/** Milliseconds per character. */
 	speed?:           number;
-	/** Milliseconds to wait before typing begins. Default: 0. */
+	/** Milliseconds before typing starts. */
 	delay?:           number;
-	/** Show a blinking cursor while typing (and optionally after). Default: true. */
 	cursor?:          boolean;
-	/** Keep cursor visible after typing completes. Default: false. */
+	/** Keep the cursor after typing ends. */
 	cursorPersist?:   boolean;
 	onComplete?:      () => void;
-	/** Called with the current character count every time a new character is revealed. */
+	/** Called with the characters revealed so far. */
 	onReveal?:        (charsRevealed: number) => void;
-	className?:       string;
 }
 
 export const Typewriter = (

@@ -8,13 +8,10 @@ export interface CountUpProps extends HTMLAttributes<HTMLSpanElement> {
 	/** Milliseconds. */
 	duration?:  number;
 	decimals?:  number;
-	/** Shown before the number, e.g. "$". */
 	prefix?:    string;
-	/** Shown after the number, e.g. "%". */
 	suffix?:    string;
 	/** Thousands separator, e.g. ",". */
 	separator?: string;
-	className?: string;
 }
 
 /**

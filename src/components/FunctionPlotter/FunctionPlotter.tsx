@@ -56,27 +56,13 @@ const MAX_EXTREMA       = 12;
 const MAX_INTERSECTIONS = 16;
 const ZERO_EPSILON      = 1e-6;
 
-// Numeric root-finding (ternarySearch, bisectRoot) essentially never lands on
-// exactly 0, even when that's the true answer (e.g. the vertex of x^2) — it
-// converges to something like 1e-9, which `toString()` renders in exponential
-// notation. That's well below anything distinguishable at 4 significant
-// figures even at max zoom, so treat it as display noise and snap to 0.
+// Root-finding lands near 0 (about 1e-9) rather than on it, which would print in exponential notation.
 const formatCoord = (n: number) => Math.abs(n) < ZERO_EPSILON ? '0' : parseFloat(n.toPrecision(4)).toString();
 
 let _idCounter = 0;
 const nextId = () => `eq-${++_idCounter}`;
 
-//
-// Equations come from free-text user input, so they're parsed and evaluated by
-// mathjs' expression parser rather than `new Function`/`eval` — mathjs never
-// hands the string to the JS engine, and its AccessorNode blocks property
-// access like `.constructor`, so a math-only grammar is all that's reachable.
-// mathjs' own docs flag `import`/`createUnit`/`simplify`/`derivative`/`resolve`/
-// `evaluate`/`parse`/`parser`/`compile`/`help`/`reviver` as unsafe to expose to
-// untrusted expressions — they can rebind functions, mutate global unit state,
-// or blow up on crafted input — so those are disabled below; everything else
-// mathjs offers (trig, log, hyperbolic, stats, ...) stays available.
-
+// Equations are free text, so mathjs parses them (never eval). The functions its docs flag as unsafe for untrusted input are disabled below.
 const mathInstance = create(all, { predictable: true });
 
 const rawParse = mathInstance.parse;
@@ -105,9 +91,7 @@ const compileExpr = (expr: string): ((x: number) => number) | null => {
 		const code       = rawParse(expr).compile();
 		const evaluateAt = (x: number) => code.evaluate({ x });
 
-		// mathjs happily parses things like `f(x) = x^2` (a function assignment)
-		// or `x > 1` (a comparison) without throwing, but the result isn't a
-		// plottable number — reject those at x=0 instead of silently drawing nothing.
+		// `f(x) = x^2` and `x > 1` parse fine but aren't plottable numbers.
 		if(typeof evaluateAt(0) !== 'number') return null;
 
 		return (x: number) =>
@@ -119,9 +103,6 @@ const compileExpr = (expr: string): ((x: number) => number) | null => {
 	catch { return null; }
 }
 
-// Refines a rough local extremum into a precise one via ternary search — works
-// for any unimodal (single min or max) window, which a narrow few-pixel range
-// around a detected slope-sign change reliably is for a smooth plotted curve.
 const ternarySearch = (fn: (x: number) => number, lo: number, hi: number, findMax: boolean): { x: number; y: number } => {
 	let a = lo;
 	let b = hi;
@@ -138,8 +119,6 @@ const ternarySearch = (fn: (x: number) => number, lo: number, hi: number, findMa
 	return { x, y: fn(x) };
 }
 
-// Finds a root of `diffFn` (the difference between two curves, so a root is an
-// intersection) within a window already known to bracket a sign change.
 const bisectRoot = (diffFn: (x: number) => number, lo: number, hi: number): number => {
 	let a  = lo;
 	let b  = hi;
@@ -346,14 +325,7 @@ const FunctionPlotter = ({
 					ctx.lineTo(sx, sy);
 				}
 
-				// Numeric, not symbolic: mathjs' `derivative` is disabled (see above),
-				// so a sign change in the discrete slope between samples is refined
-				// into a precise extremum via ternary search over that narrow window.
-				// A zero-valued slope sample is skipped rather than recorded — for a
-				// symmetric curve landing exactly on a pixel-aligned center (e.g. x^2
-				// under the default viewport), the discrete slope passes through
-				// exactly 0 right at the vertex, and overwriting `lastSlope` with 0
-				// there erases the sign needed to detect the flip on the next sample.
+				// A slope sign change brackets an extremum. A zero slope is skipped so it can't erase the sign before the flip (the vertex of x^2 lands exactly on 0).
 				if(isActive && lastWy !== null && markers.length < MAX_EXTREMA)
 				{
 					const slope = wy - lastWy;
@@ -404,13 +376,7 @@ const FunctionPlotter = ({
 
 		ctx.globalAlpha = 1;
 
-		// Only pairs that include the active equation are checked — nothing
-		// shows until a curve is selected, same as extrema.
-		// Same numeric approach as extrema, but on the difference of two curves:
-		// a sign change in (a - b) between adjacent samples brackets a root,
-		// refined via bisection. As with extrema, a zero-valued diff sample is
-		// skipped rather than recorded, so it can't erase the sign needed to
-		// detect the flip on the next sample.
+		// Same approach as extrema on the difference of two curves; only pairs with the active equation are checked.
 		const intersectionColor = getComputedStyle(document.documentElement)
 			.getPropertyValue('--color-text').trim() || '#18181b';
 

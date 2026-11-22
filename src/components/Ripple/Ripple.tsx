@@ -3,12 +3,11 @@
 import { HTMLAttributes } from 'react';
 
 export interface RippleProps extends HTMLAttributes<HTMLDivElement> {
-	/** Number of concentric rings. Defaults to 4. */
-	count?:     number;
-	/** Milliseconds for one ring's full expand-and-fade cycle. Defaults to 3000. */
-	duration?:  number;
-	children?:  React.ReactNode;
-	className?: string;
+	/** Number of rings. */
+	count?:    number;
+	/** Milliseconds per ring cycle. */
+	duration?: number;
+	children?: React.ReactNode;
 }
 
 /**

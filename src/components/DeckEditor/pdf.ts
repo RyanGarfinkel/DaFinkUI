@@ -7,10 +7,7 @@ import { parseRichText } from './richText';
 import type { jsPDF } from 'jspdf';
 import { FONTS } from './themes';
 
-// A 1280×720 slide becomes a 960×540pt page (1px = 0.75pt). Everything is
-// vector except photos: text is real, selectable text; charts and icons go
-// through svg2pdf. jsPDF only has Helvetica, Times, and Courier built in, so
-// each font maps to the closest of those.
+// A 1280×720 slide is a 960×540pt page. Text stays selectable, charts and icons go through svg2pdf, and each font maps to the nearest of jsPDF's built-in three.
 
 const PT = 0.75;
 const PAGE: [number, number] = [SLIDE_WIDTH * PT, SLIDE_HEIGHT * PT];

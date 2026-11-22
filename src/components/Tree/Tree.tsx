@@ -81,10 +81,7 @@ const Tree = ({ children, className = '', terminalIcon, nonTerminalIcon, selecta
 		const visibleIds = getVisibleIds();
 		if(visibleIds.length === 0) return;
 
-		// Read the actual focused DOM node rather than the focusedId state; state set by
-		// a prior onFocus may not have committed yet when this fires (e.g. a raw .focus()
-		// call immediately followed by a keydown), so this matches the more robust
-		// e.currentTarget-based pattern already used in Radio.tsx.
+		// Read the focused DOM node, not `focusedId`, which may not have committed yet (a `.focus()` straight followed by a keydown).
 		let currentIndex = -1;
 		for(const [id, el] of itemsRef.current)
 			if(el === e.target) { currentIndex = visibleIds.indexOf(id); break; }

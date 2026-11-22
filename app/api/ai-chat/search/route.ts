@@ -4,12 +4,7 @@ import { parseBody } from '../../parseBody';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 
-// Docs-site-only infrastructure backing the /blocks/ai-chat live preview. Never listed in
-// the ai-chat block's registry `files`. The demo has no database, so the client posts the
-// conversations it holds and this route scans them. Threads the client hasn't opened yet
-// aren't in that corpus, so they're filled in from the sample store, but only for chats the
-// client still has (a deleted chat must not keep matching). In a real app, drop `corpus` from
-// the request and run this same query against your message store instead.
+// Docs-only demo route. With no database, the client posts the conversations it holds; unopened threads come from the sample store, only for chats the client still has. A real app searches its own message store instead.
 
 const bodySchema = z.object({
 	query:  z.string().trim().min(1, 'query is required').max(200),

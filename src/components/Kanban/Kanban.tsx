@@ -85,18 +85,10 @@ export interface KanbanCardDetailsRenderProps {
 
 export type KanbanCardDetailsRenderer = (props: KanbanCardDetailsRenderProps) => ReactNode;
 
-// A real component boundary around the render-prop call, so any hooks a custom
-// renderer uses get their own fiber: keyed by openKey in KanbanCard so each
-// fresh open of the popup remounts it, reseeding draft state from the live card
-// instead of carrying over a previous session's edits.
+// A component boundary so a custom renderer's hooks get their own fiber; keyed by `openKey`, each open reseeds draft state from the live card.
 const KanbanCardDetailsHost = ({ render, ...props }: { render: KanbanCardDetailsRenderer } & KanbanCardDetailsRenderProps) => <>{render(props)}</>;
 
-// The card face — what sits on the board and gets dragged — ships a default
-// template (tag, title, description, points/due-date/subtasks meta row) but can
-// be fully replaced via `renderCard`. Unlike `renderCardDetails`, this always
-// renders something: the default is the out-of-the-box look, not an opt-in.
-// KanbanCard still owns the draggable wrapper (ref, drag listeners, click-to-open,
-// aria-label) either way — a custom renderCard only replaces what's inside it.
+// `renderCard` replaces only the face inside the draggable wrapper, which KanbanCard keeps.
 export interface KanbanCardFaceRenderProps {
   card: KanbanCardData;
   isDragging: boolean;
@@ -220,10 +212,7 @@ export const KanbanCard = ({ card, isDragging = false, className = '', onUpdate,
       )}
 
       {hasDetails && !isDragging && (
-        // Modal portals its content to document.body, but React still bubbles synthetic
-        // events through the *component* tree, not the DOM tree: without this boundary,
-        // clicking anything inside (Save, Cancel, Delete, the backdrop, ModalClose) would
-        // also reach this card's own onClick above and immediately reopen the popup.
+        // Portaled events still bubble through the React tree and would reopen the popup via this card's onClick.
         <div className='contents' onClick={(e) => e.stopPropagation()} onPointerDown={(e) => e.stopPropagation()}>
           <Modal open={detailsOpen} onOpenChange={setDetailsOpen}>
             <KanbanCardDetailsHost

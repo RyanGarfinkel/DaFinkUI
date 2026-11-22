@@ -149,10 +149,7 @@ const TimeWheel = (
 		scrollToRaw(col, raw, true);
 	};
 
-	// Native CSS scroll-snap already settles the column on the nearest row after a drag/wheel
-	// gesture; this just waits for scroll events to go quiet, then commits whatever row ended up
-	// centered, and — for wrapping columns — silently re-centers the scroll position back into the
-	// middle repeat of the list so the loop never runs out of room in either direction.
+	// Scroll-snap picks the row; this waits for scrolling to stop, commits it, and re-centers wrapping columns on the middle repeat.
 	const handleScroll = (col: ColumnKey) => () => {
 		if(settleTimers.current[col]) clearTimeout(settleTimers.current[col]!);
 		settleTimers.current[col] = setTimeout(() =>

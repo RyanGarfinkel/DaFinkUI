@@ -4,10 +4,9 @@ import { useEffect, useRef, useState, HTMLAttributes } from 'react';
 
 export interface TextScrambleProps extends HTMLAttributes<HTMLSpanElement> {
 	text:        string;
-	/** Total duration of the scramble-to-resolve animation in milliseconds. */
+	/** Milliseconds to resolve. */
 	duration?:   number;
 	characters?: string;
-	className?:  string;
 }
 
 const DEFAULT_CHARACTERS = '!<>-_\\/[]{}—=+*^?#';

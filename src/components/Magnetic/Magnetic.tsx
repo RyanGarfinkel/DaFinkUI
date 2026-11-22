@@ -3,13 +3,12 @@
 import { useEffect, useRef, type HTMLAttributes, type PointerEvent, type ReactElement } from 'react';
 
 export interface MagneticProps extends HTMLAttributes<HTMLDivElement> {
-	/** Single interactive child (e.g. a <Button>) that follows the cursor. */
-	children:   ReactElement;
-	/** Multiplier applied to the cursor offset, 0–1. Defaults to 0.3. */
-	strength?:  number;
-	/** Activation radius in px around the wrapper. Defaults to 80. */
-	range?:     number;
-	className?: string;
+	/** The one interactive child that follows the cursor. */
+	children:  ReactElement;
+	/** How far it follows, from 0 to 1. */
+	strength?: number;
+	/** Activation radius in px. */
+	range?:    number;
 }
 
 /**

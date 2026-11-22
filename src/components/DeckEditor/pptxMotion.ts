@@ -1,10 +1,6 @@
 import type { Deck, Slide, SlideTransition } from './deck';
 
-// pptxgenjs has no API for transitions or animations, so they're written into
-// the generated slide XML afterwards. Shapes are found by name: pptx.ts names
-// every object after its element id. Entrance effects all become PowerPoint's
-// Fade entrance (with each element's delay), the closest effect every viewer
-// supports; slide transitions map to PowerPoint's own fade/push/wipe/zoom.
+// pptxgenjs has no motion API, so it is written into the slide XML afterwards, finding shapes by the element id pptx.ts names them with. Every entrance becomes PowerPoint's Fade, the closest effect all viewers support.
 
 const TRANSITION_XML: Record<Exclude<SlideTransition['type'], 'none'>, string> = {
 	fade: '<p:fade/>',

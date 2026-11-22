@@ -13,10 +13,7 @@ import { getTokens } from './resources/tokens';
 import pkg from '@/package.json';
 import { z } from 'zod';
 
-// Always dynamic: every response depends on request-scoped MCP protocol state
-// (the transport reads the request body/headers itself, which Next's static
-// analysis can't see into) and on disk reads at request time. Never let this
-// route be statically optimized or cached.
+// Every response depends on request-scoped MCP state and disk reads, so it must never be cached.
 export const dynamic = 'force-dynamic';
 
 const buildServer = (): McpServer => {
@@ -64,10 +61,7 @@ const buildServer = (): McpServer => {
 		async () => ({ contents: [{ uri: 'dafink://rules', text: JSON.stringify(listRules()) }] })
 	);
 
-	// Per-item resource templates. These address the same data the tools below
-	// return (they call the identical functions) so there is exactly one
-	// implementation per data source — the template is just a second, URI-based
-	// way to reach it for resource-aware clients.
+	// URI-based access to the same functions the tools below call.
 	server.resource(
 		'component', new ResourceTemplate('dafink://components/{slug}', {
 			list: async () => ({ resources: registry.map((e) => ({ uri: `dafink://components/${e.slug}`, name: e.name, description: e.description })) }),

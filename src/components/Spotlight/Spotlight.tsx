@@ -3,10 +3,9 @@
 import { HTMLAttributes, useRef, useState, type PointerEvent } from 'react';
 
 export interface SpotlightProps extends HTMLAttributes<HTMLDivElement> {
-	/** Diameter of the glow in pixels. Defaults to 400. */
-	size?:      number;
-	children:   React.ReactNode;
-	className?: string;
+	/** Glow diameter in px. */
+	size?:    number;
+	children: React.ReactNode;
 }
 
 /**

@@ -1,10 +1,6 @@
 import type { SidePanelSide } from './SidePanel';
 
-// Lets independently-triggered SidePanels on the same side auto-offset each
-// other: opening a second panel pushes earlier ones on that side further
-// toward the center, purely by position: no dimming, no scaling, no
-// inertness. Module-level singleton (not React context) so it works across
-// the whole app without requiring a shared provider ancestor.
+// A module-level singleton, not context, so panels on the same side offset each other without a shared provider.
 
 export interface StackEntry {
 	id:   string;

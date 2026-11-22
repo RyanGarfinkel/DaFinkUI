@@ -2,10 +2,7 @@ import { downloadBlob, escapeHtml, fileName, findStage } from './exporters';
 import { SLIDE_HEIGHT, SLIDE_WIDTH } from './deck';
 import type { Deck, Slide } from './deck';
 
-// The HTML export is a self-contained presenter: one slide at a time, with the
-// deck's transitions and entrance effects done in CSS, and keyboard, click,
-// and swipe navigation, an overview grid, speaker notes, and fullscreen.
-// Slides are cloned from the editor's rendered thumbnails, so they look the same.
+// A self-contained presenter, with slides cloned from the editor's thumbnails so they look the same.
 
 const collectCss = () => [...document.styleSheets]
 	.map(sheet =>

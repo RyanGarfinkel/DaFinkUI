@@ -8,11 +8,7 @@ const PATCH_DEBOUNCE_MS = 400;
 
 const sameValue = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 
-// Owns the applications list and keeps it in sync with the API. Every mutation updates local
-// state first (so the UI never waits) and then syncs in the background. `synced` holds each
-// application as the server last confirmed it: a failed write rolls the UI back to that, and
-// every PATCH is just the diff against it. Calls for the same id run one at a time through
-// `queues`, so an edit made while a create is still in flight can't reach the server first.
+// Mutations update local state first, then sync. `synced` is what the server last confirmed (rollback target and PATCH diff base); `queues` runs one id's writes in order.
 export const useApplications = () => {
 	const [applications, setApplications] = useState<JobApplication[]>([]);
 	const [status, setStatus]             = useState<LoadStatus>('loading');

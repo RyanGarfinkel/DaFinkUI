@@ -1,7 +1,5 @@
 // Hand-authored surface style. See minimal.ts for the contract.
-// NOTE: Neumorph controls only shape and shadow: it does not override any color
-// tokens. The dual-shadow effect is most visible on mid-tone surfaces; on pure
-// white the white highlight is faint, but the dark shadow still provides depth.
+// Shape and shadow only, no color tokens. The highlight is faint on pure white; the dark shadow still gives depth.
 import type { Style } from './types';
 
 export const neumorphStyle: Style = {

@@ -123,11 +123,7 @@ export const useZodForm = <TSchema extends z.ZodType<FieldValues>>(
 	schema: TSchema,
 	options?: Omit<UseFormProps<z.infer<TSchema>>, 'resolver'>
 ): UseFormReturn<z.infer<TSchema>> => {
-	// react-hook-form's Resolver<Input, Context, Output> keys off the schema's *input*
-	// type, while zod's own generics run output-first; the two libraries' generics
-	// don't reconcile cleanly through inference alone. The public signature above is
-	// fully typed for consumers; this cast is the well-established pattern for wrapping
-	// react-hook-form + a zod resolver in a single generic hook.
+	// react-hook-form keys its resolver off the schema's input type and zod off its output, so the generics don't reconcile by inference.
 	return useForm({
 		...options,
 		resolver: zodResolver(schema as never),

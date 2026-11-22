@@ -3,12 +3,10 @@
 import { HTMLAttributes, useEffect, useRef, type PointerEvent } from 'react';
 
 export interface CursorTrailProps extends HTMLAttributes<HTMLDivElement> {
-	/** Number of dots in the trail. Defaults to 6. */
 	trailLength?: number;
-	/** Diameter in px of the leading (largest) dot. Defaults to 12. */
+	/** Diameter in px of the leading dot. */
 	size?:        number;
 	children:     React.ReactNode;
-	className?:   string;
 }
 
 interface Position {

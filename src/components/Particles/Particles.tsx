@@ -3,10 +3,9 @@
 import { HTMLAttributes, useMemo } from 'react';
 
 export interface ParticlesProps extends HTMLAttributes<HTMLDivElement> {
-	/** Number of floating dots to render. Defaults to 30. */
-	quantity?:  number;
-	children?:  React.ReactNode;
-	className?: string;
+	/** Number of dots. */
+	quantity?: number;
+	children?: React.ReactNode;
 }
 
 interface Dot {

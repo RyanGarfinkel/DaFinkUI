@@ -5,16 +5,13 @@ import { HTMLAttributes } from 'react';
 export type MarqueeDirection = 'left' | 'right';
 
 export interface MarqueeProps extends HTMLAttributes<HTMLDivElement> {
-	/** Scroll direction of the marquee track. Defaults to 'left'. */
 	direction?:    MarqueeDirection;
-	/** Seconds for one full loop of the track. Defaults to 20. */
+	/** Seconds per loop. */
 	duration?:     number;
-	/** Pause the scroll animation while the pointer hovers the marquee. Defaults to true. */
 	pauseOnHover?: boolean;
-	/** Pixel gap between repeated copies of the content. Defaults to 16. */
+	/** Gap in px between repeated copies. */
 	gap?:          number;
 	children:      React.ReactNode;
-	className?:    string;
 }
 
 /**

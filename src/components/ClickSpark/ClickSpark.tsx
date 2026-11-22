@@ -3,15 +3,12 @@
 import { useEffect, useRef, useState, type HTMLAttributes, type MouseEventHandler } from 'react';
 
 export interface ClickSparkProps extends HTMLAttributes<HTMLDivElement> {
-	/** Content to wrap. Clicks anywhere within trigger a burst at the click point. */
-	children:     React.ReactNode;
-	/** Number of spark lines rendered per burst. Defaults to 8. */
-	sparkCount?:  number;
-	/** Length of each spark line in pixels. Defaults to 12. */
-	sparkSize?:   number;
-	/** Milliseconds for one burst's full shoot-and-fade animation. Defaults to 400. */
-	duration?:    number;
-	className?:   string;
+	children:    React.ReactNode;
+	sparkCount?: number;
+	/** Line length in px. */
+	sparkSize?:  number;
+	/** Milliseconds per burst. */
+	duration?:   number;
 }
 
 interface Burst {
@@ -44,10 +41,7 @@ export const ClickSpark = (
 
 	useEffect(() => {
 		return () => {
-			// timersRef is a persistent mutable accumulator pushed to by every
-			// click, not a per-render snapshot — reading .current here at unmount
-			// time (not mount time) is exactly what clears every timer that's
-			// accrued since, which is the intended behavior.
+			// The ref collects timers across clicks; reading it at unmount clears them all.
 			// eslint-disable-next-line react-hooks/exhaustive-deps
 			timersRef.current.forEach(clearTimeout);
 		};

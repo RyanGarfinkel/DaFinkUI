@@ -352,10 +352,7 @@ export const Sidebar = (
 export type SidebarHeaderProps = HTMLAttributes<HTMLDivElement>;
 
 export const SidebarHeader = ({ className = '', children, ...props }: SidebarHeaderProps) => {
-	// No overflow-hidden here: the ancestor Sidebar wrapper already clips to width during the
-	// collapse transition, so this only needs whitespace-nowrap. An extra overflow-hidden this
-	// close to a focused child clips its focus-visible ring before it can bleed into the
-	// padded wrapper around headerChild.
+	// No overflow-hidden: the Sidebar already clips on collapse, and another one here would clip a child's focus ring.
 	return (
 		<div {...props} className={['flex items-center gap-2 whitespace-nowrap', className].join(' ')}>
 			{children}

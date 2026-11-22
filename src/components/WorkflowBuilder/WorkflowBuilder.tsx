@@ -174,10 +174,7 @@ const HANDLE_STYLE = {
 // grid you see is the grid nodes actually snap to.
 const GRID_SIZE = 20;
 
-// Every node is the same shape: some inputs, a title + optional description
-// ("the logic"), and some outputs. A node with no inputs is an entry point;
-// one with no outputs is terminal. All editing happens in the inspector panel
-// (rendered by WorkflowBuilder) — nodes here are display + drag + select + delete only.
+// Nodes only display, drag, select and delete; editing happens in the inspector panel.
 
 const WorkflowNode = ({ id, data, selected }: NodeProps<WFNode>) => {
 	const { setNodes, setEdges }                           = useReactFlow();
@@ -309,10 +306,7 @@ const toWorkflowGraph = (nodes: WFNode[], edges: WFEdge[]): WorkflowGraph => ({
 	edges: edges.map(e => ({ id: e.id, source: e.source, target: e.target, sourceHandle: e.sourceHandle ?? '', targetHandle: e.targetHandle ?? '' })),
 });
 
-// Arranges nodes into levels via BFS from entry nodes (nodes with no inputs — or,
-// failing that, nodes with no incoming edges), then lays levels out along the flow
-// axis and spreads siblings across the cross axis. Used on direction toggle so
-// switching orientation always yields a sane graph.
+// Layout used on the direction toggle: BFS levels from the entry nodes along the flow axis, siblings spread across it.
 
 const LEVEL_SPACING   = 260;
 const SIBLING_SPACING = 220;
@@ -518,11 +512,7 @@ const WorkflowBuilder = ({ defaultGraph, onChange, height = 500, className = '',
 		const currNodes = nodes;
 		const currEdges = edges;
 
-		// outgoingEdges: what fires out of a node once it completes.
-		// incomingEdges: everything that must have completed before a node may fire —
-		// a node with 2+ connected inputs only activates once ALL of them have arrived,
-		// not on the first one. doneEdges is plain runtime bookkeeping (not React state):
-		// concurrent branches read/write it synchronously, so it can't wait for a render.
+		// A node with 2+ inputs fires only once all arrive. `doneEdges` is not React state: concurrent branches read and write it synchronously.
 		const outgoingEdges = new Map<string, { edgeId: string; targetId: string }[]>();
 		const incomingEdges = new Map<string, string[]>();
 		currEdges.forEach(e =>

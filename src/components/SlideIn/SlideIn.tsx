@@ -5,14 +5,13 @@ import { useEffect, useRef, useState, HTMLAttributes } from 'react';
 export type SlideInDirection = 'left' | 'right' | 'bottom';
 
 export interface SlideInProps extends HTMLAttributes<HTMLDivElement> {
-	/** Which edge the element jumps in from when scrolled into view. Defaults to 'bottom'. */
+	/** The edge it jumps in from. */
 	direction?: SlideInDirection;
-	/** Pixel distance of the jump. Defaults to 24 (small, not a big travel). */
+	/** Jump distance in px. */
 	distance?:  number;
-	/** Reveal only the first time the element enters the viewport. Defaults to true. */
+	/** Reveal only the first time it enters the viewport. */
 	once?:      boolean;
 	children?:  React.ReactNode;
-	className?: string;
 }
 
 const hiddenTransform = (direction: SlideInDirection, distance: number): string => {
