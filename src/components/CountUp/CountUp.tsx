@@ -3,19 +3,16 @@
 import { useEffect, useRef, useState, HTMLAttributes } from 'react';
 
 export interface CountUpProps extends HTMLAttributes<HTMLSpanElement> {
-	/** Final value to count up to. */
 	value:      number;
-	/** Value the animation starts from. */
 	start?:     number;
-	/** Animation duration in milliseconds. */
+	/** Milliseconds. */
 	duration?:  number;
-	/** Number of decimal places to render. */
 	decimals?:  number;
-	/** String prepended to the number (e.g. "$"). */
+	/** Shown before the number, e.g. "$". */
 	prefix?:    string;
-	/** String appended to the number (e.g. "%"). */
+	/** Shown after the number, e.g. "%". */
 	suffix?:    string;
-	/** Thousands separator (e.g. ","). */
+	/** Thousands separator, e.g. ",". */
 	separator?: string;
 	className?: string;
 }

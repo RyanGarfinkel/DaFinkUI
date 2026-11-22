@@ -5,24 +5,22 @@ import { Children, isValidElement, cloneElement, useEffect, useRef, useState, HT
 export type RevealEffect = 'fade' | 'slide-up' | 'slide-left' | 'slide-right' | 'scale';
 
 export interface RevealProps extends HTMLAttributes<HTMLDivElement> {
-	/** Entrance effect applied when the element scrolls into view. */
 	effect?:    RevealEffect;
-	/** Delay in milliseconds before the entrance transition starts. */
+	/** Milliseconds before the entrance starts. */
 	delay?:     number;
-	/** Reveal only the first time the element enters the viewport. */
+	/** Reveal only the first time it scrolls into view. */
 	once?:      boolean;
 	children?:  React.ReactNode;
 	className?: string;
 }
 
 export interface RevealGroupProps extends HTMLAttributes<HTMLDivElement> {
-	/** Milliseconds added to each successive child Reveal's delay. */
+	/** Milliseconds added to each successive child's delay. */
 	stagger?:   number;
-	/** Base delay in milliseconds applied to the first child. */
+	/** Milliseconds before the first child. */
 	delay?:     number;
-	/** Default effect for child Reveal items that don't set their own. */
+	/** Defaults for children that don't set their own `effect` and `once`. */
 	effect?:    RevealEffect;
-	/** Default `once` for child Reveal items that don't set their own. */
 	once?:      boolean;
 	children:   React.ReactNode;
 	className?: string;

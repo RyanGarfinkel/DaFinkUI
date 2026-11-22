@@ -7,8 +7,6 @@ import { usePathname } from 'next/navigation';
 import Link, { LinkProps } from 'next/link';
 import Tooltip from '../Tooltip/Tooltip';
 
-// Same list as Modal's own FOCUSABLE_SELECTOR — kept local rather than shared, matching how
-// every other overlay/composite component here defines its own copy.
 const ACTION_FOCUSABLE_SELECTOR = [
 	'a[href]',
 	'button:not([disabled])',
@@ -22,21 +20,9 @@ const SidebarCollapsedContext = createContext(false);
 
 export const useSidebarCollapsed = () => useContext(SidebarCollapsedContext);
 
-// Backs automatic hierarchy-aware active matching for SidebarLink: Sidebar
-// resolves the single longest href (among descendant SidebarLinks with no
-// explicit isActive) that matches the current pathname — exact beats prefix
-// beats no match — so a specific route wins over a general ancestor, but a
-// general link still lights up when no more specific sibling exists.
 const SidebarActiveLinkContext = createContext<{ activeHref: string | null }>({ activeHref: null });
 
-// Walks the children tree synchronously (during Sidebar's own render, not an
-// effect) so the very first render — including SSR — already has the right
-// answer. An effect-based registration scheme would leave every auto-matched
-// link inactive until the first post-hydration re-render, a visible flash.
-// Only plain SidebarLink elements with no explicit isActive contribute; a
-// consumer that wraps SidebarLink in its own component (as this repo's docs
-// site does) is expected to compute isActive itself, exactly like the
-// explicit-override path already requires.
+// Runs during render, not in an effect, so the first render (including SSR) already knows the active link. Wrapped SidebarLinks aren't seen and must pass isActive themselves.
 const collectAutoMatchHrefs = (node: ReactNode, hrefs: string[]): void => {
 	Children.forEach(node, child =>
 	{
@@ -54,14 +40,7 @@ const collectAutoMatchHrefs = (node: ReactNode, hrefs: string[]): void => {
 	});
 };
 
-// The matching rule itself, factored out as a pure function (no React, no
-// router) so it can be reused verbatim anywhere the real algorithm needs to
-// run against a path that isn't necessarily the live browser URL — e.g. a
-// docs demo simulating navigation without actually leaving the page.
-// Exact match always wins; otherwise the longest href that's an ancestor of
-// pathname wins, so a general link (e.g. "/projects") still lights up when no
-// more specific sibling (e.g. "/projects/overview") is present. "/" is never
-// treated as an ancestor of every route — it only matches pathname === "/".
+/** Exact match wins; otherwise the longest ancestor href. "/" only matches "/". Pure, so a demo can run it against a simulated path. */
 export const resolveSidebarActiveHref = (hrefs: string[], pathname: string | null): string | null => {
 	if(pathname === null) return null;
 
@@ -79,7 +58,7 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
 	width?:             string;
 	height?:            string;
 	collapsedWidth?:    string;
-	/** Tailwind height class for the SidebarHeader slot's wrapping bar. Default `'h-14'` matches MenuBar, so an adjacent title bar of that same default height gets a border that aligns with this one. Override when that title bar is taller (e.g. it has a subtitle) — give both the same explicit height, since neither's content height predicts the other's. */
+	/** Tailwind height class of the header bar. The default `'h-14'` matches MenuBar; give both bars the same explicit height if you change it. */
 	headerHeight?:      string;
 	collapsible?:       boolean;
 	collapsed?:         boolean;
@@ -142,10 +121,7 @@ export const Sidebar = (
     useEffect(() =>
     {
         if(!sidebarRef.current) return;
-        // A row's action buttons are reachable via ArrowRight (see handleKeyDown), not Tab —
-        // Tab/Shift+Tab should skip straight from one row to the next, not stop at every
-        // hidden-until-focused rename/delete pair along the way. Re-runs on every `children`
-        // change (not just mount) so a freshly-added row's actions are excluded too.
+        // Row actions are reached with ArrowRight, not Tab. Re-runs on every `children` change so new rows are excluded too.
         const actions = sidebarRef.current.querySelectorAll<HTMLElement>(
             `[data-sidebar-item-actions] :is(${ACTION_FOCUSABLE_SELECTOR})`
         );
@@ -158,36 +134,24 @@ export const Sidebar = (
         const indicator = indicatorRef.current;
         if(!sidebar || !indicator) return;
 
-        // If more than one element ever shares aria-current, prefer the last in DOM
-        // order (the most specific / most deeply nested match).
+        // Several aria-current elements: the last in DOM order is the most specific.
         const matches = sidebar.querySelectorAll<HTMLElement>('[aria-current="page"]');
         const active  = matches[matches.length - 1];
 
         if(!active)
         {
-            // Nothing currently active (or the active link is hidden, e.g. an
-            // icon-less SidebarLink is unmounted while collapsed). Hide the
-            // indicator instead of leaving it at a stale position.
+            // No visible active link (e.g. icon-less links unmount while collapsed): hide the indicator rather than strand it.
             indicator.style.opacity = '0';
             return;
         }
 
         indicator.style.opacity = '1';
 
-        // Measured via getBoundingClientRect rather than offsetTop: a SidebarLink
-        // with a trailing `action` wraps its <a> in an extra positioned container,
-        // which would otherwise become the anchor's offsetParent and throw off
-        // offsetTop. Rect math stays correct regardless of intermediate wrappers.
+        // Rects, not offsetTop: an `action` wrapper becomes the <a>'s offsetParent and skews offsetTop.
         const container      = (indicator.offsetParent as HTMLElement) ?? sidebar;
         const containerRect  = container.getBoundingClientRect();
         const activeRect     = active.getBoundingClientRect();
-        // activeRect/containerRect are both viewport-relative, so their difference is
-        // only the offset within the container's *currently visible* scroll window —
-        // it silently loses however far the container has already scrolled. `top` is
-        // then used as `style.top` on an absolutely-positioned child, which is measured
-        // from the container's content box (unscrolled origin), so the container's own
-        // scrollTop has to be added back in or the indicator lands exactly that far off
-        // from the active link every time the list isn't scrolled to the very top.
+        // The rect difference ignores scroll; the indicator is positioned from the unscrolled content box, so add scrollTop back.
         const top            = activeRect.top - containerRect.top + container.scrollTop;
         const height         = activeRect.height;
 
@@ -205,15 +169,10 @@ export const Sidebar = (
             indicator.style.top    = `${top}px`;
             indicator.style.height = `${height}px`;
         }
-    // `children` (not just pathname) drives this: a SidebarButton's isActive is
-    // consumer state, not the URL, so a button click never touches pathname —
-    // re-measuring on every children change is what lets the indicator follow
-    // event-driven selection, not just route changes.
+    // Keyed on `children`, not pathname: a SidebarButton's isActive is consumer state and never changes the URL.
     }, [pathname, isCollapsed, children]);
 
-    // A row's own tabIndex is the single source of truth for where Tab lands (the roving-
-    // tabindex contract), so any time focus moves to a different row — even indirectly, by
-    // landing on one of *its* action buttons — that row must become the one with tabIndex 0.
+    // Roving tabindex: whichever row holds focus, even via one of its action buttons, becomes the tabIndex 0 row.
     const focusRow = (rows: HTMLElement[], target: HTMLElement) => {
         rows.forEach(r => { r.tabIndex = -1; });
         target.tabIndex = 0;
@@ -223,10 +182,7 @@ export const Sidebar = (
         const active = document.activeElement as HTMLElement | null;
         const actionGroup = active?.closest<HTMLElement>('[data-sidebar-item-actions]');
 
-        // Inside a row's action group (e.g. the rename/delete buttons on a chat row):
-        // Right/Left cycle within it, Left from the first action (or Escape) climbs back out
-        // to the row, and Up/Down jump to the same action slot on the adjacent row — so the
-        // reader never loses their place in the row/action "column" they were in.
+        // In an action group: Right/Left cycle, Left from the first (or Escape) returns to the row, Up/Down keep the same action slot on the adjacent row.
         if(actionGroup && e.currentTarget.contains(actionGroup))
         {
             const actions = Array.from(actionGroup.querySelectorAll<HTMLElement>(ACTION_FOCUSABLE_SELECTOR));
@@ -272,9 +228,7 @@ export const Sidebar = (
             return;
         }
 
-        // Row-level Right/Left: dive into this row's action group, if it has one. Right
-        // enters at the first action (rename), Left enters at the last (delete) — each
-        // arrow's entry point mirrors the direction you'd exit the group back the same way.
+        // On a row: Right enters its action group at the first action, Left at the last.
         if((e.key === 'ArrowRight' || e.key === 'ArrowLeft') && active?.hasAttribute('data-sidebar-item'))
         {
             const group = active.nextElementSibling;
@@ -356,17 +310,7 @@ export const Sidebar = (
         >
             <div className='flex h-full flex-col overflow-hidden'>
                 {hasHeader && (
-                    // Explicit height (headerHeight, default h-14) rather than padding around
-                    // the content's own height: the latter drifts the moment headerChild's
-                    // content changes, which is exactly what broke this border's alignment
-                    // with an adjacent title bar the first time around.
-                    //
-                    // [&>*]:w-full on the inner wrapper: `headerChild` (SidebarHeader's own div)
-                    // was previously a plain block-level child of a non-flex wrapper, so it
-                    // filled the width for free. The wrapper is `flex` now, so this restores it
-                    // without needing SidebarHeader itself to declare a width it can't know it needs.
-                    //
-                    // Collapsed, the 40px of usable width holds only the toggle, so headerChild is not rendered.
+                    // Explicit height, not padding: content-driven height drifts out of line with an adjacent title bar. [&>*]:w-full restores the width the flex wrapper stopped giving headerChild. Collapsed, only the toggle fits, so headerChild isn't rendered.
                     <div className={['shrink-0 flex items-center gap-1 border-b-[length:var(--border-width)] border-surface-border px-3', isCollapsed ? 'justify-center' : '', headerHeight].join(' ')}>
                         {!isCollapsed && <div className='min-w-0 flex-1 [&>*]:w-full'>{headerChild}</div>}
                         {toggleButton}
@@ -376,17 +320,7 @@ export const Sidebar = (
                 <ScrollFade
                     wrapperClassName='flex-1 min-h-0'
                     className={[
-                        // h-full: the outer wrapper (wrapperClassName) is the actual flex item
-                        // that gets constrained to the available space; this inner scrollable
-                        // element is just a plain block child of it, so it needs h-full explicitly
-                        // to fill that constrained height rather than growing to its content size.
-                        //
-                        // [&>*]:shrink-0: without this, direct children with a small min-content
-                        // size (e.g. a single bare SidebarLink placed directly under a
-                        // SidebarDivider, not wrapped in a SidebarSection) get disproportionately
-                        // squeezed once total content overflows and larger siblings (nav,
-                        // SidebarSection) hit their own min-content floor first. Overflow should
-                        // scroll, never squish content.
+                        // h-full: the outer wrapper is the constrained flex item, so this scroller must fill it. [&>*]:shrink-0: overflow should scroll, not squeeze small direct children.
                         'relative h-full overflow-x-hidden scrollbar-hover flex flex-col gap-4 px-3 [&>*]:shrink-0',
                         hasHeader ? 'pt-4' : 'pt-6',
                         footerChild ? 'pb-4' : 'pb-6',
@@ -395,10 +329,7 @@ export const Sidebar = (
                     <div
                         ref={indicatorRef}
                         aria-hidden='true'
-                        // Starts hidden via the (static, never React-toggled) opacity-0 class.
-                        // The position effect below sets el.style.opacity imperatively:
-                        // it must never appear in this JSX style/className as conditional
-                        // state, or React's reconciliation would fight the imperative value.
+                        // Opacity is set imperatively by the position effect, so keep it out of conditional JSX state or React will fight it.
                         className='absolute inset-x-3 rounded-[var(--radius)] bg-surface-active opacity-0 pointer-events-none motion-safe:transition-[top,height,opacity] motion-safe:duration-200 motion-safe:ease-[var(--ease-standard)]'
                     >
                         <span className='absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-brand' />
@@ -467,30 +398,19 @@ export const SidebarSection = ({ label, className = '', children, ...props }: Si
 };
 
 //
-// Both a URL-driven SidebarLink and an event-driven SidebarButton render as
-// the same pill, so the class list, the icon/label markup, and the
-// action-sibling/tooltip wrapping live here once instead of drifting between
-// two copies.
+// The pill shared by SidebarLink and SidebarButton.
 
 interface SidebarItemClassNameOptions {
 	hideLabel:    boolean;
 	showAction:   boolean;
 	isActive:     boolean;
-	// How much trailing space to reserve for `action`. `action` is an arbitrary
-	// ReactNode absolutely-positioned over the pill's trailing edge (see
-	// wrapSidebarItem below), so its real width can't be measured from here — this
-	// is a caller-supplied guess. Default 'pr-9' fits one icon-sized control; pass a
-	// wider class (e.g. 'pr-16') when `action` renders more than one, or the label
-	// truncates too late and ends up under the action instead of before it.
+	// `action` is overlaid, so its width can't be measured: callers reserve it ('pr-9' fits one icon).
 	actionGutter: string;
 	className:    string;
 }
 
 const sidebarItemClassName = ({ hideLabel, showAction, isActive, actionGutter, className }: SidebarItemClassNameOptions) => [
-	// min-w-0: this element is itself a flex item (of wrapSidebarItem's wrapping row when
-	// an action is present). Without it, its own min-width:auto — driven by its nowrap text
-	// content — overrides w-full and lets it grow to fit the full label, which is what let
-	// the label's own truncate never actually trigger.
+	// min-w-0: as a flex item its min-width:auto would grow to the full label and stop truncate from triggering.
 	'relative z-10 flex w-full min-w-0 items-center gap-2 overflow-hidden whitespace-nowrap rounded-[var(--radius)] px-3 py-1.5 text-left text-sm',
 	'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 	'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
@@ -528,11 +448,7 @@ interface WrapSidebarItemOptions {
 const wrapSidebarItem = (item: ReactElement<HTMLAttributes<HTMLElement>>, { hideLabel, showAction, children, action }: WrapSidebarItemOptions) => {
 	if(hideLabel) return <Tooltip content={children} side='right' className='w-full'>{item}</Tooltip>;
 
-	// `action` renders as a sibling of the link/button, never a descendant: nesting
-	// a button inside an anchor is invalid HTML and breaks keyboard/screen-reader
-	// behavior. It's overlaid on top of the item via absolute positioning instead,
-	// so visually it still reads as one pill while staying two separate,
-	// independently-focusable controls — clicking it can't trigger navigation.
+	// `action` is a sibling overlaid on the item, not a child: a button inside an anchor is invalid HTML and would trigger navigation.
 	if(!showAction) return item;
 
 	return (
@@ -562,11 +478,7 @@ export const SidebarLink = ({ isActive, icon, action, actionGutter = 'pr-9', cla
 	const collapsed = useSidebarCollapsed();
 	const { activeHref } = useContext(SidebarActiveLinkContext);
 
-	// Only a plain string href can be matched against the current pathname; a
-	// UrlObject href opts out of auto-matching the same way an explicit isActive does.
-	// Sidebar computes activeHref by reading this same href straight off this
-	// element's props (see collectAutoMatchHrefs), so no registration step is
-	// needed here — just compare against the answer it already resolved.
+	// Only string hrefs auto-match; a UrlObject opts out like an explicit isActive.
 	const hrefString = typeof href === 'string' ? href : undefined;
 	const active     = isActive !== undefined ? isActive : hrefString !== undefined && hrefString === activeHref;
 	const hideLabel  = collapsed && Boolean(icon);
@@ -590,10 +502,7 @@ export const SidebarLink = ({ isActive, icon, action, actionGutter = 'pr-9', cla
 };
 
 //
-// Same pill as SidebarLink, but for sidebar items that swap content without
-// changing the URL (e.g. an inbox/drafts/sent switcher). `isActive` is fully
-// controlled by the consumer — there's no pathname to derive it from — so it
-// always defaults to false rather than auto-matching anything.
+// For items that swap content without changing the URL. `isActive` is controlled by the consumer and defaults to false.
 
 export interface SidebarButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {
 	isActive?:      boolean;
@@ -613,10 +522,7 @@ export const SidebarButton = ({ isActive = false, indicator = true, icon, action
 
 	if(collapsed && !icon) return null;
 
-	// `indicator` opts a button out of the sliding active-pill: still styles as
-	// active (bold text) when isActive, but never sets aria-current, so a button
-	// that isn't part of an exclusive "current view" group (e.g. a one-off
-	// "Compose" action) can't drag the shared indicator over to itself.
+	// `indicator={false}` styles an active button but skips aria-current, so a one-off action can't pull the sliding indicator.
 	const button = (
 		<button
 			type='button'
@@ -648,9 +554,7 @@ export interface SidebarSkeletonProps extends HTMLAttributes<HTMLDivElement> {
 	icon?:  boolean;
 }
 
-// A stand-in for nav items that are still loading. Rows match the height and horizontal
-// padding of a real SidebarLink/SidebarButton, so the list doesn't shift when the items
-// arrive. Like an icon-less item, it renders nothing in the collapsed rail.
+// Loading placeholder sized like a real item so the list doesn't shift; hidden in the collapsed rail.
 export const SidebarSkeleton = ({ count = 3, icon = false, className = '', ...props }: SidebarSkeletonProps) => {
 	const collapsed = useSidebarCollapsed();
 

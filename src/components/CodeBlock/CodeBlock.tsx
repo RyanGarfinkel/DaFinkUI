@@ -7,9 +7,8 @@ import Tooltip from '../Tooltip/Tooltip';
 export type CodeBlockVariant = 'code' | 'example';
 
 export interface CodeBlockProps {
-	/** The raw source code string shown in the code panel. */
 	code:             string;
-	/** Preview content for variant="example". */
+	/** The live preview, for variant="example". */
 	children?:        React.ReactNode;
 	/** variant="code" renders a syntax block; variant="example" adds a Preview/Code switcher. */
 	variant?:         CodeBlockVariant;
@@ -19,9 +18,8 @@ export interface CodeBlockProps {
 	minHeight?:       string;
 	/** Alignment of preview content (example variant only). Defaults to "center". */
 	align?:           'center' | 'start';
-	/** Additional classes on the root wrapper. */
 	className?:       string;
-	/** When true, renders an editable textarea instead of a read-only pre block. */
+	/** Renders an editable textarea instead of a read-only block. */
 	editable?:        boolean;
 	/** Fires with the updated value whenever the user edits the code. */
 	onCodeChange?:    (code: string) => void;

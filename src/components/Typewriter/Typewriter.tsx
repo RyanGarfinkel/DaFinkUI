@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState, HTMLAttributes } from 'react';
 
 export interface TypewriterProps extends HTMLAttributes<HTMLSpanElement> {
-	/** The full text to type out. */
 	text:             string;
 	/** Milliseconds between each character. Default: 50. */
 	speed?:           number;
@@ -13,7 +12,6 @@ export interface TypewriterProps extends HTMLAttributes<HTMLSpanElement> {
 	cursor?:          boolean;
 	/** Keep cursor visible after typing completes. Default: false. */
 	cursorPersist?:   boolean;
-	/** Called when all characters have been revealed. */
 	onComplete?:      () => void;
 	/** Called with the current character count every time a new character is revealed. */
 	onReveal?:        (charsRevealed: number) => void;

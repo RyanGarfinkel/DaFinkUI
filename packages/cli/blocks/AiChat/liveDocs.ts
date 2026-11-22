@@ -2,12 +2,7 @@
 
 import { useEffect, useReducer, type Reducer } from 'react';
 
-// The machinery behind one live document per file in a chat (a slide deck, a sheet), edited by
-// you and the AI at the same time. The AI's steps queue up and land one at a time on the
-// *current* document, so your edits in between survive; a step whose target you've removed is
-// skipped. Your edits are recorded as inverse ops, so undo reverts only your own changes.
-// What differs per document type (how steps become frames, how ops apply, how two documents
-// diff) lives in a `LiveAdapter`; see useLiveDeck.ts and useLiveSheet.ts.
+// One live document per deck or sheet in a chat, edited by you and the AI together. AI steps queue and land one at a time on the current document, so your edits survive and steps aimed at removed targets are skipped. Your edits are stored as inverse ops, so undo reverts only yours. Per-type behavior lives in a `LiveAdapter` (useLiveDeck.ts, useLiveSheet.ts).
 
 const STEP_MS = 700;
 const TYPE_MS = 35;

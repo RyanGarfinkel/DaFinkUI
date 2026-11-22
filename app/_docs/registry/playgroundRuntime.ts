@@ -30,11 +30,7 @@ const ensureLoopProtectionRegistered = (): void => {
 export const evaluateBody = (body: string, scope: Record<string, unknown>): React.ReactNode => {
 	ensureLoopProtectionRegistered();
 
-	// Babel parses this as a standalone program, where a top-level `return` is always a syntax
-	// error, so only the function declaration goes through it. The call that actually produces
-	// a value is appended to the transpiled output afterwards, never re-parsed by Babel, and
-	// `new Function(...)` (which treats its body like a real function body, not a full program)
-	// is perfectly happy with a `return` there.
+	// Babel parses a standalone program, where a top-level `return` is a syntax error, so only the declaration goes through it; the call is appended afterwards for `new Function`.
 	const wrapped = `function Example() {\n${body}\n}`;
 
 	const result = Babel.transform(wrapped, {

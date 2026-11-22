@@ -6,15 +6,12 @@ import { javascript } from '@codemirror/lang-javascript';
 import { useEffect, useState } from 'react';
 
 export interface CodeEditorProps {
-	/** The current code string. */
 	value: string;
-	/** Fires with the updated value on every edit. */
 	onChange: (value: string) => void;
 	/** Extra CodeMirror extensions layered on top of the built-ins, e.g. a project-specific `autocompletion({ override: [...] })` call. */
 	extensions?: Extension[];
 	/** Accessible name for the editor region. */
 	'aria-label'?: string;
-	/** Additional classes on the root wrapper. */
 	className?: string;
 	/** CSS min-height for the editor surface (e.g. `'200px'`). Keeps the editor from collapsing to a single line on short content. */
 	minHeight?: string;

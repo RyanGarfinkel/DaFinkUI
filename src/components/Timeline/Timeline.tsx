@@ -33,17 +33,12 @@ export interface TimelineItemProps extends HTMLAttributes<HTMLDivElement> {
 	indicator?:   React.ReactNode;
 	children?:    React.ReactNode;
 	className?:   string;
-	/** Injected by <Timeline>: do not set manually. */
+	/** The underscore props are injected by <Timeline>; don't set them. */
 	_index?:      number;
-	/** Injected by <Timeline>: do not set manually. */
 	_isLast?:     boolean;
-	/** Injected by <Timeline>: do not set manually. */
 	_variant?:    TimelineVariant;
-	/** Injected by <Timeline>: do not set manually. */
 	_direction?:  TimelineDirection;
-	/** Injected by <Timeline>: do not set manually. */
 	_animate?:    TimelineAnimate;
-	/** Injected by <Timeline>: do not set manually. */
 	_spacing?:    TimelineSpacing;
 }
 
@@ -73,13 +68,7 @@ export const TimelineItem = (
 		? 'bg-brand text-brand-fg'
 		: 'bg-surface-active text-text-muted border-[length:var(--border-width)] border-surface-border';
 
-	// The stagger animation is applied to the dot and content individually rather
-	// than to the shared row wrapper. A 1px connector line fades to invisible long
-	// before a low-opacity dot/text does (low-contrast hairline vs. bold fill), so
-	// animating it in lockstep with its siblings made the rail look broken mid-mount
-	// — a solid dot pointing at nothing while the line itself had faded out. Keeping
-	// the line (and its wrapper) permanently at full opacity keeps the spine reading
-	// as stable while only the dot and text cascade in on top of it.
+	// Stagger the dot and content, not the row: a fading 1px connector vanishes before the dot does and the rail looks broken mid-mount.
 	const staggerStyle: React.CSSProperties = _animate === 'stagger'
 		? { animation: `tl-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) ${_index * 90}ms both` }
 		: {};

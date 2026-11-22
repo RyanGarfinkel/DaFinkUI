@@ -33,16 +33,10 @@ export interface DataTableProps<T extends Record<string, any>> {
 type SortDir = 'asc' | 'desc' | null;
 type ActiveCell = { row: number; col: number };
 
-// Only a cell with something focusable inside it — a checkbox, a sort button, a row-action
-// button, an inline Input/Select from a custom render() — is ever a Tab/arrow-key stop, and
-// it's reached with real, native focus on that element, never the wrapping <td>/<th>. A
-// plain-text cell (no `render`, or `render` that produces no focusable element) is skipped
-// entirely: Tab and the arrow keys both act as if it weren't there. If nothing anywhere in
-// the table is focusable, the whole grid has no Tab stop at all — Tab skips straight past it.
+// Only cells holding a focusable element (checkbox, sort button, render() widgets) are Tab/arrow stops, and focus lands on that element, never the <td>. If nothing is focusable the grid has no Tab stop.
 const FOCUSABLE_SELECTOR = 'button, a[href], input, select, textarea';
 
-// Arrow keys inside one of these have a native meaning of their own (cursor movement,
-// changing the selected option) that the grid must not steal.
+// The grid must not steal arrow keys from these (cursor movement, option changes).
 const NATIVE_ARROW_KEY_SELECTOR = 'textarea, select, input:not([type="checkbox"]):not([type="radio"])';
 
 const SortAscIcon = () => (
@@ -106,8 +100,7 @@ const DataTable = <T extends Record<string, any>>(
 	const [sortDir, setSortDir]     = useState<SortDir>(null);
 	const [selected, setSelected]   = useState<Set<string>>(new Set());
 	const [page, setPage]           = useState(0);
-	// null means "nothing focusable found (yet)": every cell renders with no tabIndex at all,
-	// so the whole grid is skipped. Resolved to the first navigable cell by the effect below.
+	// null: nothing focusable found yet, so no cell has a tabIndex. Resolved by the effect below.
 	const [activeCell, setActiveCell] = useState<ActiveCell | null>(null);
 
 	// In server-side mode data is already the current page: skip client sorting/slicing
@@ -189,18 +182,10 @@ const DataTable = <T extends Record<string, any>>(
 	const activeRow = activeCell?.row ?? -1;
 	const activeCol = activeCell?.col ?? -1;
 
-	// Roving tabindex: exactly one thing in the whole grid is a Tab stop at a time. Wherever
-	// the cell's content is known up front (a checkbox, a sort button), `tabIndex` is set
-	// declaratively below, right on that element — this is what keeps it correct even in
-	// server-rendered HTML, before hydration or any effect ever runs. A `render`-based cell's
-	// content isn't known until it's actually rendered, so those are resolved here, after the
-	// fact: `data-dynamic` marks exactly those cells.
+	// Roving tabindex: one Tab stop in the grid. Known content (checkbox, sort button) sets tabIndex declaratively, so SSR is correct; render() cells (`data-dynamic`) are resolved after rendering.
 	const isActiveCell = (row: number, col: number) => activeRow === row && activeCol === col;
 
-	// Finds the first focusable cell (row-major order) and keeps `activeCell` pointed at a
-	// real one whenever data/columns/selectable change — e.g. after sorting reorders rows, or
-	// a render() column's content changes what's actually focusable. null (nothing focusable
-	// anywhere) is a valid, intentional outcome: it's what makes the whole grid Tab-skippable.
+	// Keeps `activeCell` on the first focusable cell as data, columns or selectable change; null (nothing focusable) is valid.
 	useEffect(() =>
 	{
 		const table = tableRef.current;
@@ -234,12 +219,7 @@ const DataTable = <T extends Record<string, any>>(
 				return;
 			}
 
-			// A render() cell can hold a composite widget with several focusable elements of
-			// its own (a ToggleGroup's items, say), each already carrying the right tabIndex
-			// from that widget's own roving-tabindex logic. Defer to whichever one it already
-			// made the entry point (tabIndex 0) rather than always grabbing the first element —
-			// otherwise this would fight the widget for control over which of its items is
-			// reachable, especially once the user has moved off the first one.
+			// A composite widget (e.g. ToggleGroup) already marks its own entry point with tabIndex 0; use that instead of the first element so we don't fight its roving tabindex.
 			const primary = Array.from(focusables).find(el => el.tabIndex === 0) ?? focusables[0];
 			focusables.forEach(el => el.setAttribute('tabindex', el === primary && isActive ? '0' : '-1'));
 		});
@@ -256,9 +236,7 @@ const DataTable = <T extends Record<string, any>>(
 		const cell = tableRef.current?.querySelector<HTMLElement>(`[data-row="${row}"][data-col="${col}"]`);
 		if(!cell) return;
 
-		// If the cell holds a composite widget with several focusable elements (a ToggleGroup's
-		// items, say), land on whichever one it already made the entry point, not just the
-		// first — that's the item the widget itself considers "current".
+		// Same as above: land on the widget's own entry point, not the first element.
 		const focusables = Array.from(cell.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
 		const target      = focusables.find(el => el.tabIndex === 0) ?? focusables[0];
 		if(!target) return;
@@ -267,8 +245,7 @@ const DataTable = <T extends Record<string, any>>(
 		target.focus();
 	}, []);
 
-	// Wraps at the ends, same as the other roving-tabindex composites (Radio, ToggleGroup,
-	// MenuBarNav): running off the last row/column comes back around to the first.
+	// Wraps at the ends, like the other roving-tabindex composites.
 	const moveFocus = useCallback((deltaRow: number, deltaCol: number) =>
 	{
 		let row = activeRow;
@@ -287,12 +264,7 @@ const DataTable = <T extends Record<string, any>>(
 		while(row !== activeRow || col !== activeCol);
 	}, [activeRow, activeCol, maxRow, maxCol, isNavigableCell, focusCell]);
 
-	// Up/Down always belong to the grid — moving between rows — even when a composite widget
-	// in a cell (ToggleGroup, RadioGroup, ...) would otherwise also claim them for its own
-	// navigation: those widgets typically treat Up/Down the same as Left/Right, and since they
-	// always have a wrap target with 2+ items, they'd call preventDefault() on every press and
-	// the grid could never win them back. Capture-phase intercepts the key before any such
-	// widget's own (bubble-phase) handler ever sees it, so there's no fight to lose.
+	// Up/Down belong to the grid. Widgets in cells (ToggleGroup, RadioGroup) also claim them and always preventDefault, so intercept in the capture phase before they see the key.
 	const handleGridKeyDownCapture = useCallback((e: ReactKeyboardEvent<HTMLTableElement>) =>
 	{
 		if(activeCell === null) return;
@@ -304,14 +276,10 @@ const DataTable = <T extends Record<string, any>>(
 		moveFocus(e.key === 'ArrowDown' ? 1 : -1, 0);
 	}, [activeCell, moveFocus]);
 
-	// Left/Right defer to a focused composite widget's own horizontal navigation (it calls
-	// preventDefault() to say it handled the key) before falling back to moving between grid
-	// columns — this runs on the normal bubble phase, after any such widget's own handler.
+	// Left/Right run in the bubble phase, so a widget that handled the key (preventDefault) wins before the grid moves columns.
 	const handleGridKeyDown = useCallback((e: ReactKeyboardEvent<HTMLTableElement>) =>
 	{
 		if(activeCell === null) return;
-		// Enter-toggles-checkbox lives on the Checkbox component itself now (it needs to work
-		// everywhere Checkbox is used, not just inside a grid), so nothing to do for it here.
 		if(e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
 		if((e.target as HTMLElement).matches(NATIVE_ARROW_KEY_SELECTOR)) return;
 		if(e.defaultPrevented) return;
