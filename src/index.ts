@@ -205,3 +205,6 @@ export { applySheetOp, applySheetOps, applySheetOpsLenient, diffSheets, SheetOpE
 export type { SheetOp, StylePatch } from './components/SheetEditor/sheetops';
 export { SHEET_REFERENCE } from './components/SheetEditor/reference';
 export type { SheetAskContext } from './components/SheetEditor/askcontext';
+
+export { Heatmap } from './components/Heatmap/Heatmap';
+export type { HeatmapProps } from './components/Heatmap/Heatmap';
