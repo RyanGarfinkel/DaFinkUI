@@ -2,40 +2,39 @@
 
 import { describeAttachments, buildHistory, buildPrompt, collectArtifacts, findLastUserMessageId, hasPrecedingUserMessage, slideReference, DRAFT_TITLE_MAX_LENGTH } from './messageHelpers';
 import { Sidebar, SidebarButton, SidebarFooter, SidebarHeader, SidebarSection, SidebarSkeleton } from '../../components/Sidebar/Sidebar';
-import { PlusIcon, PencilIcon, TrashIcon, ReplyIcon, SearchIcon, ChevronRightIcon, MenuIcon, FileIcon } from './icons';
-import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '../../components/Modal/Modal';
+import type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, ChatSettings, SearchHit, MessageAttachment } from './types';
 import { MessageActionsRow, ChatMessageRow, buildVersionNav, Divider, DeckCard, ArtifactCard } from './MessageRow';
-import type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, SearchHit, MessageAttachment } from './types';
-import CommandPalette, { CommandGroup, CommandItem } from '../../components/CommandPalette/CommandPalette';
-import { APP_NAME, COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, CONNECTORS, SLIDES_PROMPT } from './constants';
 import { Resizable, ResizablePanel, ResizableHandle } from '../../components/Resizable/Resizable';
+import { APP_NAME, COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, SLIDES_PROMPT } from './constants';
 import { FormEvent, KeyboardEvent, ReactNode, useEffect, useRef, useState } from 'react';
-import { fetchChats, fetchThread, searchMessages, buildSearchCorpus } from './chatApi';
 import { deckBefore, deckDocKey, resolveDeckEdit, useLiveDeck } from './useLiveDeck';
 import { type CommandOption } from '../../components/CommandInput/CommandInput';
 import type { DeckAskContext } from '../../components/DeckEditor/askcontext';
 import Drawer, { DrawerHandle } from '../../components/Drawer/Drawer';
+import { PencilIcon, TrashIcon, MenuIcon, FileIcon } from './icons';
 import ScrollFade from '../../components/ScrollFade/ScrollFade';
 import { Greeting, TypingPhrase, USER_NAME } from './Phrases';
 import Spinner from '../../components/Spinner/Spinner';
+import { DeleteChatModal } from './DeleteChatModal';
+import { fetchChats, fetchThread } from './chatApi';
 import { useConversation } from './useConversation';
 import Button from '../../components/Button/Button';
-import Avatar from '../../components/Avatar/Avatar';
-import Switch from '../../components/Switch/Switch';
-import Select from '../../components/Select/Select';
 import { resolveSheetChart } from './chartSource';
 import Input from '../../components/Input/Input';
+import { SettingsModal } from './SettingsModal';
 import { useSheetPanel } from './useSheetPanel';
+import { SidebarTools } from './SidebarTools';
 import ArtifactsPanel from './ArtifactsPanel';
 import type { ArtifactEntry } from './types';
+import { ProfileCard } from './ProfileCard';
 import { useIsMobile } from './useIsMobile';
+import { ChatSearch } from './ChatSearch';
 import ThreadPanel from './ThreadPanel';
 import DeckPanel from './DeckPanel';
 import Composer from './Composer';
 
 export type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, AiChatHistoryMessage, AiChatReply, SearchCorpusEntry, SearchHit, MessageAttachment, ChatDeck, DeckEdit, DeckEditStep, ChatSheet, SheetEdit, SheetEditStep, ChatArtifact, ArtifactKind } from './types';
 
-const SEARCH_DEBOUNCE_MS = 200;
 
 const SKELETON_CHAT_ROWS = 7;
 
@@ -79,14 +78,15 @@ export const AiChat = () => {
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-	const [displayName, setDisplayName] = useState(USER_NAME);
-	const [model, setModel] = useState(MODEL_OPTIONS[1].value);
-	const [effort, setEffort] = useState(EFFORT_OPTIONS[1].value);
-	const [enabledConnectors, setEnabledConnectors] = useState<string[]>([]);
-	const [autoTitleEnabled, setAutoTitleEnabled] = useState(true);
+	const [settings, setSettings] = useState<ChatSettings>({
+		displayName:       USER_NAME,
+		model:             MODEL_OPTIONS[1].value,
+		effort:            EFFORT_OPTIONS[1].value,
+		enabledConnectors: [],
+		autoTitleEnabled:  true,
+	});
+	const { displayName, model, effort, autoTitleEnabled } = settings;
 	const [searchOpen, setSearchOpen] = useState(false);
-	const [searchHits, setSearchHits] = useState<SearchHit[]>([]);
-	const [searchLoading, setSearchLoading] = useState(false);
 	const [pendingScrollMessageId, setPendingScrollMessageId] = useState<number | null>(null);
 	const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
 	const [editDraft, setEditDraft] = useState('');
@@ -120,8 +120,6 @@ export const AiChat = () => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
 	const searchTriggerRef = useRef<HTMLButtonElement>(null);
-	const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-	const searchAbortRef = useRef<AbortController | null>(null);
 	const copyNoticeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const mountedRef = useRef(true);
 	const nextChatId = useRef(1);
@@ -188,7 +186,12 @@ export const AiChat = () => {
 
 	const activeChat = chats.find((c) => c.id === activeId) ?? null;
 	const modelLabel = MODEL_OPTIONS.find((o) => o.value === model)?.label ?? MODEL_OPTIONS[0].label;
-	const modelPicker = { model, effort, onModelChange: setModel, onEffortChange: setEffort };
+	const modelPicker = {
+		model,
+		effort,
+		onModelChange:  (next: string) => setSettings((prev) => ({ ...prev, model: next })),
+		onEffortChange: (next: string) => setSettings((prev) => ({ ...prev, effort: next })),
+	};
 	const isTyping = activeId !== null && mainConversation.typingId === activeId;
 	const isGenerating = isTyping || (activeId !== null && mainConversation.streamingId === activeId);
 	const isThreadTyping = activeThread !== null && threadConversation.typingId === activeThread.threadId;
@@ -252,19 +255,7 @@ export const AiChat = () => {
 		return () => {
 			mountedRef.current = false;
 			clearTimeout(copyNoticeTimerRef.current);
-			clearTimeout(searchTimerRef.current);
-			searchAbortRef.current?.abort();
 		};
-	}, []);
-
-	useEffect(() => {
-		const handleShortcut = (e: globalThis.KeyboardEvent) => {
-			if(!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'k') return;
-			e.preventDefault();
-			setSearchOpen(true);
-		};
-		window.addEventListener('keydown', handleShortcut);
-		return () => window.removeEventListener('keydown', handleShortcut);
 	}, []);
 
 	useEffect(() => {
@@ -275,40 +266,6 @@ export const AiChat = () => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setPendingScrollMessageId(null);
 	}, [pendingScrollMessageId, activeId, activeThread, threadMessages]);
-
-	const handleSearchQueryChange = (query: string) => {
-		clearTimeout(searchTimerRef.current);
-		searchAbortRef.current?.abort();
-
-		const trimmed = query.trim();
-		if(!trimmed)
-		{
-			setSearchHits([]);
-			setSearchLoading(false);
-			return;
-		}
-
-		setSearchLoading(true);
-		searchTimerRef.current = setTimeout(() => {
-			const controller = new AbortController();
-			searchAbortRef.current = controller;
-			searchMessages(trimmed, buildSearchCorpus(chats, threadMessages), controller.signal)
-				.then((hits) => {
-					setSearchHits(hits);
-					setSearchLoading(false);
-				})
-				.catch((err) => {
-					if(err.name === 'AbortError') return;
-					setSearchHits([]);
-					setSearchLoading(false);
-				});
-		}, SEARCH_DEBOUNCE_MS);
-	};
-
-	const handleCloseSearch = () => {
-		setSearchOpen(false);
-		searchTriggerRef.current?.focus();
-	};
 
 	const handleSelectHit = (hit: SearchHit) => {
 		shouldAutoScrollRef.current = false;
@@ -370,13 +327,8 @@ export const AiChat = () => {
 		if(editingId === id) setEditingId(null);
 	};
 
-	const handleDeleteOpenChange = (open: boolean) => {
-		if(!open) setChatPendingDeletion(null);
-	};
-
-	const handleConfirmDelete = () => {
-		if(!chatPendingDeletion) return;
-		handleDelete(chatPendingDeletion.id);
+	const handleConfirmDelete = (chat: ChatEntry) => {
+		handleDelete(chat.id);
 		setChatPendingDeletion(null);
 	};
 
@@ -857,10 +809,9 @@ export const AiChat = () => {
 		/>
 	) : null;
 
-	const chatSheetMap = sheetPanel.sheetsOf(activeChat?.id);
-	const chatSheets = [...chatSheetMap];
+	const chatSheets = openDocKey && openDeck ? sheetPanel.sheetsOf(activeChat?.id) : null;
 
-	const deckPanel = openDocKey && openDeck ? (
+	const deckPanel = chatSheets && openDocKey && openDeck ? (
 		<DeckPanel
 			inDrawer={isMobile}
 			key={openDocKey}
@@ -868,16 +819,15 @@ export const AiChat = () => {
 			activity={deckActivity}
 			note={deckNote}
 			onChange={(next, coalesceKey) => liveDeck.change(openDocKey, next, coalesceKey)}
-			onUndo={() => liveDeck.undo(openDocKey)}
-			onRedo={() => liveDeck.redo(openDocKey)}
-			canUndo={liveDeck.canUndo(openDocKey)}
-			canRedo={liveDeck.canRedo(openDocKey)}
+			history={{ undo: () => liveDeck.undo(openDocKey), redo: () => liveDeck.redo(openDocKey), canUndo: liveDeck.canUndo(openDocKey), canRedo: liveDeck.canRedo(openDocKey) }}
 			expanded={expanded}
 			onToggleExpand={handleToggleExpand}
 			onClose={handleCloseDeck}
 			onAsk={handleAskAboutSlide}
-			sheets={chatSheets.map(([id, sheet]) => ({ id, title: sheet.title }))}
-			resolveChartSource={source => resolveSheetChart(chatSheetMap, source)}
+			chartData={{
+				sheets:  Array.from(chatSheets, ([id, sheet]) => ({ id, title: sheet.title })),
+				resolve: source => resolveSheetChart(chatSheets, source),
+			}}
 		/>
 	) : null;
 
@@ -911,52 +861,7 @@ export const AiChat = () => {
 					<SidebarHeader>
 						<span className='truncate px-1 text-sm font-semibold text-text'>{APP_NAME}</span>
 					</SidebarHeader>
-					{!railCollapsed && (
-						<div className='flex items-center gap-1.5'>
-							<button
-							ref={searchTriggerRef}
-							type='button'
-							aria-label='Search all messages'
-							aria-keyshortcuts='Meta+K Control+K'
-							onClick={() => setSearchOpen(true)}
-							className={[
-								'flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border px-2.5 text-sm text-text-subtle',
-								'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
-								'hover:bg-surface-hover hover:text-text-muted',
-								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2',
-							].join(' ')}
-						>
-							<SearchIcon />
-							<span className='min-w-0 flex-1 truncate text-left'>Search…</span>
-							<kbd className='shrink-0 rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-surface-border px-1.5 py-0.5 text-[11px] font-medium text-text-muted select-none'>⌘K</kbd>
-						</button>
-						<button
-							type='button'
-							aria-label='Start a new chat'
-							onClick={handleNewChat}
-							className='flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
-						>
-							<PlusIcon />
-						</button>
-						</div>
-					)}
-					{railCollapsed && (
-						<div className='flex flex-col items-center gap-2'>
-							<Button variant='ghost' size='icon-sm' aria-label='Start a new chat' onClick={handleNewChat}>
-								<PlusIcon />
-							</Button>
-							<button
-								ref={searchTriggerRef}
-								type='button'
-								aria-label='Search all messages'
-								aria-keyshortcuts='Meta+K Control+K'
-								onClick={() => setSearchOpen(true)}
-								className='flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
-							>
-								<SearchIcon />
-							</button>
-						</div>
-					)}
+					<SidebarTools collapsed={railCollapsed} searchRef={searchTriggerRef} onSearch={() => setSearchOpen(true)} onNewChat={handleNewChat} />
 					<SidebarSection label='Chats'>
 						{chats.map((chat) => (
 							editingId === chat.id ? (
@@ -1009,29 +914,7 @@ export const AiChat = () => {
 						)}
 					</SidebarSection>
 					<SidebarFooter>
-						<button
-							type='button'
-							aria-haspopup='dialog'
-							aria-label={railCollapsed ? `${displayName}, settings` : undefined}
-							onClick={() => setSettingsOpen(true)}
-							className={[
-								`flex w-full items-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel text-left shadow-[var(--shadow-sm)] ${railCollapsed ? 'justify-center p-1' : 'gap-2.5 p-2'}`,
-								'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
-								'hover:border-surface-border-hover hover:bg-surface-hover',
-								'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
-							].join(' ')}
-						>
-							<Avatar name={displayName} shape='square' size='md' />
-							{!railCollapsed && (
-								<>
-									<span className='flex min-w-0 flex-1 flex-col items-start'>
-										<span className='w-full truncate text-sm font-medium text-text'>{displayName}</span>
-										<span className='w-full truncate text-xs text-text-muted'>{modelLabel} model</span>
-									</span>
-									<ChevronRightIcon className='shrink-0 text-text-muted' />
-								</>
-							)}
-						</button>
+						<ProfileCard name={displayName} modelLabel={modelLabel} collapsed={railCollapsed} onOpen={() => setSettingsOpen(true)} />
 					</SidebarFooter>
 				</Sidebar>
 				</SidebarSlot>
@@ -1240,88 +1123,18 @@ export const AiChat = () => {
 				</Drawer>
 			)}
 
-			<Modal open={chatPendingDeletion !== null} onOpenChange={handleDeleteOpenChange}>
-				<ModalClose />
-				<ModalHeader>
-					<ModalTitle>Delete chat</ModalTitle>
-				</ModalHeader>
-				<ModalContent>
-					{`Delete "${chatPendingDeletion?.title}"? This can't be undone.`}
-				</ModalContent>
-				<ModalFooter>
-					<Button variant='secondary' onClick={() => setChatPendingDeletion(null)}>Cancel</Button>
-					<Button variant='destructive' onClick={handleConfirmDelete}>Delete</Button>
-				</ModalFooter>
-			</Modal>
+			<DeleteChatModal chat={chatPendingDeletion} onCancel={() => setChatPendingDeletion(null)} onConfirm={handleConfirmDelete} />
 
-			<Modal size='lg' open={settingsOpen} onOpenChange={setSettingsOpen}>
-				<ModalClose />
-				<ModalHeader>
-					<ModalTitle>AI chat settings</ModalTitle>
-				</ModalHeader>
-				<ModalContent>
-					<div className='grid grid-cols-2 gap-x-8 gap-y-5'>
-						<Input
-							label='Display name'
-							value={displayName}
-							onChange={(e) => setDisplayName(e.target.value)}
-						/>
-						<Select
-							label='Model'
-							options={MODEL_OPTIONS}
-							value={model}
-							onChange={setModel}
-						/>
-						<div className='col-span-2 flex flex-col gap-3'>
-							<p className='text-sm font-medium text-text'>Connectors</p>
-							{CONNECTORS.map((connector) => (
-								<Switch
-									key={connector.id}
-									checked={enabledConnectors.includes(connector.id)}
-									onCheckedChange={(checked) => setEnabledConnectors((prev) => (checked ? [...prev, connector.id] : prev.filter((id) => id !== connector.id)))}
-									label={connector.label}
-									hint={connector.description}
-								/>
-							))}
-						</div>
-						<div className='col-span-2'>
-							<Switch
-								checked={autoTitleEnabled}
-								onCheckedChange={setAutoTitleEnabled}
-								label='Auto-title new chats'
-								hint='Names a new chat after its first message instead of leaving it as "New chat".'
-							/>
-						</div>
-					</div>
-				</ModalContent>
-				<ModalFooter>
-					<Button onClick={() => setSettingsOpen(false)}>Done</Button>
-				</ModalFooter>
-			</Modal>
+			<SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} onChange={setSettings} />
 
-			<CommandPalette
+			<ChatSearch
 				open={searchOpen}
-				onClose={handleCloseSearch}
-				placeholder='Search every chat and thread…'
-				onQueryChange={handleSearchQueryChange}
-				filter={false}
-				loading={searchLoading}
-			>
-				{chats.filter((c) => searchHits.some((h) => h.chatId === c.id)).map((chat) => (
-					<CommandGroup key={chat.id} label={chat.title}>
-						{searchHits.filter((h) => h.chatId === chat.id).map((hit) => (
-							<CommandItem
-								key={`${hit.threadId ?? 'main'}-${hit.messageId}`}
-								value={hit.snippet}
-								icon={hit.threadId ? <ReplyIcon /> : undefined}
-								onSelect={() => handleSelectHit(hit)}
-							>
-								{hit.snippet}
-							</CommandItem>
-						))}
-					</CommandGroup>
-				))}
-			</CommandPalette>
+				onOpenChange={setSearchOpen}
+				chats={chats}
+				threadMessages={threadMessages}
+				onSelectHit={handleSelectHit}
+				returnFocusRef={searchTriggerRef}
+			/>
 		</div>
 	);
 };

@@ -1,6 +1,6 @@
 'use client';
 
-import type { ChartSource, Deck, ResolvedChart, SheetChoice } from '../../components/DeckEditor/deck';
+import type { ChartData, Deck, EditHistory } from '../../components/DeckEditor/deck';
 import type { DeckAskContext } from '../../components/DeckEditor/askcontext';
 import { DeckEditor } from '../../components/DeckEditor/DeckEditor';
 import { CloseIcon, CollapseIcon, ExpandIcon } from './icons';
@@ -22,27 +22,22 @@ export interface DeckPanelProps {
 	/** A note for after an edit finishes, e.g. that some changes were skipped. */
 	note:      string;
 	onChange:  (next: Deck, coalesceKey?: string) => void;
-	onUndo:    () => void;
-	onRedo:    () => void;
-	canUndo:   boolean;
-	canRedo:   boolean;
-	expanded:       boolean;
+	history:    EditHistory;
+	expanded:      boolean;
 	onToggleExpand: () => void;
 	onClose:   () => void;
 	/** Rendered inside a Drawer (mobile): the Drawer owns Escape and the expand button is hidden. */
 	inDrawer?: boolean;
 	/** Adds an Ask AI button to the editor; called with what the user selected or highlighted. */
 	onAsk?:    (context: DeckAskContext) => void;
-	/** The chat's spreadsheets, which a chart can take its data from. */
-	sheets?:             SheetChoice[];
-	resolveChartSource?: (source: ChartSource) => ResolvedChart | null;
+	chartData?: ChartData;
 }
 
 // Shares the thread panel's column (only one is open at a time) and, like it, is a
 // persistent column rather than an overlay: no focus trap, Escape is a nicety.
 // You and the AI edit the same deck: the view follows the AI's changes until you
 // pick a slide or start working yourself, then stays put for the rest of that reply.
-export const DeckPanel = ({ deck, activity, note, onChange, onUndo, onRedo, canUndo, canRedo, expanded, onToggleExpand, onClose, inDrawer = false, onAsk, sheets, resolveChartSource }: DeckPanelProps) => {
+export const DeckPanel = ({ deck, activity, note, onChange, history, expanded, onToggleExpand, onClose, inDrawer = false, onAsk, chartData }: DeckPanelProps) => {
 	const [viewSlideId, setViewSlideId] = useState<string | undefined>(undefined);
 	const [stoppedFollowing, setStoppedFollowing] = useState<number | null>(null);
 	const following = activity !== null && stoppedFollowing !== activity.messageId;
@@ -91,17 +86,13 @@ export const DeckPanel = ({ deck, activity, note, onChange, onUndo, onRedo, canU
 				<DeckEditor
 					deck={deck}
 					onChange={onChange}
-					onUndo={onUndo}
-					onRedo={onRedo}
-					canUndo={canUndo}
-					canRedo={canRedo}
+					history={history}
 					highlightIds={activity?.elementId ? [activity.elementId] : []}
 					activeSlideId={shownSlideId}
 					onActiveSlideChange={setViewSlideId}
 					status={activity ? `${activity.label}…` : note}
 					onAsk={onAsk}
-						sheets={sheets}
-						resolveChartSource={resolveChartSource}
+					chartData={chartData}
 				/>
 			</div>
 		</div>

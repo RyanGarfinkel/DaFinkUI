@@ -1,8 +1,8 @@
 'use client';
 
 import type { SheetAskContext } from '../../components/SheetEditor/askcontext';
+import type { EditHistory, Sheet } from '../../components/SheetEditor/sheet';
 import { SheetEditor } from '../../components/SheetEditor/SheetEditor';
-import type { Sheet } from '../../components/SheetEditor/sheet';
 import { CloseIcon, CollapseIcon, ExpandIcon } from './icons';
 import Button from '../../components/Button/Button';
 import { KeyboardEvent, useState } from 'react';
@@ -22,11 +22,8 @@ export interface SheetPanelProps {
 	/** A note for after an edit finishes, e.g. that some changes were skipped. */
 	note:           string;
 	onChange:       (next: Sheet, coalesceKey?: string) => void;
-	onUndo:         () => void;
-	onRedo:         () => void;
-	canUndo:        boolean;
-	canRedo:        boolean;
-	expanded:       boolean;
+	history:        EditHistory;
+	expanded:      boolean;
 	onToggleExpand: () => void;
 	onClose:        () => void;
 	/** Rendered inside a Drawer (mobile): the Drawer owns Escape and the expand button is hidden. */
@@ -39,7 +36,7 @@ export interface SheetPanelProps {
 // persistent column rather than an overlay: no focus trap, Escape is a nicety. You and the AI
 // edit the same sheet: the AI's cells are outlined while it works, until you click or type in
 // the editor, which takes the view back for the rest of that reply.
-export const SheetPanel = ({ sheet, activity, note, onChange, onUndo, onRedo, canUndo, canRedo, expanded, onToggleExpand, onClose, inDrawer = false, onAsk }: SheetPanelProps) => {
+export const SheetPanel = ({ sheet, activity, note, onChange, history, expanded, onToggleExpand, onClose, inDrawer = false, onAsk }: SheetPanelProps) => {
 	const [stoppedFollowing, setStoppedFollowing] = useState<number | null>(null);
 	const following = activity !== null && stoppedFollowing !== activity.messageId;
 
@@ -84,10 +81,7 @@ export const SheetPanel = ({ sheet, activity, note, onChange, onUndo, onRedo, ca
 				<SheetEditor
 					sheet={sheet}
 					onChange={onChange}
-					onUndo={onUndo}
-					onRedo={onRedo}
-					canUndo={canUndo}
-					canRedo={canRedo}
+					history={history}
 					highlight={following ? activity.range : undefined}
 					status={activity ? `${activity.label}…` : note || undefined}
 					onAsk={onAsk}

@@ -1,159 +1,34 @@
 'use client';
 
-import SidePanel, { SidePanelHeader, SidePanelTitle, SidePanelContent, SidePanelFooter, SidePanelClose, type SidePanelSide } from '@/src/components/SidePanel/SidePanel';
-import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, DrawerHandle, type DrawerSide } from '@/src/components/Drawer/Drawer';
-import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext, CarouselDots } from '@/src/components/Carousel/Carousel';
-import { Sidebar, SidebarHeader, SidebarFooter, SidebarSection, SidebarLink, SidebarDivider } from '@/src/components/Sidebar/Sidebar';
-import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose, type ModalSize } from '@/src/components/Modal/Modal';
-import { MenuBar, MenuBarBrand, MenuBarActions, MenuBarNav, MenuBarNavItem, MenuBarNavMore } from '@/src/components/MenuBar/MenuBar';
-import Form, { FormControl, FormDescription, FormField, FormLabel, FormMessage, useZodForm } from '@/src/components/Form/Form';
-import Accordion, { AccordionContent, AccordionItem, AccordionTrigger } from '@/src/components/Accordion/Accordion';
-import ToolCallTrace, { type ToolCallEntry, type ToolCallLink } from '@/src/components/ToolCallTrace/ToolCallTrace';
-import Collapsible, { CollapsibleTrigger, CollapsibleContent } from '@/src/components/Collapsible/Collapsible';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/src/components/Table/Table';
-import { CommandPalette, CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
-import DataTable, { type ColumnDef, type PaginatorVariant } from '@/src/components/DataTable/DataTable';
-import { AreaChart, BarChart, DonutChart, LineChart, RadarChart } from '@/src/components/Charts/Charts';
-import { Resizable, ResizablePanel, ResizableHandle } from '@/src/components/Resizable/Resizable';
-import Questionnaire, { type QuestionStep } from '@/src/components/Questionnaire/Questionnaire';
-import { Message, MessageReactions, MessageReaction } from '@/src/components/Message/Message';
-import { CommandInput, type CommandOption } from '@/src/components/CommandInput/CommandInput';
-import { KanbanBoard, type KanbanCardDetailsRenderer } from '@/src/components/Kanban/Kanban';
-import Mosaic, { MosaicTile, type MosaicTileLayout } from '@/src/components/Mosaic/Mosaic';
-import { Skeleton, SkeletonCard, SkeletonImage } from '@/src/components/Skeleton/Skeleton';
-import ToggleGroup, { ToggleGroupItem } from '@/src/components/ToggleGroup/ToggleGroup';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/src/components/Tabs/Tabs';
-import Graph, { type GraphNode, type GraphEdge } from '@/src/components/Graph/Graph';
-import { Attachment, AttachmentGroup } from '@/src/components/Attachment/Attachment';
+import { CodeBlockPreview, FormulaPreview, CardPreview, TablePreview, SkeletonPreview, TypographyPreview, BadgePreview, AlertPreview, ProgressPreview, SpinnerPreview, HeatmapPreview,TreePreview, TimelinePreview, CarouselPreview, AvatarPreview, AttachmentPreview, MessagePreview, GraphPreview, AudioPlayerPreview, TiltPreview, SeparatorPreview, ChartsPreview, LineChartPreview, BarChartPreview, AreaChartPreview, DonutChartPreview, RadarChartPreview } from './previews/Display';
+import { ButtonPreview, InputPreview, RadioPreview, SwitchPreview, SliderPreview, ToggleGroupPreview, CheckboxPreview, ColorPickerPreview, DatePickerPreview } from './previews/Inputs';
+import { CollapsiblePreview, AccordionPreview, ToolCallTracePreview, CommandPalettePreview, TooltipPreview, PopoverPreview, MenuPreview, ContextMenuPreview } from './previews/Overlay';
+import { OTPInputPreview, ComboboxPreview, CommandInputPreview, DataTablePreview, ModalPreview, DrawerPreview, SidePanelPreview, SelectDemo, FormDemo, ToastDemo } from './Demos';
+import { TabsPreview, MenuBarPreview, TableOfContentsPreview, BreadcrumbPreview, ResizablePreview } from './previews/Layout';
 import { SheetEditorDemo } from '@/app/_docs/components/examples/SheetEditorDemo';
 import { DeckEditorDemo } from '@/app/_docs/components/examples/DeckEditorDemo';
-import TableOfContents from '@/src/components/TableOfContents/TableOfContents';
 import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
 import WorkflowBuilder from '@/src/components/WorkflowBuilder/WorkflowBuilder';
-import type { SlideElement } from '@/src/components/SlideCanvas/SlideCanvas';
-import { Timeline, TimelineItem } from '@/src/components/Timeline/Timeline';
-import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
-import { ContextMenu } from '@/src/components/ContextMenu/ContextMenu';
-import { SlideCanvas } from '@/src/components/SlideCanvas/SlideCanvas';
-import { ColorPicker } from '@/src/components/ColorPicker/ColorPicker';
-import { ToastProvider, useToast } from '@/src/components/Toast/Toast';
-import Avatar, { AvatarGroup } from '@/src/components/Avatar/Avatar';
-import { RadioGroup, RadioItem } from '@/src/components/Radio/Radio';
-import { DatePicker } from '@/src/components/DatePicker/DatePicker';
+import { SlideCanvasPreview, CodeEditorPreview } from './previews/Editors';
+import { MosaicPreview, KanbanBoardPreview } from './previews/DragDrop';
 import ThemeToggle from '@/src/components/ThemeToggle/ThemeToggle';
-import AudioPlayer from '@/src/components/AudioPlayer/AudioPlayer';
-import { CodeBlock } from '@/src/components/CodeBlock/CodeBlock';
-import Breadcrumb from '@/src/components/Breadcrumb/Breadcrumb';
-import CodeEditor from '@/src/components/CodeEditor/CodeEditor';
-import { Combobox } from '@/src/components/Combobox/Combobox';
-import { Progress } from '@/src/components/Progress/Progress';
-import { Checkbox } from '@/src/components/Checkbox/Checkbox';
-import Separator from '@/src/components/Separator/Separator';
-import Tree, { TreeItem } from '@/src/components/Tree/Tree';
-import { Spinner } from '@/src/components/Spinner/Spinner';
 import Textarea from '@/src/components/Textarea/Textarea';
-import OTPInput from '@/src/components/OTPInput/OTPInput';
-import { Select } from '@/src/components/Select/Select';
+import { QuestionnairePreview } from './previews/Forms';
 import { Canvas } from '@/src/components/Canvas/Canvas';
-import Popover from '@/src/components/Popover/Popover';
-import Tooltip from '@/src/components/Tooltip/Tooltip';
-import CountUp from '@/src/components/CountUp/CountUp';
-import Formula from '@/src/components/Formula/Formula';
-import { Alert } from '@/src/components/Alert/Alert';
-import { Badge } from '@/src/components/Badge/Badge';
-import Switch from '@/src/components/Switch/Switch';
-import Slider from '@/src/components/Slider/Slider';
-import Button from '@/src/components/Button/Button';
+import { SidebarPreview } from './previews/Navigation';
 import { Link } from '@/src/components/Link/Link';
-import Input from '@/src/components/Input/Input';
-import Menu from '@/src/components/Menu/Menu';
-import Tilt from '@/src/components/Tilt/Tilt';
-import { useState } from 'react';
-import { z } from 'zod';
 
 interface ComponentLivePreviewProps {
   slug: string;
 }
 
-interface DemoSlideElement extends SlideElement {
-  kind:  'badge' | 'title' | 'subtitle' | 'block';
-  text?: string;
-}
-
-const INITIAL_SLIDE_ELEMENTS: DemoSlideElement[] = [
-  { id: 'badge', label: 'Status badge', kind: 'badge', text: 'Q3 2026', x: 96, y: 130, width: 120, height: 40 },
-  { id: 'title', label: 'Title', kind: 'title', text: 'Quarterly review', x: 96, y: 200, width: 760, height: 120 },
-  { id: 'subtitle', label: 'Subtitle', kind: 'subtitle', text: 'Growth, retention, and what is next', x: 96, y: 330, width: 640, height: 60 },
-  { id: 'shape', label: 'Accent block', kind: 'block', x: 920, y: 160, width: 260, height: 400 },
-];
-
-const renderDemoSlideElement = (el: DemoSlideElement) => {
-  switch (el.kind) {
-    case 'badge':    return <Badge variant='success' className='text-lg'>{el.text}</Badge>;
-    case 'title':    return <h2 className='text-6xl font-semibold text-text'>{el.text}</h2>;
-    case 'subtitle': return <p className='text-3xl text-text-muted'>{el.text}</p>;
-    case 'block':    return <div className='h-full w-full rounded-[var(--radius-lg)] bg-surface-active' />;
-  }
-};
-
 export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
-  const [dashboardLayout, setDashboardLayout] = useState<MosaicTileLayout[]>([
-    { id: 'revenue', col: 1, row: 1, colSpan: 2, rowSpan: 1 },
-    { id: 'users',   col: 3, row: 1, colSpan: 1, rowSpan: 1 },
-    { id: 'chart',   col: 1, row: 2, colSpan: 3, rowSpan: 2 },
-    { id: 'growth',  col: 4, row: 1, colSpan: 1, rowSpan: 1 },
-  ]);
-  const [switchChecked, setSwitchChecked] = useState(false);
-  const [sliderValue, setSliderValue]     = useState(40);
-  const [colorPickerValue, setColorPickerValue] = useState('#3b82f6');
-  const [contextAction, setContextAction] = useState('none');
-  const [slideElements, setSlideElements] = useState(INITIAL_SLIDE_ELEMENTS);
-  const [radioValue, setRadioValue] = useState('option-1');
-  const [toggleValue, setToggleValue] = useState<string | string[]>('left');
-  const [tabValue, setTabValue] = useState('account');
-  const [menuBarNavValue, setMenuBarNavValue] = useState('home');
-  const [pickerDate, setPickerDate] = useState<Date | null>(null);
-  const [pickerTime, setPickerTime] = useState<Date | null>(null);
-  const [pickerDateTime, setPickerDateTime] = useState<Date | null>(null);
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  const [editorCode, setEditorCode] = useState('<Button>Click me</Button>');
-  const [sidebarFavorites, setSidebarFavorites] = useState<Record<string, boolean>>({});
-
   switch (slug) {
     case 'button':
-      return (
-        <div className='flex flex-col gap-4 items-center'>
-          <div className='flex flex-wrap gap-3 items-center justify-center'>
-            <Button>Primary</Button>
-            <Button variant='secondary'>Secondary</Button>
-            <Button variant='outlined'>Outlined</Button>
-            <Button variant='ghost'>Ghost</Button>
-            <Button variant='link'>Link</Button>
-            <Button variant='destructive'>Destructive</Button>
-          </div>
-          <div className='flex gap-2 items-center'>
-            <Button size='icon' variant='ghost' aria-label='Search'>
-              <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>
-            </Button>
-            <Button size='icon' variant='secondary' aria-label='Add'>
-              <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M5 12h14M12 5v14'/></svg>
-            </Button>
-            <Button size='icon' variant='destructive' aria-label='Delete'>
-              <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><path d='M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'/></svg>
-            </Button>
-          </div>
-        </div>
-      );
+      return <ButtonPreview />;
 
     case 'input':
-      return (
-        <div className='w-full max-w-sm flex flex-col gap-4'>
-          <Input label='Email' placeholder='you@example.com' hint='We will never share your email.' />
-          <Input label='Password' type='password' placeholder='••••••••' hint='At least 8 characters.' />
-          <Input label='Floating label' variant='floating' />
-          <Input label='Disabled' placeholder='Cannot edit' disabled />
-        </div>
-      );
+      return <InputPreview />;
 
     case 'otp-input':
       return <OTPInputPreview />;
@@ -166,756 +41,97 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
 
     case 'radio':
-      return (
-        <RadioGroup value={radioValue} onValueChange={setRadioValue} name='plan'>
-          <RadioItem value='option-1' label='Starter' hint='Up to 5 users' />
-          <RadioItem value='option-2' label='Pro' hint='Up to 50 users' />
-          <RadioItem value='option-3' label='Enterprise' hint='Unlimited users' />
-        </RadioGroup>
-      );
+      return <RadioPreview />;
 
     case 'switch':
-      return (
-        <div className='flex flex-col gap-4'>
-          <Switch
-            checked={switchChecked}
-            onCheckedChange={setSwitchChecked}
-            label='Email notifications'
-            hint='Receive updates about your account.'
-          />
-          <Switch checked={true} onCheckedChange={() => {}} label='Dark mode' />
-          <Switch checked={false} onCheckedChange={() => {}} label='Analytics' disabled />
-        </div>
-      );
+      return <SwitchPreview />;
 
     case 'theme-toggle':
       return <ThemeToggle />;
 
     case 'slider':
-      return (
-        <div className='w-full max-w-sm flex flex-col gap-6'>
-          <Slider
-            label='Volume'
-            showValue
-            value={sliderValue}
-            onValueChange={setSliderValue}
-            hint='Drag or use arrow keys to adjust.'
-          />
-          <Slider label='Disabled' value={60} onValueChange={() => {}} disabled />
-        </div>
-      );
+      return <SliderPreview />;
 
     case 'toggle-group':
-      return (
-        <div className='flex flex-col gap-4 items-center'>
-          <ToggleGroup type='single' value={toggleValue as string} onValueChange={setToggleValue}>
-            <ToggleGroupItem value='left'>Left</ToggleGroupItem>
-            <ToggleGroupItem value='center'>Center</ToggleGroupItem>
-            <ToggleGroupItem value='right'>Right</ToggleGroupItem>
-          </ToggleGroup>
-        </div>
-      );
+      return <ToggleGroupPreview />;
 
-    case 'code-block': {
-      const snippet = 'import Button from \'@/src/components/Button/Button\';\n\nexport default function Example() {\n  return <Button>Click me</Button>;\n}';
-      return (
-        <div className='flex flex-col gap-6 w-full max-w-2xl'>
-          <CodeBlock code={snippet} />
-          <CodeBlock variant='example' code={snippet} label='button-example' minHeight='120px'>
-            <Button>Click me</Button>
-          </CodeBlock>
-        </div>
-      );
-    }
+    case 'code-block':
+      return <CodeBlockPreview />;
 
     case 'formula':
-      return (
-        <div className='flex flex-col gap-4 items-center'>
-          <Formula expression='x^2 + y^2 = r^2' size='lg' />
-          <Formula display='block' expression='\frac{-b \pm \sqrt{b^2 - 4ac}}{2a}' size='lg' />
-          <Formula expression='\sum_{i=1}^{n} x_i' />
-        </div>
-      );
+      return <FormulaPreview />;
 
     case 'code-editor':
-      return (
-        <div className='w-full max-w-2xl'>
-          <CodeEditor value={editorCode} onChange={setEditorCode} aria-label='JSX code editor' minHeight='160px' />
-        </div>
-      );
+      return <CodeEditorPreview />;
 
     case 'card':
-      return (
-        <div className='w-full max-w-sm'>
-          <Card>
-            <CardHeader>
-              <h3 className='text-2xl font-semibold tracking-tight text-text'>Project summary</h3>
-            </CardHeader>
-            <CardContent>
-              <p className='text-base text-text leading-7'>
-                Everything is on track for the Q3 launch. Three tasks remain open.
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      );
+      return <CardPreview />;
 
     case 'table':
-      return (
-        <div className='w-full'>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeader>Name</TableHeader>
-                <TableHeader>Role</TableHeader>
-                <TableHeader>Status</TableHeader>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow><TableCell>Alice Kim</TableCell><TableCell>Designer</TableCell><TableCell>Active</TableCell></TableRow>
-              <TableRow><TableCell>Ben Torres</TableCell><TableCell>Engineer</TableCell><TableCell>Active</TableCell></TableRow>
-              <TableRow><TableCell>Clara Patel</TableCell><TableCell>PM</TableCell><TableCell>On leave</TableCell></TableRow>
-            </TableBody>
-          </Table>
-        </div>
-      );
+      return <TablePreview />;
 
     case 'skeleton':
-      return (
-        <div className='w-full max-w-sm flex flex-col gap-6'>
-          <SkeletonImage aspectRatio='16/9' />
-          <div className='flex items-center gap-3'>
-            <Skeleton width='40px' height='40px' className='rounded-full shrink-0' />
-            <div className='flex flex-col gap-2 flex-1'>
-              <Skeleton height='14px' className='w-2/5' />
-              <Skeleton height='12px' className='w-3/5' />
-            </div>
-          </div>
-          <SkeletonCard lines={3} />
-        </div>
-      );
+      return <SkeletonPreview />;
 
     case 'typography':
-      return (
-        <div className='w-full flex flex-col gap-3'>
-          <h1 className='text-4xl font-bold tracking-tight text-text'>Heading 1</h1>
-          <h2 className='text-3xl font-semibold tracking-tight text-text'>Heading 2</h2>
-          <h3 className='text-2xl font-semibold tracking-tight text-text'>Heading 3</h3>
-          <h4 className='text-xl font-semibold text-text'>Heading 4</h4>
-          <p className='text-xl text-text-muted leading-7'>Lead paragraph text that introduces the section.</p>
-          <p className='text-base text-text leading-7'>Body paragraph with regular weight and line-height.</p>
-          <p className='text-sm text-text-muted'>Muted helper text for supporting detail.</p>
-          <blockquote className='border-l-2 border-surface-border pl-4 italic text-text-muted'>A quoted passage from a source.</blockquote>
-          <p className='text-base text-text leading-7'>Inline <code className='text-sm font-mono bg-surface-active px-1.5 py-0.5 rounded text-text'>code snippet</code> example.</p>
-          <p className='text-xs text-text-muted'>Small caption text</p>
-        </div>
-      );
+      return <TypographyPreview />;
 
     case 'form':
       return <FormDemo />;
 
-    case 'questionnaire': {
-      const featureSteps: QuestionStep[] = [
-        {
-          type: 'radio',
-          question: 'What kind of feature is this?',
-          description: 'Pick the category that fits best.',
-          options: [
-            { id: 'ui', label: 'UI improvement', description: 'A visual or interaction change' },
-            { id: 'integration', label: 'Integration', description: 'Connects to another tool or API' },
-            { id: 'automation', label: 'Automation', description: 'Removes a manual step' },
-          ],
-          otherPlaceholder: 'Describe another kind…',
-        },
-        {
-          type: 'slider',
-          question: 'How urgent is this?',
-          description: 'Drag to set a priority level from 1 (low) to 5 (high).',
-          min: 1,
-          max: 5,
-          step: 1,
-        },
-        {
-          type: 'calendar',
-          question: 'When do you need this by?',
-          description: 'Pick a target date.',
-        },
-      ];
-
-      const bugSteps: QuestionStep[] = [
-        {
-          type: 'radio',
-          question: 'How severe is this bug?',
-          description: 'Choose the closest match.',
-          options: [
-            { id: 'blocker', label: 'Blocker', description: 'Nothing works until this is fixed' },
-            { id: 'major', label: 'Major', description: 'A core flow is broken' },
-            { id: 'minor', label: 'Minor', description: 'An edge case or cosmetic issue' },
-          ],
-          otherPlaceholder: 'Describe the impact…',
-        },
-        {
-          type: 'number',
-          question: 'How many users are affected?',
-          description: 'A rough estimate is fine.',
-          placeholder: 'e.g. 12',
-        },
-        {
-          type: 'calendar',
-          question: 'When did you first notice it?',
-          description: 'Pick the date it started.',
-        },
-      ];
-
-      const onboardingSteps: QuestionStep[] = [
-        {
-          type: 'radio',
-          question: "How's the rollout going?",
-          description: 'Pick the closest status.',
-          options: [
-            { id: 'on-track', label: 'On track', description: 'No blockers so far' },
-            { id: 'needs-help', label: 'Needs help', description: 'Making progress, but stuck somewhere' },
-            { id: 'blocked', label: 'Blocked', description: 'Can’t move forward right now' },
-          ],
-          otherPlaceholder: 'Describe the status…',
-        },
-        {
-          type: 'slider',
-          question: 'How confident are you in the plan?',
-          description: 'Drag to set a confidence level from 1 (low) to 5 (high).',
-          min: 1,
-          max: 5,
-          step: 1,
-        },
-        {
-          type: 'number',
-          question: 'How many team members have you onboarded so far?',
-          placeholder: 'e.g. 4',
-        },
-      ];
-
-      return (
-        <div className='grid w-full grid-cols-1 items-start gap-4 sm:grid-cols-3'>
-          <Questionnaire steps={featureSteps} onAnswer={(value) => console.log(value)} className='w-full' />
-          <Questionnaire steps={bugSteps} onAnswer={(value) => console.log(value)} className='w-full' />
-          <Questionnaire steps={onboardingSteps} onAnswer={(value) => console.log(value)} className='w-full' />
-        </div>
-      );
-    }
+    case 'questionnaire':
+      return <QuestionnairePreview />;
 
     case 'collapsible':
-      return (
-        <div className='w-full max-w-sm rounded-lg border border-surface-border px-4'>
-          <Collapsible>
-            <CollapsibleTrigger>Project details</CollapsibleTrigger>
-            <CollapsibleContent>
-              This project uses React 18, Tailwind v4, and Next.js 15. Components are
-              copied directly into your repo, no runtime dependency required.
-            </CollapsibleContent>
-          </Collapsible>
-        </div>
-      );
+      return <CollapsiblePreview />;
 
     case 'accordion':
-      return (
-        <div className='w-full max-w-sm'>
-          <Accordion type='single' collapsible defaultValue='item-1'>
-            <AccordionItem value='item-1'>
-              <AccordionTrigger>What is DaFink UI?</AccordionTrigger>
-              <AccordionContent>
-                A React component library you install source into, not a runtime package.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value='item-2'>
-              <AccordionTrigger>How do I install a component?</AccordionTrigger>
-              <AccordionContent>
-                Run <code className='font-mono text-xs'>npx dafink-ui add button</code> and the component is copied into your project.
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value='item-3'>
-              <AccordionTrigger>Do I need to install all components at once?</AccordionTrigger>
-              <AccordionContent>
-                No, each component is installed individually. Install only what your project needs.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </div>
-      );
+      return <AccordionPreview />;
 
-    case 'tool-call-trace': {
-      const searchLinks: ToolCallLink[] = [
-        { title: 'Installation — DaFink UI Docs', url: 'https://ui.ryangarfinkel.dev/installation' },
-        { title: 'dafink-ui — npm', url: 'https://www.npmjs.com/package/dafink-ui' },
-        { title: 'DaFink UI CLI source — GitHub', url: 'https://github.com/RyanGarfinkel/DaFinkUI/tree/main/packages/cli' },
-      ];
-
-      const toolCalls: ToolCallEntry[] = [
-        { id: 't1', kind: 'thought', title: 'Thinking', detail: 'The user wants the install command — check the CLI docs for the exact syntax before answering.' },
-        { id: 't2', kind: 'search', title: 'Web search', detail: '"dafink-ui cli install command"', links: searchLinks },
-        { id: 't3', kind: 'tool', title: 'Read file', detail: 'packages/cli/src/commands/add.ts', result: 'Found the add command implementation' },
-      ];
-
-      return (
-        <div className='flex w-full max-w-md flex-col gap-1.5'>
-          <ToolCallTrace toolCalls={toolCalls} />
-          <Message variant='received' bubble={false}>
-            Run npx dafink-ui add button in your project root; it copies the component source straight into your repo.
-          </Message>
-        </div>
-      );
-    }
+    case 'tool-call-trace':
+      return <ToolCallTracePreview />;
 
     case 'tabs':
-      return (
-        <div className='w-full max-w-sm'>
-          <Tabs value={tabValue} onValueChange={setTabValue}>
-            <TabsList>
-              <TabsTrigger value='account'>Account</TabsTrigger>
-              <TabsTrigger value='security'>Security</TabsTrigger>
-              <TabsTrigger value='notifications'>Notifications</TabsTrigger>
-            </TabsList>
-            <TabsContent value='account'>
-              <p className='text-base text-text leading-7'>Manage your account settings and preferences.</p>
-            </TabsContent>
-            <TabsContent value='security'>
-              <p className='text-base text-text leading-7'>Update your password and two-factor settings.</p>
-            </TabsContent>
-            <TabsContent value='notifications'>
-              <p className='text-base text-text leading-7'>Choose what notifications you receive and how.</p>
-            </TabsContent>
-          </Tabs>
-        </div>
-      );
+      return <TabsPreview />;
 
-    case 'sidebar': {
-      const favorited = sidebarFavorites;
-      const toggleFavorite = (name: string) => setSidebarFavorites(prev => ({ ...prev, [name]: !prev[name] }));
-
-      return (
-        <div className='h-96 w-56 border border-surface-border rounded-lg overflow-hidden'>
-          <Sidebar width='w-full' collapsible>
-            <SidebarHeader>
-              <span className='font-semibold text-text'>Acme</span>
-            </SidebarHeader>
-            <SidebarSection>
-              <SidebarLink href='#' isActive icon={<NavIcon d='M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z' />}>Home</SidebarLink>
-              <SidebarLink href='#' icon={<NavIcon d='M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15Z' />}>Documentation</SidebarLink>
-              <SidebarLink href='#' icon={<NavIcon d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z' />}>Examples</SidebarLink>
-            </SidebarSection>
-            <SidebarDivider />
-            <SidebarSection label='Components'>
-              <SidebarLink
-                href='#'
-                icon={<NavIcon d='M9 9h6v6H9zM4 4h16v16H4z' />}
-                action={
-                  <Button
-                    variant='ghost'
-                    size='icon-sm'
-                    aria-label={favorited.Button ? 'Remove Button from favorites' : 'Add Button to favorites'}
-                    aria-pressed={Boolean(favorited.Button)}
-                    onClick={() => toggleFavorite('Button')}
-                  >
-                    <StarIcon filled={Boolean(favorited.Button)} />
-                  </Button>
-                }
-              >
-                Button
-              </SidebarLink>
-              <SidebarLink
-                href='#'
-                icon={<NavIcon d='M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2' />}
-                action={
-                  <Button
-                    variant='ghost'
-                    size='icon-sm'
-                    aria-label={favorited.Input ? 'Remove Input from favorites' : 'Add Input to favorites'}
-                    aria-pressed={Boolean(favorited.Input)}
-                    onClick={() => toggleFavorite('Input')}
-                  >
-                    <StarIcon filled={Boolean(favorited.Input)} />
-                  </Button>
-                }
-              >
-                Input
-              </SidebarLink>
-            </SidebarSection>
-            <SidebarFooter>
-              <SidebarLink href='#' icon={<NavIcon d='M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z' />}>Settings</SidebarLink>
-            </SidebarFooter>
-          </Sidebar>
-        </div>
-      );
-    }
+    case 'sidebar':
+      return <SidebarPreview />;
 
     case 'menu-bar':
-      return (
-        <div className='w-full max-w-2xl overflow-hidden rounded-lg border border-surface-border'>
-          <MenuBar className='relative'>
-            <MenuBarBrand>
-              <span className='font-semibold text-text'>Acme</span>
-            </MenuBarBrand>
-            <MenuBarNav value={menuBarNavValue} onValueChange={setMenuBarNavValue} aria-label='Main' className='mx-auto'>
-              <MenuBarNavItem value='home'>Home</MenuBarNavItem>
-              <MenuBarNavItem value='docs'>Docs</MenuBarNavItem>
-              <MenuBarNavItem value='pricing'>Pricing</MenuBarNavItem>
-              <MenuBarNavMore
-                value='more'
-                items={[
-                  { label: 'Blog', value: 'blog' },
-                  { label: 'Changelog', value: 'changelog' },
-                  { label: 'Support', value: 'support' },
-                ]}
-              >
-                More
-              </MenuBarNavMore>
-            </MenuBarNav>
-            <MenuBarActions>
-              <Button variant='ghost' size='icon' aria-label='Search'>
-                <svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'><circle cx='11' cy='11' r='8'/><path d='m21 21-4.3-4.3'/></svg>
-              </Button>
-              <Button size='sm'>Sign in</Button>
-            </MenuBarActions>
-          </MenuBar>
-        </div>
-      );
+      return <MenuBarPreview />;
 
     case 'table-of-contents':
-      return (
-        <div className='flex gap-8 items-start'>
-          <div id='toc-demo-content' className='flex flex-col gap-6 max-w-sm'>
-            <h2 id='overview'>Overview</h2>
-            <p className='text-sm text-text-muted'>A short introduction to the section.</p>
-            <h3 id='getting-started'>Getting started</h3>
-            <p className='text-sm text-text-muted'>Steps to get up and running.</p>
-            <h2 id='advanced-usage'>Advanced usage</h2>
-            <p className='text-sm text-text-muted'>Additional configuration options.</p>
-          </div>
-          <TableOfContents containerId='toc-demo-content' />
-        </div>
-      );
+      return <TableOfContentsPreview />;
 
     case 'breadcrumb':
-      return (
-        <Breadcrumb
-          items={[
-            { label: 'Home', href: '/' },
-            { label: 'Components', href: '/components' },
-            { label: 'Breadcrumb' },
-          ]}
-        />
-      );
+      return <BreadcrumbPreview />;
 
-    case 'charts': {
-      const data = [
-        { month: 'Jan', revenue: 4000, expenses: 2400 },
-        { month: 'Feb', revenue: 3000, expenses: 1398 },
-        { month: 'Mar', revenue: 5000, expenses: 2800 },
-      ];
-      return (
-        <div className='w-full flex flex-col gap-3'>
-          <p className='text-sm text-text-muted'>
-            This is the shared module behind LineChart, BarChart, AreaChart, DonutChart, and RadarChart — see those pages for the full set.
-          </p>
-          <LineChart
-            data={data}
-            xKey='month'
-            series={[{ key: 'revenue', label: 'Revenue' }, { key: 'expenses', label: 'Expenses' }]}
-          />
-        </div>
-      );
-    }
+    case 'charts':
+      return <ChartsPreview />;
 
-    case 'line-chart': {
-      const data = [
-        { month: 'Jan', revenue: 4000, expenses: 2400 },
-        { month: 'Feb', revenue: 3000, expenses: 1398 },
-        { month: 'Mar', revenue: 5000, expenses: 2800 },
-        { month: 'Apr', revenue: 4780, expenses: 3908 },
-        { month: 'May', revenue: 5890, expenses: 4800 },
-        { month: 'Jun', revenue: 4390, expenses: 3800 },
-      ];
-      return (
-        <div className='w-full'>
-          <LineChart
-            data={data}
-            xKey='month'
-            series={[
-              { key: 'revenue', label: 'Revenue' },
-              { key: 'expenses', label: 'Expenses' },
-            ]}
-          />
-        </div>
-      );
-    }
+    case 'line-chart':
+      return <LineChartPreview />;
 
-    case 'bar-chart': {
-      const data = [
-        { quarter: 'Q1', sales: 4000, returns: 400 },
-        { quarter: 'Q2', sales: 3000, returns: 300 },
-        { quarter: 'Q3', sales: 5000, returns: 200 },
-        { quarter: 'Q4', sales: 4780, returns: 180 },
-      ];
-      return (
-        <div className='w-full'>
-          <BarChart
-            data={data}
-            xKey='quarter'
-            series={[
-              { key: 'sales', label: 'Sales' },
-              { key: 'returns', label: 'Returns' },
-            ]}
-          />
-        </div>
-      );
-    }
+    case 'bar-chart':
+      return <BarChartPreview />;
 
-    case 'area-chart': {
-      const data = [
-        { month: 'Jan', users: 800, sessions: 1200 },
-        { month: 'Feb', users: 1200, sessions: 1800 },
-        { month: 'Mar', users: 1000, sessions: 1500 },
-        { month: 'Apr', users: 1400, sessions: 2100 },
-        { month: 'May', users: 1800, sessions: 2700 },
-        { month: 'Jun', users: 2200, sessions: 3300 },
-      ];
-      return (
-        <div className='w-full'>
-          <AreaChart
-            data={data}
-            xKey='month'
-            series={[
-              { key: 'users', label: 'Users' },
-              { key: 'sessions', label: 'Sessions' },
-            ]}
-          />
-        </div>
-      );
-    }
+    case 'area-chart':
+      return <AreaChartPreview />;
 
     case 'donut-chart':
-      return (
-        <div className='w-full max-w-xs mx-auto'>
-          <DonutChart
-            data={[
-              { label: 'Direct', value: 400 },
-              { label: 'Referral', value: 300 },
-              { label: 'Organic', value: 200 },
-              { label: 'Social', value: 100 },
-            ]}
-          />
-        </div>
-      );
+      return <DonutChartPreview />;
 
-    case 'radar-chart': {
-      const data = [
-        { metric: 'Speed', modelX: 90, modelY: 70 },
-        { metric: 'Reliability', modelX: 80, modelY: 95 },
-        { metric: 'Comfort', modelX: 70, modelY: 85 },
-        { metric: 'Safety', modelX: 95, modelY: 90 },
-        { metric: 'Efficiency', modelX: 60, modelY: 80 },
-        { metric: 'Design', modelX: 85, modelY: 75 },
-      ];
-      return (
-        <div className='w-full'>
-          <RadarChart
-            data={data}
-            xKey='metric'
-            series={[
-              { key: 'modelX', label: 'Model X' },
-              { key: 'modelY', label: 'Model Y' },
-            ]}
-          />
-        </div>
-      );
-    }
+    case 'radar-chart':
+      return <RadarChartPreview />;
 
-    case 'mosaic': {
-      const REVENUE_TREND = [
-        { month: 'Jan', revenue: 32000 },
-        { month: 'Feb', revenue: 35500 },
-        { month: 'Mar', revenue: 34000 },
-        { month: 'Apr', revenue: 39800 },
-        { month: 'May', revenue: 41200 },
-        { month: 'Jun', revenue: 44000 },
-        { month: 'Jul', revenue: 45800 },
-        { month: 'Aug', revenue: 48500 },
-      ];
+    case 'mosaic':
+      return <MosaicPreview />;
 
-      const QUARTER_GROWTH = [
-        { quarter: 'Q1', growth: 18 },
-        { quarter: 'Q2', growth: 21 },
-        { quarter: 'Q3', growth: 24 },
-      ];
-
-      return (
-        <Mosaic
-          layout={dashboardLayout}
-          onLayoutChange={setDashboardLayout}
-          cols={4}
-          rowHeight={140}
-          gap={12}
-          className='w-full'
-        >
-          <MosaicTile id='revenue' minColSpan={1} maxColSpan={3} minRowSpan={1} maxRowSpan={1}>
-            {({ colSpan }) => (
-              <div className='h-full flex flex-col justify-between'>
-                <span className='text-xs text-text-muted'>Revenue</span>
-                {colSpan === 1 ? (
-                  <span className='text-2xl font-semibold text-text'>
-                    <CountUp value={48.5} decimals={1} prefix='$' suffix='k' />
-                  </span>
-                ) : (
-                  <div className='flex items-end justify-between'>
-                    <span className='text-3xl font-semibold text-text'>
-                      <CountUp value={48.5} decimals={1} prefix='$' suffix='k' />
-                    </span>
-                    <div className='flex flex-col items-end gap-1'>
-                      <Badge variant='success'>+12%</Badge>
-                      {colSpan >= 3 && (
-                        <span className='text-xs text-text-muted'>vs last month</span>
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </MosaicTile>
-
-          <MosaicTile id='users' minColSpan={1} maxColSpan={1} minRowSpan={1} maxRowSpan={1}>
-            <div className='h-full flex flex-col justify-between'>
-              <span className='text-xs text-text-muted'>Active users</span>
-              <div className='flex flex-col gap-1.5'>
-                <span className='text-2xl font-semibold text-text'>
-                  <CountUp value={3204} separator=',' />
-                </span>
-                <Badge variant='success' className='w-fit'>+5.2%</Badge>
-              </div>
-            </div>
-          </MosaicTile>
-
-          <MosaicTile id='chart' minColSpan={2} maxColSpan={4} minRowSpan={1} maxRowSpan={3}>
-            {({ colSpan, rowSpan }) => (
-              <div className='h-full flex flex-col gap-2'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-xs text-text-muted'>Revenue over time</span>
-                  {colSpan >= 3 && (
-                    <span className='text-xs text-text-subtle'>Last 8 months</span>
-                  )}
-                </div>
-                <AreaChart
-                  data={REVENUE_TREND}
-                  xKey='month'
-                  series={[{ key: 'revenue', label: 'Revenue' }]}
-                  height={Math.max(70, rowSpan * 140 + (rowSpan - 1) * 12 - 76)}
-                  showLegend={false}
-                  showGrid={rowSpan >= 2}
-                />
-              </div>
-            )}
-          </MosaicTile>
-
-          <MosaicTile id='growth' minColSpan={1} maxColSpan={2} minRowSpan={1} maxRowSpan={2}>
-            {({ colSpan, rowSpan }) => (
-              <div className='h-full flex flex-col justify-between gap-2'>
-                <div className='flex flex-col gap-1'>
-                  <span className='text-xs text-text-muted'>Growth</span>
-                  <span className={`font-semibold text-brand ${rowSpan >= 2 ? 'text-5xl' : 'text-3xl'}`}>
-                    <CountUp value={24} prefix='+' suffix='%' />
-                  </span>
-                  {(rowSpan >= 2 || colSpan >= 2) && (
-                    <span className='text-xs text-text-muted'>Quarter over quarter</span>
-                  )}
-                </div>
-                {rowSpan >= 2 && (
-                  <BarChart
-                    data={QUARTER_GROWTH}
-                    xKey='quarter'
-                    series={[{ key: 'growth', label: 'QoQ growth' }]}
-                    height={90}
-                    showLegend={false}
-                    showGrid={false}
-                  />
-                )}
-              </div>
-            )}
-          </MosaicTile>
-        </Mosaic>
-      );
-    }
-
-    case 'kanban': {
-      const columns = [
-        {
-          id: 'todo',
-          title: 'To Do',
-          cards: [
-            { id: 'k1', title: 'Research competitors', tag: 'Research' },
-            { id: 'k2', title: 'Write spec', description: 'Define requirements for v2.' },
-          ],
-        },
-        {
-          id: 'in-progress',
-          title: 'In Progress',
-          cards: [
-            { id: 'k3', title: 'Build prototype', tag: 'Engineering' },
-            { id: 'k4', title: 'Design review', description: 'Review mockups with the team.' },
-          ],
-        },
-        {
-          id: 'done',
-          title: 'Done',
-          cards: [
-            { id: 'k5', title: 'Kick-off meeting', description: 'Align on goals and timeline.' },
-          ],
-        },
-      ];
-
-      const CardDetails: KanbanCardDetailsRenderer = ({ card, onUpdate, onDelete, onClose }) => {
-        // A minimal, self-contained example of a details renderer. KanbanCard has
-        // no built-in form: you own everything shown here, down to which fields exist.
-        const [title, setTitle] = useState(card.title);
-        const [tag, setTag] = useState(card.tag ?? '');
-        const [description, setDescription] = useState(card.description ?? '');
-
-        return (
-          <>
-            <ModalClose />
-            <ModalHeader>
-              <ModalTitle>Edit card</ModalTitle>
-            </ModalHeader>
-            <ModalContent className='flex flex-col gap-4'>
-              <Input label='Title' value={title} onChange={(e) => setTitle(e.target.value)} />
-              <Input label='Tag' placeholder='Optional' value={tag} onChange={(e) => setTag(e.target.value)} />
-              <Textarea label='Description' placeholder='Optional' rows={3} value={description} onChange={(e) => setDescription(e.target.value)} />
-            </ModalContent>
-            <ModalFooter>
-              <Button variant='destructive' size='sm' className='mr-auto' onClick={() => onDelete(card.id)}>Delete</Button>
-              <Button variant='secondary' size='sm' onClick={onClose}>Cancel</Button>
-              <Button size='sm' onClick={() => onUpdate({ ...card, title, tag: tag || undefined, description: description || undefined })} disabled={!title.trim()}>Save</Button>
-            </ModalFooter>
-          </>
-        );
-      };
-
-      return <KanbanBoard initialColumns={columns} renderCardDetails={CardDetails} />;
-    }
+    case 'kanban':
+      return <KanbanBoardPreview />;
 
     case 'timeline':
-      return (
-        <div className='w-full max-w-sm'>
-          <Timeline>
-            <TimelineItem title='Install the CLI'>
-              Run <code className='font-mono text-xs'>npx dafink-ui init</code> in your project root.
-            </TimelineItem>
-            <TimelineItem title='Add components'>
-              Use <code className='font-mono text-xs'>npx dafink-ui add button</code> to copy components into your project.
-            </TimelineItem>
-            <TimelineItem title='Import and use'>
-              Import from <code className='font-mono text-xs'>@/components/ui</code> and start building.
-            </TimelineItem>
-          </Timeline>
-        </div>
-      );
+      return <TimelinePreview />;
 
     case 'canvas':
       return (
@@ -925,177 +141,46 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
 
     case 'badge':
-      return (
-        <div className='flex flex-wrap items-center gap-2'>
-          <Badge>Default</Badge>
-          <Badge variant='success'>Success</Badge>
-          <Badge variant='warning'>Warning</Badge>
-          <Badge variant='danger'>Danger</Badge>
-          <Badge variant='outline'>Outline</Badge>
-        </div>
-      );
+      return <BadgePreview />;
 
     case 'select':
       return <SelectDemo />;
 
     case 'checkbox':
-      return (
-        <div className='flex flex-col gap-3'>
-          <Checkbox id='cb1' label='Accept terms' />
-          <Checkbox id='cb2' label='Checked' defaultChecked />
-          <Checkbox id='cb3' label='Disabled' disabled />
-        </div>
-      );
+      return <CheckboxPreview />;
 
     case 'alert':
-      return (
-        <div className='flex flex-col gap-3 w-full max-w-md'>
-          <Alert title='Heads up'>This is a default alert.</Alert>
-          <Alert variant='success' title='Success'>Your changes were saved.</Alert>
-          <Alert variant='warning' title='Warning'>Review before continuing.</Alert>
-          <Alert variant='danger' title='Error'>Something went wrong.</Alert>
-        </div>
-      );
+      return <AlertPreview />;
 
     case 'progress':
-      return (
-        <div className='flex flex-col gap-4 w-full max-w-sm'>
-          <Progress value={40} />
-          <Progress value={70} showLabel />
-          <Progress value={90} size='lg' showLabel />
-        </div>
-      );
+      return <ProgressPreview />;
 
     case 'spinner':
-      return (
-        <div className='flex items-center gap-6'>
-          <Spinner size='sm' />
-          <Spinner />
-          <Spinner size='lg' />
-        </div>
-      );
+      return <SpinnerPreview />;
 
     case 'toast':
       return <ToastDemo />;
 
     case 'tree':
-      return (
-        <div className='w-full max-w-xs'>
-          <Tree>
-            <TreeItem label='src' defaultOpen>
-              <TreeItem label='components' defaultOpen>
-                <TreeItem label='Button.tsx' />
-                <TreeItem label='Input.tsx' />
-              </TreeItem>
-              <TreeItem label='app'>
-                <TreeItem label='page.tsx' />
-                <TreeItem label='layout.tsx' />
-              </TreeItem>
-            </TreeItem>
-            <TreeItem label='package.json' />
-            <TreeItem label='tsconfig.json' />
-          </Tree>
-        </div>
-      );
+      return <TreePreview />;
 
     case 'carousel':
-      return (
-        <Carousel aria-label='Number slides' loop className='w-full max-w-sm'>
-          <CarouselContent>
-            {[1, 2, 3, 4, 5].map(n => (
-              <CarouselItem key={n} className='flex items-center justify-center h-48 rounded-lg bg-surface-active select-none'>
-                <span className='text-8xl font-bold text-text-subtle'>{n}</span>
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-          <CarouselPrevious />
-          <CarouselNext />
-          <CarouselDots className='mt-3' />
-        </Carousel>
-      );
+      return <CarouselPreview />;
 
     case 'function-plotter':
       return <FunctionPlotter initialEquations={['x^2 - 2', 'sin(x)', '0.5*x + 3']} layout='side' />;
 
     case 'command-palette':
-      return (
-        <div className='flex flex-col items-center gap-4'>
-          <Button onClick={() => setPaletteOpen(true)}>
-            Open Command Palette
-          </Button>
-          <p className='text-xs text-text-muted'>Press Esc to close</p>
-          <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} placeholder='Search commands…'>
-            <CommandGroup label='Navigation'>
-              <CommandItem value='Dashboard' onSelect={() => setPaletteOpen(false)} shortcut='G D'>Dashboard</CommandItem>
-              <CommandItem value='Settings' onSelect={() => setPaletteOpen(false)} shortcut='G S'>Settings</CommandItem>
-              <CommandItem value='Profile' onSelect={() => setPaletteOpen(false)}>Profile</CommandItem>
-            </CommandGroup>
-            <CommandGroup label='Actions'>
-              <CommandItem value='New document' onSelect={() => setPaletteOpen(false)} shortcut='⌘N'>New document</CommandItem>
-              <CommandItem value='Export PDF' onSelect={() => setPaletteOpen(false)}>Export as PDF</CommandItem>
-              <CommandItem value='Invite team member' onSelect={() => setPaletteOpen(false)}>Invite team member</CommandItem>
-            </CommandGroup>
-            <CommandGroup label='Disabled'>
-              <CommandItem value='Admin panel' onSelect={() => setPaletteOpen(false)} disabled>Admin panel</CommandItem>
-            </CommandGroup>
-          </CommandPalette>
-        </div>
-      );
+      return <CommandPalettePreview />;
 
     case 'tooltip':
-      return (
-        <div className='flex flex-wrap items-center gap-4'>
-          <Tooltip content='Appears above' side='top'>
-            <Button variant='secondary'>Top</Button>
-          </Tooltip>
-          <Tooltip content='Appears below' side='bottom'>
-            <Button variant='secondary'>Bottom</Button>
-          </Tooltip>
-          <Tooltip content='Appears left' side='left'>
-            <Button variant='secondary'>Left</Button>
-          </Tooltip>
-          <Tooltip content='Appears right' side='right'>
-            <Button variant='secondary'>Right</Button>
-          </Tooltip>
-          <Tooltip content='Opens instantly' delay={0}>
-            <Button variant='secondary'>No delay</Button>
-          </Tooltip>
-        </div>
-      );
+      return <TooltipPreview />;
 
     case 'popover':
-      return (
-        <Popover trigger='Open popover' label='Share settings' side='bottom' align='center'>
-          <div className='flex flex-col gap-2'>
-            <p className='text-sm font-medium text-text'>Share this page</p>
-            <p className='text-xs text-text-muted'>Anyone with the link can view.</p>
-            <button className='self-start rounded-md bg-brand px-3 py-1.5 text-xs text-brand-fg hover:bg-brand-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'>
-              Copy link
-            </button>
-          </div>
-        </Popover>
-      );
+      return <PopoverPreview />;
 
     case 'menu':
-      return (
-        <Menu
-          trigger='Actions'
-          items={[
-            { label: 'Edit',      onSelect: () => console.log('edit')      },
-            { label: 'Duplicate', onSelect: () => console.log('duplicate') },
-            {
-              label: 'Share',
-              submenu: [
-                { label: 'Copy link', onSelect: () => console.log('copy link') },
-                { label: 'Email',     onSelect: () => console.log('email')     },
-              ],
-            },
-            { separator: true },
-            { label: 'Archive', disabled: true },
-            { label: 'Delete',    onSelect: () => console.log('delete')    },
-          ]}
-        />
-      );
+      return <MenuPreview />;
 
     case 'combobox':
       return <ComboboxPreview />;
@@ -1104,132 +189,19 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       return <CommandInputPreview />;
 
     case 'date-picker':
-      return (
-        <div className='w-full max-w-xs flex flex-col gap-3'>
-          <DatePicker
-            label='Appointment date'
-            placeholder='Pick a date'
-            value={pickerDate}
-            onChange={setPickerDate}
-            hint='Arrow keys navigate the calendar grid.'
-          />
-          {pickerDate && (
-            <p className='text-sm text-text-muted'>
-              Selected:{' '}
-              <span className='font-medium text-text'>
-                {pickerDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-              </span>
-            </p>
-          )}
-          <DatePicker
-            label='Appointment date & time'
-            granularity='datetime'
-            value={pickerDateTime}
-            onChange={setPickerDateTime}
-            hint='Type digits or use arrow keys on the time segments.'
-          />
-          {pickerDateTime && (
-            <p className='text-sm text-text-muted'>
-              Selected:{' '}
-              <span className='font-medium text-text'>
-                {pickerDateTime.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', second: '2-digit' })}
-              </span>
-            </p>
-          )}
-          <DatePicker
-            label='Reminder time'
-            granularity='time'
-            value={pickerTime}
-            onChange={setPickerTime}
-            hint='Time-only picker, no calendar grid.'
-          />
-          {pickerTime && (
-            <p className='text-sm text-text-muted'>
-              Selected:{' '}
-              <span className='font-medium text-text'>
-                {pickerTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit' })}
-              </span>
-            </p>
-          )}
-          <DatePicker
-            label='Disabled'
-            value={null}
-            onChange={() => {}}
-            disabled
-          />
-        </div>
-      );
+      return <DatePickerPreview />;
 
     case 'data-table':
       return <DataTablePreview />;
 
     case 'avatar':
-      return (
-        <div className='flex flex-col items-center gap-6'>
-          <div className='flex items-end gap-4'>
-            <Avatar name='Ada Lovelace' size='sm' />
-            <Avatar name='Grace Hopper' size='md' />
-            <Avatar name='Alan Turing' size='lg' />
-            <Avatar name='Katherine Johnson' shape='square' size='lg' />
-          </div>
-          <AvatarGroup max={3}>
-            <Avatar name='Ada Lovelace' />
-            <Avatar name='Grace Hopper' />
-            <Avatar name='Alan Turing' />
-            <Avatar name='Katherine Johnson' />
-            <Avatar name='Margaret Hamilton' />
-          </AvatarGroup>
-        </div>
-      );
+      return <AvatarPreview />;
 
     case 'attachment':
-      return (
-        <AttachmentGroup>
-          <Attachment
-            name='Q3-financials.pdf'
-            href='#'
-            type='PDF'
-            size='1.2 MB'
-            onClick={(event) => {
-              event.preventDefault();
-              window.open('#', '_blank');
-            }}
-          />
-          <Attachment
-            name='hero-shot.png'
-            size='840 KB'
-            onClick={(event) => {
-              event.preventDefault();
-              window.open('#', '_blank');
-            }}
-          />
-          <Attachment name='archive.zip' href='#' size='14.6 MB' />
-          <Attachment compact name='notes.txt' onRemove={() => {}} />
-        </AttachmentGroup>
-      );
+      return <AttachmentPreview />;
 
     case 'message':
-      return (
-        <div className='flex flex-col gap-3 w-full max-w-sm'>
-          <Message variant='received'>
-            Hey, are we still on for 3pm?
-            <MessageReactions max={2}>
-              <MessageReaction icon='👍' count={3} active onClick={() => {}} />
-              <MessageReaction icon='❤️' count={1} onClick={() => {}} />
-              <MessageReaction icon='😂' count={2} onClick={() => {}} />
-            </MessageReactions>
-          </Message>
-          <Message variant='sent'>Yep, see you then!</Message>
-
-          <Message variant='received'>
-            The Eiffel Tower is 330 meters tall, including antennas.
-          </Message>
-          <MessageReactions aria-label='Sources'>
-            <MessageReaction label='1' href='https://en.wikipedia.org/wiki/Eiffel_Tower' aria-label='Source 1: wikipedia.org' />
-            <MessageReaction label='2' href='https://www.toureiffel.paris' aria-label='Source 2: toureiffel.paris' />
-          </MessageReactions>
-        </div>
-      );
+      return <MessagePreview />;
 
     case 'modal':
       return <ModalPreview />;
@@ -1240,86 +212,17 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
     case 'side-panel':
       return <SidePanelPreview />;
 
-    case 'graph': {
-      const GRAPH_NODES: GraphNode[] = [
-        { id: 'auth',      label: 'Auth',         group: 'core'    },
-        { id: 'users',     label: 'Users',         group: 'core'    },
-        { id: 'posts',     label: 'Posts',         group: 'content' },
-        { id: 'comments',  label: 'Comments',      group: 'content' },
-        { id: 'tags',      label: 'Tags',          group: 'content' },
-        { id: 'media',     label: 'Media',         group: 'content' },
-        { id: 'notifs',    label: 'Notifications', group: 'core'    },
-        { id: 'search',    label: 'Search',        group: 'infra'   },
-        { id: 'cache',     label: 'Cache',         group: 'infra'   },
-        { id: 'email',     label: 'Email',         group: 'infra'   },
-      ];
-      const GRAPH_EDGES: GraphEdge[] = [
-        { source: 'auth',     target: 'users'    },
-        { source: 'auth',     target: 'notifs'   },
-        { source: 'users',    target: 'posts'    },
-        { source: 'users',    target: 'comments' },
-        { source: 'users',    target: 'notifs'   },
-        { source: 'posts',    target: 'comments' },
-        { source: 'posts',    target: 'tags'     },
-        { source: 'posts',    target: 'media'    },
-        { source: 'posts',    target: 'search'   },
-        { source: 'comments', target: 'notifs'   },
-        { source: 'search',   target: 'cache'    },
-        { source: 'notifs',   target: 'email'    },
-      ];
-      return (
-        <div className='w-full flex items-center justify-center'>
-          <Graph
-            nodes={GRAPH_NODES}
-            edges={GRAPH_EDGES}
-            width={580}
-            height={380}
-          />
-        </div>
-      );
-    }
+    case 'graph':
+      return <GraphPreview />;
 
     case 'audioplayer':
-      return (
-        <div className='max-w-md mx-auto w-full'>
-          <AudioPlayer
-            src='https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
-            title='SoundHelix Song 1'
-            subtitle='SoundHelix'
-          />
-        </div>
-      );
+      return <AudioPlayerPreview />;
 
     case 'tilt':
-      return (
-        <div className='flex gap-4 items-center justify-center'>
-          <Tilt className='w-fit rounded-xl'>
-            <div className='rounded-xl bg-surface border border-surface-border p-8 w-40 h-28 flex items-center justify-center text-sm font-medium text-text'>
-              Hover me
-            </div>
-          </Tilt>
-          <Tilt max={20} scale={1.08} className='w-fit rounded-xl'>
-            <div className='rounded-xl bg-brand/10 border border-brand/20 p-8 w-40 h-28 flex items-center justify-center text-sm font-medium text-brand'>
-              max=20
-            </div>
-          </Tilt>
-        </div>
-      );
+      return <TiltPreview />;
 
     case 'separator':
-      return (
-        <div className='flex flex-col gap-6 w-full max-w-sm'>
-          <Separator />
-          <Separator variant='dashed' />
-          <Separator variant='dotted' />
-          <Separator>OR</Separator>
-          <div className='flex h-16 items-center gap-3'>
-            <span className='text-sm text-text'>Item</span>
-            <Separator orientation='vertical'>OR</Separator>
-            <span className='text-sm text-text'>Item</span>
-          </div>
-        </div>
-      );
+      return <SeparatorPreview />;
 
     case 'workflow-builder':
       return (
@@ -1329,25 +232,7 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
 
     case 'resizable':
-      return (
-        <Resizable direction='horizontal' className='flex h-64 w-full overflow-hidden rounded-[var(--radius)] border border-surface-border'>
-          <ResizablePanel defaultSize={160} minSize={120} maxSize={240} className='flex items-center justify-center bg-surface-panel text-sm text-text-muted'>
-            Sidebar
-          </ResizablePanel>
-          <ResizableHandle aria-label='Resize sidebar' />
-          <ResizablePanel minSize={200} className='flex'>
-            <Resizable direction='vertical' className='flex-1 min-w-0'>
-              <ResizablePanel minSize={80} className='flex items-center justify-center bg-surface text-sm text-text-muted'>
-                Editor
-              </ResizablePanel>
-              <ResizableHandle aria-label='Resize terminal panel' />
-              <ResizablePanel defaultSize={120} minSize={80} maxSize={200} className='flex items-center justify-center bg-surface-panel text-sm text-text-muted'>
-                Terminal
-              </ResizablePanel>
-            </Resizable>
-          </ResizablePanel>
-        </Resizable>
-      );
+      return <ResizablePreview />;
 
     case 'link':
       return (
@@ -1357,56 +242,22 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
       );
 
     case 'color-picker':
-      return (
-        <ColorPicker
-          label='Accent color'
-          value={colorPickerValue}
-          onValueChange={setColorPickerValue}
-          swatches={['#ef4444', '#f59e0b', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899']}
-        />
-      );
+      return <ColorPickerPreview />;
 
     case 'slide-canvas':
-      return (
-        <div className='w-full max-w-3xl'>
-          <SlideCanvas
-            elements={slideElements}
-            onElementsChange={setSlideElements}
-            renderElement={renderDemoSlideElement}
-            gridSize={8}
-          />
-        </div>
-      );
+      return <SlideCanvasPreview />;
 
     case 'context-menu':
-      return (
-        <div className='flex flex-col items-center gap-3'>
-          <ContextMenu
-            label='File actions'
-            items={[
-              { label: 'Open', onSelect: () => setContextAction('Open') },
-              { label: 'Rename', onSelect: () => setContextAction('Rename') },
-              { label: 'Duplicate', onSelect: () => setContextAction('Duplicate') },
-              { separator: true },
-              { label: 'Delete', onSelect: () => setContextAction('Delete') },
-            ]}
-          >
-            <button
-              type='button'
-              className='flex h-32 w-64 items-center justify-center rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-dashed border-input-border text-sm text-text-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
-            >
-              Right-click, or focus and press Shift+F10
-            </button>
-          </ContextMenu>
-          <p className='text-sm text-text-muted'>Last action: {contextAction}</p>
-        </div>
-      );
+      return <ContextMenuPreview />;
 
     case 'deck-editor':
       return <DeckEditorDemo />;
 
     case 'sheet-editor':
       return <SheetEditorDemo />;
+
+    case 'heatmap':
+      return <HeatmapPreview />;
 
     default:
       return (
@@ -1415,486 +266,4 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
         </div>
       );
   }
-};
-
-
-const NavIcon = ({ d }: { d: string }) => (
-  <svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-    <path d={d} />
-  </svg>
-);
-const StarIcon = ({ filled }: { filled: boolean }) => (
-  <svg width='14' height='14' viewBox='0 0 24 24' fill={filled ? 'currentColor' : 'none'} stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-    <path d='m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2Z' />
-  </svg>
-);
-
-const OTPInputPreview = () => {
-  const [code, setCode] = useState('');
-  return (
-    <div className='flex flex-col gap-6'>
-      <OTPInput label='Verification code' length={6} value={code} onChange={setCode} hint='Enter the 6-digit code from your email.' />
-      <OTPInput label='Expired code' length={6} value='123' onChange={() => {}} error='This code has expired.' />
-    </div>
-  );
-};
-
-const LANG_OPTIONS = [
-  { value: 'ts',      label: 'TypeScript' },
-  { value: 'js',      label: 'JavaScript' },
-  { value: 'py',      label: 'Python'     },
-  { value: 'rs',      label: 'Rust'       },
-  { value: 'go',      label: 'Go'         },
-  { value: 'rb',      label: 'Ruby'       },
-  { value: 'swift',   label: 'Swift'      },
-  { value: 'kotlin',  label: 'Kotlin', disabled: true },
-  { value: 'elixir',  label: 'Elixir'     },
-  { value: 'haskell', label: 'Haskell'    },
-];
-
-const ComboboxPreview = () => {
-  const [single, setSingle] = useState('');
-  const [multi, setMulti]   = useState<string[]>(['ts', 'py']);
-  return (
-    <div className='flex flex-col gap-6 w-full max-w-sm'>
-      <Combobox
-        label='Language (single)'
-        placeholder='Search languages…'
-        options={LANG_OPTIONS}
-        value={single}
-        onChange={setSingle}
-        hint='Type to filter. Kotlin is disabled.'
-      />
-      <Combobox
-        label='Languages (multi)'
-        placeholder='Search languages…'
-        options={LANG_OPTIONS}
-        multiple
-        value={multi}
-        onChange={setMulti}
-        hint='Backspace on empty input removes the last chip.'
-      />
-    </div>
-  );
-}
-
-const COMMANDS: CommandOption[] = [
-  { name: 'compact', description: 'Summarize the conversation to save space' },
-  { name: 'clear',   description: 'Clear all messages' },
-  { name: 'rename',  description: 'Rename this chat' },
-];
-
-const CommandInputPreview = () => {
-  const [value, setValue] = useState('');
-  const [lastCommand, setLastCommand] = useState<string | null>(null);
-
-  return (
-    <div className='flex flex-col gap-3 w-full max-w-sm'>
-      <CommandInput
-        value={value}
-        onChange={setValue}
-        commands={COMMANDS}
-        onCommand={(command) => setLastCommand(command.name)}
-        placeholder='Type a message, or / for commands…'
-        menuSide='bottom'
-      />
-      {lastCommand && (
-        <p className='text-sm text-text-muted'>Ran /{lastCommand}</p>
-      )}
-    </div>
-  );
-}
-
-interface DemoEmployee {
-  id:         number;
-  name:       string;
-  role:       string;
-  department: string;
-  status:     string;
-  salary:     number;
-}
-
-const EMPLOYEES: DemoEmployee[] = [
-  { id: 1,  name: 'Alice Chen',     role: 'Engineer',        department: 'Platform',   status: 'Active',   salary: 145000 },
-  { id: 2,  name: 'Bob Ruiz',       role: 'Designer',        department: 'Product',    status: 'Away',     salary: 130000 },
-  { id: 3,  name: 'Carol Smith',    role: 'Engineering Mgr', department: 'Platform',   status: 'Active',   salary: 165000 },
-  { id: 4,  name: 'Dave Park',      role: 'Data Analyst',    department: 'Analytics',  status: 'Active',   salary: 120000 },
-  { id: 5,  name: 'Eve Torres',     role: 'Designer',        department: 'Product',    status: 'Active',   salary: 128000 },
-  { id: 6,  name: 'Frank Lee',      role: 'Engineer',        department: 'Growth',     status: 'Away',     salary: 140000 },
-  { id: 7,  name: 'Grace Yoon',     role: 'Product Manager', department: 'Product',    status: 'Active',   salary: 155000 },
-  { id: 8,  name: 'Hugo Martins',   role: 'Engineer',        department: 'Growth',     status: 'Active',   salary: 138000 },
-  { id: 9,  name: 'Iris Nakamura',  role: 'Recruiter',       department: 'People',     status: 'Active',   salary: 115000 },
-  { id: 10, name: 'James Okafor',   role: 'Engineer',        department: 'Platform',   status: 'Inactive', salary: 148000 },
-  { id: 11, name: 'Kira Walsh',     role: 'Marketing Lead',  department: 'Growth',     status: 'Active',   salary: 125000 },
-  { id: 12, name: 'Leo Fernandez',  role: 'Data Scientist',  department: 'Analytics',  status: 'Active',   salary: 155000 },
-];
-
-const STATUS_COLORS: Record<string, string> = {
-  Active:   'bg-success-bg text-success border border-success-border',
-  Away:     'bg-warning-bg text-warning border border-warning-border',
-  Inactive: 'bg-surface-active text-text-muted border border-surface-border',
-};
-
-const VARIANTS: { value: PaginatorVariant; label: string }[] = [
-  { value: 'default',  label: 'Default'  },
-  { value: 'numbered', label: 'Numbered' },
-  { value: 'compact',  label: 'Compact'  },
-  { value: 'minimal',  label: 'Minimal'  },
-];
-
-const DataTablePreview = () => {
-  const [selected, setSelected] = useState<DemoEmployee[]>([]);
-  const [variant,  setVariant]  = useState<PaginatorVariant>('default');
-  const [remote, setRemote] = useState<Record<number, boolean>>({});
-
-  const EMP_COLUMNS: ColumnDef<DemoEmployee>[] = [
-    { key: 'name',       header: 'Name',       sortable: true  },
-    { key: 'role',       header: 'Role',       sortable: true  },
-    { key: 'department', header: 'Department', sortable: true  },
-    {
-      key: 'status',
-      header: 'Status',
-      sortable: false,
-      render: (val) => (
-        <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[String(val)] ?? ''}`}>
-          {String(val)}
-        </span>
-      ),
-    },
-    {
-      key: 'salary',
-      header: 'Salary',
-      sortable: true,
-      render: (val) => `$${Number(val).toLocaleString()}`,
-    },
-    {
-      key: 'id',
-      header: 'Work type',
-      sortable: false,
-      render: (_val, row) => (
-        <Switch
-          id={`remote-${row.id}`}
-          checked={remote[row.id] ?? true}
-          onCheckedChange={(v) => setRemote(prev => ({ ...prev, [row.id]: v }))}
-          label={(remote[row.id] ?? true) ? 'Remote' : 'Office'}
-        />
-      ),
-    },
-  ];
-
-  return (
-    <div className='flex flex-col gap-3 w-full'>
-      <div className='flex items-center gap-2 flex-wrap'>
-        <span className='text-xs text-text-muted'>Paginator:</span>
-        {VARIANTS.map(v => (
-          <button
-            key={v.value}
-            type='button'
-            onClick={() => setVariant(v.value)}
-            className={[
-              'px-2.5 py-1 rounded-md text-xs font-medium',
-              'transition-colors duration-[var(--duration-fast)]',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring',
-              variant === v.value
-                ? 'bg-surface-active text-text'
-                : 'text-text-muted hover:bg-surface-hover hover:text-text',
-            ].join(' ')}
-          >
-            {v.label}
-          </button>
-        ))}
-        {selected.length > 0 && (
-          <span className='ml-auto text-xs text-text-muted'>
-            {selected.length} selected
-          </span>
-        )}
-      </div>
-      <DataTable<DemoEmployee>
-        data={EMPLOYEES}
-        columns={EMP_COLUMNS}
-        keyField='id'
-        selectable
-        onSelectionChange={setSelected}
-        pageSize={5}
-        paginatorVariant={variant}
-      />
-    </div>
-  );
-}
-
-const ModalPreview = () => {
-  const [open, setOpen] = useState(false);
-  const [size, setSize] = useState<ModalSize>('md');
-
-  const openWith = (s: ModalSize) => {
-    setSize(s);
-    setOpen(true);
-  };
-
-  return (
-    <div className='flex flex-wrap gap-2 justify-center'>
-      <Button variant='secondary' onClick={() => openWith('sm')}>Small</Button>
-      <Button variant='secondary' onClick={() => openWith('md')}>Medium</Button>
-      <Button variant='secondary' onClick={() => openWith('lg')}>Large</Button>
-
-      <Modal open={open} onOpenChange={setOpen} size={size}>
-        <ModalClose />
-        <ModalHeader>
-          <ModalTitle>Delete project</ModalTitle>
-        </ModalHeader>
-        <ModalContent>
-          This action cannot be undone. The project and all of its data will be
-          permanently removed.
-        </ModalContent>
-        <ModalFooter>
-          <Button variant='secondary' onClick={() => setOpen(false)}>Cancel</Button>
-          <Button variant='destructive' onClick={() => setOpen(false)}>Delete</Button>
-        </ModalFooter>
-      </Modal>
-    </div>
-  );
-};
-
-const DrawerPreview = () => {
-  const [open, setOpen] = useState(false);
-  const [side, setSide] = useState<DrawerSide>('right');
-
-  const openFrom = (s: DrawerSide) => {
-    setSide(s);
-    setOpen(true);
-  };
-
-  return (
-    <div className='flex flex-wrap gap-2 justify-center'>
-      <Button variant='secondary' onClick={() => openFrom('left')}>Left</Button>
-      <Button variant='secondary' onClick={() => openFrom('right')}>Right</Button>
-      <Button variant='secondary' onClick={() => openFrom('top')}>Top</Button>
-      <Button variant='secondary' onClick={() => openFrom('bottom')}>Bottom</Button>
-
-      <Drawer open={open} onOpenChange={setOpen} side={side}>
-        {side === 'bottom' && <DrawerHandle />}
-        <DrawerClose />
-        <DrawerHeader>
-          <DrawerTitle>Notifications</DrawerTitle>
-        </DrawerHeader>
-        <DrawerContent>
-          You have no unread notifications.
-        </DrawerContent>
-        <DrawerFooter>
-          <Button variant='secondary' onClick={() => setOpen(false)}>Close</Button>
-        </DrawerFooter>
-      </Drawer>
-    </div>
-  );
-};
-
-const SidePanelPreview = () => {
-  const [open, setOpen] = useState(false);
-  const [side, setSide] = useState<SidePanelSide>('right');
-
-  const openFrom = (s: SidePanelSide) => {
-    setSide(s);
-    setOpen(true);
-  };
-
-  return (
-    <div className='flex flex-wrap gap-2 justify-center'>
-      <Button variant='secondary' onClick={() => openFrom('left')}>Left</Button>
-      <Button variant='secondary' onClick={() => openFrom('right')}>Right</Button>
-      <Button variant='secondary' onClick={() => openFrom('top')}>Top</Button>
-      <Button variant='secondary' onClick={() => openFrom('bottom')}>Bottom</Button>
-
-      <SidePanel open={open} onOpenChange={setOpen} side={side}>
-        <SidePanelClose />
-        <SidePanelHeader>
-          <SidePanelTitle>Quick preview</SidePanelTitle>
-        </SidePanelHeader>
-        <SidePanelContent>
-          A floating panel, inset from every edge it does not anchor to.
-        </SidePanelContent>
-        <SidePanelFooter>
-          <Button variant='secondary' onClick={() => setOpen(false)}>Close</Button>
-        </SidePanelFooter>
-      </SidePanel>
-    </div>
-  );
-};
-
-const FRAMEWORK_OPTIONS = [
-  { value: 'next',      label: 'Next.js'   },
-  { value: 'remix',     label: 'Remix'     },
-  { value: 'astro',     label: 'Astro'     },
-  { value: 'sveltekit', label: 'SvelteKit' },
-  { value: 'nuxt',      label: 'Nuxt'      },
-];
-
-const SelectDemo = () => {
-  const [value, setValue] = useState('');
-
-  return (
-    <div className='flex flex-col gap-6 w-full max-w-xs'>
-      <Select
-        label='Framework'
-        placeholder='Choose a framework…'
-        options={FRAMEWORK_OPTIONS}
-        value={value}
-        onChange={setValue}
-        hint='The framework your project uses.'
-      />
-      <Select
-        label='Disabled'
-        options={FRAMEWORK_OPTIONS}
-        value='next'
-        disabled
-      />
-      <Select
-        label='Error state'
-        options={FRAMEWORK_OPTIONS}
-        value=''
-        placeholder='Pick one'
-        error='This field is required.'
-      />
-    </div>
-  );
-};
-
-const zodFormSchema = z.object({
-  name: z.string().min(2, 'Name must be at least 2 characters.'),
-  email: z.email('Enter a valid email address.'),
-});
-
-type ZodFormValues = z.infer<typeof zodFormSchema>;
-
-const FormDemo = () => {
-  const form = useZodForm(zodFormSchema, { mode: 'onTouched' });
-
-  const onSubmit = (values: ZodFormValues) => {
-    console.log(values);
-  };
-
-  return (
-    <Form className='w-full max-w-sm' onSubmit={form.handleSubmit(onSubmit)}>
-      <FormField>
-        <FormLabel htmlFor='name' required>Name</FormLabel>
-        <FormControl>
-          <Input id='name' placeholder='Jane Smith' aria-required='true' aria-invalid={!!form.formState.errors.name} aria-describedby={form.formState.errors.name ? 'name-error' : undefined} {...form.register('name')} />
-        </FormControl>
-        <FormMessage id='name-error'>{form.formState.errors.name?.message}</FormMessage>
-      </FormField>
-      <FormField>
-        <FormLabel htmlFor='email' required>Email</FormLabel>
-        <FormControl>
-          <Input id='email' type='email' placeholder='you@example.com' aria-required='true' aria-invalid={!!form.formState.errors.email} aria-describedby={form.formState.errors.email ? 'email-error' : undefined} {...form.register('email')} />
-        </FormControl>
-        <FormDescription>We will never share your email.</FormDescription>
-        <FormMessage id='email-error'>{form.formState.errors.email?.message}</FormMessage>
-      </FormField>
-      <Button type='submit'>Save changes</Button>
-    </Form>
-  );
-};
-
-const ToastDemo = () => {
-  const [position, setPosition] = useState<import('@/src/components/Toast/Toast').ToastPosition>('bottom-right');
-
-  const isTop    = position.startsWith('top');
-  const isLeft   = position.endsWith('left');
-  const isCenter = position.endsWith('center');
-  const isRight  = position.endsWith('right');
-
-  const setV = (v: 'top' | 'bottom') => {
-    const h = isLeft ? 'left' : isCenter ? 'center' : 'right';
-    setPosition(`${v}-${h}` as import('@/src/components/Toast/Toast').ToastPosition);
-  };
-
-  const setH = (h: 'left' | 'center' | 'right') => {
-    const v = isTop ? 'top' : 'bottom';
-    setPosition(`${v}-${h}` as import('@/src/components/Toast/Toast').ToastPosition);
-  };
-
-  const indicatorStyle: React.CSSProperties = {
-    position:  'absolute',
-    top:       isTop    ? 28    : undefined,
-    bottom:    isTop    ? undefined : 6,
-    left:      isLeft   ? 6     : isCenter ? '50%' : undefined,
-    right:     isRight  ? 6     : undefined,
-    transform: isCenter ? 'translateX(-50%)' : undefined,
-  };
-
-  const PILL = 'px-2.5 py-1 rounded-md text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring';
-  const active   = `${PILL} bg-surface-active text-text`;
-  const inactive = `${PILL} text-text-muted hover:bg-surface-hover hover:text-text`;
-
-  return (
-    <ToastProvider position={position}>
-      <div className='flex flex-col items-center gap-6 w-full'>
-
-        {/* Diagram */}
-        <div className='flex flex-col items-center gap-2'>
-          <div
-            className='relative rounded-lg border-2 border-surface-border bg-surface-hover/40'
-            style={{ width: 180, height: 112 }}
-            role='img'
-            aria-label={`Toast position: ${position}`}
-          >
-            {/* Topbar */}
-            <div className='absolute top-0 left-0 right-0 h-5 rounded-t-md border-b border-surface-border bg-surface flex items-center px-2 gap-1'>
-              <span className='w-1.5 h-1.5 rounded-full bg-surface-border' aria-hidden='true' />
-              <span className='w-1.5 h-1.5 rounded-full bg-surface-border' aria-hidden='true' />
-              <span className='w-1.5 h-1.5 rounded-full bg-surface-border' aria-hidden='true' />
-            </div>
-            {/* Toast stack indicator */}
-            <div style={indicatorStyle} aria-hidden='true'>
-              <div className='flex flex-col gap-1'>
-                <div className='w-20 h-3.5 rounded bg-brand/25 border border-brand/50' />
-                <div className='w-20 h-3.5 rounded bg-brand/12 border border-brand/30' />
-              </div>
-            </div>
-          </div>
-          <p className='text-xs text-text-muted'>
-            {position.replace('-', ' ')} · stacks {isTop ? 'downward' : 'upward'}
-          </p>
-        </div>
-
-        {/* Position controls */}
-        <div className='flex flex-col items-center gap-2'>
-          <div
-            className='flex items-center gap-1 rounded-lg border border-surface-border bg-surface p-1'
-            role='group'
-            aria-label='Vertical position'
-          >
-            <button type='button' className={isTop  ? active : inactive} onClick={() => setV('top')}>Top</button>
-            <button type='button' className={!isTop ? active : inactive} onClick={() => setV('bottom')}>Bottom</button>
-          </div>
-          <div
-            className='flex items-center gap-1 rounded-lg border border-surface-border bg-surface p-1'
-            role='group'
-            aria-label='Horizontal position'
-          >
-            <button type='button' className={isLeft   ? active : inactive} onClick={() => setH('left')}>Left</button>
-            <button type='button' className={isCenter ? active : inactive} onClick={() => setH('center')}>Center</button>
-            <button type='button' className={isRight  ? active : inactive} onClick={() => setH('right')}>Right</button>
-          </div>
-        </div>
-
-        {/* Variant triggers */}
-        <ToastButtons />
-      </div>
-    </ToastProvider>
-  );
-};
-
-const ToastButtons = () => {
-  const { toast } = useToast();
-  const BTN = 'rounded-md border border-surface-border bg-surface px-3 py-1.5 text-sm text-text hover:bg-surface-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring';
-
-  return (
-    <div className='flex flex-wrap gap-2 justify-center'>
-      <button type='button' className={BTN} onClick={() => toast({ title: 'Heads up', description: 'This is a default notification.' })}>Default</button>
-      <button type='button' className={BTN} onClick={() => toast({ title: 'Saved', description: 'Your changes were saved.', variant: 'success' })}>Success</button>
-      <button type='button' className={BTN} onClick={() => toast({ title: 'Warning', description: 'Please review before continuing.', variant: 'warning' })}>Warning</button>
-      <button type='button' className={BTN} onClick={() => toast({ title: 'Error', description: 'Something went wrong.', variant: 'danger' })}>Danger</button>
-      <button type='button' className={BTN} onClick={() => toast({ title: 'Deleted', description: 'Item was removed.', variant: 'danger', action: { label: 'Undo', onClick: () => {} } })}>With action</button>
-    </div>
-  );
 };

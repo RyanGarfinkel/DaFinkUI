@@ -28,10 +28,12 @@ const LoadedDeck = ({ doc }: { doc: DeckDocument }) => {
 		<DeckEditor
 			deck={deck}
 			onChange={(next, coalesceKey) => dispatch({ type: 'change', deck: next, coalesceKey })}
-			onUndo={() => dispatch({ type: 'undo' })}
-			onRedo={() => dispatch({ type: 'redo' })}
-			canUndo={history.past.length > 0}
-			canRedo={history.future.length > 0}
+			history={{
+				undo:    () => dispatch({ type: 'undo' }),
+				redo:    () => dispatch({ type: 'redo' }),
+				canUndo: history.past.length > 0,
+				canRedo: history.future.length > 0,
+			}}
 			status={status}
 			toolbarEnd={(
 				<>

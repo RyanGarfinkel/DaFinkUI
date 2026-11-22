@@ -4303,10 +4303,7 @@ export const DeckEditorDemo = () => {
 \t\t\t<DeckEditor
 \t\t\t\tdeck={history.present}
 \t\t\t\tonChange={change}
-\t\t\t\tonUndo={undo}
-\t\t\t\tonRedo={redo}
-\t\t\t\tcanUndo={history.past.length > 0}
-\t\t\t\tcanRedo={history.future.length > 0}
+\t\t\t\thistory={{ undo, redo, canUndo: history.past.length > 0, canRedo: history.future.length > 0 }}
 \t\t\t\ttoolbarEnd={<button type='button' className={TOOLBAR_BUTTON} onClick={restyle}>Restyle deck</button>}
 \t\t\t/>
 \t\t</div>
@@ -4315,8 +4312,7 @@ export const DeckEditorDemo = () => {
     props: [
       { name: 'deck', type: 'Deck', default: '—', description: 'The deck being edited (controlled).' },
       { name: 'onChange', type: '(next: Deck, coalesceKey?: string) => void', default: '—', description: 'Every edit, as the whole next deck. Consecutive changes sharing a coalesceKey (a drag, typing) belong in one undo step.' },
-      { name: 'onUndo / onRedo', type: '() => void', default: '—', description: 'Undo and redo, from the toolbar and ⌘Z / ⇧⌘Z. Omit both to hide the undo controls.' },
-      { name: 'canUndo / canRedo', type: 'boolean', default: 'false', description: 'Enables the undo and redo buttons.' },
+      { name: 'history', type: 'EditHistory', default: '—', description: '{ undo, redo, canUndo, canRedo }: undo and redo from the toolbar and ⌘Z / ⇧⌘Z. Omit to hide the undo controls.' },
       { name: 'toolbarEnd', type: 'ReactNode', default: '—', description: 'Host actions in the top-right cluster, before Present (e.g. a save status and a file menu). Style buttons with the exported TOOLBAR_BUTTON class to match.' },
       { name: 'highlightIds', type: 'string[]', default: '[]', description: 'Elements someone else is editing right now: each gets a pulsing outline and a tag, and their slides get a dot in the rail.' },
       { name: 'highlightLabel', type: 'string', default: "'AI'", description: 'Text on the highlight tag.' },
@@ -4396,10 +4392,7 @@ export const SheetEditorDemo = () => {
 \t\t\t<SheetEditor
 \t\t\t\tsheet={history.present}
 \t\t\t\tonChange={change}
-\t\t\t\tonUndo={undo}
-\t\t\t\tonRedo={redo}
-\t\t\t\tcanUndo={history.past.length > 0}
-\t\t\t\tcanRedo={history.future.length > 0}
+\t\t\t\thistory={{ undo, redo, canUndo: history.past.length > 0, canRedo: history.future.length > 0 }}
 \t\t\t/>
 \t\t</div>
 \t);
@@ -4407,8 +4400,7 @@ export const SheetEditorDemo = () => {
     props: [
       { name: 'sheet', type: 'Sheet', default: '—', description: 'The sheet being edited (controlled): a title, row and column counts, a cells map keyed by A1 address, and column widths. A cell\'s value is what was typed, so formulas are stored as "=SUM(A1:A5)".' },
       { name: 'onChange', type: '(next: Sheet, coalesceKey?: string) => void', default: '—', description: 'Every edit, as the whole next sheet. Consecutive changes sharing a coalesceKey (typing in one cell, dragging a column edge) belong in one undo step.' },
-      { name: 'onUndo / onRedo', type: '() => void', default: '—', description: 'Undo and redo, from the toolbar and ⌘Z / ⇧⌘Z. Omit both to hide the undo controls.' },
-      { name: 'canUndo / canRedo', type: 'boolean', default: 'false', description: 'Enables the undo and redo buttons.' },
+      { name: 'history', type: 'EditHistory', default: '—', description: '{ undo, redo, canUndo, canRedo }: undo and redo from the toolbar and ⌘Z / ⇧⌘Z. Omit to hide the undo controls.' },
       { name: 'toolbarEnd', type: 'ReactNode', default: '—', description: 'Host actions in the top-right cluster, before Download (e.g. a save status). Style buttons with the exported SHEET_TOOLBAR_BUTTON class to match.' },
       { name: 'status', type: 'string', default: '—', description: 'A host message for the polite status line. Shown instead of the editor\'s own messages while set.' },
       { name: 'highlight', type: 'string', default: '—', description: 'Cells someone else (like an AI) is editing right now, in A1 notation ("B2:C5"): outlined, pulsing, and scrolled into view.' },
@@ -4424,6 +4416,47 @@ export const SheetEditorDemo = () => {
       'SheetEditor/sheet.ts', 'SheetEditor/formulas.ts', 'SheetEditor/ops.ts', 'SheetEditor/format.ts',
       'SheetEditor/sheetops.ts', 'SheetEditor/askcontext.ts', 'SheetEditor/reference.ts',
     ],
+  },
+  {
+    slug: 'heatmap',
+    name: 'Heatmap',
+    category: 'Charts',
+    description: 'A grid of cells shaded by value, for spotting patterns across two dimensions such as activity by day and hour.',
+    usage: `import { Heatmap } from '@components/ui';
+
+const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const TIMES = ['9am', '11am', '1pm', '3pm', '5pm'];
+const COMMITS = [
+  [2, 8, 5, 9, 3],
+  [4, 10, 6, 12, 2],
+  [3, 7, null, 8, 4],
+  [5, 11, 9, 14, 6],
+  [1, 6, 4, 7, 2],
+];
+
+export default function Example() {
+  return (
+    <div className='flex flex-col gap-6'>
+      <Heatmap label='Commits by day and time' data={COMMITS} rowLabels={WEEKDAYS} columnLabels={TIMES} />
+      <Heatmap label='Commits by day and time, with values' data={COMMITS} rowLabels={WEEKDAYS} columnLabels={TIMES} showValues />
+    </div>
+  );
+}`,
+    props: [
+      { name: 'data', type: '(number | null)[][]', default: '-', description: 'One array per row. null marks a cell with no data, drawn as a dashed outline.' },
+      { name: 'rowLabels', type: 'string[]', default: '-', description: 'Labels down the left edge, one per row.' },
+      { name: 'columnLabels', type: 'string[]', default: '-', description: 'Labels across the top, one per column.' },
+      { name: 'min', type: 'number', default: 'smallest value', description: 'Value shaded as the lightest cell. Values below it clamp to the lightest shade.' },
+      { name: 'max', type: 'number', default: 'largest value', description: 'Value shaded as the darkest cell. Values above it clamp to the darkest shade.' },
+      { name: 'showValues', type: 'boolean', default: 'false', description: 'Prints each value inside its cell, on a small surface chip so it stays readable at every shade.' },
+      { name: 'formatValue', type: '(value: number) => string', default: 'rounded to 2 places', description: 'Formats values in cells, tooltips, the legend and the text read by screen readers.' },
+      { name: 'showLegend', type: 'boolean', default: 'true', description: 'Shows the light-to-dark scale with its low and high values.' },
+      { name: 'label', type: 'string', default: "'Heatmap'", description: 'Accessible name of the table.' },
+      { name: 'className', type: 'string', default: "''", description: 'Extra classes on the root.' },
+    ],
+    dependencies:         [],
+    registryDependencies: [],
+    files:                ['Heatmap/Heatmap.tsx'],
   },
 ];
 

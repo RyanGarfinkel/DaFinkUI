@@ -167,9 +167,9 @@ describe('DeckEditor', () =>
 
 	it('routes undo and redo to the host, from buttons and shortcuts', () =>
 	{
-		const onUndo = vi.fn();
-		const onRedo = vi.fn();
-		setup({ onUndo, onRedo, canUndo: true, canRedo: false });
+		const undo = vi.fn();
+		const redo = vi.fn();
+		setup({ history: { undo, redo, canUndo: true, canRedo: false } });
 
 		expect((screen.getByRole('button', { name: 'Redo' }) as HTMLButtonElement).disabled).toBe(true);
 		fireEvent.click(screen.getByRole('button', { name: 'Undo' }));
@@ -177,8 +177,8 @@ describe('DeckEditor', () =>
 		fireEvent.keyDown(editor, { key: 'z', metaKey: true });
 		fireEvent.keyDown(editor, { key: 'z', metaKey: true, shiftKey: true });
 
-		expect(onUndo).toHaveBeenCalledTimes(2);
-		expect(onRedo).toHaveBeenCalledTimes(1);
+		expect(undo).toHaveBeenCalledTimes(2);
+		expect(redo).toHaveBeenCalledTimes(1);
 	});
 
 	it('hides undo controls when the host keeps no history', () =>
@@ -233,16 +233,35 @@ describe('DeckEditor', () =>
 		expect(screen.getByRole('complementary', { name: 'Settings', hidden: true }).className).toContain('border-l');
 	});
 
+	it('resizes a table from its Rows and Columns settings, keeping the cells that remain', () =>
+	{
+		const table: DeckElement = { id: 'grid', label: 'Plan', type: 'table', header: true, fontSize: 24, rows: [['a', 'b'], ['c', 'd']], x: 100, y: 100, width: 400, height: 200 };
+		setEditorWidth(900);
+		const { onChange } = setup({ deck: { ...DECK, slides: [{ ...createSlide([table]), id: 's1' }] } });
+		fireEvent.click(screen.getByRole('button', { name: 'Settings sidebar' }));
+		fireEvent.focus(screen.getByRole('button', { name: 'Plan' }));
+
+		fireEvent.change(screen.getByLabelText('Rows'), { target: { value: '3' } });
+		const grown = onChange.mock.calls.at(-1)![0] as Deck;
+		expect((grown.slides[0].elements[0] as Extract<DeckElement, { type: 'table' }>).rows).toEqual([['a', 'b'], ['c', 'd'], ['', '']]);
+
+		fireEvent.change(screen.getByLabelText('Columns'), { target: { value: '1' } });
+		const narrowed = onChange.mock.calls.at(-1)![0] as Deck;
+		expect((narrowed.slides[0].elements[0] as Extract<DeckElement, { type: 'table' }>).rows).toEqual([['a'], ['c']]);
+	});
+
 	describe('charts linked to a sheet', () =>
 	{
 		const chart: DeckElement = { id: 'chart', label: 'Sales', type: 'chart', chart: 'bar', seriesLabel: 'Typed', data: [{ label: 'Typed', value: 1 }], x: 100, y: 100, width: 400, height: 300 };
-		const sheets = [{ id: 'sheet1', title: 'Revenue' }];
-		const resolveChartSource = vi.fn(() => ({ seriesLabel: 'Revenue', data: [{ label: 'Jan', value: 10 }, { label: 'Feb', value: 20 }] }));
+		const chartData = {
+			sheets:  [{ id: 'sheet1', title: 'Revenue' }],
+			resolve: () => ({ seriesLabel: 'Revenue', data: [{ label: 'Jan', value: 10 }, { label: 'Feb', value: 20 }] }),
+		};
 		const chartDeck = (source?: { sheetId: string; range: string }): Deck => ({ ...DECK, slides: [{ ...createSlide([{ ...chart, source } as DeckElement]), id: 's1' }] });
 
 		const openChartSettings = (deck: Deck, props: Partial<Parameters<typeof DeckEditor>[0]> = {}) => {
 			setEditorWidth(900);
-			const utils = setup({ deck, sheets, resolveChartSource, ...props });
+			const utils = setup({ deck, chartData, ...props });
 			fireEvent.click(screen.getByRole('button', { name: 'Settings sidebar' }));
 			fireEvent.focus(screen.getByRole('button', { name: 'Sales' }));
 			return utils;
@@ -250,7 +269,7 @@ describe('DeckEditor', () =>
 
 		it('offers no data source choice unless the host provides sheets', () =>
 		{
-			openChartSettings(chartDeck(), { sheets: undefined, resolveChartSource: undefined });
+			openChartSettings(chartDeck(), { chartData: undefined });
 			expect(screen.queryByText('Data')).toBeNull();
 			expect(screen.getByLabelText('Series name')).toBeDefined();
 		});
@@ -274,7 +293,7 @@ describe('DeckEditor', () =>
 
 		it('keeps the typed data when the source can\'t be read', () =>
 		{
-			openChartSettings(chartDeck({ sheetId: 'sheet1', range: 'A1:B3' }), { resolveChartSource: () => null });
+			openChartSettings(chartDeck({ sheetId: 'sheet1', range: 'A1:B3' }), { chartData: { ...chartData, resolve: () => null } });
 			expect(screen.getByText('Can’t read that range.')).toBeDefined();
 		});
 

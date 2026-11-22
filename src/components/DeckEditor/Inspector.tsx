@@ -1,8 +1,8 @@
 'use client';
 
-import type { ChartSource, DeckElement, ResolvedChart, SheetChoice, Slide } from './deck';
 import { ColorField, NumberInput, Row, Section } from './fields';
 import { ElementMotion, SlideMotion } from './MotionControls';
+import type { ChartData, DeckElement, Slide } from './deck';
 import { ElementControls } from './ElementControls';
 import Textarea from '../Textarea/Textarea';
 import Input from '../Input/Input';
@@ -15,8 +15,7 @@ interface InspectorProps {
 	onSlide:     (patch: Partial<Slide>, coalesceKey?: string) => void;
 	onPreviewTransition: () => void;
 	onPreviewEntrance:   () => void;
-	sheets?:             SheetChoice[];
-	resolveChartSource?: (source: ChartSource) => ResolvedChart | null;
+	chartData?:          ChartData;
 }
 
 const SpeakerNotes = ({ slide, onSlide }: Pick<InspectorProps, 'slide' | 'onSlide'>) => (
@@ -32,7 +31,7 @@ const SpeakerNotes = ({ slide, onSlide }: Pick<InspectorProps, 'slide' | 'onSlid
 	</Section>
 );
 
-export const Inspector = ({ slide, themeRadius, element, onPatch, onSlide, onPreviewTransition, onPreviewEntrance, sheets, resolveChartSource }: InspectorProps) => {
+export const Inspector = ({ slide, themeRadius, element, onPatch, onSlide, onPreviewTransition, onPreviewEntrance, chartData }: InspectorProps) => {
 	if(!element)
 	{
 		return (
@@ -67,7 +66,7 @@ export const Inspector = ({ slide, themeRadius, element, onPatch, onSlide, onPre
 					</div>
 				</Row>
 			</Section>
-			<ElementControls element={element} onPatch={onPatch} themeRadius={themeRadius} sheets={sheets} resolveChartSource={resolveChartSource} />
+			<ElementControls element={element} onPatch={onPatch} themeRadius={themeRadius} chartData={chartData} />
 			<ElementMotion element={element} onPatch={onPatch} onPreview={onPreviewEntrance} />
 			<SpeakerNotes slide={slide} onSlide={onSlide} />
 		</div>

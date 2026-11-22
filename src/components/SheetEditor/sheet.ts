@@ -42,6 +42,13 @@ export interface Sheet {
 	charts?:   SheetChart[];
 }
 
+export interface EditHistory {
+	undo:    () => void;
+	redo:    () => void;
+	canUndo: boolean;
+	canRedo: boolean;
+}
+
 export interface Pos {
 	r: number;
 	c: number;

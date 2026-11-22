@@ -104,9 +104,8 @@ const BUDGET_WORDS = /\b(sheets?|spreadsheets?|budget)\b/i;
 /** A chart linked to the budget sheet: only once the chat has both that sheet and the deck, and only once per deck. */
 export const linkChartReply = (message: string, history: { role: string; text: string }[], sheetIds: string[]): AiChatReply | null => {
 	if(!LINK_WORDS.test(message) || !BUDGET_WORDS.test(message) || !sheetIds.includes(BUDGET_SHEET_ID)) return null;
-	const deckTexts = [CREATE_REPLY.text, REVISE_REPLY.text];
-	const lastDeck = history.findLast(h => h.role === 'assistant' && (deckTexts.includes(h.text) || h.text === LINK_REPLY.text));
-	return lastDeck && lastDeck.text !== LINK_REPLY.text ? LINK_REPLY : null;
+	const last = history.findLast(h => h.role === 'assistant' && [CREATE_REPLY.text, REVISE_REPLY.text, LINK_REPLY.text].includes(h.text));
+	return last && last.text !== LINK_REPLY.text ? LINK_REPLY : null;
 };
 
 const DECK_WORDS = /\b(slides?|deck|presentation)\b/i;

@@ -7,6 +7,11 @@ import Select from '../Select/Select';
 import Button from '../Button/Button';
 import { Glyph } from './icons';
 
+const DURATION_RANGE = { min: 100, max: 3000 };
+const DELAY_RANGE = { min: 0, max: 10000 };
+
+const clamp = (value: number, { min, max }: { min: number; max: number }) => Math.min(max, Math.max(min, value));
+
 const PreviewButton = ({ label, onPreview }: { label: string; onPreview: () => void }) => (
 	<Button variant='outlined' size='sm' onClick={onPreview} aria-label={label}>
 		<Glyph name='play' />
@@ -32,20 +37,14 @@ export const SlideMotion = ({ slide, onSlide, onPreview }: SlideMotionProps) => 
 			/>
 		</Row>
 		{slide.transition.type !== 'none' && (
-			<Row label='Duration'>
-				<div className='flex items-center gap-2'>
-					<div className='min-w-0 flex-1'>
-						<NumberInput
-							label='Transition duration'
-							suffix='ms'
-							value={slide.transition.duration}
-							min={100}
-							max={3000}
-							onChange={duration => onSlide({ transition: { ...slide.transition, duration: Math.min(3000, Math.max(100, duration)) } }, 'transition-duration')}
-						/>
-					</div>
-					<PreviewButton label='Preview transition' onPreview={onPreview} />
-				</div>
+			<Row label='Duration' action={<PreviewButton label='Preview transition' onPreview={onPreview} />}>
+				<NumberInput
+					label='Transition duration'
+					suffix='ms'
+					value={slide.transition.duration}
+					{...DURATION_RANGE}
+					onChange={duration => onSlide({ transition: { ...slide.transition, duration: clamp(duration, DURATION_RANGE) } }, 'transition-duration')}
+				/>
 			</Row>
 		)}
 		<Row label='Ambient'>
@@ -82,20 +81,14 @@ export const ElementMotion = ({ element, onPatch, onPreview }: ElementMotionProp
 				/>
 			</Row>
 			{effect.type !== 'none' && (
-				<Row label='Delay'>
-					<div className='flex items-center gap-2'>
-						<div className='min-w-0 flex-1'>
-							<NumberInput
-								label='Entrance delay'
-								suffix='ms'
-								value={effect.delay}
-								min={0}
-								max={10000}
-								onChange={delay => onPatch({ effect: { ...effect, delay: Math.min(10000, Math.max(0, delay)) } }, 'effect-delay')}
-							/>
-						</div>
-						<PreviewButton label='Preview entrance' onPreview={onPreview} />
-					</div>
+				<Row label='Delay' action={<PreviewButton label='Preview entrance' onPreview={onPreview} />}>
+					<NumberInput
+						label='Entrance delay'
+						suffix='ms'
+						value={effect.delay}
+						{...DELAY_RANGE}
+						onChange={delay => onPatch({ effect: { ...effect, delay: clamp(delay, DELAY_RANGE) } }, 'effect-delay')}
+					/>
 				</Row>
 			)}
 		</Section>

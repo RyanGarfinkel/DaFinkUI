@@ -122,10 +122,7 @@ export const useSheetPanel = ({ chats, activeChatId, isMobile, closeOthers, onRe
 			activity={activity}
 			note={note}
 			onChange={(next, coalesceKey) => live.change(docKey, next, coalesceKey)}
-			onUndo={() => live.undo(docKey)}
-			onRedo={() => live.redo(docKey)}
-			canUndo={live.canUndo(docKey)}
-			canRedo={live.canRedo(docKey)}
+			history={{ undo: () => live.undo(docKey), redo: () => live.redo(docKey), canUndo: live.canUndo(docKey), canRedo: live.canRedo(docKey) }}
 			expanded={expanded}
 			onToggleExpand={onToggleExpand}
 			onClose={onClose}
@@ -139,7 +136,7 @@ export const useSheetPanel = ({ chats, activeChatId, isMobile, closeOthers, onRe
 		if(!chatId) return found;
 		for(const message of messagesOf(chatId))
 		{
-			const sheetId = message.kind === 'message' ? message.sheetEdit?.sheetId : undefined;
+			const sheetId = message.kind === 'message' && message.sheetEdit?.sheetId;
 			if(!sheetId || found.has(sheetId)) continue;
 			const sheet = live.docs[sheetDocKey(chatId, sheetId)] ?? latestSheet(chatId, sheetId);
 			if(sheet) found.set(sheetId, sheet);

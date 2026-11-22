@@ -13,7 +13,7 @@ const SEED: Sheet = {
 
 const Harness = ({ onUndo, initial = SEED }: { onUndo?: () => void; initial?: Sheet }) => {
 	const [sheet, setSheet] = useState(initial);
-	return <SheetEditor sheet={sheet} onChange={setSheet} onUndo={onUndo} />;
+	return <SheetEditor sheet={sheet} onChange={setSheet} history={onUndo && { undo: onUndo, redo: () => undefined, canUndo: true, canRedo: false }} />;
 };
 
 const grid = () => screen.getByRole('grid', { name: 'Budget grid' });

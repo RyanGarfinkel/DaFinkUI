@@ -1,6 +1,6 @@
 'use client';
 
-import type { ChartSource, DeckElement, ResolvedChart, SheetChoice, VerticalAlign } from './deck';
+import type { ChartData, ChartSource, DeckElement, ResolvedChart, SheetChoice, VerticalAlign } from './deck';
 import { ToggleGroup, ToggleGroupItem } from '../ToggleGroup/ToggleGroup';
 import { ColorField, NumberInput, Row, Section } from './fields';
 import { FontSelect, StyleSelect } from './FormatToolbar';
@@ -29,13 +29,8 @@ const ShapeControls = ({ element, onPatch, themeRadius }: { element: Of<'shape'>
 		</Row>
 		<ColorField label='Fill' value={element.fill} emptyText='Theme' onChange={fill => onPatch({ fill }, 'fill')} onReset={() => onPatch({ fill: '' })} />
 		{element.shape === 'rect' && (
-			<Row label='Radius'>
-				<div className='flex items-center gap-2'>
-					<div className='min-w-0 flex-1'>
-						<NumberInput label='Corner radius' suffix='px' value={element.radius ?? themeRadius} min={0} onChange={radius => onPatch({ radius }, 'radius')} />
-					</div>
-					{element.radius !== undefined && <Button variant='outlined' size='sm' onClick={() => onPatch({ radius: undefined })}>Use theme</Button>}
-				</div>
+			<Row label='Radius' action={element.radius !== undefined && <Button variant='outlined' size='sm' onClick={() => onPatch({ radius: undefined })}>Use theme</Button>}>
+				<NumberInput label='Corner radius' suffix='px' value={element.radius ?? themeRadius} min={0} onChange={radius => onPatch({ radius }, 'radius')} />
 			</Row>
 		)}
 	</Section>
@@ -102,9 +97,15 @@ const IconControls = ({ element, onPatch }: { element: Of<'icon'>; onPatch: Patc
 	</Section>
 );
 
+const MAX_TABLE_ROWS = 50;
+const MAX_TABLE_COLUMNS = 20;
+
 const TableControls = ({ element, onPatch }: { element: Of<'table'>; onPatch: Patch }) => {
 	const { rows } = element;
 	const columns = rows[0]?.length ?? 0;
+
+	const resize = (rowCount: number, columnCount: number) =>
+		onPatch({ rows: Array.from({ length: rowCount }, (_, r) => Array.from({ length: columnCount }, (_, c) => rows[r]?.[c] ?? '')) }, 'table-size');
 
 	return (
 		<Section title='Table' collapsible defaultOpen>
@@ -112,12 +113,12 @@ const TableControls = ({ element, onPatch }: { element: Of<'table'>; onPatch: Pa
 			<Row label='Header row'>
 				<Switch aria-label='Header row' checked={element.header} onCheckedChange={header => onPatch({ header })} />
 			</Row>
-			<div className='grid grid-cols-2 gap-2'>
-				<Button variant='outlined' size='sm' onClick={() => onPatch({ rows: [...rows, Array(columns).fill('')] })}>Add row</Button>
-				<Button variant='outlined' size='sm' disabled={rows.length <= 1} onClick={() => onPatch({ rows: rows.slice(0, -1) })}>Remove row</Button>
-				<Button variant='outlined' size='sm' onClick={() => onPatch({ rows: rows.map(r => [...r, '']) })}>Add column</Button>
-				<Button variant='outlined' size='sm' disabled={columns <= 1} onClick={() => onPatch({ rows: rows.map(r => r.slice(0, -1)) })}>Remove column</Button>
-			</div>
+			<Row label='Rows'>
+				<NumberInput label='Rows' value={rows.length} min={1} max={MAX_TABLE_ROWS} onChange={count => resize(Math.min(MAX_TABLE_ROWS, Math.max(1, count)), columns)} />
+			</Row>
+			<Row label='Columns'>
+				<NumberInput label='Columns' value={columns} min={1} max={MAX_TABLE_COLUMNS} onChange={count => resize(rows.length, Math.min(MAX_TABLE_COLUMNS, Math.max(1, count)))} />
+			</Row>
 		</Section>
 	);
 };
@@ -127,16 +128,21 @@ const DEFAULT_SOURCE_RANGE = 'A1:B5';
 interface ChartControlsProps {
 	element:             Of<'chart'>;
 	onPatch:             Patch;
-	sheets?:             SheetChoice[];
-	resolveChartSource?: (source: ChartSource) => ResolvedChart | null;
+	chartData?:          ChartData;
 }
 
 const TYPED_IN = '';
 
-const SheetRange = ({ source, sheets, resolve, onChange }: { source: ChartSource; sheets: SheetChoice[]; resolve?: ChartControlsProps['resolveChartSource']; onChange: (source: ChartSource) => void }) => {
-	const sheet = sheets.find(s => s.id === source.sheetId);
-	const points = sheet ? resolve?.(source)?.data.length : undefined;
-	const problem = !sheet ? 'This sheet is no longer in the chat.' : points === undefined ? 'Can’t read that range.' : points === 0 ? 'No data in that range.' : '';
+interface SheetRangeProps {
+	source:   ChartSource;
+	sheet:    SheetChoice | undefined;
+	resolved: ResolvedChart | null | undefined;
+	onChange: (source: ChartSource) => void;
+}
+
+const SheetRange = ({ source, sheet, resolved, onChange }: SheetRangeProps) => {
+	const problem = !sheet ? 'This sheet is no longer in the chat.' : !resolved ? 'Can’t read that range.' : !resolved.data.length ? 'No data in that range.' : '';
+	const points = resolved?.data.length;
 
 	return (
 		<Row label='Range'>
@@ -152,8 +158,11 @@ const SheetRange = ({ source, sheets, resolve, onChange }: { source: ChartSource
 	);
 };
 
-const ChartControls = ({ element, onPatch, sheets, resolveChartSource }: ChartControlsProps) => {
-	const linked = Boolean(element.source);
+const ChartControls = ({ element, onPatch, chartData }: ChartControlsProps) => {
+	const sheets = chartData?.sheets;
+	const { source } = element;
+	const sheet = source && sheets?.find(s => s.id === source.sheetId);
+	const resolved = source && sheet ? chartData?.resolve(source) : null;
 	const setRow = (index: number, patch: Partial<Of<'chart'>['data'][number]>) =>
 		onPatch({ data: element.data.map((row, i) => (i === index ? { ...row, ...patch } : row)) }, `data-${index}`);
 
@@ -174,18 +183,18 @@ const ChartControls = ({ element, onPatch, sheets, resolveChartSource }: ChartCo
 						placeholder='Choose a sheet'
 						hint={sheets.length ? undefined : 'Ask the AI for a spreadsheet to chart its data.'}
 						options={[{ value: TYPED_IN, label: 'Typed in' }, ...sheets.map(s => ({ value: s.id, label: s.title }))]}
-						value={element.source ? (sheets.some(s => s.id === element.source?.sheetId) ? element.source.sheetId : undefined) : TYPED_IN}
-						onChange={value => onPatch({ source: value === TYPED_IN ? undefined : { sheetId: value, range: element.source?.range ?? DEFAULT_SOURCE_RANGE } })}
+						value={!source ? TYPED_IN : sheet?.id}
+						onChange={value => onPatch({ source: value === TYPED_IN ? undefined : { sheetId: value, range: source?.range ?? DEFAULT_SOURCE_RANGE } })}
 					/>
 				</Row>
 			)}
-			{element.source && sheets && <SheetRange source={element.source} sheets={sheets} resolve={resolveChartSource} onChange={source => onPatch({ source }, 'source')} />}
-			{!linked && (
+			{source && sheets && <SheetRange source={source} sheet={sheet} resolved={resolved} onChange={next => onPatch({ source: next }, 'source')} />}
+			{!source && (
 				<Row label='Series'>
 					<Input aria-label='Series name' value={element.seriesLabel} onChange={e => onPatch({ seriesLabel: e.target.value }, 'seriesLabel')} className={FIELD} />
 				</Row>
 			)}
-			{!linked && (
+			{!source && (
 				<div className='flex flex-col gap-2'>
 					{element.data.map((row, i) => (
 						<div key={i} className='flex items-center gap-2'>
@@ -209,7 +218,7 @@ const ChartControls = ({ element, onPatch, sheets, resolveChartSource }: ChartCo
 	);
 };
 
-export const ElementControls = ({ element, onPatch, themeRadius, sheets, resolveChartSource }: { element: DeckElement; onPatch: Patch; themeRadius: number } & Pick<ChartControlsProps, 'sheets' | 'resolveChartSource'>) => {
+export const ElementControls = ({ element, onPatch, themeRadius, chartData }: { element: DeckElement; onPatch: Patch; themeRadius: number; chartData?: ChartData }) => {
 	switch(element.type)
 	{
 	case 'text':
@@ -235,7 +244,7 @@ export const ElementControls = ({ element, onPatch, themeRadius, sheets, resolve
 	case 'icon':  return <IconControls element={element} onPatch={onPatch} />;
 	case 'svg':   return <SvgControls element={element} onPatch={onPatch} />;
 	case 'table': return <TableControls element={element} onPatch={onPatch} />;
-	case 'chart': return <ChartControls element={element} onPatch={onPatch} sheets={sheets} resolveChartSource={resolveChartSource} />;
+	case 'chart': return <ChartControls element={element} onPatch={onPatch} chartData={chartData} />;
 	case 'line':
 		return (
 			<Section title='Line' collapsible defaultOpen>

@@ -90,10 +90,7 @@ export const DeckEditorDemo = () => {
 			<DeckEditor
 				deck={history.present}
 				onChange={change}
-				onUndo={undo}
-				onRedo={redo}
-				canUndo={history.past.length > 0}
-				canRedo={history.future.length > 0}
+				history={{ undo, redo, canUndo: history.past.length > 0, canRedo: history.future.length > 0 }}
 				toolbarEnd={<button type='button' className={TOOLBAR_BUTTON} onClick={restyle}>Restyle deck</button>}
 			/>
 		</div>

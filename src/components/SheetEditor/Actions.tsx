@@ -1,26 +1,24 @@
 'use client';
 
 import { handleToolbarKeys, TOOLBAR_BUTTON, type Download } from './Toolbar';
+import type { EditHistory } from './sheet';
 import { Menu } from '../Menu/Menu';
 import { ReactNode } from 'react';
 import { Glyph } from './icons';
 
 export interface ActionsProps {
-	onUndo?:     () => void;
-	onRedo?:     () => void;
-	canUndo:     boolean;
-	canRedo:     boolean;
+	history?:    EditHistory;
 	onDownload:  (kind: Download) => void;
 	toolbarEnd?: ReactNode;
 }
 
 /** History, host actions and download: the cluster at the end of the formula bar row. */
-export const Actions = ({ onUndo, onRedo, canUndo, canRedo, onDownload, toolbarEnd }: ActionsProps) => (
+export const Actions = ({ history, onDownload, toolbarEnd }: ActionsProps) => (
 	<div role='toolbar' aria-label='Sheet actions' onKeyDown={handleToolbarKeys} className='flex shrink-0 items-center gap-0.5'>
-		{(onUndo || onRedo) && (
+		{history && (
 			<>
-				<button type='button' aria-label='Undo' title='Undo (⌘Z)' className={TOOLBAR_BUTTON} disabled={!canUndo} onClick={onUndo}><Glyph name='undo' /></button>
-				<button type='button' aria-label='Redo' title='Redo (⇧⌘Z)' className={TOOLBAR_BUTTON} disabled={!canRedo} onClick={onRedo}><Glyph name='redo' /></button>
+				<button type='button' aria-label='Undo' title='Undo (⌘Z)' className={TOOLBAR_BUTTON} disabled={!history.canUndo} onClick={history.undo}><Glyph name='undo' /></button>
+				<button type='button' aria-label='Redo' title='Redo (⇧⌘Z)' className={TOOLBAR_BUTTON} disabled={!history.canRedo} onClick={history.redo}><Glyph name='redo' /></button>
 			</>
 		)}
 		{toolbarEnd}

@@ -24,8 +24,7 @@ It holds no document state of its own except the selection. The host owns the `S
 |------|------|---------|-------------|
 | sheet | `Sheet` | required | The sheet being edited (controlled). |
 | onChange | `(next: Sheet, coalesceKey?: string) => void` | required | Every edit, as the whole next sheet. Consecutive changes sharing a `coalesceKey` (typing in one cell, dragging a column edge) belong in one undo step. |
-| onUndo / onRedo | `() => void` | None | Undo/redo from the toolbar and ⌘Z / ⇧⌘Z. Omit both to hide the undo controls. |
-| canUndo / canRedo | `boolean` | `false` | Enables the undo/redo buttons. |
+| history | `EditHistory` | None | `{ undo, redo, canUndo, canRedo }`: undo/redo from the toolbar and ⌘Z / ⇧⌘Z. Omit to hide the undo controls. |
 | toolbarEnd | `ReactNode` | None | Host actions at the end of the formula bar row, before Download. Use the exported `SHEET_TOOLBAR_BUTTON` class so they match. |
 | status | `string` | None | A host message for the polite status line. Shown instead of the editor's own messages while set. |
 | highlight | `string` | None | Cells someone else (like an AI) is editing right now, in A1 notation (`"B2:C5"`): outlined, pulsing (when motion is allowed), tagged, and scrolled into view. |

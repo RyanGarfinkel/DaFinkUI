@@ -5,6 +5,7 @@ import { themeColorLabel } from './themes';
 import { useId, useState } from 'react';
 import type { ReactNode } from 'react';
 import Input from '../Input/Input';
+import { Glyph } from './icons';
 
 interface ColorFieldProps {
 	label:      string;
@@ -18,13 +19,20 @@ interface ColorFieldProps {
 interface RowProps {
 	label:    string;
 	children: ReactNode;
+	/** A button beside the control, e.g. Preview. */
+	action?:  ReactNode;
 }
 
 /** A setting laid out as a muted label on the left and its control on the right. */
-export const Row = ({ label, children }: RowProps) => (
+export const Row = ({ label, children, action }: RowProps) => (
 	<div className='grid grid-cols-[4.75rem_minmax(0,1fr)] items-center gap-3'>
 		<span className='truncate text-xs text-text-muted'>{label}</span>
-		<div className='min-w-0'>{children}</div>
+		{action ? (
+			<div className='flex min-w-0 items-center gap-2'>
+				<div className='min-w-0 flex-1'>{children}</div>
+				{action}
+			</div>
+		) : <div className='min-w-0'>{children}</div>}
 	</div>
 );
 
@@ -97,9 +105,7 @@ export const NumberField = ({ label, value, onChange, min, max }: NumberFieldPro
 interface SectionProps {
 	title:        string;
 	children:     ReactNode;
-	/** Adds a header that shows and hides the section. */
 	collapsible?: boolean;
-	/** For collapsible sections: start open. */
 	defaultOpen?: boolean;
 }
 
@@ -139,9 +145,7 @@ export const Section = ({ title, children, collapsible = false, defaultOpen = fa
 					className='flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-text hover:bg-surface-hover focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-ring motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]'
 				>
 					{title}
-					<svg aria-hidden='true' viewBox='0 0 24 24' width='14' height='14' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' className={`text-text-muted motion-safe:transition-transform motion-safe:duration-[var(--duration-fast)] ${open ? 'rotate-180' : ''}`}>
-						<path d='m6 9 6 6 6-6' />
-					</svg>
+					<Glyph name='chevronDown' size={14} className={`text-text-muted motion-safe:transition-transform motion-safe:duration-[var(--duration-fast)] ${open ? 'rotate-180' : ''}`} />
 				</button>
 			</h3>
 			<div id={bodyId} onTransitionEnd={e => e.target === e.currentTarget && open && setClip(false)} className={`grid motion-safe:transition-[grid-template-rows] motion-safe:duration-[var(--duration-base)] ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}>

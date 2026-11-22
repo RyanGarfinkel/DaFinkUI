@@ -1152,7 +1152,7 @@ export const extraSections: Record<string, ExtraSection[]> = {
 						The editor is a named <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;region&quot;</code>. Every element on the slide is a focusable button: focusing one selects it, and its floating format toolbar is a <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>role=&quot;toolbar&quot;</code> reached with Alt+F10. It holds only the quick controls plus a More options button that opens the settings panel; while the panel is open the bar is hidden and the panel follows the selected element instead. When the host passes <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>onAsk</code>, the bar also carries an Ask AI (lasso) button, which stays reachable on its own while the panel hides the bar. The slide rail is one Tab stop with roving tabindex, and each thumbnail has a context menu (Shift+F10 or the Menu key). Moves, resizes, and edits are announced through a polite status line, as is the progress of a download from the toolbar&apos;s Download menu (a standard menu button: Enter or Space opens it, arrow keys move, Escape closes). Settings are a non-modal region that opens as a column beside the slide when the editor is wide, or slides over its right edge when it&apos;s narrow (the editor&apos;s own width, not the window&apos;s). It doesn&apos;t trap focus, and it is inert while closed. Elements someone else is editing get an outline, a tag, and &quot;being edited&quot; in their slide thumbnail&apos;s name, so the change isn&apos;t signalled by color or motion alone.
 					</p>
 					<KeyboardShortcutsTable rows={[
-						{ keys: ['cmd', 'z'], description: 'Undo (when the host passes onUndo).' },
+						{ keys: ['cmd', 'z'], description: 'Undo (when the host passes history).' },
 						{ keys: ['shift', 'cmd', 'z'], description: 'Redo.' },
 						{ keys: ['cmd', 'd'], description: 'Duplicates the selected element.' },
 						{ keys: ['arrow keys'], description: 'Moves the selected element; with Shift, in bigger steps.' },
@@ -1186,11 +1186,21 @@ export const extraSections: Record<string, ExtraSection[]> = {
 						{ keys: ['cmd', 'a'], description: 'Select every cell.' },
 						{ keys: ['cmd', 'b'], description: 'Bold the selection (⌘I for italic).' },
 						{ keys: ['cmd', 'c'], description: 'Copy the selection (⌘X cuts, ⌘V pastes at its top-left cell).' },
-						{ keys: ['cmd', 'z'], description: 'Undo (when the host passes onUndo). ⇧⌘Z redoes.' },
+						{ keys: ['cmd', 'z'], description: 'Undo (when the host passes history). ⇧⌘Z redoes.' },
 						{ keys: ['home'], description: 'Jump to the first column of the row; End jumps to the last.' },
 						{ keys: ['page down'], description: 'Move ten rows down (Page Up: up).' },
 					]} />
 				</div>
+			),
+		},
+	],
+	'heatmap': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<p>
+					Heatmap is a read-only graphic with no interactive elements, so it has no tab stops or keyboard shortcuts. It renders a real <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>&lt;table&gt;</code> named by <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>label</code>, with column headers and row headers, so a screen reader can move cell by cell and hear the row, column and value; every cell carries its value as text and empty cells read &quot;No data&quot;. Shade is never the only signal: the legend shows the scale&apos;s low and high values, each cell has a tooltip, and <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>showValues</code> prints the value in the cell on a surface chip that keeps text contrast at every shade.
+				</p>
 			),
 		},
 	],

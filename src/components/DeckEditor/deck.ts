@@ -50,6 +50,19 @@ export interface ResolvedChart {
 	data:         ChartRow[];
 }
 
+export interface EditHistory {
+	undo:    () => void;
+	redo:    () => void;
+	canUndo: boolean;
+	canRedo: boolean;
+}
+
+/** Lets charts take their rows from the host's spreadsheets. `resolve` runs on every render, so keep it cheap; it returns null when the sheet or range can't be read. */
+export interface ChartData {
+	sheets:  SheetChoice[];
+	resolve: (source: ChartSource) => ResolvedChart | null;
+}
+
 export type DeckElement = SlideElement & { effect?: ElementEffect } & (
 	/** `font` overrides the theme's font for this element; omit to follow the theme. */
 	/** `bold` is the box's base weight (marks can still bold or unbold runs); `placeholder` shows while it's empty in the editor; `valign` is where the text sits in a box taller than it (default `top`). */
@@ -132,3 +145,12 @@ export const linkChartSources = (deck: Deck, resolve?: (source: ChartSource) => 
 	});
 	return changed ? { ...deck, slides } : deck;
 };
+
+/** Edits are built from the linked deck, so a sourced chart in `elements` carries the sheet's rows. Put the stored snapshot back, so only an edit to the chart itself changes its `data`. */
+export const keepStoredChartData = (elements: DeckElement[], stored: DeckElement[]): DeckElement[] =>
+	elements.map(el =>
+	{
+		if(el.type !== 'chart' || !el.source) return el;
+		const before = stored.find(s => s.id === el.id);
+		return before?.type === 'chart' ? { ...el, seriesLabel: before.seriesLabel, data: before.data } : el;
+	});

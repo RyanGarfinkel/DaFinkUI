@@ -50,10 +50,7 @@ export const SheetEditorDemo = () => {
 			<SheetEditor
 				sheet={history.present}
 				onChange={change}
-				onUndo={undo}
-				onRedo={redo}
-				canUndo={history.past.length > 0}
-				canRedo={history.future.length > 0}
+				history={{ undo, redo, canUndo: history.past.length > 0, canRedo: history.future.length > 0 }}
 			/>
 		</div>
 	);

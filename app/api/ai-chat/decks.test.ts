@@ -21,10 +21,9 @@ describe('scripted linked chart', () =>
 		const reply = linkChartReply('chart the budget sheet', afterDeck, ['q3-budget'])!;
 		expect(reply.deckEdit?.steps.length).toBeGreaterThan(0);
 
-		const add = reply.deckEdit!.steps.map(s => s.op).find(op => op.type === 'addElement' && op.element.type === 'chart');
-		const chart = add && add.type === 'addElement' && add.element.type === 'chart' ? add.element : null;
-		expect(chart?.source).toEqual({ sheetId: 'q3-budget', range: 'A1:B5' });
-		expect(resolveSheetChart(new Map([['q3-budget', sheet]]), chart!.source!)).toEqual({ seriesLabel: chart!.seriesLabel, data: chart!.data });
+		const [chart] = reply.deckEdit!.steps.flatMap(s => (s.op.type === 'addElement' && s.op.element.type === 'chart' ? [s.op.element] : []));
+		expect(chart.source).toEqual({ sheetId: 'q3-budget', range: 'A1:B5' });
+		expect(resolveSheetChart(new Map([['q3-budget', sheet]]), chart.source!)).toEqual({ seriesLabel: chart.seriesLabel, data: chart.data });
 
 		expect(linkChartReply('chart the budget sheet', [{ role: 'assistant', text: reply.text }], ['q3-budget'])).toBeNull();
 	});

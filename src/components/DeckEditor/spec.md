@@ -17,8 +17,7 @@ It holds no document state of its own. The host owns the deck and its undo histo
 |------|------|---------|-------------|
 | deck | `Deck` | required | The deck being edited (controlled). |
 | onChange | `(next: Deck, coalesceKey?: string) => void` | required | Every edit, as the whole next deck. Consecutive changes sharing a `coalesceKey` (a drag, typing) belong in one undo step. |
-| onUndo / onRedo | `() => void` | None | Undo/redo from the toolbar and ⌘Z / ⇧⌘Z. Omit both to hide the undo controls. |
-| canUndo / canRedo | `boolean` | `false` | Enables the undo/redo buttons. |
+| history | `EditHistory` | None | `{ undo, redo, canUndo, canRedo }`: undo/redo from the toolbar and ⌘Z / ⇧⌘Z. Omit to hide the undo controls. |
 | toolbarEnd | `ReactNode` | None | Host actions in the top-right cluster, before Present (a save status, a file menu). Use the exported `TOOLBAR_BUTTON` class so they match. |
 | highlightIds | `string[]` | `[]` | Elements someone else is editing: each gets a pulsing outline and a tag, and their slides get a dot in the rail. |
 | highlightLabel | `string` | `'AI'` | Text on the highlight tag. |
@@ -26,15 +25,14 @@ It holds no document state of its own. The host owns the deck and its undo histo
 | onActiveSlideChange | `(slideId: string) => void` | None | Called when the user picks a slide. |
 | status | `string` | None | A host message for the polite status line. Shown instead of the editor's own messages while set. |
 | onAsk | `(context: DeckAskContext) => void` | None | Shows an **Ask AI** button next to the floating toolbar of the selected element. See "Ask AI" below. |
-| sheets | `SheetChoice[]` | None | Spreadsheets (`{ id, title }`) a chart can take its data from. With `resolveChartSource`, the chart settings get a **Data** menu (Typed in, or one of the sheets). |
-| resolveChartSource | `(source: ChartSource) => ResolvedChart \| null` | None | Reads a sourced chart's rows (`{ seriesLabel?, data: { label, value }[] }`) from the host's sheet; `null` when the sheet or range can't be read. Called on every render, so keep it cheap. |
+| chartData | `ChartData` | None | `{ sheets, resolve }`: the spreadsheets (`{ id, title }[]`) a chart can take its data from, and a function that reads a sourced chart's rows (`{ seriesLabel?, data: { label, value }[] }`), returning `null` when the sheet or range can't be read. `resolve` runs on every render, so keep it cheap. Adds a **Data** menu (Typed in, or one of the sheets) to the chart settings. |
 | className | `string` | `''` | Extra classes on the root. The editor fills its container, so give the container or this a height. |
 
 Extends native `<div>` attributes (except `onChange`).
 
 ## Charts linked to a sheet
 
-A chart element can carry `source: { sheetId, range }` (A1 notation) instead of typed-in rows. The editor stays free of any spreadsheet code: the host passes `sheets` (the choices) and `resolveChartSource` (reads the rows), and the chart settings gain a **Data** menu (Typed in, or a sheet by title); choosing a sheet adds a range field and hides the typed-in rows. The editor renders and exports the deck with each sourced chart's rows replaced by what `resolveChartSource` returns, so the viewer, Present and every export see live data. `data` stays on the element as the last snapshot and is what shows when the source returns `null`. A deck chart is one series; a host that reads a multi-column range uses the first value column. Agents set it through an ordinary `updateElement` patch (`source`), described in `DECK_REFERENCE`.
+A chart element can carry `source: { sheetId, range }` (A1 notation) instead of typed-in rows. The editor stays free of any spreadsheet code: the host passes `chartData` (the sheet choices and a `resolve` function that reads the rows), and the chart settings gain a **Data** menu (Typed in, or a sheet by title); choosing a sheet adds a range field and hides the typed-in rows. The editor renders and exports the deck with each sourced chart's rows replaced by what `chartData.resolve` returns, so the viewer, Present and every export see live data. `data` stays on the element as the last snapshot and is what shows when the source returns `null`. A deck chart is one series; a host that reads a multi-column range uses the first value column. Agents set it through an ordinary `updateElement` patch (`source`), described in `DECK_REFERENCE`.
 
 ## Floating format bar
 
@@ -149,7 +147,7 @@ The rail thumbnails are full-size slide stages, CSS-scaled down, and always moun
 
 | Key | Action |
 |---|---|
-| ⌘Z / ⇧⌘Z (Ctrl on Windows) | Undo / redo, when the host passes `onUndo`/`onRedo` |
+| ⌘Z / ⇧⌘Z (Ctrl on Windows) | Undo / redo, when the host passes `history` |
 | ⌘D | Duplicate the selected element |
 | Arrows (Shift for larger steps) | Move the selected element |
 | Enter / Escape | Start / stop editing text or a table; Escape also cancels a drawing tool |

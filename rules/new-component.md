@@ -103,6 +103,8 @@ If a component has zero npm dependencies and zero registry dependencies, still i
 
 Every component must have a live preview case in `app/_docs/components/ComponentLivePreview.tsx`. Add a `case` for the component's slug in the switch statement. Without it, the component detail page shows "No preview available for this component", and this is not acceptable.
 
+Previews live in components under `app/_docs/components/previews/`, grouped by kind (`Inputs`, `Display`, `Overlay`, `Layout`, `DragDrop`, `Forms`, `Editors`, `Navigation`; `Demos.tsx` holds the older stateful ones), and the case is one line: `return <{ComponentName}Preview />;`. The validator needs `<{ComponentName}` inside the case block, so name the component after the registry `name`. A scaffolded stub may start inline in the case, but move it out once it has state or grows past a few lines. When checking preview against `usage`, read the preview component, not the case.
+
 The preview must match the `usage` field in the registry entry exactly. If the preview shows `<Input label="Email" />`, the `usage` string must also show `<Input label="Email" />`. They are always kept in sync.
 
 **Whenever you change the live preview, update the `usage` string in the registry to match, and vice versa.** Divergence between the two is a bug. The easiest way to check: search for the component's slug in `app/_docs/registry/index.ts` and compare the `usage` field against the `case` block in `ComponentLivePreview.tsx` side by side.

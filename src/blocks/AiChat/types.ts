@@ -150,3 +150,11 @@ export interface SearchHit {
 	sender:         'user' | 'ai';
 	snippet:        string;
 }
+
+export interface ChatSettings {
+	displayName:       string;
+	model:             string;
+	effort:            string;
+	enabledConnectors: string[];
+	autoTitleEnabled:  boolean;
+}

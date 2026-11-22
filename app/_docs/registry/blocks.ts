@@ -782,166 +782,6 @@ export default function PricingSection() {
 		files: ['PricingSection/PricingSection.tsx'],
 	},
 	{
-		slug: 'notifications-panel',
-		name: 'Notifications panel',
-		category: 'Feedback',
-		description: 'A scrollable notifications feed with unread indicators (dot + weight, never color alone) and a mark-all-as-read action.',
-		usage: `'use client';
-
-import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
-import ScrollFade from '@/src/components/ScrollFade/ScrollFade';
-import Avatar from '@/src/components/Avatar/Avatar';
-import Button from '@/src/components/Button/Button';
-import { useState } from 'react';
-
-const INITIAL_NOTIFICATIONS = [
-  { id: 1, name: 'Alex Kim', message: 'Alex Kim commented on your PR', time: '2m ago', read: false },
-  { id: 2, name: 'Sam Chen', message: 'Sam Chen assigned you a task', time: '18m ago', read: false },
-  { id: 3, name: 'Jordan Park', message: 'Jordan Park mentioned you in a doc', time: '42m ago', read: false },
-  { id: 4, name: 'Riley Yu', message: 'Riley Yu approved your request', time: '1h ago', read: true },
-  { id: 5, name: 'Morgan Lee', message: 'Morgan Lee left a review', time: '3h ago', read: true },
-  { id: 6, name: 'Taylor Cruz', message: 'Taylor Cruz shared a file with you', time: '5h ago', read: true },
-  { id: 7, name: 'Casey Diaz', message: 'Casey Diaz replied to your comment', time: '1d ago', read: true },
-  { id: 8, name: 'Drew Nolan', message: 'Drew Nolan invited you to a project', time: '2d ago', read: true },
-];
-
-export default function NotificationsPanel() {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
-
-  const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
-  };
-
-  return (
-    <Card className="w-full max-w-md">
-      <CardHeader className="flex items-center justify-between">
-        <h3 className="text-base font-semibold text-text">Notifications</h3>
-        <Button variant="ghost" size="sm" onClick={markAllAsRead}>Mark all as read</Button>
-      </CardHeader>
-      <CardContent>
-        <ScrollFade direction="vertical" className="max-h-80">
-          <div className="flex flex-col divide-y divide-surface-border">
-            {notifications.map((n) => (
-              <div key={n.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-                <Avatar name={n.name} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <p className={n.read ? 'text-sm text-text-muted' : 'text-sm font-medium text-text'}>{n.message}</p>
-                  <p className="text-xs text-text-muted mt-0.5">{n.time}</p>
-                </div>
-                {!n.read && (
-                  <span className="flex items-center gap-1.5 mt-1.5 shrink-0">
-                    <span className="w-2 h-2 rounded-full bg-brand" aria-hidden="true" />
-                    <span className="sr-only">Unread</span>
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </ScrollFade>
-      </CardContent>
-    </Card>
-  );
-}`,
-		dependencies: [],
-		registryDependencies: ['card', 'scroll-fade', 'avatar', 'button'],
-		files: ['NotificationsPanel/NotificationsPanel.tsx'],
-	},
-	{
-		slug: 'team-grid',
-		name: 'Team grid',
-		category: 'Display',
-		description: 'A responsive "meet the team" grid of member cards with avatar, role, and department badge.',
-		usage: `'use client';
-
-import Badge from '@/src/components/Badge/Badge';
-import { Card, CardContent } from '@/src/components/Card/Card';
-import Avatar from '@/src/components/Avatar/Avatar';
-
-const TEAM_MEMBERS = [
-  { name: 'Ava Thompson', role: 'Design Lead', department: 'Design', variant: 'default' },
-  { name: 'Noah Martinez', role: 'Senior Engineer', department: 'Engineering', variant: 'success' },
-  { name: 'Priya Sharma', role: 'Product Manager', department: 'Product', variant: 'warning' },
-  { name: 'Liam Chen', role: 'Frontend Engineer', department: 'Engineering', variant: 'success' },
-  { name: 'Sofia Rossi', role: 'UX Designer', department: 'Design', variant: 'default' },
-  { name: 'Ethan Brooks', role: 'Growth Marketing', department: 'Marketing', variant: 'outline' },
-];
-
-export default function TeamGrid() {
-  return (
-    <div className="flex flex-col gap-5 w-full">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-2xl font-semibold text-text">Meet the team</h2>
-        <p className="text-sm text-text-muted">The people designing and building the product every day.</p>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {TEAM_MEMBERS.map((member) => (
-          <Card key={member.name}>
-            <CardContent className="flex flex-col items-center gap-2 text-center">
-              <Avatar name={member.name} size="lg" />
-              <p className="text-sm font-medium text-text">{member.name}</p>
-              <p className="text-xs text-text-muted">{member.role}</p>
-              <Badge variant={member.variant}>{member.department}</Badge>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}`,
-		dependencies: [],
-		registryDependencies: ['badge', 'card', 'avatar'],
-		files: ['TeamGrid/TeamGrid.tsx'],
-	},
-	{
-		slug: 'chart-card',
-		name: 'Chart card',
-		category: 'Dashboards',
-		description: 'A single, self-contained stat card with an embedded trend chart: the kind of card you drop into any dashboard grid.',
-		usage: `'use client';
-
-import { Card, CardContent, CardHeader } from '@/src/components/Card/Card';
-import { AreaChart } from '@/src/components/Charts/Charts';
-import CountUp from '@/src/components/CountUp/CountUp';
-import Badge from '@/src/components/Badge/Badge';
-
-const MAU_DATA = [
-  { month: 'Jan', users: 18200 },
-  { month: 'Feb', users: 19100 },
-  { month: 'Mar', users: 20400 },
-  { month: 'Apr', users: 21800 },
-  { month: 'May', users: 23300 },
-  { month: 'Jun', users: 24800 },
-];
-
-export default function ChartCard() {
-  return (
-    <Card className="max-w-sm w-full">
-      <CardHeader>
-        <p className="text-xs text-text-muted">Monthly active users</p>
-        <div className="flex items-baseline gap-2 mt-1">
-          <p className="text-2xl font-semibold text-text">
-            <CountUp value={24800} separator="," duration={1400} />
-          </p>
-          <Badge variant="success">+12.4%</Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <AreaChart
-          data={MAU_DATA}
-          xKey="month"
-          series={[{ key: 'users', label: 'Monthly active users' }]}
-          height={140}
-          showLegend={false}
-        />
-      </CardContent>
-    </Card>
-  );
-}`,
-		dependencies: [],
-		registryDependencies: ['card', 'charts', 'count-up', 'badge'],
-		files: ['ChartCard/ChartCard.tsx'],
-	},
-	{
 		slug: 'ai-chat',
 		name: 'AI chat',
 		category: 'AI',
@@ -950,15 +790,15 @@ export default function ChartCard() {
 
 import { describeAttachments, buildHistory, buildPrompt, collectArtifacts, findLastUserMessageId, hasPrecedingUserMessage, slideReference, DRAFT_TITLE_MAX_LENGTH } from '@/src/blocks/AiChat/messageHelpers';
 import { Sidebar, SidebarButton, SidebarFooter, SidebarHeader, SidebarSection, SidebarSkeleton } from '@/src/components/Sidebar/Sidebar';
-import { PlusIcon, PencilIcon, TrashIcon, ReplyIcon, SearchIcon, ChevronRightIcon, MenuIcon, FileIcon } from '@/src/blocks/AiChat/icons';
-import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '@/src/components/Modal/Modal';
+import { PencilIcon, TrashIcon, MenuIcon, FileIcon } from '@/src/blocks/AiChat/icons';
+import { DeleteChatModal } from '@/src/blocks/AiChat/DeleteChatModal';
 import { MessageActionsRow, ChatMessageRow, buildVersionNav, Divider, DeckCard, ArtifactCard } from '@/src/blocks/AiChat/MessageRow';
-import type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, SearchHit, MessageAttachment } from '@/src/blocks/AiChat/types';
-import CommandPalette, { CommandGroup, CommandItem } from '@/src/components/CommandPalette/CommandPalette';
-import { APP_NAME, COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, CONNECTORS, SLIDES_PROMPT } from '@/src/blocks/AiChat/constants';
+import type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, ChatSettings, SearchHit, MessageAttachment } from '@/src/blocks/AiChat/types';
+import { ChatSearch } from '@/src/blocks/AiChat/ChatSearch';
+import { APP_NAME, COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, SLIDES_PROMPT } from '@/src/blocks/AiChat/constants';
 import { Resizable, ResizablePanel, ResizableHandle } from '@/src/components/Resizable/Resizable';
 import { FormEvent, KeyboardEvent, ReactNode, useEffect, useRef, useState } from 'react';
-import { fetchChats, fetchThread, searchMessages, buildSearchCorpus } from '@/src/blocks/AiChat/chatApi';
+import { fetchChats, fetchThread } from '@/src/blocks/AiChat/chatApi';
 import { deckBefore, deckDocKey, resolveDeckEdit, useLiveDeck } from '@/src/blocks/AiChat/useLiveDeck';
 import { type CommandOption } from '@/src/components/CommandInput/CommandInput';
 import type { DeckAskContext } from '@/src/components/DeckEditor/askcontext';
@@ -968,9 +808,9 @@ import { Greeting, TypingPhrase, USER_NAME } from '@/src/blocks/AiChat/Phrases';
 import Spinner from '@/src/components/Spinner/Spinner';
 import { useConversation } from '@/src/blocks/AiChat/useConversation';
 import Button from '@/src/components/Button/Button';
-import Avatar from '@/src/components/Avatar/Avatar';
-import Switch from '@/src/components/Switch/Switch';
-import Select from '@/src/components/Select/Select';
+import { SettingsModal } from '@/src/blocks/AiChat/SettingsModal';
+import { SidebarTools } from '@/src/blocks/AiChat/SidebarTools';
+import { ProfileCard } from '@/src/blocks/AiChat/ProfileCard';
 import { resolveSheetChart } from '@/src/blocks/AiChat/chartSource';
 import Input from '@/src/components/Input/Input';
 import { useSheetPanel } from '@/src/blocks/AiChat/useSheetPanel';
@@ -983,7 +823,6 @@ import Composer from '@/src/blocks/AiChat/Composer';
 
 export type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, AiChatHistoryMessage, AiChatReply, SearchCorpusEntry, SearchHit, MessageAttachment, ChatDeck, DeckEdit, DeckEditStep, ChatSheet, SheetEdit, SheetEditStep, ChatArtifact, ArtifactKind } from '@/src/blocks/AiChat/types';
 
-const SEARCH_DEBOUNCE_MS = 200;
 
 const SKELETON_CHAT_ROWS = 7;
 
@@ -1027,14 +866,15 @@ export const AiChat = () => {
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [sidebarOpen, setSidebarOpen] = useState(false);
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-	const [displayName, setDisplayName] = useState(USER_NAME);
-	const [model, setModel] = useState(MODEL_OPTIONS[1].value);
-	const [effort, setEffort] = useState(EFFORT_OPTIONS[1].value);
-	const [enabledConnectors, setEnabledConnectors] = useState<string[]>([]);
-	const [autoTitleEnabled, setAutoTitleEnabled] = useState(true);
+	const [settings, setSettings] = useState<ChatSettings>({
+		displayName:       USER_NAME,
+		model:             MODEL_OPTIONS[1].value,
+		effort:            EFFORT_OPTIONS[1].value,
+		enabledConnectors: [],
+		autoTitleEnabled:  true,
+	});
+	const { displayName, model, effort, autoTitleEnabled } = settings;
 	const [searchOpen, setSearchOpen] = useState(false);
-	const [searchHits, setSearchHits] = useState<SearchHit[]>([]);
-	const [searchLoading, setSearchLoading] = useState(false);
 	const [pendingScrollMessageId, setPendingScrollMessageId] = useState<number | null>(null);
 	const [editingMessageId, setEditingMessageId] = useState<number | null>(null);
 	const [editDraft, setEditDraft] = useState('');
@@ -1068,8 +908,6 @@ export const AiChat = () => {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const contentRef = useRef<HTMLDivElement>(null);
 	const searchTriggerRef = useRef<HTMLButtonElement>(null);
-	const searchTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-	const searchAbortRef = useRef<AbortController | null>(null);
 	const copyNoticeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const mountedRef = useRef(true);
 	const nextChatId = useRef(1);
@@ -1136,7 +974,12 @@ export const AiChat = () => {
 
 	const activeChat = chats.find((c) => c.id === activeId) ?? null;
 	const modelLabel = MODEL_OPTIONS.find((o) => o.value === model)?.label ?? MODEL_OPTIONS[0].label;
-	const modelPicker = { model, effort, onModelChange: setModel, onEffortChange: setEffort };
+	const modelPicker = {
+		model,
+		effort,
+		onModelChange:  (next: string) => setSettings((prev) => ({ ...prev, model: next })),
+		onEffortChange: (next: string) => setSettings((prev) => ({ ...prev, effort: next })),
+	};
 	const isTyping = activeId !== null && mainConversation.typingId === activeId;
 	const isGenerating = isTyping || (activeId !== null && mainConversation.streamingId === activeId);
 	const isThreadTyping = activeThread !== null && threadConversation.typingId === activeThread.threadId;
@@ -1200,19 +1043,7 @@ export const AiChat = () => {
 		return () => {
 			mountedRef.current = false;
 			clearTimeout(copyNoticeTimerRef.current);
-			clearTimeout(searchTimerRef.current);
-			searchAbortRef.current?.abort();
 		};
-	}, []);
-
-	useEffect(() => {
-		const handleShortcut = (e: globalThis.KeyboardEvent) => {
-			if(!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'k') return;
-			e.preventDefault();
-			setSearchOpen(true);
-		};
-		window.addEventListener('keydown', handleShortcut);
-		return () => window.removeEventListener('keydown', handleShortcut);
 	}, []);
 
 	useEffect(() => {
@@ -1223,40 +1054,6 @@ export const AiChat = () => {
 		// eslint-disable-next-line react-hooks/set-state-in-effect
 		setPendingScrollMessageId(null);
 	}, [pendingScrollMessageId, activeId, activeThread, threadMessages]);
-
-	const handleSearchQueryChange = (query: string) => {
-		clearTimeout(searchTimerRef.current);
-		searchAbortRef.current?.abort();
-
-		const trimmed = query.trim();
-		if(!trimmed)
-		{
-			setSearchHits([]);
-			setSearchLoading(false);
-			return;
-		}
-
-		setSearchLoading(true);
-		searchTimerRef.current = setTimeout(() => {
-			const controller = new AbortController();
-			searchAbortRef.current = controller;
-			searchMessages(trimmed, buildSearchCorpus(chats, threadMessages), controller.signal)
-				.then((hits) => {
-					setSearchHits(hits);
-					setSearchLoading(false);
-				})
-				.catch((err) => {
-					if(err.name === 'AbortError') return;
-					setSearchHits([]);
-					setSearchLoading(false);
-				});
-		}, SEARCH_DEBOUNCE_MS);
-	};
-
-	const handleCloseSearch = () => {
-		setSearchOpen(false);
-		searchTriggerRef.current?.focus();
-	};
 
 	const handleSelectHit = (hit: SearchHit) => {
 		shouldAutoScrollRef.current = false;
@@ -1318,13 +1115,8 @@ export const AiChat = () => {
 		if(editingId === id) setEditingId(null);
 	};
 
-	const handleDeleteOpenChange = (open: boolean) => {
-		if(!open) setChatPendingDeletion(null);
-	};
-
-	const handleConfirmDelete = () => {
-		if(!chatPendingDeletion) return;
-		handleDelete(chatPendingDeletion.id);
+	const handleConfirmDelete = (chat: ChatEntry) => {
+		handleDelete(chat.id);
 		setChatPendingDeletion(null);
 	};
 
@@ -1805,10 +1597,9 @@ export const AiChat = () => {
 		/>
 	) : null;
 
-	const chatSheetMap = sheetPanel.sheetsOf(activeChat?.id);
-	const chatSheets = [...chatSheetMap];
+	const chatSheets = openDocKey && openDeck ? sheetPanel.sheetsOf(activeChat?.id) : null;
 
-	const deckPanel = openDocKey && openDeck ? (
+	const deckPanel = chatSheets && openDocKey && openDeck ? (
 		<DeckPanel
 			inDrawer={isMobile}
 			key={openDocKey}
@@ -1816,16 +1607,15 @@ export const AiChat = () => {
 			activity={deckActivity}
 			note={deckNote}
 			onChange={(next, coalesceKey) => liveDeck.change(openDocKey, next, coalesceKey)}
-			onUndo={() => liveDeck.undo(openDocKey)}
-			onRedo={() => liveDeck.redo(openDocKey)}
-			canUndo={liveDeck.canUndo(openDocKey)}
-			canRedo={liveDeck.canRedo(openDocKey)}
+			history={{ undo: () => liveDeck.undo(openDocKey), redo: () => liveDeck.redo(openDocKey), canUndo: liveDeck.canUndo(openDocKey), canRedo: liveDeck.canRedo(openDocKey) }}
 			expanded={expanded}
 			onToggleExpand={handleToggleExpand}
 			onClose={handleCloseDeck}
 			onAsk={handleAskAboutSlide}
-			sheets={chatSheets.map(([id, sheet]) => ({ id, title: sheet.title }))}
-			resolveChartSource={source => resolveSheetChart(chatSheetMap, source)}
+			chartData={{
+				sheets:  Array.from(chatSheets, ([id, sheet]) => ({ id, title: sheet.title })),
+				resolve: source => resolveSheetChart(chatSheets, source),
+			}}
 		/>
 	) : null;
 
@@ -1859,52 +1649,7 @@ export const AiChat = () => {
 					<SidebarHeader>
 						<span className='truncate px-1 text-sm font-semibold text-text'>{APP_NAME}</span>
 					</SidebarHeader>
-					{!railCollapsed && (
-						<div className='flex items-center gap-1.5'>
-							<button
-							ref={searchTriggerRef}
-							type='button'
-							aria-label='Search all messages'
-							aria-keyshortcuts='Meta+K Control+K'
-							onClick={() => setSearchOpen(true)}
-							className={[
-								'flex h-8 min-w-0 flex-1 items-center gap-2 rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border px-2.5 text-sm text-text-subtle',
-								'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
-								'hover:bg-surface-hover hover:text-text-muted',
-								'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2',
-							].join(' ')}
-						>
-							<SearchIcon />
-							<span className='min-w-0 flex-1 truncate text-left'>Search…</span>
-							<kbd className='shrink-0 rounded-[var(--radius-sm)] border-[length:var(--border-width)] border-surface-border px-1.5 py-0.5 text-[11px] font-medium text-text-muted select-none'>⌘K</kbd>
-						</button>
-						<button
-							type='button'
-							aria-label='Start a new chat'
-							onClick={handleNewChat}
-							className='flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
-						>
-							<PlusIcon />
-						</button>
-						</div>
-					)}
-					{railCollapsed && (
-						<div className='flex flex-col items-center gap-2'>
-							<Button variant='ghost' size='icon-sm' aria-label='Start a new chat' onClick={handleNewChat}>
-								<PlusIcon />
-							</Button>
-							<button
-								ref={searchTriggerRef}
-								type='button'
-								aria-label='Search all messages'
-								aria-keyshortcuts='Meta+K Control+K'
-								onClick={() => setSearchOpen(true)}
-								className='flex h-8 w-8 items-center justify-center rounded-[var(--radius)] text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
-							>
-								<SearchIcon />
-							</button>
-						</div>
-					)}
+					<SidebarTools collapsed={railCollapsed} searchRef={searchTriggerRef} onSearch={() => setSearchOpen(true)} onNewChat={handleNewChat} />
 					<SidebarSection label='Chats'>
 						{chats.map((chat) => (
 							editingId === chat.id ? (
@@ -1957,29 +1702,7 @@ export const AiChat = () => {
 						)}
 					</SidebarSection>
 					<SidebarFooter>
-						<button
-							type='button'
-							aria-haspopup='dialog'
-							aria-label={railCollapsed ? \`\${displayName}, settings\` : undefined}
-							onClick={() => setSettingsOpen(true)}
-							className={[
-								\`flex w-full items-center rounded-[var(--radius)] border-[length:var(--border-width)] border-surface-border bg-surface-panel text-left shadow-[var(--shadow-sm)] \${railCollapsed ? 'justify-center p-1' : 'gap-2.5 p-2'}\`,
-								'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
-								'hover:border-surface-border-hover hover:bg-surface-hover',
-								'focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
-							].join(' ')}
-						>
-							<Avatar name={displayName} shape='square' size='md' />
-							{!railCollapsed && (
-								<>
-									<span className='flex min-w-0 flex-1 flex-col items-start'>
-										<span className='w-full truncate text-sm font-medium text-text'>{displayName}</span>
-										<span className='w-full truncate text-xs text-text-muted'>{modelLabel} model</span>
-									</span>
-									<ChevronRightIcon className='shrink-0 text-text-muted' />
-								</>
-							)}
-						</button>
+						<ProfileCard name={displayName} modelLabel={modelLabel} collapsed={railCollapsed} onOpen={() => setSettingsOpen(true)} />
 					</SidebarFooter>
 				</Sidebar>
 				</SidebarSlot>
@@ -2188,88 +1911,18 @@ export const AiChat = () => {
 				</Drawer>
 			)}
 
-			<Modal open={chatPendingDeletion !== null} onOpenChange={handleDeleteOpenChange}>
-				<ModalClose />
-				<ModalHeader>
-					<ModalTitle>Delete chat</ModalTitle>
-				</ModalHeader>
-				<ModalContent>
-					{\`Delete "\${chatPendingDeletion?.title}"? This can't be undone.\`}
-				</ModalContent>
-				<ModalFooter>
-					<Button variant='secondary' onClick={() => setChatPendingDeletion(null)}>Cancel</Button>
-					<Button variant='destructive' onClick={handleConfirmDelete}>Delete</Button>
-				</ModalFooter>
-			</Modal>
+			<DeleteChatModal chat={chatPendingDeletion} onCancel={() => setChatPendingDeletion(null)} onConfirm={handleConfirmDelete} />
 
-			<Modal size='lg' open={settingsOpen} onOpenChange={setSettingsOpen}>
-				<ModalClose />
-				<ModalHeader>
-					<ModalTitle>AI chat settings</ModalTitle>
-				</ModalHeader>
-				<ModalContent>
-					<div className='grid grid-cols-2 gap-x-8 gap-y-5'>
-						<Input
-							label='Display name'
-							value={displayName}
-							onChange={(e) => setDisplayName(e.target.value)}
-						/>
-						<Select
-							label='Model'
-							options={MODEL_OPTIONS}
-							value={model}
-							onChange={setModel}
-						/>
-						<div className='col-span-2 flex flex-col gap-3'>
-							<p className='text-sm font-medium text-text'>Connectors</p>
-							{CONNECTORS.map((connector) => (
-								<Switch
-									key={connector.id}
-									checked={enabledConnectors.includes(connector.id)}
-									onCheckedChange={(checked) => setEnabledConnectors((prev) => (checked ? [...prev, connector.id] : prev.filter((id) => id !== connector.id)))}
-									label={connector.label}
-									hint={connector.description}
-								/>
-							))}
-						</div>
-						<div className='col-span-2'>
-							<Switch
-								checked={autoTitleEnabled}
-								onCheckedChange={setAutoTitleEnabled}
-								label='Auto-title new chats'
-								hint='Names a new chat after its first message instead of leaving it as "New chat".'
-							/>
-						</div>
-					</div>
-				</ModalContent>
-				<ModalFooter>
-					<Button onClick={() => setSettingsOpen(false)}>Done</Button>
-				</ModalFooter>
-			</Modal>
+			<SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} settings={settings} onChange={setSettings} />
 
-			<CommandPalette
+			<ChatSearch
 				open={searchOpen}
-				onClose={handleCloseSearch}
-				placeholder='Search every chat and thread…'
-				onQueryChange={handleSearchQueryChange}
-				filter={false}
-				loading={searchLoading}
-			>
-				{chats.filter((c) => searchHits.some((h) => h.chatId === c.id)).map((chat) => (
-					<CommandGroup key={chat.id} label={chat.title}>
-						{searchHits.filter((h) => h.chatId === chat.id).map((hit) => (
-							<CommandItem
-								key={\`\${hit.threadId ?? 'main'}-\${hit.messageId}\`}
-								value={hit.snippet}
-								icon={hit.threadId ? <ReplyIcon /> : undefined}
-								onSelect={() => handleSelectHit(hit)}
-							>
-								{hit.snippet}
-							</CommandItem>
-						))}
-					</CommandGroup>
-				))}
-			</CommandPalette>
+				onOpenChange={setSearchOpen}
+				chats={chats}
+				threadMessages={threadMessages}
+				onSelectHit={handleSelectHit}
+				returnFocusRef={searchTriggerRef}
+			/>
 		</div>
 	);
 };
@@ -2289,6 +1942,11 @@ export default AiChat;
 			{ path: 'AiChat/useLiveDeck.ts', kind: 'hook' },
 			{ path: 'AiChat/useLiveSheet.ts', kind: 'hook' },
 			{ path: 'AiChat/useSheetPanel.tsx', kind: 'hook' },
+			'AiChat/SettingsModal.tsx',
+			'AiChat/DeleteChatModal.tsx',
+			'AiChat/ChatSearch.tsx',
+			'AiChat/SidebarTools.tsx',
+			'AiChat/ProfileCard.tsx',
 			{ path: 'AiChat/chartSource.ts', kind: 'hook' },
 			{ path: 'AiChat/useIsMobile.ts', kind: 'hook' },
 			'AiChat/CLAUDE.md',
@@ -3974,100 +3632,6 @@ export default function AuthFormMagicLinkExample() {
 		hidden: true,
 	},
 	{
-		slug: 'chart-card-radar',
-		name: 'Team skill radar',
-		category: 'Dashboards',
-		description: 'Same card shell, a RadarChart instead: comparing team scores against target benchmarks across skill areas.',
-		usage: `'use client';
-
-import { Card, CardContent, CardHeader, RadarChart, CountUp, Badge } from '@components/ui';
-
-const SKILL_DATA = [
-  { skill: 'Frontend', team: 88, target: 80 },
-  { skill: 'Backend', team: 84, target: 80 },
-  { skill: 'Design', team: 90, target: 75 },
-  { skill: 'Testing', team: 68, target: 80 },
-  { skill: 'DevOps', team: 78, target: 75 },
-  { skill: 'Docs', team: 64, target: 70 },
-];
-
-const SKILL_SERIES = [
-  { key: 'team', label: 'Team' },
-  { key: 'target', label: 'Target' },
-];
-
-export default function ChartCardRadarExample() {
-  return (
-    <Card className="max-w-sm w-full">
-      <CardHeader>
-        <p className="text-xs text-text-muted">Team skill coverage</p>
-        <div className="flex items-baseline gap-2 mt-1">
-          <p className="text-2xl font-semibold text-text">
-            <CountUp value={79} suffix="%" duration={1400} />
-          </p>
-          <Badge variant="warning">2 gaps</Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <RadarChart data={SKILL_DATA} xKey="skill" series={SKILL_SERIES} height={200} />
-      </CardContent>
-    </Card>
-  );
-}`,
-		dependencies: [],
-		registryDependencies: ['card', 'charts', 'count-up', 'badge'],
-		files: ['ChartCardRadar/ChartCardRadar.tsx'],
-		hidden: true,
-	},
-	{
-		slug: 'chart-card-bar',
-		name: 'Top products',
-		category: 'Dashboards',
-		description: 'A ranking variant of the same card shell: a BarChart totaling revenue across a product lineup.',
-		usage: `'use client';
-
-import { Card, CardContent, CardHeader, BarChart, CountUp, Badge } from '@components/ui';
-
-const PRODUCT_DATA = [
-  { product: 'Core', revenue: 42500 },
-  { product: 'Analytics', revenue: 31200 },
-  { product: 'Sync', revenue: 24800 },
-  { product: 'Mobile', revenue: 18100 },
-  { product: 'API', revenue: 12400 },
-];
-
-const TOTAL_REVENUE = PRODUCT_DATA.reduce((sum, p) => sum + p.revenue, 0);
-
-export default function ChartCardBarExample() {
-  return (
-    <Card className="max-w-sm w-full">
-      <CardHeader>
-        <p className="text-xs text-text-muted">Top products by revenue</p>
-        <div className="flex items-baseline gap-2 mt-1">
-          <p className="text-2xl font-semibold text-text">
-            <CountUp value={TOTAL_REVENUE} prefix="$" separator="," duration={1400} />
-          </p>
-          <Badge variant="success">+8.2%</Badge>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <BarChart
-          data={PRODUCT_DATA}
-          xKey="product"
-          series={[{ key: 'revenue', label: 'Revenue' }]}
-          height={160}
-          showLegend={false}
-        />
-      </CardContent>
-    </Card>
-  );
-}`,
-		dependencies: [],
-		registryDependencies: ['card', 'charts', 'count-up', 'badge'],
-		files: ['ChartCardBar/ChartCardBar.tsx'],
-		hidden: true,
-	},
-	{
 		slug: 'pricing-section-usage',
 		name: 'Usage-based pricing',
 		category: 'Marketing',
@@ -4126,156 +3690,6 @@ export default function Example() {
 		dependencies: [],
 		registryDependencies: ['card', 'slider', 'button', 'badge'],
 		files: ['PricingSectionUsage/PricingSectionUsage.tsx'],
-		hidden: true,
-	},
-	{
-		slug: 'notifications-panel-actionable',
-		name: 'Filterable with actions',
-		category: 'Feedback',
-		description: 'An All/Unread filter plus per-notification mark-as-read and dismiss actions, with type icons and an empty state.',
-		usage: `'use client';
-
-import { Tabs, TabsContent, TabsList, TabsTrigger, Card, CardContent, CardHeader, ScrollFade, Button, Badge } from '@components/ui';
-import { useState } from 'react';
-
-const INITIAL_NOTIFICATIONS = [
-  { id: 1, type: 'mention', message: 'Alex Kim mentioned you in "Q3 roadmap"', time: '2m ago', read: false },
-  { id: 2, type: 'task', message: 'Design review assigned to you', time: '18m ago', read: false },
-  { id: 3, type: 'system', message: 'Your weekly usage report is ready', time: '1h ago', read: false },
-  { id: 4, type: 'mention', message: 'Sam Chen replied to your comment', time: '3h ago', read: true },
-  { id: 5, type: 'task', message: 'Deploy checklist marked complete', time: '5h ago', read: true },
-  { id: 6, type: 'system', message: 'New login from a Chrome browser', time: '1d ago', read: true },
-];
-
-const MentionIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
-  </svg>
-);
-
-const TaskIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <rect x="3" y="4" width="18" height="18" rx="2" />
-    <path d="m9 12 2 2 4-4" />
-  </svg>
-);
-
-const SystemIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
-    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-  </svg>
-);
-
-const CheckIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <polyline points="20 6 9 17 4 12" />
-  </svg>
-);
-
-const CloseIcon = () => (
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    <path d="M18 6 6 18" />
-    <path d="m6 6 12 12" />
-  </svg>
-);
-
-const CaughtUpIcon = () => (
-  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-success" aria-hidden="true">
-    <circle cx="12" cy="12" r="10" />
-    <path d="m8 12 3 3 5-6" />
-  </svg>
-);
-
-const TYPE_ICON = {
-  mention: <MentionIcon />,
-  task: <TaskIcon />,
-  system: <SystemIcon />,
-};
-
-const TYPE_STYLE = {
-  mention: 'bg-brand/15 text-brand',
-  task: 'bg-success-bg text-success',
-  system: 'bg-warning-bg text-warning',
-};
-
-export default function Example() {
-  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
-  const [filter, setFilter] = useState('all');
-
-  const unreadCount = notifications.filter((n) => !n.read).length;
-
-  const markAsRead = (id) => {
-    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
-  };
-
-  const dismiss = (id) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
-
-  const renderList = (items) => {
-    if (items.length === 0) {
-      return (
-        <div className="flex flex-col items-center gap-2 py-10 text-center">
-          <CaughtUpIcon />
-          <p className="text-sm text-text-muted">You're all caught up.</p>
-        </div>
-      );
-    }
-
-    return (
-      <ScrollFade direction="vertical" className="max-h-72">
-        <div className="flex flex-col divide-y divide-surface-border">
-          {items.map((n) => (
-            <div key={n.id} className="flex items-start gap-3 py-3 first:pt-0 last:pb-0">
-              <span className={\`flex items-center justify-center w-7 h-7 rounded-full shrink-0 \${TYPE_STYLE[n.type]}\`}>
-                {TYPE_ICON[n.type]}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className={n.read ? 'text-sm text-text-muted' : 'text-sm font-medium text-text'}>{n.message}</p>
-                <p className="text-xs text-text-muted mt-0.5">{n.time}</p>
-              </div>
-              <div className="flex items-center gap-1 shrink-0">
-                {!n.read && (
-                  <Button variant="ghost" size="icon" className="h-7 w-7" aria-label={\`Mark as read: \${n.message}\`} onClick={() => markAsRead(n.id)}>
-                    <CheckIcon />
-                  </Button>
-                )}
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-text-muted hover:text-danger" aria-label={\`Dismiss: \${n.message}\`} onClick={() => dismiss(n.id)}>
-                  <CloseIcon />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </ScrollFade>
-    );
-  };
-
-  return (
-    <Tabs value={filter} onValueChange={setFilter}>
-      <Card className="w-full max-w-md">
-        <CardHeader className="flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base font-semibold text-text">Notifications</h3>
-            {unreadCount > 0 && <Badge variant="default">{unreadCount} new</Badge>}
-          </div>
-          <TabsList>
-            <TabsTrigger value="all">All</TabsTrigger>
-            <TabsTrigger value="unread">Unread</TabsTrigger>
-          </TabsList>
-        </CardHeader>
-        <CardContent>
-          <TabsContent value="all" className="pt-0">{renderList(notifications)}</TabsContent>
-          <TabsContent value="unread" className="pt-0">{renderList(notifications.filter((n) => !n.read))}</TabsContent>
-        </CardContent>
-      </Card>
-    </Tabs>
-  );
-}`,
-		dependencies: [],
-		registryDependencies: ['tabs', 'card', 'scroll-fade', 'button', 'badge'],
-		files: ['NotificationsPanelActionable/NotificationsPanelActionable.tsx'],
 		hidden: true,
 	},
 	{
@@ -4690,10 +4104,12 @@ const LoadedDeck = ({ doc }: { doc: DeckDocument }) => {
 		<DeckEditor
 			deck={deck}
 			onChange={(next, coalesceKey) => dispatch({ type: 'change', deck: next, coalesceKey })}
-			onUndo={() => dispatch({ type: 'undo' })}
-			onRedo={() => dispatch({ type: 'redo' })}
-			canUndo={history.past.length > 0}
-			canRedo={history.future.length > 0}
+			history={{
+				undo:    () => dispatch({ type: 'undo' }),
+				redo:    () => dispatch({ type: 'redo' }),
+				canUndo: history.past.length > 0,
+				canRedo: history.future.length > 0,
+			}}
 			status={status}
 			toolbarEnd={(
 				<>

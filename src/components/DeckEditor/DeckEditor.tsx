@@ -1,10 +1,10 @@
 'use client';
 
 import { HTMLAttributes, KeyboardEvent, ReactNode, useCallback, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import type { ChartSource, Deck, DeckElement, ResolvedChart, SheetChoice, Slide } from './deck';
-import { SLIDE_HEIGHT, SLIDE_WIDTH, duplicateSlide, linkChartSources, newId } from './deck';
+import { SLIDE_HEIGHT, SLIDE_WIDTH, duplicateSlide, keepStoredChartData, linkChartSources, newId } from './deck';
 import { EDITABLE_TYPES, GRID_SIZE, TOOL_LABELS, createFromDraw } from './elements';
 import { askContext, selectedEditorText, type DeckAskContext } from './askcontext';
+import type { ChartData, Deck, DeckElement, EditHistory, Slide } from './deck';
 import { resolveTheme, themeStageStyle } from './themes';
 import { SlideCanvas } from '../SlideCanvas/SlideCanvas';
 import { createSlideFromLayout } from './layouts';
@@ -31,11 +31,8 @@ export interface DeckEditorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'o
 	deck:                 Deck;
 	/** Every edit, as the whole next deck. Changes sharing a `coalesceKey` in a row (a drag, typing) are one undo step. */
 	onChange:             (next: Deck, coalesceKey?: string) => void;
-	/** Omit `onUndo`/`onRedo` to hide the undo controls (e.g. when the host keeps no history). */
-	onUndo?:              () => void;
-	onRedo?:              () => void;
-	canUndo?:             boolean;
-	canRedo?:             boolean;
+	/** Omit to hide the undo controls (e.g. when the host keeps no history). */
+	history?:             EditHistory;
 	/** Host actions in the top-right cluster, before Present (e.g. a save status and a file menu). */
 	toolbarEnd?:          ReactNode;
 	/** Elements someone else is editing right now: each gets a pulsing outline and a tag. */
@@ -48,10 +45,8 @@ export interface DeckEditorProps extends Omit<HTMLAttributes<HTMLDivElement>, 'o
 	status?:              string;
 	/** Adds an "Ask AI" button beside the format toolbar. It reports the selected element, or the text highlighted inside one, so the host can send it to an agent. */
 	onAsk?:               (context: DeckAskContext) => void;
-	/** Spreadsheets a chart can take its data from. Give this with `resolveChartSource` to add a "Sheet" data option to the chart settings. */
-	sheets?:              SheetChoice[];
-	/** Reads a sourced chart's rows. Called on every render, so keep it cheap. Return null when the sheet or range can't be read. */
-	resolveChartSource?:  (source: ChartSource) => ResolvedChart | null;
+	/** Adds a Data menu to the chart settings so a chart can take its rows from a spreadsheet. */
+	chartData?:           ChartData;
 }
 
 type Zoom = 'fit' | number;
@@ -66,11 +61,9 @@ const ZOOM_MAX = 3;
 // measured height plus a gap, since they wrap to two rows in narrow editors.
 const FIT_PADDING = { x: 16, bottom: 16, belowToolbar: 8 };
 const DEFAULT_TOOLBAR_HEIGHT = 56;
-// Below this editor width (not window width), settings open in a drawer.
-// From this editor width up, settings get their own column beside the slide (288px, leaving the slide at least ~230px).
-// Below it there isn't room for both, so settings slide over the slide's right edge instead.
+// Editor width (not window width) from which settings get their own 288px column; below it they slide over the slide's right edge.
 const WIDE_MIN = 520;
-// Below this editor width the insert tools and the actions no longer fit on one row, so they share one bar instead of two.
+// Below this editor width the insert tools and actions share one bar.
 const COMPACT_MAX = 560;
 
 const BAR_CHROME = 'rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface p-1';
@@ -90,10 +83,10 @@ const isEmptyText = (html: string) => !new DOMParser().parseFromString(html, 'te
 
 /** A full slide deck editor. The host owns the deck and its undo history; see spec.md. */
 export const DeckEditor = ({
-	deck: authoredDeck, onChange, onUndo, onRedo, canUndo = false, canRedo = false, toolbarEnd, highlightIds = [], highlightLabel = 'AI',
-	activeSlideId: controlledSlideId, onActiveSlideChange, status: hostStatus, onAsk, sheets, resolveChartSource, className = '', ...props
+	deck: authoredDeck, onChange, history, toolbarEnd, highlightIds = [], highlightLabel = 'AI',
+	activeSlideId: controlledSlideId, onActiveSlideChange, status: hostStatus, onAsk, chartData, className = '', ...props
 }: DeckEditorProps) => {
-	const deck = useMemo(() => linkChartSources(authoredDeck, resolveChartSource), [authoredDeck, resolveChartSource]);
+	const deck = useMemo(() => linkChartSources(authoredDeck, chartData?.resolve), [authoredDeck, chartData]);
 	const [internalSlideId, setInternalSlideId] = useState(deck.slides[0].id);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [editingId, setEditingId] = useState<string | null>(null);
@@ -153,9 +146,9 @@ export const DeckEditor = ({
 	}, []);
 
 	const changeSlide = (update: (s: Slide) => Slide, coalesceKey?: string) =>
-		onChange({ ...deck, slides: deck.slides.map(s => (s.id === slide.id ? update(s) : s)) }, coalesceKey && `${slide.id}:${coalesceKey}`);
+		onChange({ ...authoredDeck, slides: authoredDeck.slides.map(s => (s.id === slide.id ? update(s) : s)) }, coalesceKey && `${slide.id}:${coalesceKey}`);
 
-	const setElements = (elements: DeckElement[], coalesceKey?: string) => changeSlide(s => ({ ...s, elements }), coalesceKey);
+	const setElements = (elements: DeckElement[], coalesceKey?: string) => changeSlide(s => ({ ...s, elements: keepStoredChartData(elements, s.elements) }), coalesceKey);
 
 	const patchElement = (id: string, patch: Partial<DeckElement>, coalesceKey?: string) =>
 		setElements(slide.elements.map(el => (el.id === id ? { ...el, ...patch } as DeckElement : el)), coalesceKey && `${id}:${coalesceKey}`);
@@ -174,9 +167,7 @@ export const DeckEditor = ({
 		setTool(null);
 	};
 
-	// A text box left empty when editing ends is removed, so a stray click with the
-	// text tool doesn't leave an invisible box behind. Layout boxes (with a
-	// placeholder) stay put even when empty, like slide-app placeholders.
+	// An emptied text box is removed so a stray click doesn't leave an invisible one; layout boxes (with a placeholder) stay.
 	const changeEditing = (id: string | null) => {
 		const previous = slide.elements.find(el => el.id === editingId);
 		if(previous?.type === 'text' && !previous.placeholder && previous.id !== id && isEmptyText(previous.html))
@@ -197,31 +188,30 @@ export const DeckEditor = ({
 	};
 
 	const insertSlideAt = (index: number, next: Slide) => {
-		onChange({ ...deck, slides: deck.slides.toSpliced(index, 0, next) });
+		onChange({ ...authoredDeck, slides: authoredDeck.slides.toSpliced(index, 0, next) });
 		goToSlide(next.id);
 	};
 
 	const slideActions: SlideActions = {
 		select:    goToSlide,
-		reorder:   slides => onChange({ ...deck, slides }),
+		reorder:   order => onChange({ ...authoredDeck, slides: order.map(s => authoredDeck.slides.find(a => a.id === s.id) ?? s) }),
 		addAt:     (index, layout = 'titleContent') => insertSlideAt(index, createSlideFromLayout(layout, { margin: theme.margin })),
 		duplicate: id =>
 		{
-			const index = deck.slides.findIndex(s => s.id === id);
-			insertSlideAt(index + 1, duplicateSlide(deck.slides[index]));
+			const index = authoredDeck.slides.findIndex(s => s.id === id);
+			insertSlideAt(index + 1, duplicateSlide(authoredDeck.slides[index]));
 		},
-		toggleSkip: id => onChange({ ...deck, slides: deck.slides.map(s => (s.id === id ? { ...s, skipped: !s.skipped } : s)) }),
+		toggleSkip: id => onChange({ ...authoredDeck, slides: authoredDeck.slides.map(s => (s.id === id ? { ...s, skipped: !s.skipped } : s)) }),
 		remove:    id =>
 		{
-			if(deck.slides.length <= 1) return;
-			const index = deck.slides.findIndex(s => s.id === id);
-			const slides = deck.slides.filter(s => s.id !== id);
-			onChange({ ...deck, slides });
+			if(authoredDeck.slides.length <= 1) return;
+			const index = authoredDeck.slides.findIndex(s => s.id === id);
+			const slides = authoredDeck.slides.filter(s => s.id !== id);
+			onChange({ ...authoredDeck, slides });
 			if(id === slide.id) goToSlide(slides[Math.min(index, slides.length - 1)].id);
 		},
 	};
 
-	// Skipped slides stay in the deck but are left out of the presentation.
 	const presentedSlides = deck.slides.filter(s => !s.skipped);
 
 	const stepZoom = (direction: 1 | -1) => {
@@ -247,21 +237,19 @@ export const DeckEditor = ({
 		if(!(e.metaKey || e.ctrlKey) || isTextInput(e.target)) return;
 		const key = e.key.toLowerCase();
 
-		if(key === 'z' && onUndo && onRedo) (e.shiftKey ? onRedo : onUndo)();
-		else if(key === 'y' && onRedo) onRedo();
+		if(key === 'z' && history) (e.shiftKey ? history.redo : history.undo)();
+		else if(key === 'y' && history) history.redo();
 		else if(key === 'd' && selected) duplicateSelected();
 		else return;
 
 		e.preventDefault();
 	};
 
-	// Rendered in the sidebar column when wide, or in a drawer in narrow editors.
 	const inspector = (
 		<Inspector
 			slide={slide}
 			themeRadius={theme.radius}
-			sheets={resolveChartSource ? sheets : undefined}
-			resolveChartSource={resolveChartSource}
+			chartData={chartData}
 			element={selected}
 			onPatch={(patch, key) => selected && patchElement(selected.id, patch, key)}
 			onSlide={(patch, key) => changeSlide(s => ({ ...s, ...patch }), key)}
@@ -293,7 +281,6 @@ export const DeckEditor = ({
 				className={[
 					'grid min-h-0 flex-1',
 					'relative motion-safe:transition-[grid-template-columns] motion-safe:duration-[var(--duration-base)] motion-safe:ease-[var(--ease-standard)]',
-					// Wide editors give the settings their own column; narrow ones slide them over the slide area's right edge.
 					!wide ? 'grid-cols-[minmax(0,1fr)]' : sidebarOpen ? 'grid-cols-[minmax(0,1fr)_288px]' : 'grid-cols-[minmax(0,1fr)_0px]',
 				].join(' ')}
 			>
@@ -311,12 +298,12 @@ export const DeckEditor = ({
 							/>
 
 							<div className={compact ? 'contents' : `ml-auto flex max-w-full items-center gap-0.5 overflow-x-auto ${BAR_CHROME}`}>
-								{onUndo && onRedo && (
+								{history && (
 									<>
-										<button type='button' aria-label='Undo' title='Undo (⌘Z)' disabled={!canUndo} onClick={onUndo} className={TOOLBAR_BUTTON}>
+										<button type='button' aria-label='Undo' title='Undo (⌘Z)' disabled={!history.canUndo} onClick={history.undo} className={TOOLBAR_BUTTON}>
 											<Glyph name='undo' />
 										</button>
-										<button type='button' aria-label='Redo' title='Redo (⇧⌘Z)' disabled={!canRedo} onClick={onRedo} className={TOOLBAR_BUTTON}>
+										<button type='button' aria-label='Redo' title='Redo (⇧⌘Z)' disabled={!history.canRedo} onClick={history.redo} className={TOOLBAR_BUTTON}>
 											<Glyph name='redo' />
 										</button>
 										<span aria-hidden='true' className='mx-1 h-5 w-px bg-surface-border' />
@@ -341,7 +328,7 @@ export const DeckEditor = ({
 								<ThemePicker
 									value={deck.theme}
 									customTheme={deck.customTheme}
-									onChange={(theme, customTheme, key) => onChange({ ...deck, theme, ...(customTheme ? { customTheme } : {}) }, key)}
+									onChange={(theme, customTheme, key) => onChange({ ...authoredDeck, theme, ...(customTheme ? { customTheme } : {}) }, key)}
 									buttonClass={TOOLBAR_BUTTON}
 								/>
 								<button

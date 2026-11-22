@@ -1,6 +1,6 @@
 'use client';
 
-import { addr, normalize, parseAddr, rawAt, type CellStyle, type ChartType, type Pos, type Range, type Sheet, type SheetChart } from './sheet';
+import { addr, normalize, parseAddr, rawAt, type CellStyle, type ChartType, type EditHistory, type Pos, type Range, type Sheet, type SheetChart } from './sheet';
 import { borderRange, clearRange, pasteBlock, resizeCol, setValue, shiftLines, styleRange, toDelimited, parseDelimited } from './ops';
 import { ClipboardEvent, HTMLAttributes, KeyboardEvent, ReactNode, useId, useRef, useState } from 'react';
 import { createEvaluator, SheetError, type Evaluator } from './formulas';
@@ -22,11 +22,8 @@ export interface SheetEditorProps extends Omit<HTMLAttributes<HTMLDivElement>, '
 	sheet:       Sheet;
 	/** Every edit, as the whole next sheet. Changes sharing a `coalesceKey` in a row (typing, a column drag) are one undo step. */
 	onChange:    (next: Sheet, coalesceKey?: string) => void;
-	/** Omit `onUndo`/`onRedo` to hide the undo controls (e.g. when the host keeps no history). */
-	onUndo?:     () => void;
-	onRedo?:     () => void;
-	canUndo?:    boolean;
-	canRedo?:    boolean;
+	/** Omit to hide the undo controls (e.g. when the host keeps no history). */
+	history?:    EditHistory;
 	/** Host actions in the top-right cluster, before Download (e.g. a save status). */
 	toolbarEnd?: ReactNode;
 	/** A host message for the status line. Shown instead of the editor's own messages while set. */
@@ -92,7 +89,7 @@ const saveFile =(name: string, text: string, type: string) => {
 
 /** A spreadsheet editor with formulas. The host owns the sheet and its undo history; see spec.md. */
 export const SheetEditor = ({
-	sheet, onChange, onUndo, onRedo, canUndo = false, canRedo = false, toolbarEnd, status: hostStatus, highlight, highlightLabel = 'AI', onAsk, className = '', ...props
+	sheet, onChange, history, toolbarEnd, status: hostStatus, highlight, highlightLabel = 'AI', onAsk, className = '', ...props
 }: SheetEditorProps) => {
 	const [anchor, setAnchor] = useState<Pos>({ r: 0, c: 0 });
 	const [focus, setFocus] = useState<Pos>({ r: 0, c: 0 });
@@ -291,13 +288,13 @@ export const SheetEditor = ({
 			if(key === 'z')
 			{
 				e.preventDefault();
-				if(e.shiftKey) onRedo?.();
-				else onUndo?.();
+				if(e.shiftKey) history?.redo();
+				else history?.undo();
 			}
 			else if(key === 'y')
 			{
 				e.preventDefault();
-				onRedo?.();
+				history?.redo();
 			}
 			else if(key === 'a')
 			{
@@ -435,10 +432,7 @@ export const SheetEditor = ({
 					}}
 				/>
 				<Actions
-					onUndo={onUndo}
-					onRedo={onRedo}
-					canUndo={canUndo}
-					canRedo={canRedo}
+					history={history}
 					onDownload={download}
 					toolbarEnd={toolbarEnd}
 				/>
