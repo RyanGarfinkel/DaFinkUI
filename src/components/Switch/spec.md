@@ -15,6 +15,7 @@ A toggle switch for boolean values, rendered as an accessible button with `role=
 | disabled | `boolean` | `false` | Disables the switch. |
 | id | `string` | auto | HTML id for the switch button. Auto-derived from `label` if omitted (e.g. `"switch-email-notifications"`). |
 | className | `string` | `''` | Additional classes on the root wrapper. |
+| aria-label | `string` | None | Names the switch when there is no visible `label`. Ignored when `label` is set. |
 
 ## Interactive States
 

@@ -13,6 +13,8 @@ Horizontal bar indicating task completion.
 | showLabel | `boolean` | `false` | Show a "Progress X%" label row above the track. |
 | size | `'sm' \| 'md' \| 'lg'` | `'md'` | Track height. |
 | className | `string` | `''` | Additional CSS classes merged onto the root wrapper. |
+| aria-label | `string` | `'Progress'` | Accessible name of the progressbar. |
+| aria-labelledby | `string` | None | Id of an element that names the progressbar. Replaces `aria-label`. |
 
 Extends all native `<div>` HTML attributes.
 
@@ -36,7 +38,7 @@ Extends all native `<div>` HTML attributes.
 
 - The track element has `role="progressbar"`, `aria-valuenow`, `aria-valuemin={0}`, and `aria-valuemax` set automatically from props.
 - When `showLabel` is false, the screen reader still reads the numeric progress through `aria-valuenow`.
-- Add a wrapping element with an accessible label (e.g. `aria-label="Uploading file"`) when the bar appears without surrounding text context.
+- The progressbar is named "Progress" by default. Pass `aria-label` (e.g. "Uploading file") or `aria-labelledby` when the bar appears without surrounding text context. Both go on the progressbar itself, not the wrapper.
 
 ## When to Use
 

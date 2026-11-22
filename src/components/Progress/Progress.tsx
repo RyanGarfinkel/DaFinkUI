@@ -16,6 +16,8 @@ export const Progress = (
         showLabel = false,
         size      = 'md',
         className = '',
+        'aria-label': ariaLabel,
+        'aria-labelledby': labelledBy,
         ...props
     }: ProgressProps
 ) => {
@@ -31,6 +33,8 @@ export const Progress = (
 			)}
 			<div
 				role='progressbar'
+				aria-label={labelledBy ? undefined : (ariaLabel ?? 'Progress')}
+				aria-labelledby={labelledBy}
 				aria-valuenow={value}
 				aria-valuemin={0}
 				aria-valuemax={max}

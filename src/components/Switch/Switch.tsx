@@ -21,6 +21,8 @@ export interface SwitchProps {
 	disabled?: boolean;
 	id?: string;
 	className?: string;
+	/** Names the switch when there is no visible `label`. */
+	'aria-label'?: string;
 }
 
 const Switch = (
@@ -32,6 +34,7 @@ const Switch = (
         disabled,
         id,
         className = '',
+        'aria-label': ariaLabel,
     }: SwitchProps
 ) => {
 	const switchId = id ?? (label ? `switch-${label.toLowerCase().replace(/\s+/g, '-')}` : undefined);
@@ -46,6 +49,7 @@ const Switch = (
 				role='switch'
 				id={switchId}
 				aria-checked={checked}
+				aria-label={label ? undefined : ariaLabel}
 				aria-describedby={hint && hintId ? hintId : undefined}
 				disabled={disabled}
 				onClick={() => onCheckedChange(!checked)}
