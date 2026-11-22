@@ -1,10 +1,11 @@
 'use client';
 
-import { KeyboardEvent, ReactNode, useEffect, useRef } from 'react';
 import { SkeletonCard } from '../../components/Skeleton/Skeleton';
 import ScrollFade from '../../components/ScrollFade/ScrollFade';
 import { CloseIcon, CollapseIcon, ExpandIcon } from './icons';
+import { KeyboardEvent, ReactNode, useEffect } from 'react';
 import Composer, { type ComposerProps } from './Composer';
+import { useStickToBottom } from './useStickToBottom';
 import Button from '../../components/Button/Button';
 import type { ChatMessage } from './AiChat';
 import { TypingPhrase } from './Phrases';
@@ -25,8 +26,6 @@ export interface ThreadPanelProps {
 	inDrawer?:      boolean;
 }
 
-const NEAR_BOTTOM_THRESHOLD_PX = 80;
-
 const Divider = ({ label }: { label: string }) => (
 	<div className='flex items-center gap-3'>
 		<div className='h-0 flex-1 border-t border-dashed border-surface-border' />
@@ -43,40 +42,11 @@ export const ThreadPanel = (
 		title, rootMessages, threadMessages, loading, composer, isTyping, renderRoot, renderReply, expanded, onToggleExpand, onClose, inDrawer = false,
 	}: ThreadPanelProps
 ) => {
-	const containerRef = useRef<HTMLDivElement>(null);
-	const contentRef = useRef<HTMLDivElement>(null);
-	// Same scroll-anchoring contract as the main pane: stays true until the reader scrolls
-	// away from the bottom, so auto-scroll never yanks the view back down mid-read.
-	const shouldAutoScrollRef = useRef(true);
+	const { containerRef, contentRef, scrollIfFollowing } = useStickToBottom();
 
 	useEffect(() => {
-		const container = containerRef.current;
-		const content   = contentRef.current;
-		if(!container || !content) return;
-
-		const handleScroll = () => {
-			const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-			shouldAutoScrollRef.current = distanceFromBottom < NEAR_BOTTOM_THRESHOLD_PX;
-		};
-		container.addEventListener('scroll', handleScroll, { passive: true });
-
-		const scrollToBottom = () => {
-			if(shouldAutoScrollRef.current) container.scrollTop = container.scrollHeight;
-		};
-		scrollToBottom();
-
-		// Content keeps growing for as long as a reply streams in (typewriter reveal, table
-		// rows appending, favicon images loading), so this stays observing for the effect's
-		// whole lifetime rather than a fixed window — safe to leave running indefinitely
-		// since scrollToBottom above already no-ops once the reader has scrolled away.
-		const observer = new ResizeObserver(scrollToBottom);
-		observer.observe(content);
-
-		return () => {
-			container.removeEventListener('scroll', handleScroll);
-			observer.disconnect();
-		};
-	}, [rootMessages, threadMessages, loading, isTyping]);
+		scrollIfFollowing();
+	}, [scrollIfFollowing, rootMessages, threadMessages, loading, isTyping]);
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
 		if(e.key === 'Escape' && !inDrawer)
@@ -107,7 +77,7 @@ export const ThreadPanel = (
 
 			<div className='relative flex min-h-0 flex-1 flex-col'>
 				<ScrollFade ref={containerRef} direction='vertical' className='h-full' wrapperClassName='min-h-0 flex-1'>
-					<div ref={contentRef} className='flex min-h-full shrink-0 flex-col gap-4 p-5 pb-28'>
+					<div ref={contentRef} role='log' aria-label='Thread conversation' aria-busy={isTyping} className='flex min-h-full shrink-0 flex-col gap-4 p-5 pb-28'>
 						{loading ? (
 							<div className='flex flex-col gap-4'>
 								<SkeletonCard lines={2} />

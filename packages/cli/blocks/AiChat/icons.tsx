@@ -1,8 +1,6 @@
-export const PlusIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='M12 5v14M5 12h14' />
-	</svg>
-);
+import { CheckIcon as Check, ChevronLeftIcon as ChevronLeft, ChevronRightIcon as ChevronRight, CloseIcon as Close, PlusIcon as Plus, SearchIcon as Search } from '../../components/Icons/Icons';
+
+export const PlusIcon = () => <Plus size={14} />;
 
 export const MenuIcon = () => (
 	<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
@@ -36,30 +34,13 @@ export const CopyIcon = () => (
 	</svg>
 );
 
-export const CheckIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<polyline points='20 6 9 17 4 12' />
-	</svg>
-);
+export const CheckIcon = () => <Check size={14} strokeWidth={2.5} />;
 
-export const SearchIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<circle cx='11' cy='11' r='8' />
-		<path d='m21 21-4.35-4.35' />
-	</svg>
-);
+export const SearchIcon = () => <Search size={14} />;
 
-export const ChevronLeftIcon = () => (
-	<svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<polyline points='15 18 9 12 15 6' />
-	</svg>
-);
+export const ChevronLeftIcon = () => <ChevronLeft size={12} />;
 
-export const ChevronRightIcon = ({ className = '' }: { className?: string }) => (
-	<svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true' className={className}>
-		<polyline points='9 18 15 12 9 6' />
-	</svg>
-);
+export const ChevronRightIcon = ({ className = '' }: { className?: string }) => <ChevronRight size={12} className={className} />;
 
 export const RefreshIcon = () => (
 	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
@@ -69,11 +50,7 @@ export const RefreshIcon = () => (
 	</svg>
 );
 
-export const CloseIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='M18 6 6 18M6 6l12 12' />
-	</svg>
-);
+export const CloseIcon = () => <Close size={14} />;
 
 export const ExpandIcon = () => (
 	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>

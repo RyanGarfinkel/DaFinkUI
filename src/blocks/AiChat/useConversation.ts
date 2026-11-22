@@ -53,10 +53,7 @@ export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef,
 			});
 	};
 
-	// Appends the outgoing user message, then queues its reply. Only valid once `id` already
-	// has a message list to append to — a brand-new draft chat with no `chats` entry yet has
-	// to be created (message included) in one step by the caller instead; see AiChat.tsx →
-	// handleSubmit.
+	// A brand-new draft has no message list yet, so AiChat's handleSubmit creates it with its first message instead of calling this.
 	const submit = (id: string, text: string, attachments: MessageAttachment[]) => {
 		const history = [...(historyPrefix?.(id) ?? []), ...buildHistory(getMessages(id))];
 		const userMessage: ChatMessage = { id: nextMessageIdRef.current++, kind: 'message', sender: 'user', text, attachments };
@@ -94,10 +91,7 @@ export const useConversation = ({ getMessages, updateMessages, nextMessageIdRef,
 		)));
 	};
 
-	// Regenerates one ai message in place (new version, same id) rather than appending a new
-	// message — reused for both the refresh button and an edited user message's resend, using
-	// the nearest preceding user message as the prompt (its live text unless overridden) and
-	// everything before that as history, same contract as a normal send.
+	// Adds a version to one AI message. Serves both refresh and an edited message's resend; the prompt is the nearest user message above it.
 	const regenerate = (id: string, messageId: number, promptOverride?: string) => {
 		const messages = getMessages(id);
 		const index = messages.findIndex((m) => m.id === messageId);

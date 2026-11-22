@@ -33,10 +33,7 @@ export interface DeckPanelProps {
 	chartData?: ChartData;
 }
 
-// Shares the thread panel's column (only one is open at a time) and, like it, is a
-// persistent column rather than an overlay: no focus trap, Escape is a nicety.
-// You and the AI edit the same deck: the view follows the AI's changes until you
-// pick a slide or start working yourself, then stays put for the rest of that reply.
+// A persistent column, not an overlay: no focus trap. The view follows the AI until you pick a slide or start editing, then stays put for that reply.
 export const DeckPanel = ({ deck, activity, note, onChange, history, expanded, onToggleExpand, onClose, inDrawer = false, onAsk, chartData }: DeckPanelProps) => {
 	const [viewSlideId, setViewSlideId] = useState<string | undefined>(undefined);
 	const [stoppedFollowing, setStoppedFollowing] = useState<number | null>(null);

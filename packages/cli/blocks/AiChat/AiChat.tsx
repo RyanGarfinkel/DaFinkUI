@@ -1,50 +1,56 @@
 'use client';
 
 import { describeAttachments, buildHistory, buildPrompt, collectArtifacts, findLastUserMessageId, hasPrecedingUserMessage, slideReference, DRAFT_TITLE_MAX_LENGTH } from './messageHelpers';
-import { Sidebar, SidebarButton, SidebarFooter, SidebarHeader, SidebarSection, SidebarSkeleton } from '../../components/Sidebar/Sidebar';
 import type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, ChatSettings, SearchHit, MessageAttachment } from './types';
 import { MessageActionsRow, ChatMessageRow, buildVersionNav, Divider, DeckCard, ArtifactCard } from './MessageRow';
-import { Resizable, ResizablePanel, ResizableHandle } from '../../components/Resizable/Resizable';
 import { APP_NAME, COMMANDS, MODEL_OPTIONS, EFFORT_OPTIONS, SLIDES_PROMPT } from './constants';
-import { FormEvent, KeyboardEvent, ReactNode, useEffect, useRef, useState } from 'react';
+import { Sidebar, SidebarFooter, SidebarHeader } from '../../components/Sidebar/Sidebar';
 import { deckBefore, deckDocKey, resolveDeckEdit, useLiveDeck } from './useLiveDeck';
+import { Resizable, ResizablePanel } from '../../components/Resizable/Resizable';
 import { type CommandOption } from '../../components/CommandInput/CommandInput';
 import type { DeckAskContext } from '../../components/DeckEditor/askcontext';
-import Drawer, { DrawerHandle } from '../../components/Drawer/Drawer';
-import { PencilIcon, TrashIcon, MenuIcon, FileIcon } from './icons';
+import { FormEvent, ReactNode, useEffect, useRef, useState } from 'react';
 import ScrollFade from '../../components/ScrollFade/ScrollFade';
 import { Greeting, TypingPhrase, USER_NAME } from './Phrases';
+import { DesktopPanel, MobilePanel } from './PanelSlot';
 import Spinner from '../../components/Spinner/Spinner';
+import { useStickToBottom } from './useStickToBottom';
+import Drawer from '../../components/Drawer/Drawer';
 import { DeleteChatModal } from './DeleteChatModal';
 import { fetchChats, fetchThread } from './chatApi';
 import { useConversation } from './useConversation';
 import Button from '../../components/Button/Button';
 import { resolveSheetChart } from './chartSource';
-import Input from '../../components/Input/Input';
 import { SettingsModal } from './SettingsModal';
 import { useSheetPanel } from './useSheetPanel';
 import { SidebarTools } from './SidebarTools';
 import ArtifactsPanel from './ArtifactsPanel';
+import { MenuIcon, FileIcon } from './icons';
 import type { ArtifactEntry } from './types';
 import { ProfileCard } from './ProfileCard';
 import { useIsMobile } from './useIsMobile';
 import { ChatSearch } from './ChatSearch';
 import ThreadPanel from './ThreadPanel';
+import { ChatList } from './ChatList';
 import DeckPanel from './DeckPanel';
 import Composer from './Composer';
 
 export type { ChatTextMessage, ChatMessage, ThreadRef, ChatEntry, AiChatHistoryMessage, AiChatReply, SearchCorpusEntry, SearchHit, MessageAttachment, ChatDeck, DeckEdit, DeckEditStep, ChatSheet, SheetEdit, SheetEditStep, ChatArtifact, ArtifactKind } from './types';
 
 
-const SKELETON_CHAT_ROWS = 7;
-
 const MAIN_COMPOSER_ID = 'main-composer';
+
+const THREAD_SIZE = { initial: 320, min: 240, max: 480 };
+
+const DECK_SIZE = { initial: 560, min: 360, max: 900 };
+
+const SHEET_SIZE = { initial: 620, min: 360, max: 900 };
+
+const ARTIFACTS_SIZE = { initial: 480, min: 320, max: 900 };
 
 const DRAWER_EXIT_MS = 250;
 
 const COPY_NOTICE_MS = 2000;
-
-const NEAR_BOTTOM_THRESHOLD_PX = 80;
 
 interface SidebarSlotProps {
 	mobile:       boolean;
@@ -63,7 +69,6 @@ export const AiChat = () => {
 	const [chatsStatus, setChatsStatus] = useState<'loading' | 'ready' | 'error'>('loading');
 	const [activeId, setActiveId] = useState<string | null>(null);
 	const [editingId, setEditingId] = useState<string | null>(null);
-	const [draftTitle, setDraftTitle] = useState('');
 	const [draft, setDraft] = useState('');
 	const [attachedFiles, setAttachedFiles] = useState<File[]>([]);
 	// Slide elements the user pointed at with Ask AI, sent with the next message like attachments.
@@ -117,19 +122,13 @@ export const AiChat = () => {
 			window.setTimeout(() => document.getElementById(MAIN_COMPOSER_ID)?.querySelector('input')?.focus(), isMobile ? DRAWER_EXIT_MS : 0);
 		},
 	});
-	const containerRef = useRef<HTMLDivElement>(null);
-	const contentRef = useRef<HTMLDivElement>(null);
+	const { containerRef, contentRef, follow, scrollIfFollowing } = useStickToBottom();
 	const searchTriggerRef = useRef<HTMLButtonElement>(null);
 	const copyNoticeTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 	const mountedRef = useRef(true);
 	const nextChatId = useRef(1);
 	const nextThreadId = useRef(1);
 	const nextMessageIdRef = useRef(1);
-	// True as long as the user hasn't scrolled away from the bottom. Auto-scroll (below)
-	// only acts while this is true, so reading back through history — including while a
-	// reply is still streaming in — never gets yanked back down. Reset to true whenever
-	// the user does something that should re-anchor the view (send a message, switch chats).
-	const shouldAutoScrollRef = useRef(true);
 
 	const getThreadRootHistory = (chatId: string, rootMessageId: number): ChatMessage[] => {
 		const chat = chats.find((c) => c.id === chatId);
@@ -222,33 +221,8 @@ export const AiChat = () => {
 	}, []);
 
 	useEffect(() => {
-		const container = containerRef.current;
-		const content   = contentRef.current;
-		if(!container || !content) return;
-
-		const handleScroll = () => {
-			const distanceFromBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
-			shouldAutoScrollRef.current = distanceFromBottom < NEAR_BOTTOM_THRESHOLD_PX;
-		};
-		container.addEventListener('scroll', handleScroll, { passive: true });
-
-		const scrollToBottom = () => {
-			if(shouldAutoScrollRef.current) container.scrollTop = container.scrollHeight;
-		};
-		scrollToBottom();
-
-		// Content keeps growing for as long as a reply streams in (typewriter reveal, table
-		// rows appending, favicon images loading), so this stays observing for the effect's
-		// whole lifetime rather than a fixed window — safe to leave running indefinitely
-		// since scrollToBottom above already no-ops once the user has scrolled away.
-		const observer = new ResizeObserver(scrollToBottom);
-		observer.observe(content);
-
-		return () => {
-			container.removeEventListener('scroll', handleScroll);
-			observer.disconnect();
-		};
-	}, [chats, isTyping, activeId]);
+		scrollIfFollowing();
+	}, [scrollIfFollowing, chats, isTyping, activeId]);
 
 	useEffect(() => {
 		mountedRef.current = true;
@@ -268,7 +242,7 @@ export const AiChat = () => {
 	}, [pendingScrollMessageId, activeId, activeThread, threadMessages]);
 
 	const handleSelectHit = (hit: SearchHit) => {
-		shouldAutoScrollRef.current = false;
+		follow(false);
 		setPendingScrollMessageId(hit.messageId);
 		if(hit.threadId !== undefined && hit.rootMessageId !== undefined)
 		{
@@ -283,7 +257,7 @@ export const AiChat = () => {
 	// Doesn't touch `chats` — the draft only becomes a real, sidebar-visible chat once its
 	// first message is sent (see handleSubmit).
 	const handleNewChat = () => {
-		shouldAutoScrollRef.current = true;
+		follow(true);
 		setActiveId(null);
 		setDraft('');
 		setAttachedFiles([]);
@@ -292,7 +266,7 @@ export const AiChat = () => {
 	};
 
 	const handleSelectChat = (id: string) => {
-		shouldAutoScrollRef.current = true;
+		follow(true);
 		setActiveId(id);
 		setDraft('');
 		setAttachedFiles([]);
@@ -300,23 +274,7 @@ export const AiChat = () => {
 		setSidebarOpen(false);
 	};
 
-	const handleStartEdit = (chat: ChatEntry) => {
-		setEditingId(chat.id);
-		setDraftTitle(chat.title);
-	};
-
-	const handleCommitEdit = () => {
-		const title = draftTitle.trim();
-		if(title) setChats((prev) => prev.map((c) => (c.id === editingId ? { ...c, title } : c)));
-		setEditingId(null);
-	};
-
-	const handleCancelEdit = () => setEditingId(null);
-
-	const handleEditKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-		if(e.key === 'Enter') { e.preventDefault(); handleCommitEdit(); }
-		if(e.key === 'Escape') { e.preventDefault(); handleCancelEdit(); }
-	};
+	const handleRename = (id: string, title: string) => setChats((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
 
 	const handleDelete = (id: string) => {
 		setChats((prev) => {
@@ -351,10 +309,7 @@ export const AiChat = () => {
 		}
 		else
 		{
-			// The active "chat" was only a draft — this first message is what earns it a real
-			// id and a row in the sidebar. There's no existing `chats` entry yet for
-			// mainConversation.submit() to append into, so this one chat is built directly,
-			// message included, in a single setChats call instead.
+			// A draft has no `chats` entry to append to, so its first message creates the chat.
 			const chatId = String(nextChatId.current++);
 			const userMessage: ChatMessage = { id: nextMessageIdRef.current++, kind: 'message', sender: 'user', text, attachments };
 			const rawTitle = text || describeAttachments(attachments);
@@ -366,7 +321,7 @@ export const AiChat = () => {
 			mainConversation.queueReply(chatId, buildPrompt(text, attachments), []);
 		}
 
-		shouldAutoScrollRef.current = true;
+		follow(true);
 		setDraft('');
 		setAttachedFiles([]);
 		setSlideRefs([]);
@@ -374,7 +329,7 @@ export const AiChat = () => {
 
 	const handleQuestionnaireAnswer = (messageId: number, value: string) => {
 		if(!activeChat) return;
-		shouldAutoScrollRef.current = true;
+		follow(true);
 		mainConversation.questionnaireAnswer(activeChat.id, messageId, value);
 	};
 
@@ -654,7 +609,7 @@ export const AiChat = () => {
 
 		if(command.name === 'rename')
 		{
-			handleStartEdit(activeChat);
+			setEditingId(activeChat.id);
 			return;
 		}
 
@@ -862,57 +817,7 @@ export const AiChat = () => {
 						<span className='truncate px-1 text-sm font-semibold text-text'>{APP_NAME}</span>
 					</SidebarHeader>
 					<SidebarTools collapsed={railCollapsed} searchRef={searchTriggerRef} onSearch={() => setSearchOpen(true)} onNewChat={handleNewChat} />
-					<SidebarSection label='Chats'>
-						{chats.map((chat) => (
-							editingId === chat.id ? (
-								<Input
-									key={chat.id}
-									autoFocus
-									value={draftTitle}
-									onChange={(e) => setDraftTitle(e.target.value)}
-									onBlur={handleCommitEdit}
-									onKeyDown={handleEditKeyDown}
-									aria-label='Chat title'
-								/>
-							) : (
-								<SidebarButton
-									key={chat.id}
-									isActive={activeId === chat.id}
-									onClick={() => handleSelectChat(chat.id)}
-									actionGutter='pr-16'
-									action={
-										<div className='flex items-center gap-0.5'>
-											<button
-												type='button'
-												aria-label={`Rename ${chat.title}`}
-												onClick={() => handleStartEdit(chat)}
-												className='flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-text-muted hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
-											>
-												<PencilIcon />
-											</button>
-											<button
-												type='button'
-												aria-label={`Delete ${chat.title}`}
-												onClick={() => setChatPendingDeletion(chat)}
-												className='flex h-6 w-6 items-center justify-center rounded-[var(--radius-sm)] text-text-muted hover:bg-danger/10 hover:text-danger focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
-											>
-												<TrashIcon />
-											</button>
-										</div>
-									}
-								>
-									{chat.title}
-								</SidebarButton>
-							)
-						))}
-						{chatsStatus === 'loading' && <SidebarSkeleton count={SKELETON_CHAT_ROWS} aria-label='Loading chats' />}
-						{chatsStatus === 'error' && (
-							<p className='px-3 py-2 text-xs text-text-muted'>Couldn’t load chats. Refresh to try again.</p>
-						)}
-						{chatsStatus === 'ready' && chats.length === 0 && (
-							<p className='px-3 py-2 text-xs text-text-muted'>No chats yet.</p>
-						)}
-					</SidebarSection>
+					<ChatList chats={chats} status={chatsStatus} activeId={activeId} editingId={editingId} onEditingChange={setEditingId} onSelect={handleSelectChat} onRename={handleRename} onDelete={setChatPendingDeletion} />
 					<SidebarFooter>
 						<ProfileCard name={displayName} modelLabel={modelLabel} collapsed={railCollapsed} onOpen={() => setSettingsOpen(true)} />
 					</SidebarFooter>
@@ -951,7 +856,7 @@ export const AiChat = () => {
 									</div>
 									<div className='relative flex min-h-0 flex-1 flex-col'>
 										<ScrollFade ref={containerRef} direction='vertical' className='h-full' wrapperClassName='min-h-0 flex-1'>
-											<div ref={contentRef} className='flex min-h-full shrink-0 flex-col gap-4 p-5 pb-28'>
+											<div ref={contentRef} role='log' aria-label='Conversation' aria-busy={isGenerating} className='flex min-h-full shrink-0 flex-col gap-4 p-5 pb-28'>
 												{!activeChat || activeChat.messages.length === 0 ? (
 													<div className='flex flex-1 flex-col items-center justify-center gap-1.5 text-center'>
 														<Greeting />
@@ -1059,68 +964,30 @@ export const AiChat = () => {
 					</ResizablePanel>
 
 				{!isMobile && activeThread && activeChat && (
-					<>
-						{!expanded && <ResizableHandle aria-label='Resize thread panel' />}
-						<ResizablePanel defaultSize={320} minSize={240} maxSize={480} onSnap={handleSnapExpand} style={expanded ? { width: 'auto', flexGrow: 1, flexShrink: 1 } : undefined} className='flex'>
-							{threadPanel}
-						</ResizablePanel>
-					</>
+					<DesktopPanel label='Thread' size={THREAD_SIZE} expanded={expanded} onSnap={handleSnapExpand}>{threadPanel}</DesktopPanel>
 				)}
 
 				{!isMobile && openDocKey && openDeck && (
-					<>
-						{!expanded && <ResizableHandle aria-label='Resize slides panel' />}
-						<ResizablePanel defaultSize={560} minSize={360} maxSize={900} onSnap={handleSnapExpand} style={expanded ? { width: 'auto', flexGrow: 1, flexShrink: 1 } : undefined} className='flex'>
-							{deckPanel}
-						</ResizablePanel>
-					</>
+					<DesktopPanel label='Slides' size={DECK_SIZE} expanded={expanded} onSnap={handleSnapExpand}>{deckPanel}</DesktopPanel>
 				)}
 
 				{!isMobile && sheetPanel.isOpen && (
-					<>
-						{!expanded && <ResizableHandle aria-label='Resize sheet panel' />}
-						<ResizablePanel defaultSize={620} minSize={360} maxSize={900} onSnap={handleSnapExpand} style={expanded ? { width: 'auto', flexGrow: 1, flexShrink: 1 } : undefined} className='flex'>
-							{sheetPanelNode}
-						</ResizablePanel>
-					</>
+					<DesktopPanel label='Sheet' size={SHEET_SIZE} expanded={expanded} onSnap={handleSnapExpand}>{sheetPanelNode}</DesktopPanel>
 				)}
 
 				{!isMobile && openArtifacts && (
-					<>
-						{!expanded && <ResizableHandle aria-label='Resize artifacts panel' />}
-						<ResizablePanel defaultSize={480} minSize={320} maxSize={900} onSnap={handleSnapExpand} style={expanded ? { width: 'auto', flexGrow: 1, flexShrink: 1 } : undefined} className='flex'>
-							{artifactsPanel}
-						</ResizablePanel>
-					</>
+					<DesktopPanel label='Artifacts' size={ARTIFACTS_SIZE} expanded={expanded} onSnap={handleSnapExpand}>{artifactsPanel}</DesktopPanel>
 				)}
 				</Resizable>
 			</div>
 
 			{isMobile && (
-				<Drawer open={Boolean(activeThread && activeChat)} onOpenChange={(open) => !open && handleCloseThread()} side='right' aria-label='Thread' className='!w-full !max-w-full'>
-					{threadPanel}
-				</Drawer>
-			)}
-
-			{isMobile && (
-				<Drawer open={Boolean(openDocKey && openDeck)} onOpenChange={(open) => !open && handleCloseDeck()} side='bottom' aria-label='Slides' className='!h-[92dvh] !max-h-[92dvh] rounded-t-[var(--radius-lg)]'>
-					<DrawerHandle />
-					{deckPanel}
-				</Drawer>
-			)}
-
-			{isMobile && (
-				<Drawer open={sheetPanel.isOpen} onOpenChange={(open) => !open && handleCloseSheet()} side='bottom' aria-label='Sheet' className='!h-[92dvh] !max-h-[92dvh] rounded-t-[var(--radius-lg)]'>
-					<DrawerHandle />
-					{sheetPanelNode}
-				</Drawer>
-			)}
-
-			{isMobile && (
-				<Drawer open={Boolean(openArtifacts)} onOpenChange={(open) => !open && handleCloseArtifacts()} side='bottom' aria-label='Artifacts' className='!h-[92dvh] !max-h-[92dvh] rounded-t-[var(--radius-lg)]'>
-					<DrawerHandle />
-					{artifactsPanel}
-				</Drawer>
+				<>
+					<MobilePanel label='Thread' side='right' open={Boolean(activeThread && activeChat)} onClose={handleCloseThread}>{threadPanel}</MobilePanel>
+					<MobilePanel label='Slides' open={Boolean(openDocKey && openDeck)} onClose={handleCloseDeck}>{deckPanel}</MobilePanel>
+					<MobilePanel label='Sheet' open={sheetPanel.isOpen} onClose={handleCloseSheet}>{sheetPanelNode}</MobilePanel>
+					<MobilePanel label='Artifacts' open={Boolean(openArtifacts)} onClose={handleCloseArtifacts}>{artifactsPanel}</MobilePanel>
+				</>
 			)}
 
 			<DeleteChatModal chat={chatPendingDeletion} onCancel={() => setChatPendingDeletion(null)} onConfirm={handleConfirmDelete} />

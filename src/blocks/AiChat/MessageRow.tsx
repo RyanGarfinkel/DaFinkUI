@@ -73,11 +73,14 @@ export interface VersionNavInfo {
 }
 
 const VersionNav = ({ index, count, onPrev, onNext }: VersionNavInfo) => (
-	<div className='flex items-center gap-0.5 text-xs text-text-muted opacity-0 motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)] group-hover:opacity-100 focus-within:opacity-100'>
+	<div role='group' aria-label='Message versions' className='flex items-center gap-0.5 text-xs text-text-muted opacity-0 motion-safe:transition-opacity motion-safe:duration-[var(--duration-fast)] group-hover:opacity-100 focus-within:opacity-100'>
 		<button type='button' aria-label='Previous version' onClick={onPrev} disabled={index === 0} className={VERSION_NAV_BUTTON_CLASSES}>
 			<ChevronLeftIcon />
 		</button>
-		<span className='tabular-nums'>{index + 1}/{count}</span>
+		<span role='status' className='tabular-nums'>
+			<span aria-hidden='true'>{index + 1}/{count}</span>
+			<span className='sr-only'>Version {index + 1} of {count}</span>
+		</span>
 		<button type='button' aria-label='Next version' onClick={onNext} disabled={index === count - 1} className={VERSION_NAV_BUTTON_CLASSES}>
 			<ChevronRightIcon />
 		</button>
@@ -279,7 +282,12 @@ const ChatMessageRowContent = ({
 		return (
 			<div className='group flex flex-col items-end gap-1.5'>
 				<MessageAttachments attachments={m.attachments} />
-				{m.text && <Message variant='sent'>{m.text}</Message>}
+				{m.text && (
+					<Message variant='sent'>
+						<span className='sr-only'>You: </span>
+						{m.text}
+					</Message>
+				)}
 				{renderTrailing?.(m)}
 			</div>
 		);
@@ -290,6 +298,7 @@ const ChatMessageRowContent = ({
 			{m.animate && <TypingPhrase />}
 			{m.toolCalls && <ToolCallTrace toolCalls={m.toolCalls} />}
 			<Message variant='received' bubble={false}>
+				<span className='sr-only'>Assistant: </span>
 				<StreamingMessage
 					key={m.versionIndex ?? 0}
 					text={m.text}

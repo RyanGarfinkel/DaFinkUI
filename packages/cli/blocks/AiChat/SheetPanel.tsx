@@ -32,10 +32,7 @@ export interface SheetPanelProps {
 	onAsk?:         (context: SheetAskContext) => void;
 }
 
-// Shares the thread panel's column (only one side panel is open at a time) and, like it, is a
-// persistent column rather than an overlay: no focus trap, Escape is a nicety. You and the AI
-// edit the same sheet: the AI's cells are outlined while it works, until you click or type in
-// the editor, which takes the view back for the rest of that reply.
+// A persistent column, not an overlay: no focus trap. The AI's cells stay outlined until you click or type, which takes the view back for that reply.
 export const SheetPanel = ({ sheet, activity, note, onChange, history, expanded, onToggleExpand, onClose, inDrawer = false, onAsk }: SheetPanelProps) => {
 	const [stoppedFollowing, setStoppedFollowing] = useState<number | null>(null);
 	const following = activity !== null && stoppedFollowing !== activity.messageId;

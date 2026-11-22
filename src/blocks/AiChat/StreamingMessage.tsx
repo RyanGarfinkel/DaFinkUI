@@ -221,11 +221,7 @@ interface StreamingSegmentProps {
 	onDone:  () => void;
 }
 
-// Renders exactly one segment while it's the active one in a streaming message.
-// A text segment types itself out; a table reveals its own rows; everything else
-// (charts, math, image, audio) can't be partially rendered — a truncated JSON blob
-// or half-typed LaTeX expression is invalid — so it just pops in after a brief
-// pause, keeping the pacing between segments even instead of flashing by instantly.
+// Text types out and tables reveal rows. Charts, math, images and audio can't render partially (truncated JSON or LaTeX is invalid), so they pop in after a short pause.
 const StreamingSegment = ({ segment, onDone }: StreamingSegmentProps) => {
 	const onDoneRef = useRef(onDone);
 	useEffect(() => { onDoneRef.current = onDone; });

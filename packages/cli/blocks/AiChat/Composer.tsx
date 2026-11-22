@@ -2,7 +2,7 @@
 
 import CommandInput, { type CommandOption } from '../../components/CommandInput/CommandInput';
 import { Attachment, AttachmentGroup } from '../../components/Attachment/Attachment';
-import { ChangeEvent, ClipboardEvent, FormEvent, useRef } from 'react';
+import { ChangeEvent, ClipboardEvent, FormEvent, useEffect, useRef } from 'react';
 import ModelPicker, { type ModelPickerProps } from './ModelPicker';
 import Button from '../../components/Button/Button';
 import type { MessageAttachment } from './types';
@@ -52,8 +52,7 @@ const StopIcon = () => (
 	</svg>
 );
 
-// Shared by the main pane and ThreadPanel so the input, file upload, and send/stop button
-// are one implementation — each pane just owns its own draft, attachment, and submit state.
+// Shared by the main pane and ThreadPanel; each pane owns its own draft, attachments and submit state.
 export const Composer = (
 	{
 		draft, onDraftChange, onSubmit, isGenerating, onStop, attachedFiles, onAttach,
@@ -61,6 +60,30 @@ export const Composer = (
 	}: ComposerProps
 ) => {
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const formRef = useRef<HTMLFormElement>(null);
+	const restoreFocus = useRef(false);
+	const canSend = Boolean(draft.trim()) || attachedFiles.length > 0 || references.length > 0;
+
+	useEffect(() => {
+		if(!isGenerating) return;
+
+		const release = (e: FocusEvent) => {
+			if(!formRef.current?.contains(e.target as Node)) restoreFocus.current = false;
+		};
+		document.addEventListener('focusin', release);
+		return () => document.removeEventListener('focusin', release);
+	}, [isGenerating]);
+
+	useEffect(() => {
+		if(isGenerating || !restoreFocus.current) return;
+		restoreFocus.current = false;
+		formRef.current?.querySelector<HTMLInputElement>('input[role="combobox"]')?.focus();
+	}, [isGenerating]);
+
+	const handleSubmit = (e: FormEvent) => {
+		if(canSend && !isGenerating) restoreFocus.current = true;
+		onSubmit(e);
+	};
 
 	const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
 		const picked = Array.from(e.target.files ?? []);
@@ -82,7 +105,7 @@ export const Composer = (
 	};
 
 	return (
-		<form id={id} onSubmit={onSubmit} className='flex w-full flex-col items-center gap-2'>
+		<form id={id} ref={formRef} onSubmit={handleSubmit} className='flex w-full flex-col items-center gap-2'>
 			{(attachedFiles.length > 0 || references.length > 0) && (
 				<AttachmentGroup className='w-full max-w-xl'>
 					{references.map((reference, index) => (
@@ -119,7 +142,7 @@ export const Composer = (
 							<StopIcon />
 						</Button>
 					) : (
-						<Button type='submit' variant='ghost' size='icon' aria-label={sendLabel} disabled={!draft.trim() && attachedFiles.length === 0 && references.length === 0}>
+						<Button type='submit' variant='ghost' size='icon' aria-label={sendLabel} disabled={!canSend}>
 							<SendIcon />
 						</Button>
 					)}

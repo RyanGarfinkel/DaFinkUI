@@ -1,9 +1,6 @@
 import type { AiChatHistoryMessage, AiChatReply, ChatDeck, ChatEntry, ChatMessage, ChatSheet, ChatTextMessage, SearchCorpusEntry, SearchHit } from './types';
 
-// Everything in this file talks to the docs-site API routes under app/api/ai-chat/. Point
-// these at your own backend and the rest of the block (typing indicator, streaming reveal,
-// tool-call trace, table/chart rendering) keeps working unchanged, as long as each function
-// keeps returning the same shape.
+// Every call goes to app/api/ai-chat/. Point them at your backend; the rest of the block works as long as the shapes match.
 
 export const fetchChats = async (): Promise<ChatEntry[]> => {
 	const res = await fetch('/api/ai-chat/chats');
@@ -19,10 +16,7 @@ export const fetchThread = async (threadId: string): Promise<ChatMessage[]> => {
 	return messages;
 };
 
-// `decks` are the chat's slide decks as you've left them, each with its `deckId`, so an agent
-// edits your version (including your own changes since its last reply) and can reply with a
-// `deckEdit` for the same `deckId`.
-// `sheets` work the same way for spreadsheets: reply with a `sheetEdit` for the same `sheetId`.
+// `decks` and `sheets` are the chat's documents as you left them, so an agent edits your version and replies with a `deckEdit` or `sheetEdit` for the same id.
 export const sendMessage = async (message: string, history: AiChatHistoryMessage[], decks: ChatDeck[] = [], sheets: ChatSheet[] = []): Promise<AiChatReply> => {
 	const res = await fetch('/api/ai-chat', {
 		method:  'POST',
