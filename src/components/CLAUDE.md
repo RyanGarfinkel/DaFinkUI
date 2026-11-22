@@ -19,7 +19,7 @@ Folder name = component name, PascalCase. Sibling helper files are allowed only 
 
 | You changed | Also update |
 |---|---|
-| A prop, variant, size, state, or a11y behavior | `spec.md`, `ComponentName.test.tsx`, and the docs page's Accessibility section (`extraSections[slug]` in `app/_docs/registry/extraSections.tsx`) |
+| A prop, variant, size, state, or a11y behavior | `spec.md`, `ComponentName.test.tsx`, the docs page's Accessibility section (`extraSections[slug]` in `app/_docs/registry/extraSections.tsx`), and the axe sweep in `src/a11y.test.tsx` |
 | Anything the docs demo shows | `usage` in `app/_docs/registry/index.ts` (or `effects.ts`) **and** the `case` in `app/_docs/components/ComponentLivePreview.tsx`. Re-read both side by side, including sample data |
 | An import of another component | `registryDependencies` in the registry entry |
 | An import of an npm package | `dependencies` in the registry entry. Ask the user before adding a new package |

@@ -131,6 +131,7 @@ Use Vitest and `@testing-library/react`. Tests must cover:
 4. **Disabled**: disabled state removes pointer events and shows correct classes
 5. **Accessibility**: any `aria-*` attributes set by the component are correct
 6. **Forwarded props**: native HTML attributes (e.g. `onClick`, `type`) are passed through
+7. **axe**: add the component, in each state a user can reach, to `src/a11y.test.tsx`. It runs axe-core through `expectNoViolations` (`test/axe.ts`) and fails on missing names, bad ARIA and invalid roles. Contrast and landmark rules are off because jsdom has no layout; `scripts/check-contrast.ts` covers contrast.
 
 ```tsx
 import { render, screen } from '@testing-library/react';
