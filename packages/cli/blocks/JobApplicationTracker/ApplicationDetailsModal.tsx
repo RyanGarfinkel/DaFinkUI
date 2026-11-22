@@ -7,6 +7,7 @@ import Attachment from '../../components/Attachment/Attachment';
 import DatePicker from '../../components/DatePicker/DatePicker';
 import Separator from '../../components/Separator/Separator';
 import Textarea from '../../components/Textarea/Textarea';
+import { CloseIcon } from '../../components/Icons/Icons';
 import { ChangeEvent, useRef, useState } from 'react';
 import Button from '../../components/Button/Button';
 import Input from '../../components/Input/Input';
@@ -24,13 +25,6 @@ const formatFileSize = (bytes: number): string => {
 	if(bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
 	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 };
-
-const CloseIcon = () => (
-	<svg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='M18 6 6 18' />
-		<path d='m6 6 12 12' />
-	</svg>
-);
 
 export interface ApplicationDetailsModalProps {
 	open:         boolean;
@@ -124,7 +118,7 @@ export const ApplicationDetailsModal = ({ open, application, onOpenChange, onSav
 								aria-label='Remove resume'
 								onClick={() => updateDraft({ resume: undefined })}
 							>
-								<CloseIcon />
+								<CloseIcon size={10} strokeWidth={2.5} />
 							</Button>
 						</div>
 					) : (

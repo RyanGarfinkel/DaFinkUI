@@ -1,22 +1,18 @@
 'use client';
 
 import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
+import { CheckIcon, ChevronDownIcon } from '../Icons/Icons';
+import type { FieldProps, Option } from '../Models/Models';
 
-export interface SelectOption {
-	value: string;
-	label: string;
-}
+export type SelectOption = Option;
 
 export type SelectSize = 'sm' | 'md';
 
-export interface SelectProps {
+export interface SelectProps extends FieldProps {
 	options:      SelectOption[];
 	value?:       string;
 	onChange?:    (value: string) => void;
 	placeholder?: string;
-	label?:       string;
-	hint?:        string;
-	error?:       string;
 	size?:        SelectSize;
 	/** Which edge of the trigger the list opens from. Use `top` for a control at the bottom of its container. */
 	side?:        'top' | 'bottom';
@@ -222,23 +218,13 @@ export const Select = (
 					<span className={selectedLabel ? 'text-text' : 'text-text-subtle'}>
 						{selectedLabel ?? placeholder}
 					</span>
-					<svg
-						width={size === 'sm' ? 12 : 14}
-						height={size === 'sm' ? 12 : 14}
-						viewBox='0 0 24 24'
-						fill='none'
-						stroke='currentColor'
-						strokeWidth='2'
-						strokeLinecap='round'
-						strokeLinejoin='round'
-						aria-hidden='true'
+					<ChevronDownIcon
+						size={size === 'sm' ? 12 : 14}
 						className={[
 							'text-text-muted shrink-0 transition-transform duration-[var(--duration-fast)]',
 							mounted ? 'rotate-180' : '',
 						].join(' ')}
-					>
-						<path d='m6 9 6 6 6-6' />
-					</svg>
+					/>
 				</button>
 
 				{mounted && (
@@ -283,20 +269,7 @@ export const Select = (
 										{opt.label}
 									</span>
 									{isSelected && (
-										<svg
-											width='13'
-											height='13'
-											viewBox='0 0 24 24'
-											fill='none'
-											stroke='currentColor'
-											strokeWidth='2.5'
-											strokeLinecap='round'
-											strokeLinejoin='round'
-											aria-hidden='true'
-											className='text-brand shrink-0'
-										>
-											<path d='M20 6 9 17l-5-5' />
-										</svg>
+										<CheckIcon size={13} strokeWidth={2.5} className='text-brand shrink-0' />
 									)}
 								</li>
 							);

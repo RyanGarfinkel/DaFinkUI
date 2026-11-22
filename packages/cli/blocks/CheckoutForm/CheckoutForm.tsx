@@ -3,15 +3,10 @@
 import { Card, CardContent, CardFooter, CardHeader } from '../../components/Card/Card';
 import { FormSection, FormField, FormLabel } from '../../components/Form/Form';
 import { RadioGroup, RadioItem } from '../../components/Radio/Radio';
+import { CheckIcon } from '../../components/Icons/Icons';
 import Button from '../../components/Button/Button';
 import { useEffect, useRef, useState } from 'react';
 import Input from '../../components/Input/Input';
-
-const CheckIcon = () => (
-	<svg width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' className='text-success' aria-hidden='true'>
-		<polyline points='20 6 9 17 4 12' />
-	</svg>
-);
 
 export const CheckoutForm = () => {
 	const [email,         setEmail]         = useState('');
@@ -47,7 +42,7 @@ export const CheckoutForm = () => {
 			{success ? (
 				<CardContent className='flex flex-col items-center gap-4 py-6'>
 					<div className='w-14 h-14 rounded-full bg-success/15 flex items-center justify-center'>
-						<CheckIcon />
+						<CheckIcon size={28} strokeWidth={2.5} className='text-success' />
 					</div>
 					<p className='text-sm text-text-muted text-center'>Payment complete. A receipt has been sent to {email || 'your email'}.</p>
 				</CardContent>

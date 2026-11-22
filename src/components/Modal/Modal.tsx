@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent, DialogHTMLAttributes } from 'react';
+import { CloseIcon } from '../Icons/Icons';
 
 const FOCUSABLE_SELECTOR = [
 	'a[href]',
@@ -312,20 +313,7 @@ export const ModalClose = (
 			className={`absolute top-4 right-4 rounded-[var(--radius)] p-1 text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring ${className}`}
 			{...props}
 		>
-			<svg
-				width='16'
-				height='16'
-				viewBox='0 0 24 24'
-				fill='none'
-				stroke='currentColor'
-				strokeWidth='2'
-				strokeLinecap='round'
-				strokeLinejoin='round'
-				aria-hidden='true'
-			>
-				<path d='M18 6 6 18' />
-				<path d='m6 6 12 12' />
-			</svg>
+			<CloseIcon />
 		</button>
 	);
 };

@@ -6,6 +6,7 @@ import { FormField, FormLabel, FormMessage } from '../../components/Form/Form';
 import Checkbox from '../../components/Checkbox/Checkbox';
 import OTPInput from '../../components/OTPInput/OTPInput';
 import Progress from '../../components/Progress/Progress';
+import { CheckIcon } from '../../components/Icons/Icons';
 import Button from '../../components/Button/Button';
 import { useEffect, useRef, useState } from 'react';
 import Badge from '../../components/Badge/Badge';
@@ -13,11 +14,7 @@ import Input from '../../components/Input/Input';
 
 type Mode = 'signin' | 'signup';
 
-const CheckIcon = () => (
-	<svg width='28' height='28' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' className='text-success' aria-hidden='true'>
-		<polyline points='20 6 9 17 4 12' />
-	</svg>
-);
+const SuccessIcon = () => <CheckIcon size={28} strokeWidth={2.5} className='text-success' />;
 
 export const AuthForm = () => {
 	const [mode, setMode] = useState<Mode>('signin');
@@ -157,7 +154,7 @@ export const AuthForm = () => {
 						{step === 2 && (
 							<div className='flex flex-col items-center gap-4 py-2'>
 								<div className='w-14 h-14 rounded-full bg-success/15 flex items-center justify-center'>
-									<CheckIcon />
+									<SuccessIcon />
 								</div>
 								<p className='text-sm text-text-muted text-center'>Authentication complete. Redirecting…</p>
 								<Button variant='outlined' size='sm' onClick={resetSignin}>Start over</Button>
@@ -167,7 +164,7 @@ export const AuthForm = () => {
 				) : success ? (
 					<div className='flex flex-col items-center gap-4 py-2'>
 						<div className='w-14 h-14 rounded-full bg-success/15 flex items-center justify-center'>
-							<CheckIcon />
+							<SuccessIcon />
 						</div>
 						<p className='text-sm text-text-muted text-center'>Account created. Check your email to verify.</p>
 					</div>

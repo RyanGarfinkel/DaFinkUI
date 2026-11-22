@@ -1,8 +1,10 @@
 'use client';
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import type { Tone } from '../Models/Models';
+import { CloseIcon } from '../Icons/Icons';
 
-export type ToastVariant  = 'default' | 'success' | 'warning' | 'danger';
+export type ToastVariant  = Tone;
 export type ToastPosition =
 	| 'top-left'    | 'top-center'    | 'top-right'
 	| 'bottom-left' | 'bottom-center' | 'bottom-right';
@@ -157,9 +159,7 @@ const ToastCard = (
 				aria-label='Dismiss'
 				className='shrink-0 rounded-[var(--radius)] p-0.5 text-text-muted hover:text-text hover:bg-surface-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-ring'
 			>
-				<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-					<path d='M18 6 6 18M6 6l12 12' />
-				</svg>
+				<CloseIcon size={14} />
 			</button>
 		</div>
 	);

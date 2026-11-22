@@ -42,12 +42,7 @@ export interface Sheet {
 	charts?:   SheetChart[];
 }
 
-export interface EditHistory {
-	undo:    () => void;
-	redo:    () => void;
-	canUndo: boolean;
-	canRedo: boolean;
-}
+export type { EditHistory } from '../Models/Models';
 
 export interface Pos {
 	r: number;

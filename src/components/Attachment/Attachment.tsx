@@ -1,6 +1,7 @@
 'use client';
 
 import { Children, HTMLAttributes, MouseEvent, ReactNode, isValidElement } from 'react';
+import { CloseIcon } from '../Icons/Icons';
 
 export type AttachmentIcon = 'file' | 'image' | 'video' | 'audio' | 'archive' | 'code';
 
@@ -62,12 +63,6 @@ const CodeGlyph = () => (
 	</svg>
 );
 
-const RemoveGlyph = () => (
-	<svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='M18 6 6 18M6 6l12 12' />
-	</svg>
-);
-
 const ICON_GLYPHS: Record<AttachmentIcon, () => ReactNode> = {
 	file:    FileGlyph,
 	image:   ImageGlyph,
@@ -103,10 +98,7 @@ export const Attachment = (
 	const Glyph         = ICON_GLYPHS[resolvedIcon];
 	const meta          = [type, size].filter(Boolean).join(' · ');
 
-	// Images can preview themselves: their own href IS a valid <img> source.
-	// Anything else (a PDF, say) has no such shortcut: browsers can't render a
-	// PDF file as an <img>, so a real preview there requires an explicit
-	// `thumbnail` (e.g. a pre-rendered cover image of the first page).
+	// An image previews itself from its href; anything else (a PDF) needs an explicit `thumbnail`.
 	const previewSrc = thumbnail ?? (resolvedIcon === 'image' ? href : undefined);
 
 	const content = (
@@ -164,7 +156,7 @@ export const Attachment = (
 					onClick={onRemove}
 					className='mr-1.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-[var(--radius-sm)] text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
 				>
-					<RemoveGlyph />
+					<CloseIcon size={12} />
 				</button>
 			)}
 		</div>

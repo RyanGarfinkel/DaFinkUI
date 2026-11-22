@@ -177,7 +177,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['models'],
     files: ['Input/Input.tsx'],
   },
   {
@@ -302,7 +302,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['models'],
     files: ['Textarea/Textarea.tsx'],
   },
   {
@@ -425,6 +425,12 @@ export default function Example() {
         default: 'auto',
         description: 'HTML id for the switch button; auto-derived from label if omitted.',
       },
+      {
+        name: 'aria-label',
+        type: 'string',
+        default: '-',
+        description: 'Names the switch when there is no visible label.',
+      },
     ],
     dependencies: [],
     registryDependencies: [],
@@ -518,7 +524,7 @@ export default function Example() {
       { name: 'className', type: 'string', default: "''", description: 'Additional CSS classes.' },
     ],
     dependencies:         [],
-    registryDependencies: [],
+    registryDependencies: ['models'],
     files:                ['Badge/Badge.tsx'],
   },
   {
@@ -630,7 +636,7 @@ export default function Example() {
       { name: 'aria-label',  type: 'string',                     default: 'undefined',  description: "Accessible name for the trigger when there's no visible label (e.g. a compact inline use like a table cell)." },
     ],
     dependencies:         [],
-    registryDependencies: [],
+    registryDependencies: ['icons', 'models'],
     files:                ['Select/Select.tsx'],
   },
   {
@@ -1062,7 +1068,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: ['date-picker', 'slider', 'button', 'input'],
+    registryDependencies: ['date-picker', 'icons', 'slider', 'button', 'input'],
     files: ['Questionnaire/Questionnaire.tsx'],
   },
   {
@@ -1089,7 +1095,7 @@ export default function Example() {
       { name: 'className', type: 'string',    default: "''",        description: 'Additional CSS classes.' },
     ],
     dependencies:         [],
-    registryDependencies: [],
+    registryDependencies: ['models'],
     files:                ['Alert/Alert.tsx'],
   },
   {
@@ -1153,7 +1159,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['icons'],
     files: ['Collapsible/Collapsible.tsx'],
     composition: {
       name: 'Collapsible',
@@ -1228,7 +1234,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['icons'],
     files: ['Accordion/Accordion.tsx'],
     composition: {
       name: 'Accordion',
@@ -1284,7 +1290,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: ['collapsible', 'timeline', 'scroll-fade'],
+    registryDependencies: ['collapsible', 'icons', 'timeline', 'scroll-fade'],
     files: ['ToolCallTrace/ToolCallTrace.tsx'],
   },
   {
@@ -1563,7 +1569,7 @@ export default function Example() {
       { name: 'children',  type: 'ReactNode', default: 'undefined', description: 'MenuBar content (brand, nav, search, actions).' },
     ],
     dependencies:         [],
-    registryDependencies: ['menu'],
+    registryDependencies: ['icons', 'menu'],
     files:                ['MenuBar/MenuBar.tsx'],
     composition: {
       name: 'MenuBar',
@@ -1625,6 +1631,30 @@ export default function Example() {
     dependencies: ['recharts'],
     registryDependencies: [],
     files: ['Charts/Charts.tsx'],
+    hidden: true,
+  },
+  {
+    slug: 'icons',
+    name: 'Icons',
+    category: 'Utilities',
+    description: 'The stroke icons components repeat (check, close, plus, search, chevrons), sized and stroked by props. Decorative by default.',
+    usage: 'import { CheckIcon, CloseIcon, ChevronDownIcon } from \'@components/ui\';',
+    props: [],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Icons/Icons.tsx'],
+    hidden: true,
+  },
+  {
+    slug: 'models',
+    name: 'Models',
+    category: 'Utilities',
+    description: 'Shared prop shapes (FieldProps, Option, Tone, EditHistory) that Input, Select, Alert, DeckEditor and others build on. Types only.',
+    usage: 'import type { FieldProps, Option, Tone, EditHistory } from \'@components/ui\';',
+    props: [],
+    dependencies: [],
+    registryDependencies: [],
+    files: ['Models/Models.tsx'],
     hidden: true,
   },
   {
@@ -2114,6 +2144,7 @@ export default function Example() {
       { name: 'max',       type: 'number',              default: '100',  description: 'Maximum value.' },
       { name: 'showLabel', type: 'boolean',             default: 'false', description: 'Show "Progress X%" label row.' },
       { name: 'size',      type: "'sm' | 'md' | 'lg'", default: "'md'", description: 'Track height.' },
+      { name: 'aria-label', type: 'string',             default: "'Progress'", description: 'Accessible name of the progressbar.' },
       { name: 'className', type: 'string',              default: "''",   description: 'Additional CSS classes.' },
     ],
     dependencies:         [],
@@ -2187,7 +2218,7 @@ function MyComponent() {
       { name: 'action',      type: '{ label: string; onClick: () => void }',       default: 'undefined',  description: 'Optional action button.' },
     ],
     dependencies:         [],
-    registryDependencies: [],
+    registryDependencies: ['icons', 'models'],
     files:                ['Toast/Toast.tsx'],
   },
   {
@@ -2572,7 +2603,7 @@ export default function Example() {
       { name: 'unstyledTrigger',  type: 'boolean',                             default: 'false',      description: 'Drops the built-in trigger styles so triggerClassName fully defines the trigger.' },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['icons'],
     files: ['Menu/Menu.tsx'],
   },
   {
@@ -2631,7 +2662,7 @@ export default function Example() {
       { name: 'className',   type: 'string',                         default: "''",        description: 'Additional classes on the root wrapper.' },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['icons', 'models'],
     files: ['Combobox/Combobox.tsx'],
   },
   {
@@ -2764,7 +2795,7 @@ export default function Example() {
       { name: 'className',   type: 'string',             default: "''",        description: 'Additional classes on the root wrapper.' },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['icons'],
     files: ['DatePicker/DatePicker.tsx', 'DatePicker/TimeField.tsx'],
   },
   {
@@ -2816,7 +2847,7 @@ export default function Example() {
       { name: 'className',         type: 'string',                 default: "''",      description: 'Additional classes on the root wrapper.' },
     ],
     dependencies: [],
-    registryDependencies: ['checkbox'],
+    registryDependencies: ['checkbox', 'icons'],
     files: ['DataTable/DataTable.tsx', 'DataTable/Paginator.tsx'],
   },
   {
@@ -3100,7 +3131,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: ['toggle-group'],
+    registryDependencies: ['icons', 'toggle-group'],
     files: ['CodeBlock/CodeBlock.tsx'],
   },
   {
@@ -3347,7 +3378,7 @@ export default function Example() {
       { name: 'className', type: 'string',  default: "''",             description: 'Additional classes merged onto the root chip wrapper.' },
     ],
     dependencies:         [],
-    registryDependencies: [],
+    registryDependencies: ['icons'],
     files:                ['Attachment/Attachment.tsx'],
     composition: {
       name: 'AttachmentGroup',
@@ -3396,7 +3427,7 @@ export default function Example() {
       { name: 'children',  type: 'ReactNode', default: '-', description: 'The message content. A MessageReactions child is detected and extracted automatically; it can appear anywhere inside.' },
     ],
     dependencies:         [],
-    registryDependencies: [],
+    registryDependencies: ['icons'],
     files:                ['Message/Message.tsx'],
     composition: {
       name: 'Message',
@@ -3495,7 +3526,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['icons'],
     files: ['Modal/Modal.tsx'],
     composition: {
       name: 'Modal',
@@ -3597,7 +3628,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: [],
+    registryDependencies: ['icons'],
     files: ['Drawer/Drawer.tsx'],
     composition: {
       name: 'Drawer',
@@ -3697,7 +3728,7 @@ export default function Example() {
       },
     ],
     dependencies: [],
-    registryDependencies: ['card'],
+    registryDependencies: ['card', 'icons'],
     files: ['SidePanel/SidePanel.tsx', 'SidePanel/sidePanelStack.ts'],
     composition: {
       name: 'SidePanel',
@@ -4323,7 +4354,7 @@ export const DeckEditorDemo = () => {
       { name: 'className', type: 'string', default: "''", description: 'Extra classes on the root. It fills its container, so give the container (or this) a height.' },
     ],
     dependencies:         ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities', '@tiptap/react', '@tiptap/pm', '@tiptap/starter-kit', '@tiptap/extension-text-align', '@tiptap/extension-text-style', 'jspdf', 'jszip', 'pptxgenjs', 'svg2pdf.js'],
-    registryDependencies: ['button', 'charts', 'color-picker', 'context-menu', 'input', 'menu', 'meteors', 'particles', 'popover', 'reveal', 'select', 'slide-canvas', 'switch', 'table', 'text-scramble', 'textarea', 'toggle-group', 'typewriter'],
+    registryDependencies: ['button', 'charts', 'color-picker', 'context-menu', 'input', 'menu', 'meteors', 'models', 'particles', 'popover', 'reveal', 'select', 'slide-canvas', 'switch', 'table', 'text-scramble', 'textarea', 'toggle-group', 'typewriter'],
     files:                [
       'DeckEditor/DeckEditor.tsx', 'DeckEditor/FormatToolbar.tsx', 'DeckEditor/InsertTools.tsx', 'DeckEditor/Inspector.tsx', 'DeckEditor/ElementControls.tsx',
       'DeckEditor/MotionControls.tsx', 'DeckEditor/fields.tsx', 'DeckEditor/SlideRail.tsx', 'DeckEditor/LayoutPicker.tsx', 'DeckEditor/ThemePicker.tsx',
@@ -4409,7 +4440,7 @@ export const SheetEditorDemo = () => {
       { name: 'className', type: 'string', default: "''", description: 'Extra classes on the root. It fills its container, so give the container (or this) a height.' },
     ],
     dependencies:         [],
-    registryDependencies: ['menu', 'popover', 'select', 'charts', 'modal', 'button', 'input', 'color-picker'],
+    registryDependencies: ['menu', 'models', 'popover', 'select', 'charts', 'modal', 'button', 'input', 'color-picker'],
     files:                [
       'SheetEditor/SheetEditor.tsx', 'SheetEditor/Grid.tsx', 'SheetEditor/Toolbar.tsx', 'SheetEditor/icons.tsx',
       'SheetEditor/ChartStrip.tsx', 'SheetEditor/charts.ts', 'SheetEditor/Actions.tsx', 'SheetEditor/FormulaInput.tsx', 'SheetEditor/refs.ts', 'SheetEditor/functions.ts', 'SheetEditor/FunctionHints.tsx', 'SheetEditor/FormatDialog.tsx', 'SheetEditor/CustomColor.tsx',

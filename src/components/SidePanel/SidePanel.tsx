@@ -3,6 +3,7 @@
 import { registerInStack, unregisterFromStack, reportStackEntrySize, subscribeToStack, getStackSnapshot, computeStackOffset, isBlockedInStack } from './sidePanelStack';
 import { createContext, useContext, useEffect, useRef, useState, useId, useSyncExternalStore, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent } from 'react';
 import { Card, CardHeader, CardContent, CardFooter } from '../Card/Card';
+import { CloseIcon } from '../Icons/Icons';
 import { createPortal } from 'react-dom';
 
 // SidePanel is non-modal (see below), so this is only used to focus the first
@@ -64,11 +65,7 @@ const useSidePanelContext = () => {
  * to disable any custom close controls you build outside of `SidePanelClose`. */
 export const useSidePanelBlocked = (): boolean => useSidePanelContext().isBlocked;
 
-// Deliberately non-modal: unlike Modal/Dialog/Drawer, SidePanel never inerts the
-// rest of the page (no native <dialog>.showModal(), no focus trap, no backdrop).
-// It behaves like a docked panel: it stays open until Escape or an explicit
-// close action, so multiple independent SidePanels can be open at once, each
-// with its own trigger elsewhere on the page.
+// Non-modal on purpose: no inert page, focus trap or backdrop, so several panels can be open at once.
 
 export interface SidePanelProps extends HTMLAttributes<HTMLDivElement> {
 	open:         boolean;
@@ -314,20 +311,7 @@ export const SidePanelClose = (
 			className={`absolute top-4 right-4 rounded-[var(--radius)] p-1 text-text-muted transition-colors duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring disabled:pointer-events-none disabled:opacity-40 ${className}`}
 			{...props}
 		>
-			<svg
-				width='16'
-				height='16'
-				viewBox='0 0 24 24'
-				fill='none'
-				stroke='currentColor'
-				strokeWidth='2'
-				strokeLinecap='round'
-				strokeLinejoin='round'
-				aria-hidden='true'
-			>
-				<path d='M18 6 6 18' />
-				<path d='m6 6 12 12' />
-			</svg>
+			<CloseIcon />
 		</button>
 	);
 };

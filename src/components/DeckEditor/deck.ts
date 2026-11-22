@@ -50,12 +50,7 @@ export interface ResolvedChart {
 	data:         ChartRow[];
 }
 
-export interface EditHistory {
-	undo:    () => void;
-	redo:    () => void;
-	canUndo: boolean;
-	canRedo: boolean;
-}
+export type { EditHistory } from '../Models/Models';
 
 /** Lets charts take their rows from the host's spreadsheets. `resolve` runs on every render, so keep it cheap; it returns null when the sheet or range can't be read. */
 export interface ChartData {

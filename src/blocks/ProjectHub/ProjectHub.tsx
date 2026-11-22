@@ -3,6 +3,7 @@
 import KanbanBoard, { type KanbanCardDetailsRenderer, type KanbanColumnData, type KanbanCardData, type KanbanSubtask } from '../../components/Kanban/Kanban';
 import Modal, { ModalHeader, ModalTitle, ModalContent, ModalFooter, ModalClose } from '../../components/Modal/Modal';
 import { Sidebar, SidebarButton, SidebarHeader, SidebarSection } from '../../components/Sidebar/Sidebar';
+import { CloseIcon as Close, PlusIcon as Plus } from '../../components/Icons/Icons';
 import { Select, type SelectOption } from '../../components/Select/Select';
 import TextShimmer from '../../components/TextShimmer/TextShimmer';
 import Typewriter from '../../components/Typewriter/Typewriter';
@@ -70,11 +71,7 @@ const ACCENT_LABEL: Record<Accent, string> = {
 	danger:  'Red',
 };
 
-const PlusIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='M12 5v14M5 12h14' />
-	</svg>
-);
+const PlusIcon = () => <Plus size={14} />;
 
 const CalendarIcon = () => (
 	<svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
@@ -89,12 +86,7 @@ const SparkleIcon = ({ className = '' }: { className?: string }) => (
 	</svg>
 );
 
-const CloseIcon = () => (
-	<svg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='M18 6 6 18' />
-		<path d='m6 6 12 12' />
-	</svg>
-);
+const CloseIcon = () => <Close size={10} strokeWidth={2.5} />;
 
 const LinkIcon = () => (
 	<svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>

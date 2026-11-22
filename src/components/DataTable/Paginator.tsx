@@ -1,5 +1,7 @@
 'use client';
 
+import { ChevronLeftIcon, ChevronRightIcon } from '../Icons/Icons';
+
 export type PaginatorVariant = 'default' | 'numbered' | 'minimal' | 'compact';
 
 export interface PaginatorProps {
@@ -13,10 +15,7 @@ export interface PaginatorProps {
 	className?:   string;
 }
 
-// Layout/behavior only — no color classes here. A color utility that's present alongside
-// a conflicting one (e.g. text-text-muted next to text-brand-fg) has cascade-order-dependent
-// precedence in the compiled CSS, not "last one in the class string wins": each button gets
-// exactly one of BTN_DEFAULT or BTN_CURRENT below, never both, so there's nothing to conflict.
+// No color classes here: conflicting utilities resolve by CSS order, so each button gets exactly one of BTN_DEFAULT or BTN_CURRENT.
 const BTN_BASE = [
 	'inline-flex items-center justify-center rounded-[var(--radius)] border-[length:var(--border-width)]',
 	'text-sm',
@@ -36,17 +35,9 @@ const BTN_CURRENT = 'bg-brand text-brand-fg border-brand hover:bg-brand-hover ho
 const BTN_TEXT  = 'px-3 py-1.5';
 const BTN_ICON  = 'w-8 h-8';
 
-const ChevronLeft = () => (
-	<svg width='16' height='16' viewBox='0 0 16 16' fill='none' aria-hidden='true'>
-		<path d='M10 12L6 8l4-4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
-	</svg>
-);
+const ChevronLeft = () => <ChevronLeftIcon strokeWidth={1.5} />;
 
-const ChevronRight = () => (
-	<svg width='16' height='16' viewBox='0 0 16 16' fill='none' aria-hidden='true'>
-		<path d='M6 4l4 4-4 4' stroke='currentColor' strokeWidth='1.5' strokeLinecap='round' strokeLinejoin='round' />
-	</svg>
-);
+const ChevronRight = () => <ChevronRightIcon strokeWidth={1.5} />;
 
 const getPageNumbers = (page: number, totalPages: number): (number | '...')[] => {
 	if(totalPages <= 7) return Array.from({ length: totalPages }, (_, i) => i);

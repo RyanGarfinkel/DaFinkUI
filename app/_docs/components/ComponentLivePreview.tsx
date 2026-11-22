@@ -259,6 +259,12 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
     case 'heatmap':
       return <HeatmapPreview />;
 
+    case 'icons':
+      return <p className='text-sm text-text-muted'>Shared icons. Nothing renders on its own.</p>;
+
+    case 'models':
+      return <p className='text-sm text-text-muted'>Types only. Nothing renders.</p>;
+
     default:
       return (
         <div className='text-sm text-text-muted'>

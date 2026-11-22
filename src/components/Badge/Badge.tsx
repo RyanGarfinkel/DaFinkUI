@@ -1,8 +1,9 @@
 'use client';
 
+import type { Tone } from '../Models/Models';
 import { HTMLAttributes } from 'react';
 
-export type BadgeVariant = 'default' | 'success' | 'warning' | 'danger' | 'outline';
+export type BadgeVariant = Tone | 'outline';
 
 export interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
 	variant?: BadgeVariant;

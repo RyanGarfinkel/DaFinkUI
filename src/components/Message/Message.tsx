@@ -1,4 +1,5 @@
 import { AnchorHTMLAttributes, ButtonHTMLAttributes, Children, HTMLAttributes, ReactElement, ReactNode, cloneElement, isValidElement } from 'react';
+import { CheckIcon } from '../Icons/Icons';
 
 export type MessageVariant = 'sent' | 'received';
 
@@ -144,27 +145,12 @@ const buildReactionAriaLabel = ({ icon, label, count, active }: ReactionVisualPr
 	return undefined;
 };
 
-const CheckIcon = () => (
-	<svg
-		aria-hidden='true'
-		viewBox='0 0 24 24'
-		fill='none'
-		stroke='currentColor'
-		strokeWidth='3'
-		strokeLinecap='round'
-		strokeLinejoin='round'
-		className='h-2.5 w-2.5 shrink-0'
-	>
-		<path d='M20 6 9 17l-5-5' />
-	</svg>
-);
-
 const ReactionContent = ({ icon, label, count, active }: ReactionVisualProps) => {
 	const hideText = Boolean(buildReactionAriaLabel({ icon, label, count, active })) && count !== undefined;
 
 	return (
 		<>
-			{active && <CheckIcon />}
+			{active && <CheckIcon size={10} strokeWidth={3} className='shrink-0' />}
 			{icon && <span aria-hidden='true' className='leading-none'>{icon}</span>}
 			{(label !== undefined || count !== undefined) && (
 				<span aria-hidden={hideText || undefined} className='leading-none'>{label ?? count}</span>

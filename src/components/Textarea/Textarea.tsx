@@ -1,13 +1,9 @@
 'use client';
 
 import { TextareaHTMLAttributes, forwardRef } from 'react';
+import type { FieldProps } from '../Models/Models';
 
-export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-	label?:    string;
-	error?:    string;
-	hint?:     string;
-	className?: string;
-}
+export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement>, FieldProps {}
 
 const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
 	({ label, error, hint, className = '', id, ...props }, ref) =>

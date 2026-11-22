@@ -120,6 +120,9 @@ export type { ScrollFadeProps, ScrollFadeDirection } from './components/ScrollFa
 
 export { Select } from './components/Select/Select';
 export type { SelectOption, SelectSize } from './components/Select/Select';
+export type { FieldProps, Option, Tone, EditHistory } from './components/Models/Models';
+export { CheckIcon, CloseIcon, PlusIcon, SearchIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from './components/Icons/Icons';
+export type { IconProps } from './components/Icons/Icons';
 
 export { default as Slider } from './components/Slider/Slider';
 export type { SliderProps } from './components/Slider/Slider';

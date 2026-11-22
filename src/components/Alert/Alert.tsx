@@ -1,6 +1,7 @@
+import type { Tone } from '../Models/Models';
 import { HTMLAttributes } from 'react';
 
-export type AlertVariant = 'default' | 'success' | 'warning' | 'danger';
+export type AlertVariant = Tone;
 
 export interface AlertProps extends HTMLAttributes<HTMLDivElement> {
 	variant?: AlertVariant;

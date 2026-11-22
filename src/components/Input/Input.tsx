@@ -1,13 +1,11 @@
 'use client';
 
 import { InputHTMLAttributes, forwardRef, useState } from 'react';
+import type { FieldProps } from '../Models/Models';
 
 export type InputVariant = 'default' | 'floating';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
-	label?:   string;
-	error?:   string;
-	hint?:    string;
+export interface InputProps extends InputHTMLAttributes<HTMLInputElement>, FieldProps {
 	variant?: InputVariant;
 }
 

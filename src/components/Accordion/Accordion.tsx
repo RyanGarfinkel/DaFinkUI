@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+import { ChevronDownIcon } from '../Icons/Icons';
 
 export type AccordionType = 'single' | 'multiple';
 
@@ -120,20 +121,7 @@ export const AccordionTrigger = ({ className = '', children, disabled, ...props 
 			{...props}
 		>
 			{children}
-			<svg
-				width='16'
-				height='16'
-				viewBox='0 0 24 24'
-				fill='none'
-				stroke='currentColor'
-				strokeWidth='2'
-				strokeLinecap='round'
-				strokeLinejoin='round'
-				aria-hidden='true'
-				className={`shrink-0 text-text-muted motion-safe:transition-transform motion-safe:duration-200 ${isOpen ? 'rotate-180' : ''}`}
-			>
-				<path d='m6 9 6 6 6-6' />
-			</svg>
+			<ChevronDownIcon className={`shrink-0 text-text-muted motion-safe:transition-transform motion-safe:duration-200 ${isOpen ? 'rotate-180' : ''}`} />
 		</button>
 	);
 };

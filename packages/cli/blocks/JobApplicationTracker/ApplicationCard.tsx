@@ -1,6 +1,7 @@
 'use client';
 
 import Badge, { type BadgeVariant } from '../../components/Badge/Badge';
+import { ChevronRightIcon } from '../../components/Icons/Icons';
 import Avatar from '../../components/Avatar/Avatar';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -65,12 +66,6 @@ const CalendarIcon = () => (
 const PaperclipIcon = () => (
 	<svg width='11' height='11' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
 		<path d='m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48' />
-	</svg>
-);
-
-const ChevronIcon = () => (
-	<svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='m9 6 6 6-6 6' />
 	</svg>
 );
 
@@ -146,7 +141,7 @@ export const ApplicationCard = ({ application, isDragging = false, className = '
 							onClick={(e) => { e.stopPropagation(); onOpen?.(application); }}
 							className='ml-auto flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-text-subtle opacity-0 transition-colors duration-[var(--duration-fast)] group-hover:opacity-100 hover:bg-surface-active hover:text-text focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:ring-brand-ring'
 						>
-							<ChevronIcon />
+							<ChevronRightIcon size={12} />
 						</button>
 					)}
 				</div>

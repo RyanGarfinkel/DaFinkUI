@@ -1,4 +1,5 @@
 import { createContext, useContext, useRef, useEffect, useState, HTMLAttributes, ButtonHTMLAttributes } from 'react';
+import { ChevronDownIcon } from '../Icons/Icons';
 import { Menu, MenuItem } from '../Menu/Menu';
 
 export interface MenuBarProps extends HTMLAttributes<HTMLElement> {
@@ -244,12 +245,6 @@ export interface MenuBarNavMoreProps {
 	className?: string;
 }
 
-const ChevronDownIcon = () => (
-	<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round'>
-		<path d='m6 9 6 6 6-6' />
-	</svg>
-);
-
 export const MenuBarNavMore = ({ value, items, children, className = '' }: MenuBarNavMoreProps) => {
 	const ctx      = useMenuBarNavContext();
 	const isActive = items.some(item => item.value === ctx.value);
@@ -277,7 +272,7 @@ export const MenuBarNavMore = ({ value, items, children, className = '' }: MenuB
 			trigger={
 				<>
 					<span>{children}</span>
-					<ChevronDownIcon />
+					<ChevronDownIcon size={14} />
 				</>
 			}
 			triggerClassName={[

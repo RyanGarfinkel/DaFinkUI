@@ -3,6 +3,7 @@
 import Accordion, { AccordionContent, AccordionItem, AccordionTrigger } from '../../components/Accordion/Accordion';
 import { ToggleGroup, ToggleGroupItem } from '../../components/ToggleGroup/ToggleGroup';
 import { Card, CardContent, CardFooter, CardHeader } from '../../components/Card/Card';
+import { CheckIcon } from '../../components/Icons/Icons';
 import Button from '../../components/Button/Button';
 import Badge from '../../components/Badge/Badge';
 import { useState } from 'react';
@@ -73,12 +74,6 @@ const FAQS = [
 	},
 ];
 
-const CheckIcon = () => (
-	<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' className='text-brand shrink-0' aria-hidden='true'>
-		<polyline points='20 6 9 17 4 12' />
-	</svg>
-);
-
 export const PricingSection = () => {
 	const [period, setPeriod] = useState<BillingPeriod>('monthly');
 
@@ -115,7 +110,7 @@ export const PricingSection = () => {
 									<ul className='flex flex-col gap-2.5'>
 										{tier.features.map((feature) => (
 											<li key={feature} className='flex items-center gap-2 text-sm text-text'>
-												<CheckIcon />
+												<CheckIcon className='text-brand shrink-0' />
 												{feature}
 											</li>
 										))}

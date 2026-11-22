@@ -1,6 +1,7 @@
 'use client';
 
 import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
+import { ChevronLeftIcon, ChevronRightIcon } from '../Icons/Icons';
 import TimeField from './TimeField';
 
 type Granularity = 'date' | 'time' | 'datetime';
@@ -372,7 +373,7 @@ export const DatePicker = (
 									'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 								].join(' ')}
 							>
-								<ChevronLeft />
+								<ChevronLeftIcon size={14} />
 							</button>
 
 							<span className='text-sm font-medium text-text select-none'>
@@ -390,7 +391,7 @@ export const DatePicker = (
 									'motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]',
 								].join(' ')}
 							>
-								<ChevronRight />
+								<ChevronRightIcon size={14} />
 							</button>
 						</div>
 
@@ -544,42 +545,6 @@ const ClockIcon = () => {
 		>
 			<circle cx='12' cy='12' r='9' />
 			<polyline points='12 7 12 12 15.5 14' />
-		</svg>
-	);
-};
-
-const ChevronLeft = () => {
-	return (
-		<svg
-			width='14'
-			height='14'
-			viewBox='0 0 24 24'
-			fill='none'
-			stroke='currentColor'
-			strokeWidth='2'
-			strokeLinecap='round'
-			strokeLinejoin='round'
-			aria-hidden='true'
-		>
-			<path d='m15 18-6-6 6-6' />
-		</svg>
-	);
-};
-
-const ChevronRight = () => {
-	return (
-		<svg
-			width='14'
-			height='14'
-			viewBox='0 0 24 24'
-			fill='none'
-			stroke='currentColor'
-			strokeWidth='2'
-			strokeLinecap='round'
-			strokeLinejoin='round'
-			aria-hidden='true'
-		>
-			<path d='m9 18 6-6-6-6' />
 		</svg>
 	);
 };

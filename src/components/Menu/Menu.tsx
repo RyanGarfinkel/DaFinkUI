@@ -2,6 +2,7 @@
 
 import { KeyboardEvent, useCallback, useEffect, useId, useRef, useState } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
+import { CheckIcon, ChevronRightIcon } from '../Icons/Icons';
 import { createPortal } from 'react-dom';
 
 export type MenuSide  = 'top' | 'right' | 'bottom' | 'left';
@@ -48,18 +49,6 @@ export const navigableIndexes = (entries: MenuEntry[]) => entries
 	.filter(({ entry }) => !isSeparator(entry) && !entry.disabled)
 	.map(({ i }) => i);
 
-const CheckIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='M20 6 9 17l-5-5' />
-	</svg>
-);
-
-const ChevronIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-		<path d='m9 18 6-6-6-6' />
-	</svg>
-);
-
 export interface MenuEntriesProps {
 	entries:    MenuEntry[];
 	idPrefix:   string;
@@ -102,10 +91,10 @@ export const MenuEntries = ({ entries, idPrefix, activeAt, expandedAt, onEnter, 
 								: 'text-text-muted hover:bg-surface-hover hover:text-text cursor-pointer',
 					].join(' ')}
 				>
-					{isChecked && <span className={`-ml-1 flex w-3.5 shrink-0 ${entry.selected ? 'opacity-100' : 'opacity-0'}`}><CheckIcon /></span>}
+					{isChecked && <span className={`-ml-1 flex w-3.5 shrink-0 ${entry.selected ? 'opacity-100' : 'opacity-0'}`}><CheckIcon size={14} strokeWidth={2.5} /></span>}
 					<span className='flex-1'>{entry.label}</span>
 					{entry.detail && <span className='text-xs text-text-muted'>{entry.detail}</span>}
-					{hasSub && <ChevronIcon />}
+					{hasSub && <ChevronRightIcon size={14} />}
 				</li>
 			);
 		})}

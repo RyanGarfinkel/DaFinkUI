@@ -1,41 +1,33 @@
 'use client';
 
 import { KeyboardEvent, useEffect, useId, useRef, useState } from 'react';
+import { CheckIcon, ChevronDownIcon, CloseIcon } from '../Icons/Icons';
+import type { FieldProps, Option } from '../Models/Models';
 
-export interface ComboboxOption {
-	value:     string;
-	label:     string;
+export interface ComboboxOption extends Option {
 	disabled?: boolean;
 }
 
 export type ComboboxSize = 'sm' | 'md';
 
-export interface ComboboxSingleProps {
+interface ComboboxBaseProps extends FieldProps {
 	options:      ComboboxOption[];
-	value?:       string;
-	onChange?:    (value: string) => void;
-	multiple?:    false;
 	placeholder?: string;
-	label?:       string;
-	hint?:        string;
-	error?:       string;
 	size?:        ComboboxSize;
 	disabled?:    boolean;
 	className?:   string;
 }
 
-export interface ComboboxMultiProps {
-	options:      ComboboxOption[];
-	value?:       string[];
-	onChange?:    (value: string[]) => void;
-	multiple:     true;
-	placeholder?: string;
-	label?:       string;
-	hint?:        string;
-	error?:       string;
-	size?:        ComboboxSize;
-	disabled?:    boolean;
-	className?:   string;
+export interface ComboboxSingleProps extends ComboboxBaseProps {
+	value?:    string;
+	onChange?: (value: string) => void;
+	multiple?: false;
+}
+
+export interface ComboboxMultiProps extends ComboboxBaseProps {
+	value?:    string[];
+	onChange?: (value: string[]) => void;
+	multiple:  true;
 }
 
 export type ComboboxProps = ComboboxSingleProps | ComboboxMultiProps;
@@ -332,9 +324,7 @@ export const Combobox = (props: ComboboxProps) => {
 									onClick={() => removePill(pill.value)}
 									className='ml-0.5 rounded-sm text-text-muted hover:text-text focus:outline-none focus-visible:ring-1 focus-visible:ring-brand-ring disabled:pointer-events-none motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)]'
 								>
-									<svg width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-										<path d='M18 6 6 18M6 6l12 12' />
-									</svg>
+									<CloseIcon size={10} strokeWidth={2.5} />
 								</button>
 							</span>
 						))}
@@ -379,18 +369,7 @@ export const Combobox = (props: ComboboxProps) => {
 							mounted ? 'rotate-180' : '',
 						].join(' ')}
 					>
-						<svg
-							width={size === 'sm' ? 12 : 14}
-							height={size === 'sm' ? 12 : 14}
-							viewBox='0 0 24 24'
-							fill='none'
-							stroke='currentColor'
-							strokeWidth='2'
-							strokeLinecap='round'
-							strokeLinejoin='round'
-						>
-							<path d='m6 9 6 6 6-6' />
-						</svg>
+						<ChevronDownIcon size={size === 'sm' ? 12 : 14} />
 					</div>
 				</div>
 
@@ -448,20 +427,7 @@ export const Combobox = (props: ComboboxProps) => {
 											{highlightMatch(opt.label, inputValue)}
 										</span>
 										{isSelected && !opt.disabled && (
-											<svg
-												width='13'
-												height='13'
-												viewBox='0 0 24 24'
-												fill='none'
-												stroke='currentColor'
-												strokeWidth='2.5'
-												strokeLinecap='round'
-												strokeLinejoin='round'
-												aria-hidden='true'
-												className='text-brand shrink-0 ml-2'
-											>
-												<path d='M20 6 9 17l-5-5' />
-											</svg>
+											<CheckIcon size={13} strokeWidth={2.5} className='text-brand shrink-0 ml-2' />
 										)}
 									</li>
 								);

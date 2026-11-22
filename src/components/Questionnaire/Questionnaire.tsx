@@ -5,6 +5,7 @@ import DatePicker from '../../components/DatePicker/DatePicker';
 import Slider from '../../components/Slider/Slider';
 import Button from '../../components/Button/Button';
 import Input from '../../components/Input/Input';
+import { CheckIcon } from '../Icons/Icons';
 
 export interface QuestionOption {
 	id:           string;
@@ -32,11 +33,7 @@ export interface QuestionnaireProps {
 
 const optionLetter = (index: number) => String.fromCharCode(65 + index);
 
-const CheckIcon = () => (
-	<svg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' className='shrink-0 text-success' aria-hidden='true'>
-		<polyline points='20 6 9 17 4 12' />
-	</svg>
-);
+const AnsweredIcon = () => <CheckIcon size={14} className='shrink-0 text-success' />;
 
 interface RadioOptionCardProps {
 	option:   QuestionOption;
@@ -187,7 +184,7 @@ export const Questionnaire = ({ step, steps, answer, onAnswer, className = '' }:
 	{
 		return (
 			<div className={`flex w-fit max-w-full items-center gap-2 self-start px-3 py-2 ${wrapperClass}`}>
-				<CheckIcon />
+				<AnsweredIcon />
 				<span className='text-sm text-text-muted'>You answered:</span>
 				<span className='text-sm font-medium text-text'>{answer}</span>
 			</div>
@@ -262,7 +259,7 @@ export const Questionnaire = ({ step, steps, answer, onAnswer, className = '' }:
 								<div className='flex flex-col gap-1 px-3 py-2'>
 									{stepList.map((s, index) => (
 										<div key={s.question} className='flex items-baseline gap-2'>
-											<CheckIcon />
+											<AnsweredIcon />
 											<span className='text-xs text-text-muted'>{s.question}</span>
 											<span className='text-sm font-medium text-text'>{answers[index]}</span>
 										</div>
