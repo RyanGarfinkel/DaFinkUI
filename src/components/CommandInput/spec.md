@@ -20,6 +20,8 @@ No npm dependencies. No registry dependencies.
 | `onCommand` | `(command: CommandOption) => void` | None     | Called when a command is executed (Enter or pointer-select on a menu item). |
 | `trigger`   | `string`                        | `'/'`       | Character that opens the command menu when it's the first character typed. |
 | `menuSide`  | `'top' \| 'bottom'`              | `'top'`     | Which side of the input the menu opens on.                                |
+| `inputClassName` | `string`                   | `''`        | Appended to the field's own classes. The component has no size variants: the consumer decides the field's height, padding and text size here. Defaults are `text-sm py-2 pl-3` plus `pr-3` (`pr-12` with `endContent`); override one with Tailwind's important modifier, e.g. `py-3! pl-4! pr-14!`. |
+| `endContent` | `ReactNode`                    | -           | Rendered inside the field's right edge (vertically centered, 6px from the edge), e.g. a send or stop button. The input reserves right padding for it, and it sits inside the field's single border so a wrapper doesn't need a second one. Interactive content here joins the normal Tab order after the input. |
 | `className` | `string`                        | `''`        | Additional classes on the root wrapper element.                           |
 
 Also accepts and forwards standard `<input>` attributes (`placeholder`, `disabled`, `name`, `id`, `autoFocus`, etc.) except `value`, `onChange`, and `onKeyDown`, which are owned by the component.

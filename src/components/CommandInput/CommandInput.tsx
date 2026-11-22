@@ -17,6 +17,10 @@ export interface CommandInputProps extends Omit<InputHTMLAttributes<HTMLInputEle
 	onCommand:  (command: CommandOption) => void;
 	trigger?:   string;
 	menuSide?:  CommandInputMenuSide;
+	/** Rendered inside the field's right edge, e.g. a send button. Keeps one border around both instead of a wrapper's border around the field's own. */
+	endContent?: ReactNode;
+	/** Appended to the field's own classes, so the consumer sets its size. Override a default (padding, text size) with Tailwind's important modifier, e.g. `py-3!`. */
+	inputClassName?: string;
 	className?: string;
 }
 
@@ -42,6 +46,8 @@ export const CommandInput = (
 		onCommand,
 		trigger = '/',
 		menuSide = 'top',
+		endContent,
+		inputClassName = '',
 		placeholder,
 		className = '',
 		disabled,
@@ -199,15 +205,19 @@ export const CommandInput = (
 				onChange={handleChange}
 				onKeyDown={handleKeyDown}
 				className={[
-					'w-full rounded-[var(--radius)] border-[length:var(--border-width)] bg-surface text-text text-sm px-3 py-2',
+					'w-full rounded-[var(--radius)] border-[length:var(--border-width)] bg-surface text-text text-sm py-2 pl-3',
+						endContent ? 'pr-12' : 'pr-3',
 					'placeholder:text-text-subtle',
 					'motion-safe:transition-shadow motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] outline-none',
 					'hover:border-input-border-hover',
 					'border-input-border focus:border-input-ring',
 					'focus:outline-none shadow-[var(--inner-shadow)] focus-visible:shadow-[var(--input-focus-shadow)]',
 					'disabled:cursor-not-allowed disabled:bg-input-disabled-bg disabled:text-input-disabled-text disabled:border-input-border',
+					inputClassName,
 				].join(' ')}
 			/>
+
+			{endContent && <div className='absolute inset-y-0 right-1.5 flex items-center'>{endContent}</div>}
 
 			{mounted && (
 				<ul

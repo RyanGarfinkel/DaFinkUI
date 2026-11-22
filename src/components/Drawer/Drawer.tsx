@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent, DialogHTMLAttributes } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, useId, HTMLAttributes, ButtonHTMLAttributes, KeyboardEvent, PointerEvent, DialogHTMLAttributes, RefObject } from 'react';
 
 const FOCUSABLE_SELECTOR = [
 	'a[href]',
@@ -29,8 +29,15 @@ const SIDE_HIDDEN_CLASSES: Record<DrawerSide, string> = {
 	bottom: 'translate-y-full',
 };
 
+const SWIPE_DISMISS_RATIO = 0.33;
+const SWIPE_DISMISS_MIN_PX = 48;
+const SWIPE_FLICK_VELOCITY = 0.5;
+const SWIPE_FLICK_MIN_PX = 16;
+
 interface DrawerContextValue {
 	titleId:      string;
+	side:         DrawerSide;
+	panelRef:     RefObject<HTMLDivElement | null>;
 	requestClose: () => void;
 }
 
@@ -196,7 +203,7 @@ const Drawer = (
 	if(!mounted) return null;
 
 	return (
-		<DrawerContext.Provider value={{ titleId, requestClose }}>
+		<DrawerContext.Provider value={{ titleId, side, panelRef, requestClose }}>
 			<dialog
 				ref={dialogRef}
 				role='dialog'
@@ -245,6 +252,77 @@ const Drawer = (
 };
 
 export default Drawer;
+
+export interface DrawerHandleProps extends HTMLAttributes<HTMLDivElement> {
+	className?: string;
+}
+
+interface SwipeState {
+	start:  number;
+	time:   number;
+	offset: number;
+}
+
+export const DrawerHandle = ({ className = '', ...props }: DrawerHandleProps) => {
+	const { side, panelRef, requestClose } = useDrawerContext();
+	const swipeRef = useRef<SwipeState | null>(null);
+
+	if(side !== 'bottom' && side !== 'top') throw new Error('DrawerHandle only works with side="bottom" or side="top"');
+
+	const direction = side === 'bottom' ? 1 : -1;
+
+	const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
+		const panel = panelRef.current;
+		if(!e.isPrimary || !panel) return;
+		e.currentTarget.setPointerCapture?.(e.pointerId);
+		swipeRef.current = { start: e.clientY, time: e.timeStamp, offset: 0 };
+		panel.style.transition = 'none';
+	};
+
+	const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+		const swipe = swipeRef.current;
+		const panel = panelRef.current;
+		if(!swipe || !panel) return;
+		swipe.offset = Math.max(0, (e.clientY - swipe.start) * direction);
+		panel.style.transform = `translateY(${swipe.offset * direction}px)`;
+	};
+
+	const finishSwipe = (e: PointerEvent<HTMLDivElement>, released: boolean) => {
+		const swipe = swipeRef.current;
+		const panel = panelRef.current;
+		swipeRef.current = null;
+		if(!swipe || !panel) return;
+
+		panel.style.transition = '';
+
+		const elapsed = e.timeStamp - swipe.time;
+		const velocity = elapsed > 0 ? swipe.offset / elapsed : 0;
+		const farEnough = swipe.offset > Math.max(panel.offsetHeight * SWIPE_DISMISS_RATIO, SWIPE_DISMISS_MIN_PX);
+		const flicked = velocity > SWIPE_FLICK_VELOCITY && swipe.offset > SWIPE_FLICK_MIN_PX;
+
+		if(released && (farEnough || flicked))
+		{
+			requestClose();
+			return;
+		}
+
+		panel.style.transform = '';
+	};
+
+	return (
+		<div
+			aria-hidden='true'
+			onPointerDown={handlePointerDown}
+			onPointerMove={handlePointerMove}
+			onPointerUp={(e) => finishSwipe(e, true)}
+			onPointerCancel={(e) => finishSwipe(e, false)}
+			className={`flex w-full shrink-0 cursor-grab touch-none select-none items-center justify-center py-3 active:cursor-grabbing ${className}`}
+			{...props}
+		>
+			<span className='h-1 w-10 rounded-full bg-surface-border-hover' />
+		</div>
+	);
+};
 
 export interface DrawerHeaderProps extends HTMLAttributes<HTMLDivElement> {
 	className?: string;

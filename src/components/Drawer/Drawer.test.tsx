@@ -1,4 +1,4 @@
-import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, DrawerSide } from './Drawer';
+import Drawer, { DrawerHeader, DrawerTitle, DrawerContent, DrawerFooter, DrawerClose, DrawerHandle, DrawerSide } from './Drawer';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import userEvent from '@testing-library/user-event';
@@ -375,5 +375,103 @@ describe('Drawer', () =>
 		const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 		expect(() => render(<DrawerTitle>Orphan</DrawerTitle>)).toThrow();
 		spy.mockRestore();
+	});
+
+	describe('DrawerHandle', () =>
+	{
+		const renderSheet = (side: DrawerSide = 'bottom', onOpenChange = vi.fn()) => {
+			render(
+				<Drawer open onOpenChange={onOpenChange} side={side}>
+					<DrawerHandle data-testid='handle' />
+					<DrawerClose />
+					<DrawerTitle>Sheet</DrawerTitle>
+				</Drawer>
+			);
+			return { onOpenChange, handle: screen.getByTestId('handle') };
+		};
+
+		const swipe = (handle: HTMLElement, from: number, to: number) => {
+			fireEvent.pointerDown(handle, { isPrimary: true, pointerId: 1, clientY: from });
+			fireEvent.pointerMove(handle, { isPrimary: true, pointerId: 1, clientY: to });
+			fireEvent.pointerUp(handle, { isPrimary: true, pointerId: 1, clientY: to });
+		};
+
+		it('is hidden from assistive technology and not focusable', async () =>
+		{
+			const { handle } = renderSheet();
+			await waitFor(() => expect(handle).toHaveAttribute('aria-hidden', 'true'));
+			expect(handle).not.toHaveAttribute('tabindex');
+		});
+
+		it('moves the panel with the pointer while dragging down', async () =>
+		{
+			const { handle } = renderSheet();
+			await waitFor(() => expect(getPanel()).toBeInTheDocument());
+			fireEvent.pointerDown(handle, { isPrimary: true, pointerId: 1, clientY: 100 });
+			fireEvent.pointerMove(handle, { isPrimary: true, pointerId: 1, clientY: 130 });
+			expect(getPanel().style.transform).toBe('translateY(30px)');
+			expect(getPanel().style.transition).toBe('none');
+		});
+
+		it('closes when swiped far enough', async () =>
+		{
+			const { handle, onOpenChange } = renderSheet();
+			await waitFor(() => expect(getPanel()).toBeInTheDocument());
+			swipe(handle, 100, 300);
+			expect(onOpenChange).toHaveBeenCalledWith(false);
+		});
+
+		it('springs back and stays open on a small drag', async () =>
+		{
+			const { handle, onOpenChange } = renderSheet();
+			await waitFor(() => expect(getPanel()).toBeInTheDocument());
+			swipe(handle, 100, 110);
+			expect(onOpenChange).not.toHaveBeenCalled();
+			expect(getPanel().style.transform).toBe('');
+			expect(getPanel().style.transition).toBe('');
+		});
+
+		it('does not move or close when dragged toward the inside of the screen', async () =>
+		{
+			const { handle, onOpenChange } = renderSheet();
+			await waitFor(() => expect(getPanel()).toBeInTheDocument());
+			swipe(handle, 300, 100);
+			expect(onOpenChange).not.toHaveBeenCalled();
+			expect(getPanel().style.transform).toBe('');
+		});
+
+		it('springs back without closing when the pointer is cancelled', async () =>
+		{
+			const { handle, onOpenChange } = renderSheet();
+			await waitFor(() => expect(getPanel()).toBeInTheDocument());
+			fireEvent.pointerDown(handle, { isPrimary: true, pointerId: 1, clientY: 100 });
+			fireEvent.pointerMove(handle, { isPrimary: true, pointerId: 1, clientY: 400 });
+			fireEvent.pointerCancel(handle, { isPrimary: true, pointerId: 1, clientY: 400 });
+			expect(onOpenChange).not.toHaveBeenCalled();
+			expect(getPanel().style.transform).toBe('');
+		});
+
+		it('swipes a top drawer closed by dragging up', async () =>
+		{
+			const { handle, onOpenChange } = renderSheet('top');
+			await waitFor(() => expect(getPanel()).toBeInTheDocument());
+			swipe(handle, 300, 100);
+			expect(onOpenChange).toHaveBeenCalledWith(false);
+		});
+
+		it('still closes with Escape and the close button', async () =>
+		{
+			const { onOpenChange } = renderSheet();
+			await waitFor(() => expect(getPanel()).toBeInTheDocument());
+			fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });
+			expect(onOpenChange).toHaveBeenCalledWith(false);
+		});
+
+		it('throws on a left or right drawer', () =>
+		{
+			const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
+			expect(() => renderSheet('right')).toThrow();
+			spy.mockRestore();
+		});
 	});
 });

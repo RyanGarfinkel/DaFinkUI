@@ -93,27 +93,32 @@ describe('Sidebar', () =>
 		expect(screen.getByRole('button', { name: 'Collapse navigation' })).toBeTruthy();
 	});
 
-	it('defaults the toggle position to middle', () =>
+	it('renders the toggle as a plain icon button in the sidebar, not a circle on the border', () =>
 	{
 		render(<Sidebar collapsible><p>content</p></Sidebar>);
 		const toggle = screen.getByRole('button', { name: 'Collapse navigation' });
-		expect(toggle.className).toContain('top-1/2');
-		expect(toggle.className).toContain('-translate-y-1/2');
+		expect(toggle.className).not.toContain('rounded-full');
+		expect(toggle.className).not.toContain('absolute');
+		expect(toggle.closest('aside')).toBeTruthy();
 	});
 
-	it('positions the toggle at the top when togglePosition="top"', () =>
+	it('puts the toggle in the header bar beside the header content, and shows only the toggle when collapsed', async () =>
 	{
-		render(<Sidebar collapsible togglePosition='top'><p>content</p></Sidebar>);
+		const user = userEvent.setup();
+		render(<Sidebar collapsible><SidebarHeader>Brand</SidebarHeader><p>content</p></Sidebar>);
 		const toggle = screen.getByRole('button', { name: 'Collapse navigation' });
-		expect(toggle.className).toContain('top-11');
-		expect(toggle.className).not.toContain('top-1/2');
+		expect(toggle.parentElement).toBe(screen.getByText('Brand').closest('.border-b-\\[length\\:var\\(--border-width\\)\\]'));
+
+		await user.click(toggle);
+
+		expect(screen.queryByText('Brand')).toBeNull();
+		expect(screen.getByRole('button', { name: 'Expand navigation' })).toBeTruthy();
 	});
 
-	it('positions the toggle at the bottom when togglePosition="bottom"', () =>
+	it('renders a header bar for the toggle even without a SidebarHeader', () =>
 	{
-		render(<Sidebar collapsible togglePosition='bottom'><p>content</p></Sidebar>);
-		const toggle = screen.getByRole('button', { name: 'Collapse navigation' });
-		expect(toggle.className).toContain('bottom-6');
+		render(<Sidebar collapsible><p>content</p></Sidebar>);
+		expect(screen.getByRole('button', { name: 'Collapse navigation' }).parentElement!.className).toContain('border-b');
 	});
 });
 

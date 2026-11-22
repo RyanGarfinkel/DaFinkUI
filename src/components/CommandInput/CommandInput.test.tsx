@@ -24,6 +24,50 @@ const Harness = (
 	);
 };
 
+describe('CommandInput: endContent', () =>
+{
+	it('renders end content inside the root wrapper, after the input', () =>
+	{
+		render(
+			<CommandInput value='' onChange={vi.fn()} commands={COMMANDS} onCommand={vi.fn()} endContent={<button type='button'>Send</button>} />
+		);
+		const input = screen.getByRole('combobox');
+		const button = screen.getByRole('button', { name: 'Send' });
+		expect(input.parentElement).toBe(button.parentElement!.parentElement);
+		expect(input.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+	});
+
+	it('reserves right padding only when there is end content', () =>
+	{
+		const { rerender } = render(<CommandInput value='' onChange={vi.fn()} commands={COMMANDS} onCommand={vi.fn()} />);
+		expect(screen.getByRole('combobox').className).toContain('pr-3');
+
+		rerender(<CommandInput value='' onChange={vi.fn()} commands={COMMANDS} onCommand={vi.fn()} endContent={<span>x</span>} />);
+		expect(screen.getByRole('combobox').className).toContain('pr-12');
+	});
+});
+
+describe('CommandInput: inputClassName', () =>
+{
+	it('has no size variants: the field uses its defaults', () =>
+	{
+		render(<CommandInput value='' onChange={vi.fn()} commands={COMMANDS} onCommand={vi.fn()} />);
+		const input = screen.getByRole('combobox');
+		expect(input.className).toContain('text-sm');
+		expect(input.className).toContain('py-2');
+	});
+
+	it('appends inputClassName to the field, not the wrapper', () =>
+	{
+		render(<CommandInput inputClassName='py-3! custom-field' className='custom-root' value='' onChange={vi.fn()} commands={COMMANDS} onCommand={vi.fn()} />);
+		const input = screen.getByRole('combobox');
+		expect(input.className).toContain('custom-field');
+		expect(input.className).toContain('py-3!');
+		expect(input.parentElement!.className).toContain('custom-root');
+		expect(input.parentElement!.className).not.toContain('custom-field');
+	});
+});
+
 describe('CommandInput: rendering', () =>
 {
 	it('renders the input with placeholder', () =>

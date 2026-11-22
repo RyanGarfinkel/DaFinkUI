@@ -1,6 +1,6 @@
 # Drawer
 
-A blocking side-panel overlay that slides in from an edge of the screen. Uses the native `<dialog>` element with `showModal()` for top-layer rendering, so no z-index is required and it is not clippable by ancestor overflow or transform. Shares the full modal accessibility contract (focus trap, Escape-to-close, backdrop dismissal, focus return) but uses a translate animation instead of fade + scale. Composed of `Drawer`, `DrawerHeader`, `DrawerTitle`, `DrawerContent`, `DrawerFooter`, and `DrawerClose`.
+A blocking side-panel overlay that slides in from an edge of the screen. Uses the native `<dialog>` element with `showModal()` for top-layer rendering, so no z-index is required and it is not clippable by ancestor overflow or transform. Shares the full modal accessibility contract (focus trap, Escape-to-close, backdrop dismissal, focus return) but uses a translate animation instead of fade + scale. Composed of `Drawer`, `DrawerHeader`, `DrawerTitle`, `DrawerContent`, `DrawerFooter`, `DrawerClose`, and `DrawerHandle`.
 
 ---
 
@@ -24,6 +24,7 @@ No additional npm packages required. No registry dependencies.
 | `DrawerContent` | Component | Scrollable body content area (`flex-1 overflow-y-auto`). |
 | `DrawerFooter`  | Component | Action row, right-aligned.                               |
 | `DrawerClose`   | Component | An × button in the top-right corner that closes the drawer. |
+| `DrawerHandle`  | Component | A grab handle for `side="bottom"` or `side="top"` drawers. Dragging it toward the screen edge swipes the drawer closed. Throws for `left`/`right`. |
 | `DrawerSide`    | Type      | `'left' \| 'right' \| 'top' \| 'bottom'`                 |
 
 ---
@@ -75,6 +76,20 @@ No additional npm packages required. No registry dependencies.
 | `bottom` | `inset-x-0 bottom-0 max-h-[85vh]`        | `translate-y-full`   |
 
 The panel exposes `data-side` and `data-state="open" | "closed"` for style extension.
+
+---
+
+## Swipe to close (`DrawerHandle`)
+
+Place `<DrawerHandle />` as the first child of a `side="bottom"` drawer (the last child for `side="top"`). It renders a pill in a full-width, 28px-tall strip. Dragging that strip moves the whole panel with the pointer, one way only (toward the edge it came from; dragging the other way does nothing). Having the handle is the opt-in: a drawer without one never reacts to swipes, so dragging inside content (scrolling a list, moving elements in an editor) can't dismiss it.
+
+On release the drawer closes (`onOpenChange(false)`, then the usual exit animation from where it was let go) when either is true:
+- it moved further than a third of the panel's height, and at least 48px, or
+- it was flicked: faster than 0.5 px/ms and moved at least 16px.
+
+Otherwise it springs back using the panel's normal transition, so reduced motion snaps it back instantly. A cancelled pointer (e.g. a system gesture takes over) always springs back.
+
+The handle is `aria-hidden` and not focusable. Swiping is a pointer shortcut only; keyboard and assistive-technology users close the drawer with Escape or `DrawerClose`, so always keep one of them (or a footer action) in a drawer that has a handle.
 
 ---
 
@@ -160,7 +175,10 @@ Uses the `mounted` + `visible` two-phase pattern (same as `Modal` and `CommandPa
 ## When to Use
 
 - Use a drawer for supplementary content or tasks that benefit from staying anchored to the page context: filter panels, detail views, settings, carts, notification lists.
-- Use `side="right"` (default) for detail/inspection panes, `side="left"` for navigation, `side="bottom"` for mobile-style sheets.
+- Use `side="right"` (default) for detail/inspection panes, `side="left"` for navigation, `side="bottom"` for mobile-style sheets (add a `DrawerHandle` so they can be swiped away).
+- **Prefer a drawer on mobile only for content that is part of the page.** A drawer is modal: the page behind it is dimmed, inert, and scroll-locked. On wide screens, content you work alongside (a navigation sidebar, a thread, a detail pane, an editor) belongs in a persistent column or a non-modal `SidePanel`, where the page stays usable. Below the mobile breakpoint there is no room for a second column, so render that same content in a `Drawer` instead. Pick one by the editor's or page's own width, not the device. On desktop, reserve `Drawer` for short, self-contained tasks that should interrupt: filters, a cart, settings, a notifications list.
+- Don't use a drawer for something the user must keep comparing against the page behind it, on any screen size.
+- Menus, popovers and tooltips that render into `document.body` open behind a modal drawer; a drawer's content must not depend on them until those components portal into the open dialog.
 - Prefer a `Modal` for short, focused decisions (confirmations); prefer a drawer when the content is longer or list-like.
 - Always include a `DrawerTitle`: the dialog's accessible name depends on it.
 
@@ -178,6 +196,7 @@ import Drawer, {
   DrawerContent,
   DrawerFooter,
   DrawerClose,
+  DrawerHandle,
   type DrawerSide,
 } from '@/src/components/Drawer/Drawer';
 import Button from '@/src/components/Button/Button';
@@ -199,6 +218,7 @@ export default function Example() {
       <Button variant="secondary" onClick={() => openFrom('bottom')}>Bottom</Button>
 
       <Drawer open={open} onOpenChange={setOpen} side={side}>
+        {side === 'bottom' && <DrawerHandle />}
         <DrawerClose />
         <DrawerHeader>
           <DrawerTitle>Notifications</DrawerTitle>

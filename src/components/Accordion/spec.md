@@ -67,7 +67,7 @@ Accepts all native `<div>` HTML attributes.
 ## Accessibility
 
 - Each `AccordionTrigger` is a `<button>` with `aria-expanded` reflecting the open/closed state
-- Content panels use `role="region"` and `aria-hidden` (`true` when closed, `false` when open)
+- Content panels use `role="region"` and `aria-hidden` (`true` when closed, `false` when open). Closed panels are also `inert`, so links and fields inside can't be reached with Tab while collapsed.
 - Chevron icon is `aria-hidden`
 - Keyboard: uses native tab order, not roving tabindex — every `AccordionTrigger` is its own native button and its own Tab stop; `Tab` moves focus between triggers in document order, `Enter`/`Space` toggles the focused item
 

@@ -18,6 +18,8 @@ export interface SelectProps {
 	hint?:        string;
 	error?:       string;
 	size?:        SelectSize;
+	/** Which edge of the trigger the list opens from. Use `top` for a control at the bottom of its container. */
+	side?:        'top' | 'bottom';
 	disabled?:    boolean;
 	className?:   string;
 	/** Extra classes on the trigger button itself, for a consumer restyling the control (e.g. a borderless-until-hover look inline in a table cell). `className` only reaches the outer wrapper. */
@@ -41,7 +43,8 @@ export const Select = (
         hint,
         error,
         size        = 'md',
-        disabled    = false,
+        side        = 'bottom',
+        disabled   = false,
         className   = '',
         triggerClassName = '',
         'aria-label': ariaLabel,
@@ -248,9 +251,10 @@ export const Select = (
 						aria-activedescendant={`${id}-opt-${activeIndex}`}
 						onKeyDown={handleListKeyDown}
 						className={[
-							'absolute z-50 top-full mt-1 left-0 min-w-full rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
+							'absolute z-50 left-0 min-w-full rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border bg-surface-panel shadow-[var(--shadow-lg)] backdrop-blur-[var(--backdrop-blur)]',
 							'overflow-x-hidden overflow-y-auto max-h-60 py-2 outline-none',
-							'transition-all duration-[var(--duration-fast)] origin-top',
+							'transition-all duration-[var(--duration-fast)]',
+							side === 'top' ? 'bottom-full mb-1 origin-bottom' : 'top-full mt-1 origin-top',
 							visible ? 'opacity-100 scale-100' : 'opacity-0 scale-95',
 						].join(' ')}
 					>

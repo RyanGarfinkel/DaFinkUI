@@ -75,16 +75,6 @@ export const resolveSidebarActiveHref = (hrefs: string[], pathname: string | nul
 	return best;
 };
 
-export type SidebarTogglePosition = 'top' | 'middle' | 'bottom';
-
-const TOGGLE_POSITION_CLASSES: Record<SidebarTogglePosition, string> = {
-	// Centers the (h-6) toggle on the bottom edge of a standard h-14 (56px) MenuBar,
-	// so it sits right at the intersection of the sidebar's and top bar's borders.
-	top:    'top-11',
-	middle: 'top-1/2 -translate-y-1/2',
-	bottom: 'bottom-6',
-};
-
 export interface SidebarProps extends HTMLAttributes<HTMLElement> {
 	width?:             string;
 	height?:            string;
@@ -95,13 +85,12 @@ export interface SidebarProps extends HTMLAttributes<HTMLElement> {
 	collapsed?:         boolean;
 	defaultCollapsed?:  boolean;
 	onCollapsedChange?: (collapsed: boolean) => void;
-	togglePosition?:    SidebarTogglePosition;
 }
 
 export const Sidebar = (
     {
         width = 'w-56', height = 'h-full', collapsedWidth = 'w-16', headerHeight = 'h-14', collapsible = false,
-        collapsed, defaultCollapsed = false, onCollapsedChange, togglePosition = 'middle',
+        collapsed, defaultCollapsed = false, onCollapsedChange,
         className = '', children, onKeyDown, ...props
     }: SidebarProps
 ) => {
@@ -323,6 +312,33 @@ export const Sidebar = (
     };
 
     const hasPositionOverride = /\b(static|fixed|absolute|sticky|relative)\b/.test(className);
+    const hasHeader = Boolean(headerChild) || collapsible;
+
+    const toggleButton = collapsible && (
+        <button
+            type='button'
+            onClick={toggleCollapsed}
+            aria-expanded={!isCollapsed}
+            aria-label={isCollapsed ? 'Expand navigation' : 'Collapse navigation'}
+            className='flex h-8 w-8 shrink-0 items-center justify-center rounded-[var(--radius)] text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring'
+        >
+            <svg
+                width='16'
+                height='16'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                aria-hidden='true'
+            >
+                <rect width='18' height='18' x='3' y='3' rx='2' />
+                <path d='M9 3v18' />
+                <path d={isCollapsed ? 'm14 9 3 3-3 3' : 'm16 15-3-3 3-3'} />
+            </svg>
+        </button>
+    );
 
     return (
         <SidebarCollapsedContext.Provider value={isCollapsed}>
@@ -338,50 +354,22 @@ export const Sidebar = (
                 height, isCollapsed ? collapsedWidth : width, className,
             ].filter(Boolean).join(' ')}
         >
-            {collapsible && (
-                <button
-                    type='button'
-                    onClick={toggleCollapsed}
-                    aria-expanded={!isCollapsed}
-                    aria-label={isCollapsed ? 'Expand navigation' : 'Collapse navigation'}
-                    className={[
-                        // z-[60]: higher than a typical fixed MenuBar (z-50), so the button
-                        // stays visible even when togglePosition="top" straddles that border too.
-                        'absolute -right-3 z-[60] flex h-6 w-6 items-center justify-center rounded-full border-[length:var(--border-width)] border-surface-border bg-surface text-text-muted motion-safe:transition-colors motion-safe:duration-[var(--duration-fast)] hover:bg-surface-hover hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-ring',
-                        TOGGLE_POSITION_CLASSES[togglePosition],
-                    ].join(' ')}
-                >
-                    <svg
-                        width='14'
-                        height='14'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth='2'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        aria-hidden='true'
-                        className={['motion-safe:transition-transform motion-safe:duration-200', isCollapsed ? 'rotate-180' : ''].join(' ')}
-                    >
-                        <path d='m15 18-6-6 6-6' />
-                    </svg>
-                </button>
-            )}
-
             <div className='flex h-full flex-col overflow-hidden'>
-                {headerChild && (
+                {hasHeader && (
                     // Explicit height (headerHeight, default h-14) rather than padding around
                     // the content's own height: the latter drifts the moment headerChild's
                     // content changes, which is exactly what broke this border's alignment
                     // with an adjacent title bar the first time around.
                     //
-                    // [&>*]:w-full: `headerChild` (SidebarHeader's own div) was previously a
-                    // plain block-level child of a non-flex wrapper, so it filled the width
-                    // for free. Making this wrapper `flex` to center it vertically means it
-                    // no longer does that on its own — this restores it without needing
-                    // SidebarHeader itself to declare a width it can't know it needs.
-                    <div className={['shrink-0 flex items-center border-b-[length:var(--border-width)] border-surface-border px-3 [&>*]:w-full', headerHeight].join(' ')}>
-                        {headerChild}
+                    // [&>*]:w-full on the inner wrapper: `headerChild` (SidebarHeader's own div)
+                    // was previously a plain block-level child of a non-flex wrapper, so it
+                    // filled the width for free. The wrapper is `flex` now, so this restores it
+                    // without needing SidebarHeader itself to declare a width it can't know it needs.
+                    //
+                    // Collapsed, the 40px of usable width holds only the toggle, so headerChild is not rendered.
+                    <div className={['shrink-0 flex items-center gap-1 border-b-[length:var(--border-width)] border-surface-border px-3', isCollapsed ? 'justify-center' : '', headerHeight].join(' ')}>
+                        {!isCollapsed && <div className='min-w-0 flex-1 [&>*]:w-full'>{headerChild}</div>}
+                        {toggleButton}
                     </div>
                 )}
 
@@ -400,7 +388,7 @@ export const Sidebar = (
                         // SidebarSection) hit their own min-content floor first. Overflow should
                         // scroll, never squish content.
                         'relative h-full overflow-x-hidden scrollbar-hover flex flex-col gap-4 px-3 [&>*]:shrink-0',
-                        headerChild ? 'pt-4' : 'pt-6',
+                        hasHeader ? 'pt-4' : 'pt-6',
                         footerChild ? 'pb-4' : 'pb-6',
                     ].join(' ')}
                 >

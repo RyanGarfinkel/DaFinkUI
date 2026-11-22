@@ -46,7 +46,7 @@ const OTPInput = ({
 	useEffect(() =>
 	{
 		if(value !== lastEmitted.current)
-			// eslint-disable-next-line react-hooks/set-state-in-effect
+			 
 			setSlots(Array.from({ length }, (_, i) => value[i] ?? ''));
 	}, [value, length]);
 

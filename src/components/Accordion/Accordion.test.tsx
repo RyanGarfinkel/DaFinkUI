@@ -38,6 +38,14 @@ describe('Accordion', () =>
 		expect(regions.every(r => r.getAttribute('aria-hidden') === 'true')).toBe(true);
 	});
 
+	it('keeps closed content out of the tab order with inert, and restores it when opened', async () =>
+	{
+		renderAccordion();
+		expect(screen.getAllByRole('region', { hidden: true }).every(r => r.hasAttribute('inert'))).toBe(true);
+		await userEvent.click(screen.getByRole('button', { name: /Item One/i }));
+		expect(screen.getAllByRole('region')[0].hasAttribute('inert')).toBe(false);
+	});
+
 	it('opens an item when its trigger is clicked', async () =>
 	{
 		renderAccordion();

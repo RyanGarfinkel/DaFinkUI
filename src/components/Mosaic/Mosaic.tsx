@@ -640,7 +640,7 @@ export const MosaicTile = (
 	{
 		if(!isResizing.current)
 		{
-			// eslint-disable-next-line react-hooks/set-state-in-effect
+			 
 			setLocalCol(srcCol);
 			setLocalRow(srcRow);
 			setLocalTileCol(tileCol);

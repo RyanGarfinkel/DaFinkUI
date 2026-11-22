@@ -22,6 +22,7 @@ No npm dependencies. No registry dependencies.
 | `hint`        | `string`                          | `undefined`   | Helper text below the trigger (hidden when error).   |
 | `error`       | `string`                          | `undefined`   | Error message; switches trigger to error state.      |
 | `size`        | `'sm' \| 'md'`                    | `'md'`        | Trigger height and text size.                        |
+| `side`        | `'top' \| 'bottom'`               | `'bottom'`    | Edge of the trigger the list opens from; `top` for controls at the bottom of a container. |
 | `disabled`    | `boolean`                         | `false`       | Prevents interaction.                                |
 | `className`   | `string`                          | `''`          | Additional classes on the root wrapper.              |
 

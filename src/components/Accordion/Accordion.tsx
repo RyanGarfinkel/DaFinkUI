@@ -149,6 +149,7 @@ export const AccordionContent = ({ className = '', children, ...props }: Accordi
 		<div
 			role='region'
 			aria-hidden={!isOpen}
+			inert={!isOpen}
 			className='motion-safe:grid motion-safe:transition-[grid-template-rows] motion-safe:duration-200'
 			style={{ gridTemplateRows: isOpen ? '1fr' : '0fr' }}
 			{...props}
