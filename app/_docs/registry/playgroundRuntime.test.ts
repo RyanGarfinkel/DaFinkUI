@@ -2,7 +2,7 @@
 
 import { evaluateBody, ensureReturn } from './playgroundRuntime';
 import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import * as React from 'react';
 
 describe('evaluateBody', () =>
@@ -70,9 +70,75 @@ describe('evaluateBody', () =>
 		expect(screen.getByTestId('sum').textContent).toBe('10');
 	});
 
-	it('does not throw for code that reads ambient globals (documented, not sandboxed)', () =>
+	it('does not expose ambient globals such as window', () =>
 	{
-		expect(() => evaluateBody('return (<div>{typeof window}</div>);', {})).not.toThrow();
+		expect(() => evaluateBody('return (<div>{typeof window}</div>);', {})).toThrow(/not available/);
+	});
+});
+
+describe('evaluateBody network guard', () =>
+{
+	const blocked = [
+		['fetch', 'fetch("/api"); return <div />;'],
+		['window.fetch', 'window.fetch("/api"); return <div />;'],
+		['globalThis', 'globalThis.fetch("/api"); return <div />;'],
+		['self', 'self.fetch("/api"); return <div />;'],
+		['this', 'this.fetch("/api"); return <div />;'],
+		['XMLHttpRequest', 'new XMLHttpRequest(); return <div />;'],
+		['WebSocket', 'new WebSocket("ws://x"); return <div />;'],
+		['navigator.sendBeacon', 'navigator.sendBeacon("/x"); return <div />;'],
+		['eval', 'eval("fetch(1)"); return <div />;'],
+		['Function', 'Function("return fetch")(); return <div />;'],
+		['.constructor', 'const F = (() => {}).constructor; return <div />;'],
+		['computed constructor', 'const k = "constr" + "uctor"; const F = (() => {})[k]; return <div />;'],
+		['getOwnPropertyDescriptor', 'Object.getOwnPropertyDescriptor(Object, "x"); return <div />;'],
+		['string timer', 'setTimeout("fetch(1)", 0); return <div />;'],
+		['dynamic import', 'import("https://x.dev/a.js"); return <div />;'],
+		['remote url', 'const u = "https://example.com"; return <div />;'],
+		['protocol-relative url', 'const u = "//example.com/a.js"; return <div />;'],
+		['css url()', 'return <div style={{ background: "url(/a.png)" }} />;'],
+		['img element', 'return <img alt="" />;'],
+		['iframe element', 'return <iframe />;'],
+		['src attribute', 'return <Avatar src="/a.png" />;'],
+		['dynamic src', 'const s = "x"; return <Avatar src={s} />;'],
+	];
+
+	it.each(blocked)('rejects %s', (_name, code) =>
+	{
+		expect(() => evaluateBody(code, { Avatar: () => null })).toThrow();
+	});
+
+	it('allows an inline data: src', () =>
+	{
+		expect(() => evaluateBody('return <Avatar src="data:image/png;base64,AAAA" />;', { Avatar: () => null })).not.toThrow();
+	});
+
+	it('still supports ordinary code: builtins, hooks-style callbacks and computed indexing', () =>
+	{
+		const node = evaluateBody(
+			'const items = [1, 2, 3];\nconst total = items.reduce((a, b) => a + b, 0);\nconst key = "a";\nconst o = { [key]: Math.max(...items) };\nreturn (<div data-testid="ok">{total}-{o[key]}-{items[1]}-{JSON.stringify(Object.keys(o))}</div>);',
+			{}
+		);
+
+		render(node as React.ReactElement);
+		expect(screen.getByTestId('ok').textContent).toBe('6-3-2-["a"]');
+	});
+
+	it('does not touch the real fetch', () =>
+	{
+		const original = globalThis.fetch;
+		const spy = vi.fn();
+		globalThis.fetch = spy as never;
+
+		try
+		{
+			expect(() => evaluateBody('fetch("/api"); return <div />;', {})).toThrow();
+			expect(spy).not.toHaveBeenCalled();
+		}
+		finally
+		{
+			globalThis.fetch = original;
+		}
 	});
 });
 

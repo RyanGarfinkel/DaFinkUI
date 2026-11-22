@@ -1,3 +1,4 @@
+import { createSandbox, networkGuardPlugin } from './playgroundGuard';
 import * as Babel from '@babel/standalone';
 import loopProtect from 'loop-protect';
 import * as React from 'react';
@@ -9,6 +10,7 @@ let loopProtectionRegistered = false;
 const ensureLoopProtectionRegistered = (): void => {
 	if (loopProtectionRegistered) return;
 	Babel.registerPlugin('loopProtection', loopProtect(LOOP_TIMEOUT_MS));
+	Babel.registerPlugin('networkGuard', networkGuardPlugin);
 	loopProtectionRegistered = true;
 };
 
@@ -23,9 +25,10 @@ const ensureLoopProtectionRegistered = (): void => {
  *   freeze the tab; execution continues with whatever ran before the break.
  * - Any transpile or synchronous runtime error is thrown as a plain `Error` with a readable
  *   message; callers are expected to catch it (this function never swallows errors itself).
- * - This does NOT sandbox the code; it runs with full access to the page's `window`/`document`,
- *   the same as the user's own browser console. That's an accepted tradeoff for a code
- *   playground embedded directly in the docs site (no iframe boundary), not an oversight.
+ * - No network access: free names resolve only against `scope` and a short list of safe
+ *   builtins (see `playgroundGuard`), so `window`, `fetch`, `XMLHttpRequest`, `WebSocket` and
+ *   `globalThis` are unreachable, and a Babel pass rejects remote URLs, resource-loading
+ *   elements and `constructor`/`__proto__` access. This is a guard, not an iframe boundary.
  */
 export const evaluateBody = (body: string, scope: Record<string, unknown>): React.ReactNode => {
 	ensureLoopProtectionRegistered();
@@ -35,16 +38,14 @@ export const evaluateBody = (body: string, scope: Record<string, unknown>): Reac
 
 	const result = Babel.transform(wrapped, {
 		presets: [['react', { runtime: 'classic' }]],
-		plugins: ['loopProtection'],
+		plugins: ['networkGuard', 'loopProtection'],
 		filename: 'playground.tsx',
 	});
 
 	if (!result.code) throw new Error('Nothing to render.');
 
-	const runnable = `${result.code}\nreturn Example();`;
-	const scopeEntries = Object.entries(scope);
-	const run = new Function('React', ...scopeEntries.map(([key]) => key), runnable);
-	return run(React, ...scopeEntries.map(([, value]) => value));
+	const run = new Function('__sandbox', `with (__sandbox) {\n${result.code}\nreturn Example();\n}`);
+	return run(createSandbox(scope, React));
 };
 
 /** True when `code` has no top-level `return`; lets the editor accept a bare JSX expression
