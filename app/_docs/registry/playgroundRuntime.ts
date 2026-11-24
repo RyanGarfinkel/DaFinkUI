@@ -9,8 +9,8 @@ let loopProtectionRegistered = false;
 
 const ensureLoopProtectionRegistered = (): void => {
 	if (loopProtectionRegistered) return;
-	Babel.registerPlugin('loopProtection', loopProtect(LOOP_TIMEOUT_MS));
-	Babel.registerPlugin('networkGuard', networkGuardPlugin);
+	Babel.registerPlugin('loopProtection', loopProtect(LOOP_TIMEOUT_MS) as never);
+	Babel.registerPlugin('networkGuard', networkGuardPlugin as never);
 	loopProtectionRegistered = true;
 };
 
@@ -42,7 +42,7 @@ export const evaluateBody = (body: string, scope: Record<string, unknown>): Reac
 		filename: 'playground.tsx',
 	});
 
-	if (!result.code) throw new Error('Nothing to render.');
+	if (!result?.code) throw new Error('Nothing to render.');
 
 	const run = new Function('__sandbox', `with (__sandbox) {\n${result.code}\nreturn Example();\n}`);
 	return run(createSandbox(scope, React));
