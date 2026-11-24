@@ -12,15 +12,141 @@ export interface ChangelogEntry {
 
 export const changelog: ChangelogEntry[] = [
 	{
-		'version': 'Unreleased',
-		'date': null,
+		'version': '0.6.0',
+		'date': '2026-11-24',
 		'sections': [
+			{
+				'label': 'Added',
+				'changes': [
+					'Add sheet editor, linked deck charts and settings panel redesign',
+					'Remove notifications panel, team grid and chart card blocks',
+					'Add heatmap component',
+					'Add shared models and icons, use them across components',
+					'Block network access in playground code',
+					'Add pdf viewer, latex editor, doc editor and document artifact'
+				]
+			},
+			{
+				'label': 'Fixed',
+				'changes': [
+					'Polish accordion, command input, drawer, select and sidebar',
+					'Name switch and progressbar for assistive technology',
+					'Center the heatmap grid and legend'
+				]
+			},
+			{
+				'label': 'Changed',
+				'changes': [
+					'Bump next to 16.4.6',
+					'Bundle editor props and split large docs and chat files',
+					'Extract chat list, panel slots and scroll hook from aichat',
+					'Release v0.6.0'
+				]
+			},
+			{
+				'label': 'Docs',
+				'changes': [
+					'Trim comments that restate code or run to paragraphs',
+					'Drop prop docs that only restate the prop name',
+					'Trim long comments and redundant prop docs',
+					'Add layered hook best practices to reliability',
+					'Require a 390px mobile check for components and blocks'
+				]
+			}
+		]
+	},
+	{
+		'version': '0.5.0',
+		'date': '2026-11-15',
+		'sections': [
+			{
+				'label': 'Added',
+				'changes': [
+					'Add snap callback to resizable panels dragged past max size',
+					'Add deck editor, slide editor block and slides panel to ai chat'
+				]
+			},
+			{
+				'label': 'Fixed',
+				'changes': [
+					'Open the docs search palette reliably',
+					'Size tabs and toggle group to their items',
+					'Copy ts test files with cli add --with-tests',
+					'Report the real version from dafink-ui --version'
+				]
+			},
+			{
+				'label': 'Changed',
+				'changes': [
+					'Remove stale files when syncing the cli registry',
+					'Release v0.5.0'
+				]
+			},
+			{
+				'label': 'Docs',
+				'changes': [
+					'Mention slide editing in the ai chat block description'
+				]
+			}
+		]
+	},
+	{
+		'version': '0.4.0',
+		'date': '2026-10-24',
+		'sections': [
+			{
+				'label': 'Added',
+				'changes': [
+					'Replace dropdown menu with unified menu component',
+					'Add model picker to ai chat block',
+					'Add terminal block',
+					'Expand mcp registry resources',
+					'Add eslint command to cli',
+					'Add link component',
+					'Add lint and hook commands to the cli',
+					'Add non-interactive flags to cli init',
+					'Document init flags in mcp prompt and install page',
+					'Validate docs api request bodies with zod',
+					'Load job application tracker from an api with optimistic updates'
+				]
+			},
+			{
+				'label': 'Fixed',
+				'changes': [
+					'Improve focus management across overlay components',
+					'Clear combobox timers on unmount and reopen',
+					'Clear overlay close timers on unmount and reopen',
+					'Stop workflow builder run animation on unmount',
+					'Cancel pending timers and frames in palette, toast, and toc',
+					'Cancel open frames and typeahead timers on overlay unmount',
+					'Cancel open frames on unmount in date picker and time field',
+					'Clear timers and guard async updates on unmount in blocks',
+					'Hide carousel arrows and autoplay with a single slide',
+					'Let tab leave the menu bar from any item',
+					'Satisfy react compiler lint rules in previews and overlays'
+				]
+			},
 			{
 				'label': 'Changed',
 				'changes': [
 					'Split ci into parallel jobs with shared setup',
 					'Add pr title check, codeql, and dependabot',
-					'Add playwright visual regression with pr comment'
+					'Add playwright visual regression with pr comment',
+					'Bump the actions group with 4 updates',
+					'Bump commander from 13.1.0 to 15.0.0',
+					'Bump eslint from 9.39.4 to 10.12.0',
+					'Bump @testing-library/jest-dom from 6.9.1 to 7.0.1',
+					'Extract reusable checks workflow shared by ci and publish',
+					'Show pointer cursor on enabled buttons globally',
+					'Release v0.4.0',
+					'Enlarge mobile touch targets to 44px in docs nav and theme toggle',
+					'Upgrade next, mcp sdk and zod'
+				]
+			},
+			{
+				'label': 'Docs',
+				'changes': [
+					'Update docs registry, previews, and project guidelines'
 				]
 			}
 		]
