@@ -71,9 +71,9 @@ function assertOneOf(flag: string, value: string | undefined, allowed: string[])
 	process.exit(1);
 }
 
-function abortIfCancelled<T>(value: T | symbol): T
+function abortIfCancelled<T>(value: T): Exclude<T, symbol>
 {
-	if(!isCancel(value)) return value as T;
+	if(!isCancel(value)) return value as Exclude<T, symbol>;
 
 	cancel('Setup cancelled.');
 	process.exit(0);
