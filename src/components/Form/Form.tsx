@@ -126,7 +126,7 @@ export const useZodForm = <TSchema extends z.ZodType<FieldValues>>(
 	// react-hook-form keys its resolver off the schema's input type and zod off its output, so the generics don't reconcile by inference.
 	return useForm({
 		...options,
-		resolver: zodResolver(schema as never),
+		resolver: zodResolver(schema as never) as unknown as UseFormProps<z.infer<TSchema>>['resolver'],
 	}) as UseFormReturn<z.infer<TSchema>>;
 };
 
