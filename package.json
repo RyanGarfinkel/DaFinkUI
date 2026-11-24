@@ -40,7 +40,7 @@
     "@tiptap/starter-kit": "^3.35.0",
     "@types/d3-force": "^3.0.10",
     "@uiw/react-codemirror": "^4.25.12",
-    "@xyflow/react": "^12.11.0",
+    "@xyflow/react": "^13.0.2",
     "d3-force": "^3.0.1",
     "jspdf": "^4.2.1",
     "jszip": "^3.10.2",
