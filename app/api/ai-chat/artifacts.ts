@@ -26,6 +26,8 @@ const MARKDOWN_REPORT = `# Q3 review
 3. Start the annual-plan pricing test.
 `;
 
+const DOCUMENT_HTML = '<h1>Q3 review</h1><p>Signups grew <strong>18%</strong> month over month, led by the new onboarding flow. Retention at day 30 held at <strong>42%</strong>.</p><h2>Highlights</h2><ul><li><p>Support tickets per active user fell for the third quarter in a row</p></li><li><p>The team-invite flow is ready to ship</p></li></ul><h2>Next quarter</h2><ol><li><p>Ship the team-invite flow</p></li><li><p>Cut time to first project below two minutes</p></li><li><p>Start the annual-plan pricing test</p></li></ol><blockquote><p>Edit anything here, then download it as a Word file.</p></blockquote>';
+
 const HTML_PAGE = `<!doctype html>
 <html lang="en">
 <head>
@@ -127,7 +129,14 @@ const ARTIFACT_REPLIES: { words: RegExp; reply: AiChatReply }[] = [
 		},
 	},
 	{
-		words: /\b(report|document|doc|summary|write-?up|memo)\b/i,
+		words: /\b(document|doc|docx|word|letter|proposal)\b/i,
+		reply: {
+			text:      'I drafted the Q3 review as a document. Open it from the card below to edit it here, and download it as a Word file when you’re done.',
+			artifacts: [{ id: 'q3-review-word', kind: 'document', title: 'Q3 review', filename: 'q3-review.docx', content: DOCUMENT_HTML } satisfies ChatArtifact],
+		},
+	},
+	{
+		words: /\b(report|summary|write-?up|memo)\b/i,
 		reply: {
 			text:      'I wrote up the Q3 review as a document. It’s saved to this chat’s artifacts: open it from the card below or from the Artifacts button.',
 			artifacts: [{ id: 'q3-review-doc', kind: 'markdown', title: 'Q3 review', filename: 'q3-review.md', content: MARKDOWN_REPORT } satisfies ChatArtifact],

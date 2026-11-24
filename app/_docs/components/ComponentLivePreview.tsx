@@ -5,13 +5,14 @@ import { ButtonPreview, InputPreview, RadioPreview, SwitchPreview, SliderPreview
 import { CollapsiblePreview, AccordionPreview, ToolCallTracePreview, CommandPalettePreview, TooltipPreview, PopoverPreview, MenuPreview, ContextMenuPreview } from './previews/Overlay';
 import { OTPInputPreview, ComboboxPreview, CommandInputPreview, DataTablePreview, ModalPreview, DrawerPreview, SidePanelPreview, SelectDemo, FormDemo, ToastDemo } from './Demos';
 import { TabsPreview, MenuBarPreview, TableOfContentsPreview, BreadcrumbPreview, ResizablePreview } from './previews/Layout';
+import { SlideCanvasPreview, CodeEditorPreview, DocEditorPreview } from './previews/Editors';
 import { SheetEditorDemo } from '@/app/_docs/components/examples/SheetEditorDemo';
 import { DeckEditorDemo } from '@/app/_docs/components/examples/DeckEditorDemo';
 import FunctionPlotter from '@/src/components/FunctionPlotter/FunctionPlotter';
 import WorkflowBuilder from '@/src/components/WorkflowBuilder/WorkflowBuilder';
-import { SlideCanvasPreview, CodeEditorPreview } from './previews/Editors';
 import { MosaicPreview, KanbanBoardPreview } from './previews/DragDrop';
 import ThemeToggle from '@/src/components/ThemeToggle/ThemeToggle';
+import { PdfViewer } from '@/src/components/PdfViewer/PdfViewer';
 import Textarea from '@/src/components/Textarea/Textarea';
 import { QuestionnairePreview } from './previews/Forms';
 import { Canvas } from '@/src/components/Canvas/Canvas';
@@ -264,6 +265,12 @@ export const ComponentLivePreview = ({ slug }: ComponentLivePreviewProps) => {
 
     case 'models':
       return <p className='text-sm text-text-muted'>Types only. Nothing renders.</p>;
+
+    case 'pdfviewer':
+      return <PdfViewer src='/sample.pdf' title='Quarterly Report' height='28rem' />;
+
+    case 'doc-editor':
+      return <DocEditorPreview />;
 
     default:
       return (

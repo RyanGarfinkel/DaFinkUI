@@ -47,14 +47,14 @@ export interface ChatSheet {
 	sheet:   Sheet;
 }
 
-export type ArtifactKind = 'pdf' | 'markdown' | 'image' | 'code';
+export type ArtifactKind = 'pdf' | 'markdown' | 'document' | 'image' | 'code';
 
 /** A document the AI made in a reply. It's kept in the chat's artifacts list and opens in the artifacts panel. */
 export interface ChatArtifact {
 	id:        string;
 	kind:      ArtifactKind;
 	title:     string;
-	/** `markdown` and `code` carry the text itself. `pdf` and `image` carry a URL (a data URL works). */
+	/** `markdown` and `code` carry the text itself, `document` carries HTML (editable, downloaded as .docx). `pdf` and `image` carry a URL (a data URL works). */
 	content:   string;
 	/** Used for the download name and, for `code`, shown as the language. */
 	filename?: string;

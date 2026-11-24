@@ -7,6 +7,7 @@ import { PricingSection } from '@/src/blocks/PricingSection/PricingSection';
 import { AuthFormSocial } from '@/src/blocks/AuthFormSocial/AuthFormSocial';
 import { SettingsForm } from '@/src/blocks/SettingsForm/SettingsForm';
 import { CheckoutForm } from '@/src/blocks/CheckoutForm/CheckoutForm';
+import { LatexEditor } from '@/src/blocks/LatexEditor/LatexEditor';
 import { SlideEditor } from '@/src/blocks/SlideEditor/SlideEditor';
 import { ProjectHub } from '@/src/blocks/ProjectHub/ProjectHub';
 import { Dashboard } from '@/src/blocks/Dashboard/Dashboard';
@@ -30,4 +31,5 @@ export const blockPreviews: Record<string, React.ReactNode> = {
 	'job-application-tracker': <JobApplicationTracker />,
 	terminal: <Terminal />,
 	'slide-editor': <SlideEditor />,
+	'latex-editor': <LatexEditor />,
 };

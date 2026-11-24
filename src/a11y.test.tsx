@@ -7,6 +7,8 @@ import { RadioGroup, RadioItem } from './components/Radio/Radio';
 import Breadcrumb from './components/Breadcrumb/Breadcrumb';
 import { ChatMessageRow } from './blocks/AiChat/MessageRow';
 import { Combobox } from './components/Combobox/Combobox';
+import PdfViewer from './components/PdfViewer/PdfViewer';
+import DocEditor from './components/DocEditor/DocEditor';
 import Tree, { TreeItem } from './components/Tree/Tree';
 import { Sidebar } from './components/Sidebar/Sidebar';
 import { Heatmap } from './components/Heatmap/Heatmap';
@@ -26,7 +28,7 @@ import Alert from './components/Alert/Alert';
 import Badge from './components/Badge/Badge';
 import Input from './components/Input/Input';
 import type { ReactElement } from 'react';
-import { describe, it } from 'vitest';
+import { describe, it, vi } from 'vitest';
 
 const noop = () => {};
 
@@ -149,8 +151,54 @@ const AICHAT: Record<string, ReactElement> = {
 	),
 };
 
+vi.mock('pdfjs-dist', () => ({
+	GlobalWorkerOptions: {},
+	getDocument:         () => ({
+		destroy: () => {},
+		promise: Promise.resolve({
+			numPages: 2,
+			getPage:  () => Promise.resolve({
+				getViewport:       ({ scale }: { scale: number }) => ({ width: 612 * scale, height: 792 * scale }),
+				render:            () => ({ promise: Promise.resolve(), cancel: () => {} }),
+				streamTextContent: () => ({}),
+			}),
+		}),
+	}),
+	TextLayer: class
+	{
+		public render = () => Promise.resolve();
+		public cancel = () => {};
+	},
+}));
+
 describe('accessibility (axe)', () =>
 {
+	it('PdfViewer has no violations once loaded', async () =>
+	{
+		const { container, findByRole } = render(<PdfViewer src='/a.pdf' title='Report' />);
+		await findByRole('img', { name: 'Page 1 of 2' });
+
+		await expectNoViolations(container);
+	});
+
+	it('DocEditor has no violations, editable and read-only', async () =>
+	{
+		const editable = render(<DocEditor value='<h1>Report</h1><p>Hello</p>' title='Report' />);
+		await editable.findByRole('textbox', { name: 'Document' });
+		await expectNoViolations(editable.container);
+
+		const readOnly = render(<DocEditor value='<p>Hello</p>' readOnly aria-label='Read only' />);
+		await readOnly.findByRole('textbox', { name: 'Read only' });
+		await expectNoViolations(readOnly.container);
+	});
+
+	it('PdfViewer has no violations while loading', async () =>
+	{
+		const { container } = render(<PdfViewer src='/a.pdf' title='Report' />);
+
+		await expectNoViolations(container);
+	});
+
 	it.each(Object.entries({ ...COMPONENTS, ...AICHAT }))('%s has no violations', async (_name, element) =>
 	{
 		const { container } = render(element);

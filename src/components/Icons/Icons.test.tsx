@@ -1,8 +1,9 @@
-import { CheckIcon, CloseIcon, PlusIcon, SearchIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from './Icons';
+import { AlignCenterIcon, AlignLeftIcon, AlignRightIcon, BoldIcon, DownloadIcon, ItalicIcon, ListIcon, OrderedListIcon, QuoteIcon, RedoIcon, StrikeIcon, UnderlineIcon, UndoIcon } from './Icons';
+import { CheckIcon, CloseIcon, MinusIcon, PlusIcon, SearchIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from './Icons';
 import { render } from '@testing-library/react';
 import { describe, it, expect } from 'vitest';
 
-const ICONS = { CheckIcon, CloseIcon, PlusIcon, SearchIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon };
+const ICONS = { AlignCenterIcon, AlignLeftIcon, AlignRightIcon, BoldIcon, DownloadIcon, ItalicIcon, ListIcon, OrderedListIcon, QuoteIcon, RedoIcon, StrikeIcon, UnderlineIcon, UndoIcon, CheckIcon, CloseIcon, MinusIcon, PlusIcon, SearchIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon };
 
 describe('Icons', () =>
 {

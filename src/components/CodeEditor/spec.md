@@ -22,7 +22,11 @@ npx dafink-ui add code-editor
 | `extensions`  | `Extension[]`               | `[]`    | Extra CodeMirror extensions layered on top of the built-ins, e.g. a project-specific `autocompletion({ override: [...] })` call. |
 | `aria-label`  | `string`                    | None    | Accessible name for the editor region.                                                          |
 | `className`   | `string`                    | `''`    | Additional Tailwind classes merged onto the root wrapper.                                       |
+| `language`    | `Extension`                 | JSX/JS  | Language support extension. Pass the exported `latex` for LaTeX, or any CodeMirror language. |
+| `wrap`        | `boolean`                   | `false` | Wrap long lines instead of scrolling horizontally. |
+| `height`      | `string`                    | None    | CSS height for the editor surface (e.g. `'100%'` to fill a sized parent). Defaults to the content height. |
 | `minHeight`   | `string`                    | None    | CSS min-height for the editor surface (e.g. `'200px'`). Keeps the editor from collapsing to a single line on short content. |
+| `ref`         | `Ref<CodeEditorHandle>`     | None    | Handle with `revealLine(line)`: selects the 1-based line, scrolls it to the middle and focuses the editor. Out-of-range lines are clamped. |
 
 ---
 
@@ -30,7 +34,8 @@ npx dafink-ui add code-editor
 
 | Behavior | Detail |
 |---|---|
-| Language | `javascript({ jsx: true })`: JSX/JS syntax highlighting always on |
+| Language | `javascript({ jsx: true })` by default. Pass `language={latex}` (from `CodeEditor/latex.ts`) for LaTeX: comments, `\commands`, `$math$` and brackets are highlighted, and autocomplete is on (see below) |
+| LaTeX autocomplete | Typing `\` lists commands, with snippet placeholders for the ones that take arguments (Tab moves between them). The built-in list lives in `latexCommands.ts`, grouped by package: core commands always show, and a package's commands show normally once its `\usepackage` is in the document. Before that they rank lower, say "needs <package>", and picking one also adds the `\usepackage` line below the last package. The list also learns from the document: commands defined with `\newcommand`, `\renewcommand`, `\providecommand`, `\def` or `\DeclareMathOperator` (with their argument count, ranked first), and any other command already used in the file; `\newenvironment` and `\newtheorem` names join the `\begin{` list. To add commands, edit `latexCommands.ts`. Inside `\begin{` it lists environments and fills in the matching `\end{}`; inside `\end{` it lists only the environments still open; inside `\usepackage{` it lists common packages; inside `\ref{`, `\eqref{`, `\cref{` and similar it lists the `\label{}` keys defined in the document |
 | Theme | Follows the document's `.dark` class via a `MutationObserver`; switches between CodeMirror's `light` and `dark` themes live |
 | Tab | Indents the current line (CodeMirror's `indentWithTab`, on by default) |
 | Tab (completion open) | Accepts the selected autocomplete suggestion instead of indenting: bound at `Prec.highest` so it intercepts before indentation, but falls through to indent when no completion is active |

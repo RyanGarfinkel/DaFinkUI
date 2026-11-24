@@ -12,7 +12,8 @@ const SNAP_OVERSHOOT_PX = 48;
 interface ResizablePanelEntry {
 	minSize:    number;
 	maxSize?:   number;
-	onSnap?:    () => void;
+	onSnap?:     () => void;
+	onCollapse?: () => void;
 	sized:      boolean;
 	getSize:    () => number;
 	commitSize: (size: number) => void;
@@ -72,6 +73,8 @@ export interface ResizablePanelProps extends HTMLAttributes<HTMLDivElement> {
 	maxSize?:     number;
 	/** Fires when a drag is released at least 48px past `maxSize`; the panel itself stays clamped. */
 	onSnap?:      () => void;
+	/** Fires when a drag is released at least 48px below `minSize`; the panel itself stays clamped at `minSize`. */
+	onCollapse?:  () => void;
 }
 
 // A group is expected to have at most one flexible (no defaultSize) panel in practice — a
@@ -79,7 +82,7 @@ export interface ResizablePanelProps extends HTMLAttributes<HTMLDivElement> {
 // just absorbs whatever space is left — but nothing here enforces a single flexible panel.
 export const ResizablePanel = (
 	{
-		defaultSize, minSize = DEFAULT_MIN_SIZE_PX, maxSize, onSnap,
+		defaultSize, minSize = DEFAULT_MIN_SIZE_PX, maxSize, onSnap, onCollapse,
 		className = '', children, style, ...props
 	}: ResizablePanelProps
 ) => {
@@ -96,20 +99,23 @@ export const ResizablePanel = (
 	const getSize    = useCallback(() => sizeRef.current, []);
 	const commitSize = useCallback((next: number) => setSize(next), []);
 	const onSnapRef  = useRef(onSnap);
+	const onCollapseRef = useRef(onCollapse);
 
 	useEffect(() => {
 		onSnapRef.current = onSnap;
-	}, [onSnap]);
+		onCollapseRef.current = onCollapse;
+	}, [onSnap, onCollapse]);
 
 	const snap = useCallback(() => onSnapRef.current?.(), []);
+	const collapse = useCallback(() => onCollapseRef.current?.(), []);
 
 	// A layout effect (not a passive one) so every panel is registered before ResizableHandle's
 	// own mount effect (a passive effect) runs — otherwise a handle whose target is a *later*
 	// sibling panel (declared after it in JSX) could read an unregistered panel on first mount.
 	useLayoutEffect(() => {
-		registerPanel(id, { minSize, maxSize, onSnap: snap, sized, getSize, commitSize });
+		registerPanel(id, { minSize, maxSize, onSnap: snap, onCollapse: collapse, sized, getSize, commitSize });
 		return () => unregisterPanel(id);
-	}, [id, minSize, maxSize, snap, sized, getSize, commitSize, registerPanel, unregisterPanel]);
+	}, [id, minSize, maxSize, snap, collapse, sized, getSize, commitSize, registerPanel, unregisterPanel]);
 
 	const sizeStyle = sized
 		? direction === 'horizontal'
@@ -229,7 +235,7 @@ export const ResizableHandle = ({ className = '', 'aria-label': ariaLabel = 'Res
 		const signedDelta = drag.target.sign * delta;
 		const raw         = drag.startSize + signedDelta;
 		const clamped     = applySize(drag.target, raw);
-		const { maxSize, onSnap } = drag.target.entry;
+		const { minSize, maxSize, onSnap, onCollapse } = drag.target.entry;
 
 		drag.target.entry.commitSize(clamped);
 		setDisplaySize(clamped);
@@ -241,6 +247,7 @@ export const ResizableHandle = ({ className = '', 'aria-label': ariaLabel = 'Res
 		document.body.style.userSelect = '';
 
 		if(maxSize !== undefined && raw >= maxSize + SNAP_OVERSHOOT_PX) onSnap?.();
+		else if(raw <= minSize - SNAP_OVERSHOOT_PX) onCollapse?.();
 	};
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {

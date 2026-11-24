@@ -14,6 +14,8 @@ export interface ArtifactsPanelProps {
 	onSelect:       (key: string | null) => void;
 	/** A slide deck or a sheet opens in its own panel, not here. */
 	onOpenDocument: (entry: ArtifactEntry) => void;
+	/** Called with an artifact's id and new content when the person edits it (document artifacts). */
+	onArtifactChange?: (artifactId: string, content: string) => void;
 	expanded:       boolean;
 	onToggleExpand: () => void;
 	onClose:        () => void;
@@ -21,7 +23,7 @@ export interface ArtifactsPanelProps {
 	inDrawer?:      boolean;
 }
 
-export const ArtifactsPanel = ({ entries, openKey, onSelect, onOpenDocument, expanded, onToggleExpand, onClose, inDrawer = false }: ArtifactsPanelProps) => {
+export const ArtifactsPanel = ({ entries, openKey, onSelect, onOpenDocument, onArtifactChange, expanded, onToggleExpand, onClose, inDrawer = false }: ArtifactsPanelProps) => {
 	const open = entries.find((entry) => entry.key === openKey && entry.artifact);
 
 	const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
@@ -64,7 +66,7 @@ export const ArtifactsPanel = ({ entries, openKey, onSelect, onOpenDocument, exp
 
 			<div className='min-h-0 flex-1'>
 				{open?.artifact ? (
-					<ArtifactViewer artifact={open.artifact} />
+					<ArtifactViewer artifact={open.artifact} onChange={(content) => onArtifactChange?.(open.artifact!.id, content)} />
 				) : entries.length === 0 ? (
 					<p className='p-5 text-sm text-text-muted'>Documents, images, slides and sheets the AI makes in this chat will appear here.</p>
 				) : (

@@ -6,7 +6,8 @@ type EntryKind = ArtifactKind | 'slides' | 'sheet';
 
 export const KIND_LABELS: Record<EntryKind, string> = {
 	pdf:      'PDF',
-	markdown: 'Document',
+	markdown: 'Markdown',
+	document: 'Document',
 	image:    'Image',
 	code:     'Code',
 	slides:   'Slides',
@@ -16,6 +17,7 @@ export const KIND_LABELS: Record<EntryKind, string> = {
 export const KIND_ICONS: Record<EntryKind, ReactNode> = {
 	pdf:      <FileIcon />,
 	markdown: <FileIcon />,
+	document: <FileIcon />,
 	image:    <ImageIcon />,
 	code:     <CodeIcon />,
 	slides:   <SlidesIcon />,

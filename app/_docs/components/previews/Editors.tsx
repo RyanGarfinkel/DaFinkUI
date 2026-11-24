@@ -1,6 +1,7 @@
 'use client';
 
 import { SlideCanvas, type SlideElement } from '@/src/components/SlideCanvas/SlideCanvas';
+import { DocEditor } from '@/src/components/DocEditor/DocEditor';
 import CodeEditor from '@/src/components/CodeEditor/CodeEditor';
 import { Badge } from '@/src/components/Badge/Badge';
 import { useState } from 'react';
@@ -38,6 +39,18 @@ export const SlideCanvasPreview = () => {
 				renderElement={renderDemoSlideElement}
 				gridSize={8}
 			/>
+		</div>
+	);
+};
+
+const INITIAL_DOCUMENT = '<h1>Q3 review</h1><p>Signups grew <strong>18%</strong> month over month, led by the new onboarding flow.</p><ul><li><p>Retention held at 42%</p></li><li><p>Support tickets fell again</p></li></ul>';
+
+export const DocEditorPreview = () => {
+	const [html, setHtml] = useState(INITIAL_DOCUMENT);
+
+	return (
+		<div className='w-full max-w-3xl'>
+			<DocEditor value={html} onChange={setHtml} title='Q3 review' height='28rem' />
 		</div>
 	);
 };

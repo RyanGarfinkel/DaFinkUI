@@ -1,11 +1,17 @@
 'use client';
 
-import CodeMirror, { keymap, Prec, type Extension } from '@uiw/react-codemirror';
+import CodeMirror, { EditorView, keymap, Prec, type Extension, type ReactCodeMirrorRef } from '@uiw/react-codemirror';
+import { Ref, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { acceptCompletion } from '@codemirror/autocomplete';
 import { javascript } from '@codemirror/lang-javascript';
-import { useEffect, useState } from 'react';
+
+export interface CodeEditorHandle {
+	/** Selects the 1-based line, scrolls it to the middle of the editor and focuses the editor. */
+	revealLine: (line: number) => void;
+}
 
 export interface CodeEditorProps {
+	ref?: Ref<CodeEditorHandle>;
 	value: string;
 	onChange: (value: string) => void;
 	/** Extra CodeMirror extensions layered on top of the built-ins, e.g. a project-specific `autocompletion({ override: [...] })` call. */
@@ -13,6 +19,12 @@ export interface CodeEditorProps {
 	/** Accessible name for the editor region. */
 	'aria-label'?: string;
 	className?: string;
+	/** Language support extension. Defaults to JSX/JavaScript; pass `latex` (exported alongside) or any CodeMirror language. */
+	language?: Extension;
+	/** Wrap long lines instead of scrolling horizontally. */
+	wrap?: boolean;
+	/** CSS height for the editor surface (e.g. `'100%'` to fill a sized parent). Defaults to the content height. */
+	height?: string;
 	/** CSS min-height for the editor surface (e.g. `'200px'`). Keeps the editor from collapsing to a single line on short content. */
 	minHeight?: string;
 }
@@ -35,7 +47,9 @@ const tabAcceptCompletionKeymap = Prec.highest(keymap.of([
 	{ key: 'Tab', run: acceptCompletion },
 ]));
 
-const BASE_EXTENSIONS = [javascript({ jsx: true }), escapeBlurKeymap, tabAcceptCompletionKeymap];
+const JSX_LANGUAGE = javascript({ jsx: true });
+
+const BASE_EXTENSIONS = [escapeBlurKeymap, tabAcceptCompletionKeymap];
 
 const useIsDarkMode = (): boolean => {
 	const [isDark, setIsDark] = useState(false);
@@ -54,15 +68,29 @@ const useIsDarkMode = (): boolean => {
 	return isDark;
 };
 
-const CodeEditor = ({ value, onChange, extensions = [], className = '', 'aria-label': ariaLabel, minHeight }: CodeEditorProps) => {
+const CodeEditor = ({ ref, value, onChange, extensions = [], language = JSX_LANGUAGE, wrap = false, className = '', 'aria-label': ariaLabel, height, minHeight }: CodeEditorProps) => {
 	const isDark = useIsDarkMode();
+	const editorRef = useRef<ReactCodeMirrorRef>(null);
+
+	useImperativeHandle(ref, () => ({
+		revealLine: (number) => {
+			const view = editorRef.current?.view;
+			if(!view) return;
+
+			const line = view.state.doc.line(Math.min(Math.max(number, 1), view.state.doc.lines));
+			view.dispatch({ selection: { anchor: line.from, head: line.to }, effects: EditorView.scrollIntoView(line.from, { y: 'center' }) });
+			view.focus();
+		},
+	}));
 
 	return (
-		<div className={`rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border overflow-hidden text-sm ${className}`}>
+		<div className={`rounded-[var(--radius-lg)] border-[length:var(--border-width)] border-surface-border overflow-hidden text-sm ${height ? '[&>div]:h-full' : ''} ${className}`}>
 			<CodeMirror
+				ref={editorRef}
 				value={value}
 				onChange={onChange}
-				extensions={[...BASE_EXTENSIONS, ...extensions]}
+				extensions={[language, ...(wrap ? [EditorView.lineWrapping] : []), ...BASE_EXTENSIONS, ...extensions]}
+				height={height}
 				theme={isDark ? 'dark' : 'light'}
 				basicSetup={{ foldGutter: false }}
 				aria-label={ariaLabel}

@@ -3234,15 +3234,39 @@ export default function Example() {
         description: 'Additional Tailwind classes merged onto the root wrapper.',
       },
       {
+        name: 'language',
+        type: 'Extension',
+        default: 'JSX/JavaScript',
+        description: 'Language support extension. Pass the exported latex for LaTeX, or any CodeMirror language.',
+      },
+      {
+        name: 'wrap',
+        type: 'boolean',
+        default: 'false',
+        description: 'Wrap long lines instead of scrolling horizontally.',
+      },
+      {
+        name: 'height',
+        type: 'string',
+        default: '-',
+        description: 'CSS height for the editor surface (e.g. "100%" to fill a sized parent). Defaults to the content height.',
+      },
+      {
         name: 'minHeight',
         type: 'string',
         default: '-',
         description: 'CSS min-height for the editor surface (e.g. "200px"). Keeps the editor from collapsing to a single line on short content.',
       },
+      {
+        name: 'ref',
+        type: 'Ref<CodeEditorHandle>',
+        default: '-',
+        description: 'Handle with revealLine(line): selects the 1-based line, scrolls it to the middle and focuses the editor.',
+      },
     ],
-    dependencies: ['@uiw/react-codemirror', '@codemirror/lang-javascript', '@codemirror/autocomplete'],
+    dependencies: ['@uiw/react-codemirror', '@codemirror/lang-javascript', '@codemirror/autocomplete', '@codemirror/language'],
     registryDependencies: [],
-    files: ['CodeEditor/CodeEditor.tsx'],
+    files: ['CodeEditor/CodeEditor.tsx', 'CodeEditor/latex.ts', 'CodeEditor/latexComplete.ts', 'CodeEditor/latexCommands.ts'],
   },
   {
     slug: 'avatar',
@@ -4058,7 +4082,7 @@ export default function Example() {
     composition: {
       name: 'Resizable',
       children: [
-        { name: 'ResizablePanel', description: 'defaultSize (sized) or omitted (flexible), minSize (120), maxSize' },
+        { name: 'ResizablePanel', description: 'defaultSize (sized) or omitted (flexible), minSize (120), maxSize, onSnap (dragged past maxSize), onCollapse (dragged past minSize)' },
         { name: 'ResizableHandle', description: 'keyboard-operable drag grip between two panels; aria-label' },
       ],
     },
@@ -4488,6 +4512,63 @@ export default function Example() {
     dependencies:         [],
     registryDependencies: [],
     files:                ['Heatmap/Heatmap.tsx'],
+  },
+  {
+    slug: 'pdfviewer',
+    name: 'PdfViewer',
+    category: 'Display',
+    description: 'A clean PDF reader with page navigation, zoom, fit to width and selectable text.',
+    usage: `import { PdfViewer } from '@components/ui';
+
+export default function Example() {
+  return <PdfViewer src='/sample.pdf' title='Quarterly Report' height='28rem' />;
+}`,
+    props: [
+      { name: 'src', type: 'string | Uint8Array', default: 'None', description: 'URL of the PDF, or its bytes. Required. Cross-origin URLs need CORS headers.' },
+      { name: 'title', type: 'string', default: 'None', description: 'Optional heading shown on the left of the toolbar. Also names the scrolling region; falls back to "PDF document" when omitted.' },
+      { name: 'initialPage', type: 'number', default: '1', description: 'Page to scroll to once the document has loaded.' },
+      { name: 'height', type: 'number | string', default: "'40rem'", description: 'Height of the viewer. Pages scroll inside it.' },
+      { name: 'toolbarTarget', type: 'HTMLElement | null', default: 'None', description: 'Where the zoom and page controls render. Omit for the built-in toolbar row; pass an element to portal the controls into your own toolbar (no title or border of their own); pass null to hide them.' },
+      { name: 'onLoad', type: '(pageCount: number) => void', default: 'None', description: 'Called once the document has loaded.' },
+      { name: 'onError', type: '(error: Error) => void', default: 'None', description: 'Called when the file cannot be loaded or parsed.' },
+      { name: 'onPageChange', type: '(page: number) => void', default: 'None', description: 'Called when the current page changes, by scrolling, the toolbar or the page field.' },
+      { name: 'onPageDoubleClick', type: '(point: { page: number; x: number; y: number }) => void', default: 'None', description: 'Called on a double click with the page number and the position in PDF points from the page top-left corner.' },
+    ],
+    dependencies:         ['pdfjs-dist'],
+    registryDependencies: ['button', 'select', 'spinner', 'icons'],
+    files:                ['PdfViewer/PdfViewer.tsx', 'PdfViewer/PdfPage.tsx'],
+  },
+  {
+    slug: 'doc-editor',
+    name: 'DocEditor',
+    category: 'Canvas',
+    description: 'A word-processor style document editor with headings, text formatting, lists, quotes and alignment, and a download as a Word (.docx) file.',
+    usage: `'use client';
+
+import { useState } from 'react';
+import { DocEditor } from '@components/ui';
+
+const INITIAL_DOCUMENT = '<h1>Q3 review</h1><p>Signups grew <strong>18%</strong> month over month, led by the new onboarding flow.</p><ul><li><p>Retention held at 42%</p></li><li><p>Support tickets fell again</p></li></ul>';
+
+export default function Example() {
+  const [html, setHtml] = useState(INITIAL_DOCUMENT);
+
+  return <DocEditor value={html} onChange={setHtml} title="Q3 review" height="28rem" />;
+}`,
+    props: [
+      { name: 'value', type: 'string', default: '-', description: 'Required. The document as HTML (headings, paragraphs, lists, quotes). Pass the HTML from onChange back in to keep it controlled.' },
+      { name: 'onChange', type: '(html: string) => void', default: 'None', description: 'Called with the document HTML after every edit.' },
+      { name: 'title', type: 'string', default: 'None', description: 'Document title: the default download name and the title inside the .docx file.' },
+      { name: 'filename', type: 'string', default: 'title', description: 'Download name, without the .docx extension. Falls back to title, then "document".' },
+      { name: 'readOnly', type: 'boolean', default: 'false', description: 'Show the document without editing. The formatting controls are hidden.' },
+      { name: 'downloadable', type: 'boolean', default: 'true', description: 'Show the Download .docx button. Turn it off when the host provides its own download.' },
+      { name: 'height', type: 'number | string', default: "'40rem'", description: 'Height of the editor. The page scrolls inside it.' },
+      { name: 'aria-label', type: 'string', default: "'Document'", description: 'Accessible name of the editing area.' },
+      { name: 'className', type: 'string', default: "''", description: 'Additional CSS classes on the root element.' },
+    ],
+    dependencies:         ['@tiptap/react', '@tiptap/starter-kit', '@tiptap/extension-text-align', 'jszip'],
+    registryDependencies: ['button', 'select', 'icons'],
+    files:                ['DocEditor/DocEditor.tsx', 'DocEditor/docx.ts'],
   },
 ];
 

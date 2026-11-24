@@ -14,7 +14,8 @@ export { CodeBlock } from './components/CodeBlock/CodeBlock';
 export type { CodeBlockVariant, CodeBlockProps } from './components/CodeBlock/CodeBlock';
 
 export { default as CodeEditor } from './components/CodeEditor/CodeEditor';
-export type { CodeEditorProps } from './components/CodeEditor/CodeEditor';
+export type { CodeEditorProps, CodeEditorHandle } from './components/CodeEditor/CodeEditor';
+export { latex } from './components/CodeEditor/latex';
 
 export { Alert } from './components/Alert/Alert';
 export type { AlertVariant } from './components/Alert/Alert';
@@ -121,7 +122,7 @@ export type { ScrollFadeProps, ScrollFadeDirection } from './components/ScrollFa
 export { Select } from './components/Select/Select';
 export type { SelectOption, SelectSize } from './components/Select/Select';
 export type { FieldProps, Option, Tone, EditHistory } from './components/Models/Models';
-export { CheckIcon, CloseIcon, PlusIcon, SearchIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from './components/Icons/Icons';
+export { CheckIcon, CloseIcon, MinusIcon, PlusIcon, SearchIcon, ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon, UndoIcon, RedoIcon, BoldIcon, ItalicIcon, UnderlineIcon, StrikeIcon, ListIcon, OrderedListIcon, AlignLeftIcon, AlignCenterIcon, AlignRightIcon, QuoteIcon, DownloadIcon } from './components/Icons/Icons';
 export type { IconProps } from './components/Icons/Icons';
 
 export { default as Slider } from './components/Slider/Slider';
@@ -211,3 +212,9 @@ export type { SheetAskContext } from './components/SheetEditor/askcontext';
 
 export { Heatmap } from './components/Heatmap/Heatmap';
 export type { HeatmapProps } from './components/Heatmap/Heatmap';
+
+export { PdfViewer } from './components/PdfViewer/PdfViewer';
+export type { PdfViewerProps, PagePoint } from './components/PdfViewer/PdfViewer';
+
+export { DocEditor, downloadDocx, exportDocx } from './components/DocEditor/DocEditor';
+export type { DocEditorProps } from './components/DocEditor/DocEditor';

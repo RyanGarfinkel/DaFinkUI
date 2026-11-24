@@ -141,6 +141,44 @@ describe('Resizable', () =>
 		});
 	});
 
+	describe('onCollapse', () =>
+	{
+		const dragTo = (clientX: number, onCollapse: () => void) => {
+			Element.prototype.setPointerCapture     = () => {};
+			Element.prototype.releasePointerCapture = () => {};
+
+			render(
+				<Resizable direction='horizontal'>
+					<ResizablePanel defaultSize={200} minSize={120} maxSize={320} onCollapse={onCollapse} data-testid='sidebar'>Sidebar</ResizablePanel>
+					<ResizableHandle />
+					<ResizablePanel>Main</ResizablePanel>
+				</Resizable>
+			);
+			const strip = screen.getByRole('separator').parentElement as HTMLElement;
+
+			fireEvent.pointerDown(strip, { pointerId: 1, clientX: 0 });
+			fireEvent.pointerUp(strip, { pointerId: 1, clientX });
+			return screen.getByTestId('sidebar');
+		};
+
+		it('fires when a drag is released 48px or more below minSize, leaving the panel at minSize', () =>
+		{
+			let collapses = 0;
+			const sidebar = dragTo(-(80 + 48), () => { collapses += 1; });
+
+			expect(collapses).toBe(1);
+			expect(sidebar.style.width).toBe('120px');
+		});
+
+		it('does not fire for a drag that stops short of the overshoot', () =>
+		{
+			let collapses = 0;
+			dragTo(-(80 + 47), () => { collapses += 1; });
+
+			expect(collapses).toBe(0);
+		});
+	});
+
 	it('reflects the clamped size in aria-valuenow, aria-valuemin, and aria-valuemax', () =>
 	{
 		renderGroup();

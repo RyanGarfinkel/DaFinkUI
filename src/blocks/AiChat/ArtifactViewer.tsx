@@ -1,5 +1,6 @@
 'use client';
 
+import { DocEditor, downloadDocx } from '../../components/DocEditor/DocEditor';
 import { CodeBlock } from '../../components/CodeBlock/CodeBlock';
 import Button from '../../components/Button/Button';
 import { ChatMarkdown } from './ChatMarkdown';
@@ -7,12 +8,20 @@ import type { ChatArtifact } from './types';
 import { DownloadIcon } from './icons';
 
 export interface ArtifactViewerProps {
-	artifact: ChatArtifact;
+	artifact:  ChatArtifact;
+	/** Called with the new content when the person edits a document. */
+	onChange?: (content: string) => void;
 }
 
 const MIME_TYPES = { markdown: 'text/markdown', code: 'text/plain' } as const;
 
 const downloadArtifact = (artifact: ChatArtifact) => {
+	if(artifact.kind === 'document')
+	{
+		void downloadDocx(artifact.content, (artifact.filename ?? artifact.title).replace(/\.docx$/, ''));
+		return;
+	}
+
 	const isText = artifact.kind === 'markdown' || artifact.kind === 'code';
 	const href = isText ? URL.createObjectURL(new Blob([artifact.content], { type: MIME_TYPES[artifact.kind as keyof typeof MIME_TYPES] })) : artifact.content;
 	const link = Object.assign(document.createElement('a'), { href, download: artifact.filename ?? artifact.title });
@@ -21,7 +30,7 @@ const downloadArtifact = (artifact: ChatArtifact) => {
 	if(isText) setTimeout(() => URL.revokeObjectURL(href), 1000);
 };
 
-const Body = ({ artifact }: ArtifactViewerProps) => {
+const Body = ({ artifact, onChange }: ArtifactViewerProps) => {
 	switch(artifact.kind)
 	{
 	case 'pdf':
@@ -42,6 +51,19 @@ const Body = ({ artifact }: ArtifactViewerProps) => {
 			</div>
 		);
 
+	case 'document':
+		return (
+			<DocEditor
+				value={artifact.content}
+				onChange={onChange}
+				title={artifact.title}
+				aria-label={artifact.title}
+				downloadable={false}
+				height='100%'
+				className='rounded-none border-0'
+			/>
+		);
+
 	case 'code':
 		return (
 			<div className='h-full overflow-auto p-5'>
@@ -51,17 +73,17 @@ const Body = ({ artifact }: ArtifactViewerProps) => {
 	}
 };
 
-export const ArtifactViewer = ({ artifact }: ArtifactViewerProps) => (
+export const ArtifactViewer = ({ artifact, onChange }: ArtifactViewerProps) => (
 	<div className='flex h-full min-h-0 flex-col'>
 		<div className='flex shrink-0 items-center justify-between gap-2 border-b-[length:var(--border-width)] border-surface-border px-4 py-2'>
 			<p className='min-w-0 truncate text-xs text-text-muted'>{artifact.filename ?? artifact.title}</p>
 			<Button variant='ghost' size='sm' className='gap-1.5' onClick={() => downloadArtifact(artifact)}>
 				<DownloadIcon />
-				Download
+				{artifact.kind === 'document' ? 'Download .docx' : 'Download'}
 			</Button>
 		</div>
 		<div className='min-h-0 flex-1'>
-			<Body artifact={artifact} />
+			<Body artifact={artifact} onChange={onChange} />
 		</div>
 	</div>
 );

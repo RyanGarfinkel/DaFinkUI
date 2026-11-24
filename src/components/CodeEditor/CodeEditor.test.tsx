@@ -1,6 +1,8 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
+import CodeEditor, { CodeEditorHandle } from './CodeEditor';
 import { describe, it, expect } from 'vitest';
-import CodeEditor from './CodeEditor';
+import { createRef } from 'react';
+import { latex } from './latex';
 
 describe('CodeEditor', () => {
 	it('renders without errors and shows the initial value', () => {
@@ -22,6 +24,38 @@ describe('CodeEditor', () => {
 	it('applies the provided aria-label to the editor region', () => {
 		render(<CodeEditor value='' onChange={() => {}} aria-label='JSX code editor' />);
 		expect(screen.getByLabelText('JSX code editor')).toBeInTheDocument();
+	});
+
+	it('highlights LaTeX commands, comments and math when given the latex language', () => {
+		const { container } = render(<CodeEditor language={latex} value={'\\section{Intro} % note\n$x^2$'} onChange={() => {}} />);
+		expect(container.querySelector('.cm-content')?.textContent).toContain('\\section{Intro}');
+		expect(container.querySelectorAll('.cm-content span[class]').length).toBeGreaterThan(0);
+	});
+
+	it('selects and focuses a line through the ref', () => {
+		const ref = createRef<CodeEditorHandle>();
+		const { container } = render(<CodeEditor ref={ref} value={'one\ntwo\nthree'} onChange={() => {}} />);
+
+		act(() => ref.current?.revealLine(2));
+
+		expect(window.getSelection()?.toString()).toBe('two');
+		expect(document.activeElement).toBe(container.querySelector('.cm-content'));
+	});
+
+	it('keeps the ref line inside the document', () => {
+		const ref = createRef<CodeEditorHandle>();
+		render(<CodeEditor ref={ref} value={'one\ntwo'} onChange={() => {}} />);
+
+		expect(() => act(() => ref.current?.revealLine(99))).not.toThrow();
+		expect(() => act(() => ref.current?.revealLine(0))).not.toThrow();
+	});
+
+	it('wraps long lines only when wrap is set', () => {
+		const { container, rerender } = render(<CodeEditor value='x' onChange={() => {}} />);
+		expect(container.querySelector('.cm-lineWrapping')).toBeNull();
+
+		rerender(<CodeEditor value='x' onChange={() => {}} wrap />);
+		expect(container.querySelector('.cm-lineWrapping')).not.toBeNull();
 	});
 
 	it('merges a custom className onto the root wrapper', () => {

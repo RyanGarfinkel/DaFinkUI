@@ -1,0 +1,49 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R 4 0 R 5 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 6 0 R /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> >>
+endobj
+4 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 7 0 R /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 8 0 R /Resources << /Font << /F1 9 0 R /F2 10 0 R >> >> >>
+endobj
+6 0 obj
+<< /Length 330 >>
+stream
+BT /F2 28 Tf 72 700 Td (Quarterly Report) Tj ET
+BT /F1 12 Tf 72 664 Td (Page one of a sample document for the PdfViewer component.) Tj ET
+BT /F1 12 Tf 72 640 Td (Select this text, zoom in and out, or jump to a page from the toolbar.) Tj ET
+BT /F1 12 Tf 72 616 Td (Pages render on demand as they scroll into view.) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Length 260 >>
+stream
+BT /F2 22 Tf 72 700 Td (Highlights) Tj ET
+BT /F1 12 Tf 72 664 Td (Revenue grew steadily across every region this quarter.) Tj ET
+BT /F1 12 Tf 72 640 Td (Support response times dropped by a third after the new rollout.) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Length 220 >>
+stream
+BT /F2 22 Tf 72 700 Td (Next Steps) Tj ET
+BT /F1 12 Tf 72 664 Td (Ship the redesign, expand to two new markets, and hire for support.) Tj ET
+endstream
+endobj
+9 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+10 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+trailer
+<< /Root 1 0 R /Size 11 >>
+%%EOF

@@ -1204,4 +1204,42 @@ export const extraSections: Record<string, ExtraSection[]> = {
 			),
 		},
 	],
+	'pdfviewer': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<div className='flex flex-col gap-4'>
+					<p>
+						PdfViewer uses the native tab order: the toolbar controls come first, then the page area, which is a focusable scrolling region named after the title so keyboard users can read the document without a mouse. Each page is exposed as an image labelled &quot;Page 2 of 8&quot;, and the text layer over it is real text, so it can be selected, copied and read by screen readers. Controls that cannot act yet (before load and at the zoom limits) are disabled, and a failed load is announced with an alert.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['Tab'], description: 'Moves through the toolbar, then into the page area.' },
+						{ keys: ['Enter'], description: 'In the page field, jumps to the typed page.' },
+						{ keys: ['↑', '↓'], description: 'Scrolls the focused page area.' },
+						{ keys: ['Page Up', 'Page Down'], description: 'Scrolls the focused page area by one screen.' },
+						{ keys: ['Home', 'End'], description: 'Jumps to the start or end of the document.' },
+					]} />
+				</div>
+			),
+		},
+	],
+	'doc-editor': [
+		{
+			heading: 'Accessibility',
+			description: (
+				<div className='flex flex-col gap-4'>
+					<p>
+						DocEditor&apos;s writing area is a multi-line textbox with an accessible name, and its toolbar is a labelled group of buttons. Tab moves into the toolbar and through each control, and the Left and Right arrows also move between them. Toggle buttons such as Bold report their state with <code className='font-mono text-xs bg-surface-active rounded px-1.5 py-0.5'>aria-pressed</code>, and the toolbar never takes focus away from the text, so the selection is kept while you format. In read-only mode the writing area is not editable and the formatting controls are removed.
+					</p>
+					<KeyboardShortcutsTable rows={[
+						{ keys: ['Tab'], description: 'Moves between the toolbar and the writing area.' },
+						{ keys: ['←', '→'], description: 'In the toolbar, moves between controls.' },
+						{ keys: ['Ctrl/Cmd', 'B'], description: 'Bold. Italic is I, underline is U.' },
+						{ keys: ['Ctrl/Cmd', 'Z'], description: 'Undo. Add Shift to redo.' },
+						{ keys: ['Tab', 'Shift+Tab'], description: 'In a list item, indents or outdents it.' },
+					]} />
+				</div>
+			),
+		},
+	],
 };

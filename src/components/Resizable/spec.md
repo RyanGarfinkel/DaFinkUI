@@ -24,6 +24,7 @@ Extends all native `<div>` HTML attributes.
 | minSize     | number    | `120`   | Minimum size in pixels a sized panel can be dragged or keyed down to.       |
 | maxSize     | number    | -       | Maximum size in pixels a sized panel can be dragged or keyed up to. Omit for no upper cap. |
 | onSnap      | () => void | -      | Called when a pointer drag is released at least 48px past `maxSize` (requires `maxSize`). The panel itself stays clamped at `maxSize`; what "snap" means (e.g. taking the full width and hiding its sibling) is up to the caller. Keyboard resizing never snaps, so the same layout needs a visible button as its keyboard path. |
+| onCollapse  | () => void | -      | Called when a pointer drag is released at least 48px below `minSize`. The panel stays clamped at `minSize`; the caller decides what collapsing means (e.g. hiding the panel and showing its sibling full width). Like `onSnap`, keyboard resizing never triggers it. |
 | className   | string    | `""`    | Additional CSS classes merged onto the panel's root div.                    |
 | children    | ReactNode | -       | Panel content. The panel clips overflow (`overflow-hidden`); content that needs its own scrolling should manage it internally (e.g. `ScrollFade`). |
 
@@ -84,6 +85,16 @@ All keyboard resizing is clamped identically to drag resizing.
 ## When to Use
 
 Use `Resizable` for a layout where the user should be able to adjust how much space adjacent regions get: a sidebar next to a main content pane, a main pane next to a detail/thread panel, a code editor next to a preview pane. Use `direction="horizontal"` for side-by-side panels, `direction="vertical"` for stacked ones. Give every panel that should be independently draggable a `defaultSize`, and leave exactly one panel — the one that should absorb the remaining space — without one.
+
+### Recommended: keep split views from getting stuck too small
+
+A split view whose panels can only be dragged between `minSize` and `maxSize` still leaves the user with a cramped pane they have to fight to recover. For any split where one side can usefully disappear (editor and preview, list and detail), we recommend:
+
+- Set a real `minSize` (not the 120px default) and a `maxSize` on the sized panel, so neither side is ever a sliver.
+- Pair them with `onSnap` (released past `maxSize`) and `onCollapse` (released past `minSize`) and have those switch the layout to a single full-width pane. A drag past the limit then means "give me just this pane" rather than a dead end.
+- Provide a visible control that does the same thing (a layout dropdown or an expand button). Keyboard resizing never snaps, so the control is also the keyboard path.
+
+`LatexEditor` is the reference: dragging the divider past either limit switches to the source-only or PDF-only view, and the Layout menu (Source only / Split / PDF only) gets back.
 
 Don't use `Resizable` for a fixed layout that never needs user adjustment; a plain flex or grid layout is simpler and avoids the drag/keyboard interaction surface entirely.
 

@@ -276,6 +276,13 @@ export const AiChat = () => {
 
 	const handleRename = (id: string, title: string) => setChats((prev) => prev.map((c) => (c.id === id ? { ...c, title } : c)));
 
+	const handleArtifactChange = (chatId: string, artifactId: string, content: string) => setChats((prev) => prev.map((c) => (c.id !== chatId ? c : {
+		...c,
+		messages: c.messages.map((m) => (m.kind === 'message' && m.artifacts?.some((a) => a.id === artifactId)
+			? { ...m, artifacts: m.artifacts.map((a) => (a.id === artifactId ? { ...a, content } : a)) }
+			: m)),
+	})));
+
 	const handleDelete = (id: string) => {
 		setChats((prev) => {
 			const next = prev.filter((c) => c.id !== id);
@@ -795,6 +802,7 @@ export const AiChat = () => {
 			openKey={openArtifacts.key}
 			onSelect={(key) => setArtifactView({ ...openArtifacts, key })}
 			onOpenDocument={handleOpenDocumentEntry}
+			onArtifactChange={(artifactId, content) => handleArtifactChange(openArtifacts.chatId, artifactId, content)}
 			expanded={expanded}
 			onToggleExpand={handleToggleExpand}
 			onClose={handleCloseArtifacts}
