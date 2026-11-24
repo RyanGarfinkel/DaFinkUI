@@ -417,5 +417,6 @@ console.log(`
 Next steps:
   1. Implement ${name} and replace the placeholder registry props, usage, and preview so they match.
   2. Fill in every TODO in ${kind === 'component' ? 'spec.md, the registry description, and the Accessibility entry in extraSections.tsx' : 'the registry description'}.
-  3. Run: npm test && node scripts/validate-components.mjs
+  3. Check it at 390px wide (see the "Mobile Check" section of rules/new-${kind}.md).
+  4. Run: npm test && node scripts/validate-components.mjs
 `);

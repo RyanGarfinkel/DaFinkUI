@@ -80,6 +80,19 @@ Every new block must have an entry in `blocks.ts`. See `rules/docs-site.md` → 
 
 Add the block to `app/_docs/registry/blockPreviews.tsx`'s `blockPreviews` map: `import` it from `src/blocks/` and render it with no props, e.g. `'settings-form': <SettingsForm />`. Because this renders the real installable file, there's no separate "demo" implementation to keep in sync; only `usage` needs manual updating when the block's source changes.
 
+## Mobile Check (Required)
+
+A block is not done until it has been checked at phone width (390px, and 360px for dense layouts). A desktop window often can't shrink that far, so use the browser's device mode, or load the block's docs page in a 390px-wide same-origin `iframe` and measure inside it.
+
+- No horizontal page scroll: `document.documentElement.scrollWidth` must not exceed the viewport width. Wide content (tables, code) scrolls inside its own container
+- Nothing is clipped, overlapping, or pushed off-screen, and every control is reachable and at least 24×24 CSS px
+- Overlays (menus, popovers, drawers) open fully on screen
+- Respond to the block's own width, not the viewport (`rules/design.md`). Measure the container with a `ResizeObserver` or use `@container`; the docs preview and a consumer's layout can each give the block a different width
+- A multi-pane layout (split view, sidebar plus content) must collapse to a single pane when the container can't give each pane its minimum size. Remove the option that can't work (hide "Split" from its layout menu) rather than offering a broken layout, and keep the user's choice so it returns when the container widens. `LatexEditor` (`compact`) is the reference; `AiChat` swaps panels for drawers on mobile
+- Set `minSize`/`maxSize` on `ResizablePanel`s from the container width so the last pane never falls below its minimum (see the `Resizable` spec)
+
+Record what you checked in the PR description.
+
 ## Updating a Block
 
 - If the block's real source (`src/blocks/BlockName/BlockName.tsx`) changes, update `usage` in `blocks.ts` to match: the same "usage code and preview must align" discipline as components (`rules/docs-site.md`)

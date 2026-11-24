@@ -37,6 +37,7 @@ After registry edits run `npm run sync-registry`. Never hand-edit `packages/cli/
 - **Every component needs a docs-page Accessibility section.** `extraSections[slug]` in `app/_docs/registry/extraSections.tsx` must have a `heading: 'Accessibility'` entry — it renders last on the page, after Props. `scripts/validate-components.mjs` enforces this in CI. See `rules/docs-site.md` and the `toggle-group` entry for the pattern (prose on the focus model + a `KeyboardShortcutsTable` for real keyboard interactions).
 - **Composite widgets** (Tabs, ToggleGroup, Radio, Tree, MenuBar) use roving tabindex.
 - **Motion** must respect `prefers-reduced-motion`; the global rule in `globals.css` covers CSS animation, but JS-driven motion (Magnetic, Tilt, Particles, Confetti, CursorTrail, and similar) needs its own check.
+- **Mobile check.** Before calling a component done, check it at 390px (360px if dense): no horizontal page scroll, nothing clipped, overlays on screen, targets ≥ 24px. A desktop window may not shrink that far; use device mode or a 390px same-origin `iframe` of the docs page. Respond to the component's own container, not the viewport, and fall back to one region when side-by-side regions can't fit. Full rule: `rules/new-component.md` → "Mobile Check".
 - **Bug found → failing test first**, then the fix.
 
 ## Components other code depends on

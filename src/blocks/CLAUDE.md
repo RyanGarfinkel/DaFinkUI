@@ -42,6 +42,10 @@ Then run `npm run sync-registry`.
 - **Dead Tailwind utilities**: confirm any color class has a `--color-*` token inside `@theme {}` in `app/globals.css`.
 - **No `<main>` (or `<header>`/`<footer>` used as page landmarks) in a block.** The docs page and any consumer app already have a `main` landmark, so a block's own `<main>` creates a second one. Use `<section aria-label="...">` instead. `SlideEditor` hit this.
 
+## Mobile check (required)
+
+Before calling a block done, check it at 390px (360px if dense): no horizontal page scroll, nothing clipped, overlays on screen, targets ≥ 24px. A desktop window may not shrink that far; use device mode or a 390px same-origin `iframe` of the docs page. Respond to the block's own width (`ResizeObserver` or `@container`), not the viewport, and collapse multi-pane layouts to one pane when they can't fit, hiding the options that can't work. `LatexEditor` is the reference. Full rule: `rules/new-block.md` → "Mobile Check".
+
 ## Adding a block
 
 1. Read `rules/new-block.md` end to end.
